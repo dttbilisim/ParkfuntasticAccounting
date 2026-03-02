@@ -13720,11 +13720,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj",
+      "projectUniqueName": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj",
       "projectName": "ecommerce.Admin.Domain",
-      "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj",
+      "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj",
       "packagesPath": "/Users/efeeskin/.nuget/packages/",
-      "outputPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin.Services/obj/",
+      "outputPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin.Services/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/efeeskin/.nuget/NuGet/NuGet.Config"
@@ -13740,29 +13740,29 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.EFCore/ecommerce.EFCore.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.EFCore/ecommerce.EFCore.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.EFCore/ecommerce.EFCore.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.EFCore/ecommerce.EFCore.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/CurrencyAuto/CurrencyAuto.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/CurrencyAuto/CurrencyAuto.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/CurrencyAuto/CurrencyAuto.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/CurrencyAuto/CurrencyAuto.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj"
             }
           }
         }

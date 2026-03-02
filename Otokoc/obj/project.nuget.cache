@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "x0xtSexOmQk=",
+  "dgSpecHash": "U5w5W5o6uXM=",
   "success": true,
-  "projectFilePath": "/Users/efeeskin/Desktop/test/parkfuntastic/Otokoc/Otokoc.csproj",
+  "projectFilePath": "/Users/efeeskin/Desktop/test/Untitled/Otokoc/Otokoc.csproj",
   "expectedPackageFiles": [
     "/Users/efeeskin/.nuget/packages/audit.entityframework.abstractions/30.0.2/audit.entityframework.abstractions.30.0.2.nupkg.sha512",
     "/Users/efeeskin/.nuget/packages/audit.entityframework.core/30.0.2/audit.entityframework.core.30.0.2.nupkg.sha512",

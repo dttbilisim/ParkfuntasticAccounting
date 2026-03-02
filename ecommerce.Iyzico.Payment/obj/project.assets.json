@@ -177,11 +177,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj",
+      "projectUniqueName": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj",
       "projectName": "ecommerce.Iyzico.Payment",
-      "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj",
+      "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj",
       "packagesPath": "/Users/efeeskin/.nuget/packages/",
-      "outputPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Iyzico.Payment/obj/",
+      "outputPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Iyzico.Payment/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/efeeskin/.nuget/NuGet/NuGet.Config"

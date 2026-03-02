@@ -17076,8 +17076,8 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
-      "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.EP/ecommerce.EP.csproj",
-      "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj",
+      "/Users/efeeskin/Desktop/test/Untitled/ecommerce.EP/ecommerce.EP.csproj",
+      "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj",
       "AutoMapper >= 12.0.1",
       "AutoMapper.Extensions.Microsoft.DependencyInjection >= 12.0.1",
       "BasbugOto >= 1.0.0",
@@ -17130,11 +17130,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin/ecommerce.Admin.csproj",
+      "projectUniqueName": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin/ecommerce.Admin.csproj",
       "projectName": "ecommerce.Admin",
-      "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin/ecommerce.Admin.csproj",
+      "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin/ecommerce.Admin.csproj",
       "packagesPath": "/Users/efeeskin/.nuget/packages/",
-      "outputPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin/obj/",
+      "outputPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/efeeskin/.nuget/NuGet/NuGet.Config"
@@ -17150,62 +17150,62 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Users/efeeskin/Desktop/test/parkfuntastic/BasbugOto/BasbugOto.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/BasbugOto/BasbugOto.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/BasbugOto/BasbugOto.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/BasbugOto/BasbugOto.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Core/ecommerce.Core.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Core/ecommerce.Core.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Core/ecommerce.Core.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Core/ecommerce.Core.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.EFCore/ecommerce.EFCore.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.EFCore/ecommerce.EFCore.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.EFCore/ecommerce.EFCore.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.EFCore/ecommerce.EFCore.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/CurrencyAuto/CurrencyAuto.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/CurrencyAuto/CurrencyAuto.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/CurrencyAuto/CurrencyAuto.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/CurrencyAuto/CurrencyAuto.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Dega/Dega.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Dega/Dega.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Dega/Dega.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Dega/Dega.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Dot.Integration/Dot.Integration.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Dot.Integration/Dot.Integration.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Dot.Integration/Dot.Integration.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Dot.Integration/Dot.Integration.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Mng/ecommerce.Cargo.Mng.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Sendeo/ecommerce.Cargo.Sendeo.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Cargo.Yurtici/ecommerce.Cargo.Yurtici.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.EP/ecommerce.EP.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.EP/ecommerce.EP.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.EP/ecommerce.EP.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.EP/ecommerce.EP.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Iyzico.Payment/ecommerce.Iyzico.Payment.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Web.Domain/ecommerce.Web.Domain.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Web.Domain/ecommerce.Web.Domain.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Web.Domain/ecommerce.Web.Domain.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Web.Domain/ecommerce.Web.Domain.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ImageDownload/ImageDownload.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ImageDownload/ImageDownload.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ImageDownload/ImageDownload.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ImageDownload/ImageDownload.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/OtoIsmail/OtoIsmail.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/OtoIsmail/OtoIsmail.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/OtoIsmail/OtoIsmail.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/OtoIsmail/OtoIsmail.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Otokoc/Otokoc.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Otokoc/Otokoc.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Otokoc/Otokoc.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Otokoc/Otokoc.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Remar/Remar.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Remar/Remar.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Remar/Remar.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Remar/Remar.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Telecom.Address/Telecom.Address.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Telecom.Address/Telecom.Address.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Telecom.Address/Telecom.Address.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Telecom.Address/Telecom.Address.csproj"
             }
           }
         }
@@ -17382,8 +17382,8 @@
     {
       "code": "NU1105",
       "level": "Error",
-      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.EP/ecommerce.EP.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
-      "libraryId": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.EP/ecommerce.EP.csproj",
+      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/Untitled/ecommerce.EP/ecommerce.EP.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
+      "libraryId": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.EP/ecommerce.EP.csproj",
       "targetGraphs": [
         "net9.0"
       ]
@@ -17391,8 +17391,8 @@
     {
       "code": "NU1105",
       "level": "Error",
-      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
-      "libraryId": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj",
+      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/Untitled/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
+      "libraryId": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj",
       "targetGraphs": [
         "net9.0"
       ]

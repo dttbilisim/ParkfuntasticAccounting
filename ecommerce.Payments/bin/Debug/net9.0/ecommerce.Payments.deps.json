@@ -1213,11 +1213,11 @@
           "System.Runtime.Extensions": "4.3.0"
         }
       },
-      "System.Linq.Dynamic.Core/1.2.25": {
+      "System.Linq.Dynamic.Core/1.4.6": {
         "runtime": {
-          "lib/net7.0/System.Linq.Dynamic.Core.dll": {
-            "assemblyVersion": "1.2.25.0",
-            "fileVersion": "1.2.25.0"
+          "lib/net8.0/System.Linq.Dynamic.Core.dll": {
+            "assemblyVersion": "1.4.6.0",
+            "fileVersion": "1.4.6.0"
           }
         }
       },
@@ -1695,7 +1695,7 @@
           "Slugify.Core": "4.0.1",
           "System.IO.Hashing": "9.0.6",
           "System.IdentityModel.Tokens.Jwt": "6.26.1",
-          "System.Linq.Dynamic.Core": "1.2.25"
+          "System.Linq.Dynamic.Core": "1.4.6"
         },
         "runtime": {
           "ecommerce.Core.dll": {
@@ -2565,12 +2565,12 @@
       "path": "system.linq/4.3.0",
       "hashPath": "system.linq.4.3.0.nupkg.sha512"
     },
-    "System.Linq.Dynamic.Core/1.2.25": {
+    "System.Linq.Dynamic.Core/1.4.6": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-qpkqDHLNxGR1qBNrdnnPfJFfsKSWy3nUELC/BWxP8vwSaf8vVwecZzXOV4B52yOGit94g0pLWJEe30a4L1tE7g==",
-      "path": "system.linq.dynamic.core/1.2.25",
-      "hashPath": "system.linq.dynamic.core.1.2.25.nupkg.sha512"
+      "sha512": "sha512-GZJ996kvIKH0nnKysDWy+le7k0Hoq1iSY7S5sNq6AF1bXPQGidaXjiOJNX4VCUuVWpbe28Ygb6mDSwgY+UhHLA==",
+      "path": "system.linq.dynamic.core/1.4.6",
+      "hashPath": "system.linq.dynamic.core.1.4.6.nupkg.sha512"
     },
     "System.Linq.Expressions/4.3.0": {
       "type": "package",

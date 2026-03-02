@@ -11651,11 +11651,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/efeeskin/Desktop/test/parkfuntastic/ImageDownload/ImageDownload.csproj",
+      "projectUniqueName": "/Users/efeeskin/Desktop/test/Untitled/ImageDownload/ImageDownload.csproj",
       "projectName": "ImageDownload",
-      "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ImageDownload/ImageDownload.csproj",
+      "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ImageDownload/ImageDownload.csproj",
       "packagesPath": "/Users/efeeskin/.nuget/packages/",
-      "outputPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ImageDownload/obj/",
+      "outputPath": "/Users/efeeskin/Desktop/test/Untitled/ImageDownload/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/efeeskin/.nuget/NuGet/NuGet.Config"
@@ -11671,14 +11671,14 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Core/ecommerce.Core.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Core/ecommerce.Core.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Core/ecommerce.Core.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Core/ecommerce.Core.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.Domain.Shared/ecommerce.Domain.Shared.csproj"
             },
-            "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.EFCore/ecommerce.EFCore.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/Common/ecommerce.EFCore/ecommerce.EFCore.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.EFCore/ecommerce.EFCore.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/Common/ecommerce.EFCore/ecommerce.EFCore.csproj"
             }
           }
         }

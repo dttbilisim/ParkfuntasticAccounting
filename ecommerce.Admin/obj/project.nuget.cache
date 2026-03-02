@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "S7mnbootucs=",
+  "dgSpecHash": "W0PpdILoMZk=",
   "success": false,
-  "projectFilePath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin/ecommerce.Admin.csproj",
+  "projectFilePath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin/ecommerce.Admin.csproj",
   "expectedPackageFiles": [
     "/Users/efeeskin/.nuget/packages/audit.entityframework.abstractions/30.0.2/audit.entityframework.abstractions.30.0.2.nupkg.sha512",
     "/Users/efeeskin/.nuget/packages/audit.entityframework.core/30.0.2/audit.entityframework.core.30.0.2.nupkg.sha512",
@@ -343,8 +343,8 @@
     {
       "code": "NU1105",
       "level": "Error",
-      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.EP/ecommerce.EP.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
-      "libraryId": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.EP/ecommerce.EP.csproj",
+      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/Untitled/ecommerce.EP/ecommerce.EP.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
+      "libraryId": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.EP/ecommerce.EP.csproj",
       "targetGraphs": [
         "net9.0"
       ]
@@ -352,8 +352,8 @@
     {
       "code": "NU1105",
       "level": "Error",
-      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
-      "libraryId": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj",
+      "message": "Unable to find project information for '/Users/efeeskin/Desktop/test/Untitled/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj'. If you are using Visual Studio, this may be because the project is unloaded or not part of the current solution so run a restore from the command-line. Otherwise, the project file may be invalid or missing targets required for restore.",
+      "libraryId": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Odaksodt/ecommerce.Odaksodt.csproj",
       "targetGraphs": [
         "net9.0"
       ]

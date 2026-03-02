@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v9.0": {
       "ecommerce.Cargo.Sendeo/1.0.0": {
         "dependencies": {
-          "RestSharp": "108.0.3",
+          "RestSharp": "110.2.0",
           "ecommerce.Core": "1.0.0",
           "ecommerce.Domain.Shared": "1.0.0",
           "ecommerce.EFCore": "1.0.0"
@@ -1546,11 +1546,14 @@
           }
         }
       },
-      "RestSharp/108.0.3": {
+      "RestSharp/110.2.0": {
+        "dependencies": {
+          "System.Text.Json": "9.0.2"
+        },
         "runtime": {
-          "lib/net6.0/RestSharp.dll": {
-            "assemblyVersion": "108.0.3.0",
-            "fileVersion": "108.0.3.0"
+          "lib/net7.0/RestSharp.dll": {
+            "assemblyVersion": "110.2.0.0",
+            "fileVersion": "110.2.0.0"
           }
         }
       },
@@ -2596,6 +2599,7 @@
           "EFUtilities": "1.0.2",
           "Microsoft.EntityFrameworkCore": "9.0.6",
           "Microsoft.Extensions.Configuration.Json": "9.0.0",
+          "Newtonsoft.Json": "13.0.3",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
           "ecommerce.Core": "1.0.0"
         },
@@ -3545,12 +3549,12 @@
       "path": "pipelines.sockets.unofficial/2.2.8",
       "hashPath": "pipelines.sockets.unofficial.2.2.8.nupkg.sha512"
     },
-    "RestSharp/108.0.3": {
+    "RestSharp/110.2.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-phq1AkVhqVXHZxvWDV4fJEJKCR5OHNFUGx2Ix8o5EFShS6654oZhth4X2RWvaU/W7UexIswW0T+lTirxfLU2Ow==",
-      "path": "restsharp/108.0.3",
-      "hashPath": "restsharp.108.0.3.nupkg.sha512"
+      "sha512": "sha512-FXGw0IMcqY7yO/hzS9QrD3iNswNgb9UxJnxWmfOxmGs4kRlZWqdtBoGPLuhlbgsDzX1RFo4WKui8TGGKXWKalw==",
+      "path": "restsharp/110.2.0",
+      "hashPath": "restsharp.110.2.0.nupkg.sha512"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
       "type": "package",

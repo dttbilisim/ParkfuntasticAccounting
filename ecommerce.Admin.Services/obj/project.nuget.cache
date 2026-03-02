@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "08QNVXJOV0U=",
+  "dgSpecHash": "jcolRBsqEQ4=",
   "success": true,
-  "projectFilePath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj",
+  "projectFilePath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj",
   "expectedPackageFiles": [
     "/Users/efeeskin/.nuget/packages/audit.entityframework.abstractions/30.0.2/audit.entityframework.abstractions.30.0.2.nupkg.sha512",
     "/Users/efeeskin/.nuget/packages/audit.entityframework.core/30.0.2/audit.entityframework.core.30.0.2.nupkg.sha512",

@@ -2599,6 +2599,7 @@
           "EFUtilities": "1.0.2",
           "Microsoft.EntityFrameworkCore": "9.0.6",
           "Microsoft.Extensions.Configuration.Json": "9.0.0",
+          "Newtonsoft.Json": "13.0.3",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
           "ecommerce.Core": "1.0.0"
         },

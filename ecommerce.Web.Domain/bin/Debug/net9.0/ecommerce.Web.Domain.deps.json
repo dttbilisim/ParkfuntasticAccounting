@@ -1851,6 +1851,51 @@
           }
         }
       },
+      "QuestPDF/2024.10.2": {
+        "runtime": {
+          "lib/net8.0/QuestPDF.dll": {
+            "assemblyVersion": "2024.10.2.0",
+            "fileVersion": "2024.10.2.0"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/linux-arm64/native/libQuestPdfSkia.so": {
+            "rid": "linux-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-musl-x64/native/libQuestPdfSkia.so": {
+            "rid": "linux-musl-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/libQuestPdfSkia.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx-arm64/native/libQuestPdfSkia.dylib": {
+            "rid": "osx-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx-x64/native/libQuestPdfSkia.dylib": {
+            "rid": "osx-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/QuestPdfSkia.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/QuestPdfSkia.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "Radzen.Blazor/4.7.1": {
         "dependencies": {
           "LibSassBuilder": "2.0.1",
@@ -3078,12 +3123,32 @@
           "System.Xml.ReaderWriter": "4.3.0"
         }
       },
+      "CurrencyAuto/1.0.0": {
+        "dependencies": {
+          "ecommerce.Core": "1.0.0",
+          "ecommerce.Domain.Shared": "1.0.0",
+          "ecommerce.EFCore": "1.0.0"
+        },
+        "runtime": {
+          "CurrencyAuto.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "ecommerce.Admin.Domain/1.0.0": {
         "dependencies": {
+          "AutoMapper": "12.0.1",
           "Castle.Core": "5.2.1",
+          "CurrencyAuto": "1.0.0",
           "Dapper": "2.0.123",
+          "Microsoft.Extensions.Caching.Memory": "9.0.6",
+          "Microsoft.Extensions.Http": "9.0.9",
           "Microsoft.Extensions.Localization.Abstractions": "9.0.6",
+          "NEST": "7.17.5",
+          "NEST.JsonNetSerializer": "7.17.5",
           "ODataQuery": "1.1.0",
+          "QuestPDF": "2024.10.2",
           "Radzen.Blazor": "4.7.1",
           "RestSharp": "110.2.0",
           "System.Data.SqlClient": "4.8.5",
@@ -3093,7 +3158,8 @@
           "ecommerce.Cargo.Yurtici": "1.0.0",
           "ecommerce.Domain.Shared": "1.0.0",
           "ecommerce.EFCore": "1.0.0",
-          "ecommerce.Iyzico.Payment": "1.0.0"
+          "ecommerce.Iyzico.Payment": "1.0.0",
+          "ecommerce.Virtual.Pos": "1.0.0"
         },
         "runtime": {
           "ecommerce.Admin.Domain.dll": {
@@ -3214,6 +3280,7 @@
           "EFUtilities": "1.0.2",
           "Microsoft.EntityFrameworkCore": "9.0.6",
           "Microsoft.Extensions.Configuration.Json": "9.0.0",
+          "Newtonsoft.Json": "13.0.3",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
           "ecommerce.Core": "1.0.0"
         },
@@ -4397,6 +4464,13 @@
       "path": "polly.extensions.http/3.0.0",
       "hashPath": "polly.extensions.http.3.0.0.nupkg.sha512"
     },
+    "QuestPDF/2024.10.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2Dsbm4nu6G9ObRgIHn6pf4wyGpIbpvIP5V5FmoJF5aH9fw4D+liC9fFXky16APx+EWnFbmOkRlAGZ9VkmvOpGA==",
+      "path": "questpdf/2024.10.2",
+      "hashPath": "questpdf.2024.10.2.nupkg.sha512"
+    },
     "Radzen.Blazor/4.7.1": {
       "type": "package",
       "serviceable": true,
@@ -5299,6 +5373,11 @@
       "sha512": "sha512-lJ8AxvkX7GQxpC6GFCeBj8ThYVyQczx2+f/cWHJU8tjS7YfI6Cv6bon70jVEgs2CiFbmmM8b9j1oZVx0dSI2Ww==",
       "path": "system.xml.xmldocument/4.3.0",
       "hashPath": "system.xml.xmldocument.4.3.0.nupkg.sha512"
+    },
+    "CurrencyAuto/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "ecommerce.Admin.Domain/1.0.0": {
       "type": "project",

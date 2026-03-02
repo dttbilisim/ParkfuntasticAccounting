@@ -8433,11 +8433,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Payments/ecommerce.Payments.csproj",
+      "projectUniqueName": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Payments/ecommerce.Payments.csproj",
       "projectName": "ecommerce.Payments",
-      "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Payments/ecommerce.Payments.csproj",
+      "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Payments/ecommerce.Payments.csproj",
       "packagesPath": "/Users/efeeskin/.nuget/packages/",
-      "outputPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Payments/obj/",
+      "outputPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Payments/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/efeeskin/.nuget/NuGet/NuGet.Config"
@@ -8453,8 +8453,8 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj": {
-              "projectPath": "/Users/efeeskin/Desktop/test/parkfuntastic/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj"
+            "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj": {
+              "projectPath": "/Users/efeeskin/Desktop/test/Untitled/ecommerce.Virtual.Pos/ecommerce.Virtual.Pos.csproj"
             }
           }
         }

@@ -249,20 +249,20 @@ using(var scope = app.Services.CreateScope()){
         
         // 1. OtoIsmail (Günlük - Tarih Bazlı: Sadece bugün değişen ürünler)
         // Günde 6 kez çalışır: 09:00, 11:00, 13:00, 15:00, 17:00, 19:00
-        var otoIsmailJobId = nameof(OtoIsmailBackgroundService);
-        await recurringJobManager.RemoveIfExistsAsync(otoIsmailJobId);
-        await recurringJobManager.RecurAsync<OtoIsmailBackgroundService>("0 9,10,11,12,13,14,15,16,17,18,19,20 * * *", null, otoIsmailJobId, TimeZoneInfo.Local, "admin");
-        
-        // 1.1. OtoIsmail Full Sync (Haftalık - Tüm ürünler)
-        // Her Cumartesi gece saat 04:00'de çalışır (haftada bir tam senkronizasyon)
-        var otoIsmailFullSyncJobId = nameof(OtoIsmailFullSyncBackgroundService);
-        await recurringJobManager.RemoveIfExistsAsync(otoIsmailFullSyncJobId);
-        await recurringJobManager.RecurAsync<OtoIsmailFullSyncBackgroundService>("0 4 * * 6", null, otoIsmailFullSyncJobId, TimeZoneInfo.Local, "admin");
-
-        // 2. RemarProduct
-        var remarJobId = nameof(RemarProductBackgroundService);
-        await recurringJobManager.RemoveIfExistsAsync(remarJobId);
-        await recurringJobManager.RecurAsync<RemarProductBackgroundService>("0 9,10,11,12,13,14,15,16,17,18,19,20 * * *", null, remarJobId, TimeZoneInfo.Local, "admin");
+        // var otoIsmailJobId = nameof(OtoIsmailBackgroundService);
+        // await recurringJobManager.RemoveIfExistsAsync(otoIsmailJobId);
+        // await recurringJobManager.RecurAsync<OtoIsmailBackgroundService>("0 9,10,11,12,13,14,15,16,17,18,19,20 * * *", null, otoIsmailJobId, TimeZoneInfo.Local, "admin");
+        //
+        // // 1.1. OtoIsmail Full Sync (Haftalık - Tüm ürünler)
+        // // Her Cumartesi gece saat 04:00'de çalışır (haftada bir tam senkronizasyon)
+        // var otoIsmailFullSyncJobId = nameof(OtoIsmailFullSyncBackgroundService);
+        // await recurringJobManager.RemoveIfExistsAsync(otoIsmailFullSyncJobId);
+        // await recurringJobManager.RecurAsync<OtoIsmailFullSyncBackgroundService>("0 4 * * 6", null, otoIsmailFullSyncJobId, TimeZoneInfo.Local, "admin");
+        //
+        // // 2. RemarProduct
+        // var remarJobId = nameof(RemarProductBackgroundService);
+        // await recurringJobManager.RemoveIfExistsAsync(remarJobId);
+        // await recurringJobManager.RecurAsync<RemarProductBackgroundService>("0 9,10,11,12,13,14,15,16,17,18,19,20 * * *", null, remarJobId, TimeZoneInfo.Local, "admin");
 
         // 3. BasbugOto
         // var basbugJobId = nameof(BasbugOtoBackgroundService);
@@ -270,10 +270,10 @@ using(var scope = app.Services.CreateScope()){
         // await recurringJobManager.RecurAsync<BasbugOtoBackgroundService>("0 9,10,11,12,13,14,15,16,17,18,19,20 * * *", null, basbugJobId, TimeZoneInfo.Local, "admin");
 
         // 4. Dega
-        var degaJobId = nameof(DegaBackgroundService);
-        await recurringJobManager.RemoveIfExistsAsync(degaJobId);
-        await recurringJobManager.RecurAsync<DegaBackgroundService>("0 9,10,11,12,13,14,15,16,17,18,19,20 * * *", null, degaJobId, TimeZoneInfo.Local, "admin");
-        
+        // var degaJobId = nameof(DegaBackgroundService);
+        // await recurringJobManager.RemoveIfExistsAsync(degaJobId);
+        // await recurringJobManager.RecurAsync<DegaBackgroundService>("0 9,10,11,12,13,14,15,16,17,18,19,20 * * *", null, degaJobId, TimeZoneInfo.Local, "admin");
+        //
         var currencyJob = nameof(CurrencyBackgroundService);
         await recurringJobManager.RemoveIfExistsAsync(currencyJob);
         await recurringJobManager.RecurAsync<CurrencyBackgroundService>("0 12 * * *", null, currencyJob, TimeZoneInfo.Local, "admin");

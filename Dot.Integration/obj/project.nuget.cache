@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "7Wu8wgICd3E=",
+  "dgSpecHash": "+fMA/XGeXoQ=",
   "success": true,
-  "projectFilePath": "/Users/efeeskin/Desktop/test/parkfuntastic/Dot.Integration/Dot.Integration.csproj",
+  "projectFilePath": "/Users/efeeskin/Desktop/test/Untitled/Dot.Integration/Dot.Integration.csproj",
   "expectedPackageFiles": [
     "/Users/efeeskin/.nuget/packages/audit.entityframework.abstractions/30.0.2/audit.entityframework.abstractions.30.0.2.nupkg.sha512",
     "/Users/efeeskin/.nuget/packages/audit.entityframework.core/30.0.2/audit.entityframework.core.30.0.2.nupkg.sha512",

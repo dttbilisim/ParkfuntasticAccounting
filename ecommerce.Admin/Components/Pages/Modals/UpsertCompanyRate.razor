@@ -1,0 +1,87 @@
+﻿@page "/upsert-companyrate"
+@using ecommerce.Admin.Domain.Dtos.CompanyRateDto;
+@attribute [Authorize]
+
+<PageTitle>Şirket Komisyon Ekle/Düzenle</PageTitle>
+
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kategori Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="CompanyRateUpsertDto" Data="@companyRate" Visible="@(companyRate != null)" Submit="@FormSubmit">
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Oran Tipi" Component="Product" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDown TValue="string" Data=@TierType Change="@(args=> ChangeEvent(args))" @bind-Value=@SelectedTierType FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" />
+            </div>
+        </div>
+
+
+        @if (ShowProducts)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Ürün" Component="Product" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDownDataGrid Data="@Products" PageNumbersCount="10" PageSize="10" TextProperty="Name" ValueProperty="Id" Placeholder="Ürün Seçiniz" style="display: block; width: 100%" @bind-Value="@companyRate.ProductId" Name="ProductId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowVirtualization="true" AllowClear="true" AllowFiltering="true" />
+                </div>
+            </div>
+        }
+
+        @if (ShowCategories)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Kategori" Component="Category" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDownDataGrid Data="@Categories" PageNumbersCount="10" PageSize="10" TextProperty="Name" ValueProperty="Id" Placeholder="Kategori Seçiniz" style="display: block; width: 100%" @bind-Value="@companyRate.CategoryId" Name="CategoryId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowVirtualization="true" AllowClear="true" AllowFiltering="true" />
+                </div>
+            </div>
+        }
+
+        @if (ShowTiers)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Ürün Grubu" Component="Tier" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDownDataGrid Data="@Tiers" PageNumbersCount="10" PageSize="10" TextProperty="Name" ValueProperty="Id" Placeholder="Ürün Grubu Seçiniz" style="display: block; width: 100%" @bind-Value="@companyRate.TierId" Name="TierId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowVirtualization="true" AllowClear="true" AllowFiltering="true" />
+                </div>
+            </div>
+        }
+
+        @if (ShowProducts || ShowCategories || ShowTiers)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Oran" Component="Rate" style="width: 100%" />
+                </div>
+                <div class="col-md-2">
+                    <RadzenNumeric Placeholder="Oran" style="display: block; width: 100%" @bind-Value="@companyRate.Rate" Name="Rate" Min="0" Max="100" />
+
+                </div>
+            </div>
+        }
+
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+

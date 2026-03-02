@@ -1,0 +1,118 @@
+@using ecommerce.Admin.Domain.Dtos.SurveyDto
+@using ecommerce.Core.Utils
+
+<PageTitle>Anket Ekle/Düzenle</PageTitle>
+   <RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Client">
+   <Tabs>
+       <RadzenTabsItem Text="Anketler">
+           <RadzenTemplateForm TItem="SurveyUpsertDto" Data="@Survey" Visible="@(!Id.HasValue || Survey.Id > 0)" Submit="@FormSubmit" InvalidSubmit="@ShowErrors">
+               <RadzenFluentValidator @ref="SurveyFluentValidator" Validator="@SurveyValidator"/>
+
+               <RadzenStack>
+                   <RadzenFormField Text="Anket Başlığı" Variant="Variant.Outlined" class="w-100">
+                       <ChildContent>
+                           <RadzenTextBox @bind-Value="@Survey.Title"/>
+                       </ChildContent>
+                       <Helper>
+                           <RadzenText Text="@SurveyFluentValidator.GetValidationMessage(r => r.Title)" class="@SurveyFluentValidator.GetErrorCssClass()"/>
+                       </Helper>
+                   </RadzenFormField>
+                   <RadzenFormField Text="Anket Açıklaması" Variant="Variant.Outlined" class="w-100">
+                       <ChildContent>
+                           <RadzenTextBox @bind-Value="@Survey.Description"/>
+                       </ChildContent>
+                       <Helper>
+                           <RadzenText Text="@SurveyFluentValidator.GetValidationMessage(r => r.Description)" class="@SurveyFluentValidator.GetErrorCssClass()"/>
+                       </Helper>
+                   </RadzenFormField>
+                   <RadzenRow>
+                       <RadzenColumn SizeSM="6">
+                           <RadzenStack>
+                               <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                                   <RadzenCheckBox TValue="bool" Name="Status" Value="@(Survey.Status == (int) EntityStatus.Active)" ValueChanged="@((v) => Survey.Status = v ? (int) EntityStatus.Active : (int) EntityStatus.Passive)"/>
+                                   <RadzenLabel Text="Aktif" Component="Status"/>
+                               </RadzenStack>
+                           </RadzenStack>
+                       </RadzenColumn>
+                       <RadzenColumn SizeSM="6">
+                           <RadzenFormField Text="Sıra" Variant="Variant.Outlined" class="w-100">
+                               <ChildContent>
+                                   <RadzenNumeric @bind-Value="@Survey.Order"/>
+                               </ChildContent>
+                               <Helper>
+                                   <RadzenText Text="@SurveyFluentValidator.GetValidationMessage(r => r.Order)" class="@SurveyFluentValidator.GetErrorCssClass()"/>
+                               </Helper>
+                           </RadzenFormField>
+                       </RadzenColumn>
+                   </RadzenRow>
+               </RadzenStack>
+
+               <RadzenPanel class="rz-mt-4">
+                   <HeaderTemplate>
+                       <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" class="w-100">
+                           <RadzenText TextStyle="TextStyle.Subtitle1" Class="rz-m-0" Text="Seçenekler"/>
+                           <RadzenButton Icon="add_circle_outline" Text="Seçenek Ekle" Click="@InsertSurveyOptionRow" Variant="Variant.Flat"/>
+                       </RadzenStack>
+                   </HeaderTemplate>
+                   <ChildContent>
+                       <RadzenDataGrid @ref="SurveyOptionDataGrid" TItem="SurveyOptionUpsertDto" AllowAlternatingRows="false" AllowFiltering="false" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single" Data="@Survey.SurveyOptions" Render="@OnRadzenGridRender" class="rz-mt-4">
+                           <Columns>
+                               <RadzenDataGridColumn Context="surveyOption" TItem="SurveyOptionUpsertDto" Property="Title" Title="Seçenek" MinWidth="200px">
+                                   <EditTemplate>
+                                       <RadzenTextBox @bind-Value="@SurveyOptionToEdit.Title" class="w-100"/>
+                                   </EditTemplate>
+                               </RadzenDataGridColumn>
+                               <RadzenDataGridColumn Context="surveyOption" TItem="SurveyOptionUpsertDto" Property="Order" Title="Sıra" Width="90px" SortOrder="SortOrder.Ascending">
+                                   <EditTemplate>
+                                       <RadzenNumeric @bind-Value="@SurveyOptionToEdit.Order" class="w-100"/>
+                                   </EditTemplate>
+                               </RadzenDataGridColumn>
+                    
+                               <RadzenDataGridColumn Context="surveyOption" TItem="SurveyOptionUpsertDto" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="100px">
+                                   <Template>
+                                       <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" Click="@(() => EditSurveyOptionRow(surveyOption))" @onclick:stopPropagation="true"/>
+                                       <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => DeleteSurveyOptionRow(surveyOption))" @onclick:stopPropagation="true"/>
+                                   </Template>
+                                   <EditTemplate>
+                                       <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Small" Click="@(() => SaveSurveyOptionRow(surveyOption))"/>
+                                       <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => CancelSurveyOptionEdit(surveyOption))"/>
+                                   </EditTemplate>
+                               </RadzenDataGridColumn>
+                           </Columns>
+                       </RadzenDataGrid>
+                   </ChildContent>
+               </RadzenPanel>
+              
+
+               <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+                   <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+                   <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" BusyText="Kaydediliyor..." IsBusy="Saving" Variant="Variant.Flat" class="rz-mr-1"/>
+               </RadzenStack>
+           </RadzenTemplateForm>
+       </RadzenTabsItem>
+       <RadzenTabsItem Text="Cevaplar" Visible="@(Id.HasValue)">
+            <RadzenPanel class="rz-mt-4">
+                              <HeaderTemplate>
+                                  <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" class="w-100">
+                                      <RadzenText TextStyle="TextStyle.Subtitle1" Class="rz-m-0" Text="Cevaplar"/>
+                              
+                                  </RadzenStack>
+                              </HeaderTemplate>
+                              <ChildContent>
+                                  <RadzenDataGrid @ref="SurveyAnwerDataGrid" TItem="SurveyAnswerStatisticDto" AllowAlternatingRows="false" AllowFiltering="false" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single" Data="@SurveyAnswerStatisticDto" Render="@OnRadzenGridRender" class="rz-mt-4">
+                                      <Columns>
+                                          <RadzenDataGridColumn Context="surveyOption" TItem="SurveyAnswerStatisticDto" Property="Summary" Title="Seçenek" MinWidth="200px">
+                                             
+                                          </RadzenDataGridColumn>
+                                         <RadzenDataGridColumn Context="surveyOption" TItem="SurveyAnswerStatisticDto" Property="TotalCount" Title="Cevap Toplamı" MinWidth="200px">
+                                                                                      
+                                                                                   </RadzenDataGridColumn>
+                                   
+                                        
+                                      </Columns>
+                                  </RadzenDataGrid>
+                              </ChildContent>
+                          </RadzenPanel>
+       </RadzenTabsItem>
+   </Tabs>
+   </RadzenTabs>

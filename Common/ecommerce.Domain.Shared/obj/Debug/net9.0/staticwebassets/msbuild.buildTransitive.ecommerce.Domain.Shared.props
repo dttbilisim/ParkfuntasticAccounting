@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../buildMultiTargeting/ecommerce.Domain.Shared.props" />
+</Project>

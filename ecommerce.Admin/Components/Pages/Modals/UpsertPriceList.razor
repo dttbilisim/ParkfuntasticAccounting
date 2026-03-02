@@ -1,0 +1,239 @@
+@using ecommerce.Admin.Domain.Dtos.PriceListDto
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+@using Radzen
+@using Radzen.Blazor
+
+<style>
+    /* Fiyat listesi modalı: input ve dropdown gri arka planı kaldır */
+    .price-list-modal .rz-inputtext,
+    .price-list-modal .rz-dropdown-trigger,
+    .price-list-modal input.rz-inputtext,
+    .price-list-modal .form-control-modern,
+    .price-list-modal .rz-textbox input,
+    .price-list-modal .rz-dropdown .rz-dropdown-trigger {
+        background-color: #fff !important;
+    }
+    .price-list-modal .rz-datepicker .rz-inputtext {
+        background-color: #fff !important;
+    }
+</style>
+
+@if (PriceList == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <RadzenTemplateForm Data="@PriceList" Submit="@(async (PriceListUpsertDto args) => { await FormSubmit(args); })">
+        <div class="modal-content-body price-list-modal">
+            <RadzenTabs RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="Genel Bilgiler" Icon="info">
+                        <div class="tab-content-wrapper">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <RadzenLabel Text="Sirkü No" Component="Code" />
+                                    <RadzenTextBox Name="Code" @bind-Value="@PriceList.Code" class="w-100 form-control-modern" Placeholder="PL-2025-001" />
+                                    <RadzenRequiredValidator Component="Code" Text="Liste kodu zorunludur" Popup="true" Style="position: absolute" />
+                                </div>
+                                <div class="col-md-6">
+                                    <RadzenLabel Text="Sirkü Tarihi" Component="StartDate" />
+                                    <RadzenDatePicker Name="StartDate" @bind-Value="@PriceList.StartDate" class="w-100 form-control-modern" DateFormat="dd.MM.yyyy" />
+                                    <RadzenRequiredValidator Component="StartDate" Text="Sirkü tarihi zorunludur" Popup="true" Style="position: absolute" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <RadzenLabel Text="Sirkü Adı" Component="Name" />
+                                    <RadzenTextBox Name="Name" @bind-Value="@PriceList.Name" class="w-100 form-control-modern" Placeholder="Fiyat Listesi Adı" />
+                                    <RadzenRequiredValidator Component="Name" Text="Liste adı zorunludur" Popup="true" Style="position: absolute" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <RadzenLabel Text="Cari Seçiniz" Component="Customer" />
+                                    <RadzenDropDown TValue="int?" Name="Customer"
+                                                    Data="@CustomerOptions"
+                                                    TextProperty="Text"
+                                                    ValueProperty="Value"
+                                                    @bind-Value="@PriceList.CustomerId"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="true"
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    Placeholder="Seçiniz..." />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <RadzenLabel Text="Şirket" Component="Corporation" />
+                                    <RadzenDropDown TValue="int?" Name="Corporation"
+                                                    Data="@CorporationOptions"
+                                                    TextProperty="Name"
+                                                    ValueProperty="Id"
+                                                    @bind-Value="@PriceList.CorporationId"
+                                                    Change="@OnCorporationChange"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="true"
+                                                    Placeholder="Seçiniz..."
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    <RadzenRequiredValidator Component="Corporation" Text="Şirket seçimi zorunludur" Popup="true" Style="position: absolute" />
+                                </div>
+                                <div class="col-md-3">
+                                    <RadzenLabel Text="Şube" Component="Branch" />
+                                    <RadzenDropDown TValue="int?" Name="Branch"
+                                                    Data="@BranchOptions"
+                                                    TextProperty="Name"
+                                                    ValueProperty="Id"
+                                                    @bind-Value="@PriceList.BranchId"
+                                                    Change="@OnBranchChange"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="true"
+                                                    Placeholder="Seçiniz..."
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    <RadzenRequiredValidator Component="Branch" Text="Şube seçimi zorunludur" Popup="true" Style="position: absolute" />
+                                </div>
+                                <div class="col-md-3">
+                                    <RadzenLabel Text="Depo" Component="Warehouse" />
+                                    <RadzenDropDown TValue="int?" Name="Warehouse"
+                                                    Data="@WarehouseOptions"
+                                                    TextProperty="Name"
+                                                    ValueProperty="Id"
+                                                    @bind-Value="@PriceList.WarehouseId"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="true"
+                                                    Placeholder="Seçiniz..."
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    <RadzenRequiredValidator Component="Warehouse" Text="Depo seçimi zorunludur" Popup="true" Style="position: absolute" />
+                                </div>
+                                <div class="col-md-3">
+                                    <RadzenLabel Text="Döviz Tipi" Component="Currency" />
+                                    <RadzenDropDown TValue="int?" Name="Currency"
+                                                    Data="@CurrencyOptions"
+                                                    TextProperty="Text"
+                                                    ValueProperty="Value"
+                                                    @bind-Value="@PriceList.CurrencyId"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="true"
+                                                    Placeholder="Seçiniz..."
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    <RadzenRequiredValidator Component="Currency"
+                                                              Text="Döviz tipi zorunludur"
+                                                              Popup="true"
+                                                              Style="position: absolute" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <RadzenCheckBox @bind-Value="@PriceList.IsActive" Name="IsActive" TValue="bool" />
+                                    <RadzenLabel Text="Aktif" Component="IsActive" class="ms-2" />
+                                </div>
+                            </div>
+                        </div>
+                    </RadzenTabsItem>
+
+                    <RadzenTabsItem Text="Ürünler" Icon="inventory" Disabled="@(!IsHeaderValid)">
+                        <div class="tab-content-wrapper">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <div class="product-search-container" style="position: relative;">
+                                        <RadzenAutoComplete TValue="string"
+                                                            class="w-100"
+                                                            Placeholder="Ürün adı veya barkod ile arayın..."
+                                                            @bind-Value="selectedProductCode"
+                                                            Data="@productSearchResults"
+                                                            TextProperty="Name"
+                                                            ValueProperty="IdStr"
+                                                            MinLength="2"
+                                                            LoadData="@LoadProducts"
+                                                            Change="@OnProductSearchChanged"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            onkeydown="if(event.key === 'Enter') { event.preventDefault(); }"
+                                                            Style="width:100%">
+                                            <Template Context="product">
+                                                <div class="product-search-item" style="padding: 10px; border-bottom: 1px solid #e9ecef; cursor: pointer;">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="product-name" style="font-weight: 600; font-size: 0.95rem;">@((product as ProductListDto).Name)</span>
+                                                        <span class="product-brand-badge" style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background-color: #f8f9fa; border: 1px solid #dee2e6; color: #6c757d;">@((product as ProductListDto).Brand?.Name)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <small class="product-barcode-text" style="color: #6c757d; font-size: 0.85rem;">
+                                                            <i class="fas fa-barcode me-1"></i>Barkod: @((product as ProductListDto).Barcode)
+                                                        </small>
+                                                        <span class="product-price" style="color: #198754; font-weight: bold; font-size: 0.95rem;">
+                                                            @((product as ProductListDto).Price > 0 ? (product as ProductListDto).Price.ToString("C2") : ((product as ProductListDto).RetailPrice ?? 0).ToString("C2"))
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </Template>
+                                        </RadzenAutoComplete>
+                                        @if (!string.IsNullOrEmpty(selectedProductCode))
+                                        {
+                                            <button type="button" class="btn-clear-search" onclick="@(() => { selectedProductCode = null; })" 
+                                                    style="position: absolute; right: 35px; top: 50%; transform: translateY(-50%); 
+                                                           border: none; background: transparent; color: #999; cursor: pointer; z-index: 10;">
+                                                <i class="fas fa-times-circle"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <RadzenButton Text="Ürünü Ekle" Icon="add"
+                                                  ButtonStyle="ButtonStyle.Success"
+                                                  Click="@AddProductFromSearch"
+                                                  class="w-100 mb-1" />
+                                </div>
+                            </div>
+
+                            <RadzenDataGrid @ref="itemsGrid"
+                                            Data="@(PriceList?.Items ?? new List<PriceListItemUpsertDto>())"
+                                            TItem="PriceListItemUpsertDto"
+                                            AllowPaging="false"
+                                            AllowSorting="false"
+                                            Density="Density.Compact"
+                                            GridLines="DataGridGridLines.Horizontal"
+                                            Style="height: 300px">
+                                <Columns>
+                                    <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Title="Sıra" Width="60px">
+                                        <Template Context="item">
+                                            @((PriceList?.Items?.IndexOf(item) ?? -1) + 1)
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Property="ProductName" Title="Ürün Adı" />
+                                    <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Property="CostPrice" Title="Maliyet Fiyatı" Width="150px">
+                                        <Template Context="item">
+                                            <RadzenNumeric @bind-Value="@item.CostPrice" TValue="decimal" class="compact-numeric w-100" ShowUpDown="false" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Property="SalePrice" Title="Satış Fiyatı" Width="150px">
+                                        <Template Context="item">
+                                            <RadzenNumeric @bind-Value="@item.SalePrice" TValue="decimal" class="compact-numeric w-100" ShowUpDown="false" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Title="Sil" Width="60px" Filterable="false" Sortable="false">
+                                        <Template Context="item">
+                                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Click="@(async () => await RemovePriceListItem(item))" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                </Columns>
+                            </RadzenDataGrid>
+                        </div>
+                    </RadzenTabsItem>
+
+                </Tabs>
+            </RadzenTabs>
+        </div>
+
+        <div class="modal-sticky-footer d-flex justify-content-between">
+            <div class="d-flex gap-2">
+                <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}

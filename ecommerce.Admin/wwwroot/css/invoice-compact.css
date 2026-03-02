@@ -1,0 +1,221 @@
+/* =====================================================
+   SENIOR B2B ERP - ULTRA-COMPACT DESIGN
+   Focus: Zero Clipping, High Contrast, Precision
+   ===================================================== */
+
+:root {
+    --erp-primary: #0f172a;
+    --erp-accent: #2563eb;
+    --erp-border: #cbd5e1;
+    --erp-bg: #f1f5f9;
+    --erp-card: #ffffff;
+    --erp-text: #1e293b;
+    --erp-text-muted: #64748b;
+    --erp-input-h: 30px;
+    --erp-font-size: 12px;
+}
+
+.modal-content-body-compact {
+    padding: 12px !important;
+    background-color: var(--erp-bg);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: var(--erp-font-size);
+    min-height: 500px;
+}
+
+.pro-card {
+    background: var(--erp-card);
+    border: 1px solid var(--erp-border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.pro-card-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--erp-primary);
+    text-transform: uppercase;
+    border-bottom: 2px solid #f1f5f9;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pro-field {
+    margin-bottom: 4px;
+}
+
+.pro-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--erp-text-muted);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+
+
+/* GRID PERFORMANCE & DENSITY */
+.pro-invoice-grid {
+    border: 1px solid var(--erp-border) !important;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.pro-invoice-grid .rz-grid-table thead th {
+    padding: 8px 10px !important;
+    background: #f8fafc !important;
+    font-weight: 800 !important;
+    font-size: 11px !important;
+    color: var(--erp-primary) !important;
+    border-bottom: 2px solid var(--erp-border) !important;
+}
+
+.pro-invoice-grid .rz-grid-table tbody td {
+    padding: 6px 10px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    min-height: 48px !important;
+    vertical-align: middle !important;
+}
+
+/* FINANCIAL SUMMARY BOX */
+.pro-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pro-summary-table td {
+    padding: 5px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pro-summary-label {
+    font-size: 12px;
+    color: var(--erp-text-muted);
+}
+
+.pro-summary-value {
+    font-size: 14px;
+    font-weight: 700;
+    text-align: right;
+    color: #000;
+}
+
+.pro-total-row {
+    margin-top: 10px;
+    padding: 14px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.pro-total-label {
+    font-weight: 800;
+    color: #166534;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pro-total-value {
+    font-weight: 900;
+    color: #15803d;
+    font-size: 26px;
+    letter-spacing: -1px;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.pro-total-value small {
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+/* TRY SUMMARY (FOR FOREIGN CURRENCY) */
+.pro-try-summary {
+    background: #fdfdfd;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.pro-try-header {
+    font-size: 10px;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-align: center;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 4px;
+}
+
+.pro-try-content {
+    padding: 0 4px;
+}
+
+/* CUSTOMER INFO SECTION */
+.pro-customer-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.info-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.info-value {
+    font-size: 11px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+
+.pro-btn {
+    height: 32px !important;
+    padding: 0 16px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+}
+
+.pro-modal-footer {
+    padding: 12px 24px;
+    background: #fff;
+    border-top: 2px solid var(--erp-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.pro-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    padding: 4px;
+    border: 1px solid var(--erp-border);
+    border-radius: 4px;
+}

@@ -1,0 +1,56 @@
+﻿@page "/upsert-productactivearticle"
+@using ecommerce.Admin.Domain.Dtos.ProductActiveArcticleDto;
+@using Blazored.FluentValidation
+@attribute [Authorize]
+<PageTitle>Etken Madde Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Etken Madde Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="ProductActiveArticleUpsertDto" Data="@productActiveArticleUpsertDto" Submit="@FormSubmit" OnInvalidSubmit="ShowErrors">
+        <FluentValidationValidator @ref="_fluentValidationValidator" />
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Etken Madde" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDownDataGrid Data="@activeArticles" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@productActiveArticleUpsertDto.ActiveArticleId" Name="ActiveArticleId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" />
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Adet / Ölçek Tipi" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-6">
+                        <RadzenNumeric style="display: block; width: 100%" @bind-Value="@productActiveArticleUpsertDto.ScaleCount" Name="ScaleCount" Min="0" />
+                    </div>
+                    <div class="col-md-6">
+                        <RadzenDropDownDataGrid Data="@scaleTypes" style="display: block; width: 100%" @bind-Value="@productActiveArticleUpsertDto.ScaleType" Name="ScaleType" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Miktar" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@productActiveArticleUpsertDto.Amount" Name="Amount" Min="0" />
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Ölçüm Cinsi" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDownDataGrid Data="@scaleUnits" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@productActiveArticleUpsertDto.ScaleUnitId" Name="ScaleUnitId" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

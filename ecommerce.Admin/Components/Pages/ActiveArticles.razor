@@ -1,0 +1,43 @@
+﻿@page "/activearticles"
+@using ecommerce.Admin.Domain.Dtos.ActiveArticleDto;
+@using ecommerce.Admin.Resources
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Core.Utils;
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Etkin Madde Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Etken Madde Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Etken Madde Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="ActiveArticleListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@activeArticles" CellRender="@RowRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ActiveArticleListDto" Property="Id" Title="Id" Width="50px">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ActiveArticleListDto" Property="Name" Title="Etken Madde Adı">
+                    </RadzenDataGridColumn>               
+                    <RadzenDataGridColumn TItem="ActiveArticleListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="activeArticle">
+                            @if (activeArticle.Status != EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, activeArticle)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+@using ecommerce.Web.Utility
+@inject AppStateManager AppStateManager
+
+@implements IDisposable
+@if (isLoading)
+{
+    <div class="modern-loading-overlay">
+        <div class="modern-loading-spinner">
+            <div class="loading-ring"></div>
+        </div>
+        <div class="modern-loading-text">Yükleniyor...</div>
+    </div>
+}
+
+@code {
+    private bool isLoading = false;
+
+    protected override void OnInitialized()
+    {
+        AppStateManager.GlobalLoadingChanged += OnLoadingChanged;
+    }
+
+    private void OnLoadingChanged(bool loading)
+    {
+        if (isLoading == loading) return;
+        isLoading = loading;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AppStateManager.GlobalLoadingChanged -= OnLoadingChanged;
+    }
+}

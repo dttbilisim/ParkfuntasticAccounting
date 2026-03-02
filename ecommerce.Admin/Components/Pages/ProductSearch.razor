@@ -1,0 +1,1985 @@
+@page "/product-search"
+@using ecommerce.Domain.Shared.Dtos.Product
+@using ecommerce.Admin.Components.Layout
+@using Radzen
+@using Radzen.Blazor
+@layout MainLayout
+@implements IDisposable
+
+<style>
+    /* Custom Scrollbar Styles */
+    .b2b-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .b2b-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+        border-radius: 4px;
+    }
+    
+    .b2b-scrollbar::-webkit-scrollbar-thumb {
+        background: #ced4da; 
+        border-radius: 4px;
+    }
+    
+    .b2b-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #adb5bd; 
+    }
+
+    /* Şasi Detection Styles */
+    .b2b-search-input.vin-detected {
+        border: 2px solid #198754 !important;
+        background: linear-gradient(to right, #f0fff4, #ffffff) !important;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15) !important;
+        padding-right: 140px !important; /* Şasi badge için yer aç */
+    }
+
+    .vin-badge {
+        background: linear-gradient(135deg, #f0fff4 0%, #d1e7dd 100%);
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid #198754;
+        animation: vinPulse 2s ease-in-out infinite;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    @@keyframes vinPulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 6px rgba(25, 135, 84, 0);
+        }
+    }
+
+</style>
+
+<div class="product-search-root b2b-animate @(isLoading ? "is-loading" : "")" @onclick="CloseRecentSearchesOnOutsideClick">
+    <!-- CORPORATE HEADER -->
+    <!-- COMPACT B2B TOOLBAR -->
+    <div class="b2b-header-toolbar">
+        <!-- Search Group -->
+        <form @onsubmit:preventDefault="true" @onsubmit="OnSearchSubmit" class="b2b-search-group position-relative d-flex align-items-center w-100">
+            <i class="fa-solid fa-magnifying-glass b2b-search-icon"></i>
+            <input value="@searchText" 
+                   @oninput="@(e => { searchText = e.Value?.ToString() ?? ""; StateHasChanged(); })" 
+                   @onfocus="OnSearchInputFocus"
+                   @onblur="OnSearchInputBlur"
+                   class="@GetSearchInputClass()" 
+                   placeholder="OEM kodu, ürün adı, marka veya 17 haneli şasi numarası ile arayın..." 
+                   title="17 haneli şasi numarası girerseniz otomatik araç eşleştirme yapılır" />
+            @if (IsVinNumber(searchText))
+            {
+                <span class="vin-badge position-absolute" style="right: 90px; top: 50%; transform: translateY(-50%); z-index: 10;" title="Şasi Numarası Tespit Edildi">
+                    <i class="fa-solid fa-car text-success me-1"></i>
+                    <span class="small fw-bold text-success">ŞASİ</span>
+                </span>
+            }
+            @if (!string.IsNullOrEmpty(searchText))
+            {
+            <button type="button" class="btn btn-link text-muted p-0 position-absolute" style="right: 50px; z-index: 10;" @onclick="ClearSearch" title="Arama metnini temizle">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+            }
+            <button type="button" class="btn btn-link text-muted p-0 position-absolute end-0 me-2" style="right: 10px; z-index: 10;" @onclick="ToggleRecentSearchesDropdown" @onclick:stopPropagation="true" title="Geçmiş Aramalar">
+                <i class="fa-solid fa-clock-rotate-left @(isRecentSearchesDropdownOpen ? "text-success" : "")"></i>
+            </button>
+            
+            <!-- Recent Searches Dropdown -->
+            @if (isRecentSearchesDropdownOpen)
+            {
+                <div class="recent-searches-dropdown" @onclick:stopPropagation="true" @onmouseleave="CloseRecentSearchesDropdown">
+                    <div class="recent-searches-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-success"></i>
+                            <span class="fw-bold">Geçmiş Aramalar</span>
+                            <span class="badge bg-light text-dark ms-2">@(recentSearches?.Count ?? 0)</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ClearRecentSearches" title="Tümünü Temizle">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <div class="recent-searches-table-container">
+                        @if (recentSearches != null && recentSearches.Any())
+                        {
+                            <table class="recent-searches-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-search">Arama</th>
+                                        <th class="col-date">Tarih</th>
+                                        <th class="col-count">Kayıt</th>
+                                        <th class="col-action"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var searchItem in recentSearches)
+                                    {
+                                        <tr class="recent-search-row" 
+                                            @onclick="@(() => SelectRecentSearch(searchItem.Term))"
+                                            @onmouseover="@(() => hoveredSearch = searchItem.Term)"
+                                            @onmouseout="@(() => hoveredSearch = null)">
+                                            <td class="col-search">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="fa-solid fa-search text-muted"></i>
+                                                    <span class="@(hoveredSearch == searchItem.Term ? "text-success fw-semibold" : "fw-medium")">@searchItem.Term</span>
+                                                </div>
+                                            </td>
+                                            <td class="col-date">
+                                                <span class="text-muted small">
+                                                    <i class="fa-solid fa-calendar-alt me-1"></i>
+                                                    @searchItem.SearchDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                                </span>
+                                            </td>
+                                            <td class="col-count">
+                                                @if (searchItem.RecordCount > 0)
+                                                {
+                                                    <span class="text-muted small fw-semibold">
+                                                        <i class="fa-solid fa-list me-1"></i>@searchItem.RecordCount
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">-</span>
+                                                }
+                                            </td>
+                                            <td class="col-action">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0" 
+                                                        @onclick="@(() => RemoveRecentSearch(searchItem.Term))"
+                                                        @onclick:stopPropagation="true"
+                                                        title="Sil">
+                                                    <i class="fa-solid fa-times"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fa-solid fa-clock-rotate-left fa-2x mb-2 opacity-50"></i>
+                                <p class="mb-0 small">Henüz geçmiş arama yok</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+            }
+            @* Hidden submit button to capture Enter key within the form - using robust hidden style *@
+            <button type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" tabindex="-1"></button>
+        </form>
+
+        <!-- Toolbar Actions -->
+        <div class="b2b-toolbar-actions">
+            <!-- Toggles as Icons/Buttons -->
+            <!-- Toggles as Switches -->
+             <div class="d-flex align-items-center gap-3">
+                 <div class="form-check form-switch custom-switch mb-0" title="Sadece stokta olan ürünleri göster">
+                    <input class="form-check-input" type="checkbox" id="stockSwitch" checked="@showOnlyInStock" @onchange="@(args => OnOnlyInStockToggle((bool)(args.Value ?? false)))" title="Sadece stokta olan ürünleri göster">
+                    <label class="form-check-label fw-bold text-dark small user-select-none" for="stockSwitch" style="cursor:pointer" title="Sadece stokta olan ürünleri göster">Stokta</label>
+                </div>
+
+                <div class="form-check form-switch custom-switch mb-0" title="Sadece resimli ürünleri göster">
+                    <input class="form-check-input" type="checkbox" id="imageSwitch" checked="@showOnlyWithImage" @onchange="@(args => OnOnlyWithImageToggle((bool)(args.Value ?? false)))" title="Sadece resimli ürünleri göster">
+                    <label class="form-check-label fw-bold text-dark small user-select-none" for="imageSwitch" style="cursor:pointer" title="Sadece resimli ürünleri göster">Resimli</label>
+                </div>
+            </div>
+
+            <div class="vr mx-1 text-muted opacity-25"></div>
+
+            <button class="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" style="border-radius: 8px; background-color: var(--b2b-primary); border: none;" @onclick="OnSearchSubmit" disabled="@isLoading" title="Ürün ara">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                }
+                else
+                {
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                }
+                <span class="fw-semibold">@(isLoading ? "Aranıyor..." : "ARA")</span>
+            </button>
+
+            <button class="btn-b2b-icon" @onclick="OpenVehicleMatchModal" title="Araç bilgilerine göre ürün ara (Marka, Model, Yıl)">
+                <i class="fa-solid fa-car text-success"></i> <span class="d-none d-lg-inline">Araçtan Bul</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    @if (hasSearched || isLoading)
+    {
+        <div class="container-fluid px-3 pb-4 product-results-area">
+            <div class="row g-3 transition-all">
+            <!-- SIDEBAR: FILTERS -->
+            @if(isFilterVisible)
+            {
+                <div class="col-lg-2 col-md-3 animate-slide-up">
+                    <div class="filter-sidebar card shadow-sm border-0 h-100 rounded-3">
+                         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                             <h6 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-filter me-2 text-success"></i>Filtreler</h6>
+                              <button class="btn btn-light btn-sm rounded-circle shadow-sm" @onclick="ToggleFilters" title="Filtreleri Gizle">
+                                 <i class="fa-solid fa-chevron-left text-success"></i>
+                             </button>
+                         </div>
+                         <div class="card-body p-2 scrollable-filters">
+                            
+                            <!-- 1. Price Range (Accordion) -->
+                            <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isPriceExpanded = !isPriceExpanded" style="cursor: pointer;">
+                                    <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-tag me-2 text-success"></i>Fiyat Aralığı</label>
+                                    <i class="fa-solid @(isPriceExpanded ? "fa-chevron-up" : "fa-chevron-down") small text-muted"></i>
+                                </div>
+                                @if(isPriceExpanded) {
+                                    <div class="mt-3 fade-in px-2">
+                                        <RadzenSlider TValue="IEnumerable<double>" 
+                                                      Value=@priceRange 
+                                                      Range="true" 
+                                                      Min="@(0m)" 
+                                                      Max="@((decimal)priceMaxLimit)" 
+                                                      Step="100"
+                                                      Change="@(args => OnPriceChange(args))" 
+                                                      Class="w-100 mb-3" />
+                                        
+                                        <div class="d-flex align-items-center justify-content-between text-muted small">
+                                            <span>@((minPrice ?? 0).ToString("N0")) ₺</span>
+                                            <span>@((maxPrice ?? priceMaxLimit).ToString("N0")) ₺</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- 2. DotParts / Parça Grubu (Accordion) -->
+                             <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isPartsExpanded = !isPartsExpanded" style="cursor: pointer;">
+                                    <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-gears me-2 text-success"></i>Parça Grubu</label>
+                                    <i class="fa-solid @(isPartsExpanded ? "fa-chevron-up" : "fa-chevron-down") small text-muted"></i>
+                                </div>
+                                @if(isPartsExpanded) {
+                                    <div class="mt-3 fade-in">
+                                         <RadzenDropDown Data="@dotPartNames" 
+                                                           @bind-Value="@selectedDotPartNamesList"
+                                                           Multiple="true"
+                                                           AllowFiltering="true"
+                                                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                           Placeholder="Seçiniz"
+                                                           SelectedItemsText="seçildi"
+                                                           Change="@OnDotPartNamesChanged"
+                                                           Class="w-100 search-dropdown shadow-sm border-0" />
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- 3. Categories (Accordion) -->
+                            <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isCategoriesExpanded = !isCategoriesExpanded" style="cursor: pointer;">
+                                    <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-layer-group me-2 text-success"></i>Kategoriler</label>
+                                    <i class="fa-solid @(isCategoriesExpanded ? "fa-chevron-up" : "fa-chevron-down") small text-muted"></i>
+                                </div>
+                                @if(isCategoriesExpanded) {
+                                    <div class="mt-3 fade-in">
+                                         <RadzenDropDown Data="@categories" TextProperty="Name" ValueProperty="Id"
+                                                           @bind-Value="selectedCategoryIds"
+                                                           Multiple="true"
+                                                           AllowFiltering="true"
+                                                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                           Placeholder="Seçiniz"
+                                                           SelectedItemsText="seçildi"
+                                                           Change="@(args => OnSearchFiltersChanged())"
+                                                           Class="w-100 search-dropdown shadow-sm border-0" />
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- 4. Brands (Accordion) -->
+                            <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isBrandsExpanded = !isBrandsExpanded" style="cursor: pointer;">
+                                    <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-copyright me-2 text-success"></i>Markalar</label>
+                                    <i class="fa-solid @(isBrandsExpanded ? "fa-chevron-up" : "fa-chevron-down") small text-muted"></i>
+                                </div>
+                                @if(isBrandsExpanded) {
+                                    <div class="mt-3 fade-in">
+                                         <RadzenDropDown Data="@brands" TextProperty="Name" ValueProperty="Id"
+                                                           @bind-Value="selectedBrandIds"
+                                                           Multiple="true"
+                                                           AllowFiltering="true"
+                                                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                           Placeholder="Seçiniz"
+                                                           SelectedItemsText="seçildi"
+                                                           Change="@(args => OnSearchFiltersChanged())"
+                                                           Class="w-100 search-dropdown shadow-sm border-0" />
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- 5. Vehicle Filters (Accordion) -->
+                            <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isVehiclesExpanded = !isVehiclesExpanded" style="cursor: pointer;">
+                                    <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-car me-2 text-success"></i>Araç Filtreleri</label>
+                                    <i class="fa-solid @(isVehiclesExpanded ? "fa-chevron-up" : "fa-chevron-down") small text-muted"></i>
+                                </div>
+                                @if(isVehiclesExpanded) {
+                                    <div class="mt-3 fade-in">
+                                        <div class="mb-3">
+                                            <label class="form-label small text-muted">Araç Markası</label>
+                                            <RadzenDropDown Data="@manufacturerNames" 
+                                                               @bind-Value="@selectedManufacturerName"
+                                                               Placeholder="Marka Seç"
+                                                               Change="@(args => OnManufacturerChanged((string)args))"
+                                                               Class="w-100 search-dropdown" 
+                                                               AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small text-muted">Araç Modeli</label>
+                                            <RadzenDropDown Data="@baseModelNames" 
+                                                               @bind-Value="@selectedBaseModelName"
+                                                               Placeholder="Model Seç"
+                                                               Change="@(args => OnModelChanged((string)args))"
+                                                               Disabled="@(string.IsNullOrEmpty(selectedManufacturerName))"
+                                                               Class="w-100 search-dropdown" 
+                                                               AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                         </div>
+                         <div class="card-footer bg-white border-top p-3">
+                             <button class="btn btn-outline-danger w-100 btn-sm rounded-pill" @onclick="ClearAllFilters">
+                                 <i class="fa-solid fa-trash-can me-2"></i>Tümünü Temizle
+                             </button>
+                         </div>
+                    </div>
+                </div>
+            }
+
+            <!-- MAIN AREA -->
+            <div class="@(isFilterVisible ? "col-lg-10 col-md-9" : "col-12") transition-all">
+                <div class="results-container">
+                    <!-- Tools Bar -->
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-3 bg-white rounded-4 shadow-sm">
+                         <div class="d-flex align-items-center gap-3">
+                            @if(!isFilterVisible)
+                            {
+                                <button class="btn btn-dark btn-sm rounded-pill shadow-sm" type="button" @onclick="ToggleFilters" style="white-space:nowrap">
+                                     <i class="fas fa-filter me-2"></i>Filtreleri Göster
+                                </button>
+                            }
+                            <div class="filter-summary animate__animated animate__fadeIn d-flex align-items-center gap-3">
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        <i class="fas fa-list me-2"></i>@searchResult.DataCount Bulunan Ürün
+                                    </span>
+                                    
+                                    @if (searchResult.TotalRawCount > searchResult.DataCount)
+                                    {
+                                        <span class="badge bg-secondary rounded-pill px-3 py-2" title="Muadiller Dahil Toplam Sayı">
+                                            <i class="fas fa-layer-group me-2"></i>@searchResult.TotalRawCount Bulunan Muadil
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="form-check form-switch custom-switch mb-0" title="Ürünleri satıcı/depo bazında grupla">
+                                <input class="form-check-input" type="checkbox" id="groupBySellerSwitch" checked="@isGroupedBySeller" @onchange="@(args => ToggleGroupBySeller())" title="Ürünleri satıcı/depo bazında grupla">
+                                <label class="form-check-label fw-bold text-dark small user-select-none" for="groupBySellerSwitch" style="cursor:pointer" title="Ürünleri satıcı/depo bazında grupla">Depo Bazlı Grupla</label>
+                            </div>
+
+                            <div class="form-check form-switch custom-switch mb-0" title="Muadilleri Listeye Dahil Et">
+                                <input class="form-check-input" type="checkbox" id="includeEquivalentsSwitch" checked="@isIncludeEquivalents" @onchange="@(args => ToggleIncludeEquivalents())" title="Muadilleri Listeye Dahil Et">
+                                <label class="form-check-label fw-bold small text-dark" for="includeEquivalentsSwitch">Muadilleri Listeye Dahil Et</label>
+                            </div>
+                            @if (hasSearched && searchResult.DataCount > 0)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" style="font-size: 11px; padding: 4px 8px;" @onclick="ClearAllFilters" title="Filtreleri Temizle">
+                                    <i class="fa-solid fa-filter-circle-xmark me-1"></i> Filtreyi Temizle
+                                </button>
+                            }
+                         </div>
+                         <div class="view-toggles d-flex bg-light p-1 rounded-pill border">
+                             <button class="btn btn-sm rounded-pill px-3 @(isTableView ? "btn-white shadow-sm fw-bold" : "btn-transparent text-muted")" @onclick='() => isTableView = true' title="Liste görünümüne geç">
+                                <i class="fa-solid fa-list me-1"></i> Liste
+                            </button>
+                            <button class="btn btn-sm rounded-pill px-3 @(!isTableView ? "btn-white shadow-sm fw-bold" : "btn-transparent text-muted")" @onclick='() => isTableView = false' title="Kart görünümüne geç">
+                                <i class="fa-solid fa-grip-vertical me-1"></i> Kart
+                            </button>
+                         </div>
+                    </div>
+                    @if (isLoading && (searchResult == null || searchResult.DataCount == 0))
+                    {
+                        <div class="py-5 text-center">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            @if (isLoadingVin)
+                            {
+                                <p class="mt-3 text-muted fw-bold">Araçlar Yükleniyor...</p>
+                            }
+                            else
+                            {
+                                <p class="mt-3 text-muted fw-bold">Ürünler Hazırlanıyor...</p>
+                            }
+                        </div>
+                    }
+                    else if (!isLoading && (searchResult == null || searchResult.DataCount == 0 || searchResult.Data == null || !searchResult.Data.Any()))
+                    {
+                         @if (currentVinVehicle != null)
+                         {
+                             <div class="py-5 text-center bg-white rounded-5 shadow-sm border border-success border-opacity-25">
+                                 <div class="mb-4 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 80px; height: 80px;">
+                                     <i class="fa-solid fa-car fa-2x"></i>
+                                 </div>
+                                 <h4 class="fw-bold text-dark mb-1">Araç Tespit Edildi</h4>
+                                 <h5 class="text-success fw-bold mb-3">@currentVinVehicle.ManufacturerName @currentVinVehicle.BaseModelName (@currentVinVehicle.ModelYear)</h5>
+                                 
+                                 <div class="d-inline-block bg-light px-3 py-1 rounded-pill mb-4 border">
+                                     <span class="text-muted small me-2">Şasi No:</span>
+                                     <span class="code-mono fw-bold text-dark">@currentVinVehicle.Wmi@currentVinVehicle.VdsCode...</span>
+                                 </div>
+                                 
+                                 <p class="text-muted mb-4 px-4" style="max-width: 600px; margin: 0 auto;">
+                                     Aracınız başarıyla tespit edildi ancak sistemimizde bu araç için kayıtlı ürün/parça bulunamadı.
+                                 </p>
+                                 
+                                 <div class="d-flex justify-content-center gap-2">
+                                     <button class="btn btn-outline-secondary rounded-pill px-4" @onclick="ClearAllFilters">Filtreleri Sıfırla</button>
+                                     <button class="btn btn-outline-primary rounded-pill px-4" @onclick="OpenVehicleMatchModal">Aracı Değiştir</button>
+                                 </div>
+                             </div>
+                         }
+                         else
+                         {
+                             <div class="py-5 text-center bg-white rounded-5 shadow-sm">
+                                 <img src="/images/empty-search.svg" class="mb-4" style="height: 150px; opacity: 0.5;" />
+                                 <h4 class="fw-bold text-dark">Sonuç Bulunamadı</h4>
+                                 <p class="text-muted">Farklı bir arama yapmayı veya filtreleri temizlemeyi deneyin.</p>
+                                 <button class="btn btn-success rounded-pill px-4" @onclick="ClearAllFilters">Filtreleri Sıfırla</button>
+                             </div>
+                         }
+                    }
+                    else
+                    {
+                        <div class="product-results-area position-relative" style="min-height: 400px;">
+                            @if (isLoading)
+                            {
+                                <div class="loading-overlay d-flex flex-column align-items-center position-absolute w-100 h-100 rounded-5" 
+                                     style="background: rgba(255,255,255,0.45); z-index: 1000; top: 0; left: 0; backdrop-filter: blur(3px); pointer-events: all;">
+                                    <div class="sticky-top d-flex flex-column align-items-center justify-content-center" style="top: 300px; height: 100px;">
+                                        <div class="spinner-border text-success mb-3 shadow-sm" role="status" style="width: 3.5rem; height: 3.5rem; border-width: 0.35em;">
+                                            <span class="visually-hidden">Yükleniyor...</span>
+                                        </div>
+                                        <div class="fw-bold text-dark px-3 py-1 rounded-pill shadow-sm bg-white" style="letter-spacing: 0.5px; font-size: 1rem; border: 1px solid #e9ecef;">
+                                            @(isLoadingVin ? "İşleminizi yapıyorum lütfen bekleyin" : "İşleminizi yapıyorum lütfen bekleyin")
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        @if (isTableView)
+                        {
+                            <div class="b2b-grid-container fade-in">
+                                <AdminDataGrid @ref="searchGrid" Data="@searchResult.Data" 
+                                                TItem="SellerProductViewModel" 
+                                                IsLoading="@isLoading"
+                                                Count="@searchResult.TotalRawCount"
+                                                LoadData="@OnLoadData"
+                                                AllowPaging="true" 
+                                                PageSize="50"
+                                                PagerHorizontalAlign="HorizontalAlign.Center"
+                                                AllowSorting="true" 
+                                                AllowFiltering="false"
+                                                AllowGrouping="true"
+                                                ShowGroupPanel="false"
+                                                GridLines="DataGridGridLines.Horizontal"
+                                                RowRender="@RowRender"
+                                                Class="rz-datagrid product-search-grid">
+                                    <GroupHeaderTemplate>
+                                        <div class="d-flex align-items-center gap-3 py-2 px-3" style="background: linear-gradient(to right, #f0fdf4, #ffffff); border-left: 4px solid #198754;">
+                                            <div class="d-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm" style="width: 32px; height: 32px;">
+                                                <i class="fa-solid fa-store text-success"></i>
+                                            </div>
+                                            <span class="fw-bold text-dark text-uppercase fs-6">
+                                                @context.Data.Key
+                                            </span>
+                                            <span class="badge bg-success text-white rounded-pill px-3">
+                                                @context.Data.Count Ürün
+                                            </span>
+                                        </div>
+                                    </GroupHeaderTemplate>
+                                    <Columns>
+                                        <RadzenDataGridColumn TItem="SellerProductViewModel" Title="GÖRSEL" Width="80px" Sortable="false" TextAlign="TextAlign.Center">
+                                            <Template Context="p">
+                                                <div class="d-flex justify-content-center position-relative" @onclick="() => OpenImageZoom(ResolveSearchImage(p))" style="cursor: zoom-in;">
+                                                    <img src="@ResolveSearchImage(p)" class="rounded-2 border" style="width: 48px; height: 48px; object-fit: contain; background: #fff;" />
+                                                </div>
+                                            </Template>
+                                        </RadzenDataGridColumn>
+
+                                        <RadzenDataGridColumn TItem="SellerProductViewModel" Property="PartNumber" Title="ÜRÜN KODU" Width="140px">
+                                             <Template Context="p">
+                                                <div class="code-mono fw-bold">@p.PartNumber</div>
+                                                @if (p.OemCode != null && p.OemCode.Any())
+                                                {
+                                                    <div class="small text-muted mt-1" style="font-size: 11px;">GC: @(string.Join(", ", p.OemCode.Take(2)))</div>
+                                                }
+                                            </Template>
+                                        </RadzenDataGridColumn>
+
+                                        <RadzenDataGridColumn TItem="SellerProductViewModel" Property="ProductName" Title="ÜRÜN ADI" MinWidth="200px">
+                                            <Template Context="p">
+                                                @{
+                                                    var productNameId = $"product-name-{p.SellerItemId}";
+                                                }
+                                                <div class="d-flex flex-column align-items-start py-1">
+                                                    @if (p.IsEquivalent)
+                                                    {
+                                                        <span class="badge shadow-sm" 
+                                                              style="background-color: #198754; color: white; border-radius: 50px; font-size: 9px; padding: 2px 10px; margin-bottom: 3px; font-weight: 500; letter-spacing: 0.5px;">MUADİL</span>
+                                                    }
+                                                    <a href="javascript:void(0)" 
+                                                       @ref="@(_elementReferences[productNameId])"
+                                                       class="text-decoration-none fw-semibold text-dark hover-success text-truncate d-block mw-100" 
+                                                       @onclick="() => OpenProductDetailModal(p)"
+                                                       @onmouseenter="@(() => ShowTooltip(productNameId, p.ProductName ?? ""))"
+                                                       @onmouseleave="@(() => HideTooltip())">
+                                                        @p.ProductName
+                                                    </a>
+                                                </div>
+                                            </Template>
+                                        </RadzenDataGridColumn>
+
+                                        <RadzenDataGridColumn TItem="SellerProductViewModel" Property="Brand.Name" Title="MARKA" Width="80px">
+                                            <Template Context="p">
+                                                <div class="fw-bold text-secondary text-truncate">@(p.Brand?.Name ?? "-")</div>
+                                            </Template>
+                                        </RadzenDataGridColumn>
+
+                                        <RadzenDataGridColumn TItem="SellerProductViewModel" Title="MUADİL" Width="120px" Sortable="false" TextAlign="TextAlign.Center">
+                                             <Template Context="p">
+                                                  @if (!isIncludeEquivalents && p.SimilarProductCount > 0)
+                                                  {
+                                                      <button class="btn btn-xs btn-success d-flex align-items-center gap-1 mx-auto" 
+                                                              @onclick="() => OpenSimilarProductsModal(p)" 
+                                                              style="font-size: 10px; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">
+                                                          <i class="fa-solid fa-layer-group"></i> Muadil Ürünler
+                                                      </button>
+                                                  }
+                                                  else { <span class="text-muted opacity-25">-</span> }
+                                             </Template>
+                                         </RadzenDataGridColumn>
+
+                                         <RadzenDataGridColumn TItem="SellerProductViewModel" Property="Stock" Title="STOK" Width="80px" TextAlign="TextAlign.Center">
+                                            <Template Context="p">
+                                                @if (IsPlasiyer())
+                                                {
+                                                    @* Plasiyer: Stok miktarını göster *@
+                                                    @if (p.Stock > 0)
+                                                    {
+                                                        <span class="badge-stock in-stock">
+                                                            <i class="fa-solid fa-check"></i> @p.Stock
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge-stock out-stock">0</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    @* CustomerB2B: Stokta/Tükendi göster *@
+                                                    @if (p.Stock > 0)
+                                                    {
+                                                        <span class="badge-stock in-stock">Stokta</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge-stock out-stock">Tükendi</span>
+                                                    }
+                                                }
+                                            </Template>
+                                        </RadzenDataGridColumn>
+
+                                        @if (ShowPurchaseHistoryColumn)
+                                        {
+                                         <RadzenDataGridColumn TItem="SellerProductViewModel" Title="GEÇMİŞ" Width="70px" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">
+                                            <Template Context="p">
+                                                @if (purchasedProductIds.Contains(p.ProductId))
+                                                {
+                                                    <button type="button" class="btn btn-link text-success p-0" title="Geçmiş alışverişler"
+                                                            @onclick="() => OpenPurchaseHistoryModal(p)"
+                                                            @onclick:stopPropagation="true">
+                                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                                    </button>
+                                                }
+                                                else { <span class="text-muted opacity-25">-</span> }
+                                            </Template>
+                                         </RadzenDataGridColumn>
+                                        }
+
+                                        @if (isCartVisible)
+                                        {
+                                         <RadzenDataGridColumn TItem="SellerProductViewModel" Property="SellerItemId" Title="SEPET" Width="140px" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">
+                                            <Template Context="p">
+                                                @{
+                                                    var isInCart = existingCartItems.ContainsKey(p.SellerItemId);
+                                                    bool isItemLoading = isCartLoading || IsProductLoading(p.SellerItemId);
+                                                }
+                                                @if (isCartLoading)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm text-muted" role="status" title="Sepet yükleniyor..."></span>
+                                                }
+                                                else if (p.Stock > 0 && p.SalePrice > 0)
+                                                {
+                                                    @if (isInCart)
+                                                    {
+                                                        <!-- Quantity Controls - Only show when item is in cart -->
+                                                        @if (isItemLoading)
+                                                        {
+                                                            <div class="d-flex justify-content-center align-items-center" style="min-height: 36px;">
+                                                                <span class="spinner-border spinner-border-sm text-success" role="status" title="Güncelleniyor...">
+                                                                    <span class="visually-hidden">Güncelleniyor...</span>
+                                                                </span>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="quantity-controls d-flex justify-content-center">
+                                                                <button class="qty-btn minus" 
+                                                                        disabled="@isItemLoading"
+                                                                        @onclick="@(() => UpdateQtyDifference(p.SellerItemId, -1))"
+                                                                        @onclick:stopPropagation="true"
+                                                                        title="Miktarı azalt">
+                                                                    <i class="fa-solid fa-minus"></i>
+                                                                </button>
+                                                                
+                                                                <input type="number" 
+                                                                       value="@GetQuantity(p.SellerItemId)" 
+                                                                       @onchange="@(e => OnQuantityChanged(p.SellerItemId, int.Parse(e.Value?.ToString() ?? "1")))"
+                                                                       title="Sepetteki adet (Maksimum: @p.Stock)" 
+                                                                       min="1"
+                                                                       max="@p.Stock"
+                                                                       oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.abs(this.value) : 1"
+                                                                       disabled="@isItemLoading"
+                                                                       @onclick:stopPropagation="true" />
+                                                                       
+                                                                <button class="qty-btn plus" 
+                                                                        disabled="@isItemLoading"
+                                                                        @onclick="@(() => UpdateQtyDifference(p.SellerItemId, 1))"
+                                                                        @onclick:stopPropagation="true"
+                                                                        title="Miktarı artır">
+                                                                    <i class="fa-solid fa-plus"></i>
+                                                                </button>
+                                                            </div>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <!-- Add to Cart Button - Only show when item is NOT in cart -->
+                                                        <button class="btn btn-sm btn-success d-flex align-items-center justify-content-center" 
+                                                                style="width: 36px; height: 36px; padding: 0;"
+                                                                title="Sepete Ekle"
+                                                                disabled="@isItemLoading"
+                                                                @onclick="@(() => AddToCart(p.SellerItemId))"
+                                                                @onclick:stopPropagation="true">
+                                                            @if(isItemLoading) {
+                                                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                            } else {
+                                                                <i class="fa-solid fa-cart-plus"></i>
+                                                            }
+                                                        </button>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">-</span>
+                                                }
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        }
+
+                                         <RadzenDataGridColumn TItem="SellerProductViewModel" Property="SalePrice" Title="FİYAT" Width="100px" TextAlign="TextAlign.Right">
+                                            <Template Context="p">
+                                                <div class="fw-bold text-dark">@p.SalePrice.ToString("N2") <span class="small text-muted">@p.Currency</span></div>
+                                            </Template>
+                                        </RadzenDataGridColumn>
+
+
+                                        <RadzenDataGridColumn TItem="SellerProductViewModel" Title="ARAÇ" Width="60px" Sortable="false" TextAlign="TextAlign.Center">
+                                            <Template Context="p">
+                                                @if (p.SubModelsJson != null && p.SubModelsJson.Any())
+                                                {
+                                                    <button class="btn btn-link text-success p-0" @onclick="() => OpenVehicleModal(p)" title="Bu ürünün uyumlu olduğu araçları görüntüle">
+                                                        <i class="fa-solid fa-car"></i>
+                                                    </button>
+                                                }
+                                                else { <span class="text-muted opacity-25">-</span> }
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                </AdminDataGrid>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- CATALOG CARD VIEW -->
+                            <div class="b2b-catalog-grid fade-in">
+                                @foreach (var p in searchResult.Data)
+                                {
+                                    <div class="catalog-card @(p.IsEquivalent ? "equivalent-highlight" : "")" style="@(p.IsEquivalent ? "border: 2px solid #198754 !important;" : "")">
+                                        <div class="catalog-img-wrapper" @onclick="() => OpenProductDetailModal(p)">
+                                            <img src="@ResolveSearchImage(p)" />
+                                        </div>
+                                        <div class="catalog-info">
+                                            <div class="d-flex align-items-center mb-1 gap-1">
+                                                <div class="code-mono">@p.PartNumber</div>
+                                                    @if (!isIncludeEquivalents && p.SimilarProductCount > 0)
+                                                    {
+                                                        <button class="btn btn-sm btn-success text-white shadow-sm d-flex align-items-center gap-2" 
+                                                                style="font-size: 0.75rem; padding: 0.4rem 0.8rem; border-radius: 6px; transition: all 0.2s ease;"
+                                                                @onclick:stopPropagation="true"
+                                                                @onclick="@(() => OpenSimilarProductsModal(p))">
+                                                            <i class="fas fa-layer-group"></i>
+                                                            <span>Muadil Ürünler</span>
+                                                        </button>
+                                                    }
+                                                    @if (ShowPurchaseHistoryColumn && purchasedProductIds.Contains(p.ProductId))
+                                                    {
+                                                        <button type="button" class="btn btn-link text-success p-0 ms-1" title="Geçmiş alışverişler"
+                                                                @onclick="() => OpenPurchaseHistoryModal(p)"
+                                                                @onclick:stopPropagation="true">
+                                                            <i class="fa-solid fa-clock-rotate-left"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                                @{
+                                                var cardProductNameId = $"card-product-name-{p.SellerItemId}";
+                                            }
+                                            <div class="d-flex flex-column align-items-start">
+                                                @if (p.IsEquivalent)
+                                                {
+                                                    <span class="badge shadow-sm" 
+                                                          style="background-color: #198754; color: white; border-radius: 50px; font-size: 9px; padding: 2px 10px; margin-bottom: 4px; font-weight: 500; letter-spacing: 0.5px;">MUADİL</span>
+                                                }
+                                                <h5 @ref="@(_elementReferences[cardProductNameId])"
+                                                    @onclick="() => OpenProductDetailModal(p)" 
+                                                    style="cursor: pointer;"
+                                                    @onmouseenter="@(() => ShowTooltip(cardProductNameId, p.ProductName ?? ""))"
+                                                    @onmouseleave="@(() => HideTooltip())">@p.ProductName</h5>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-between mt-2">
+                                                 <div class="small fw-bold text-secondary">@(p.Brand?.Name)</div>
+                                                 @if (IsPlasiyer())
+                                                 {
+                                                     @* Plasiyer: Stok miktarını göster *@
+                                                     @if(p.Stock > 0) { 
+                                                         <span class="badge-stock in-stock"><i class="fa-solid fa-check"></i> @p.Stock</span> 
+                                                     } else { 
+                                                         <span class="badge-stock out-stock">0</span> 
+                                                     }
+                                                 }
+                                                 else
+                                                 {
+                                                     @* CustomerB2B: Stokta/Tükendi göster *@
+                                                     @if(p.Stock > 0) { 
+                                                         <span class="badge-stock in-stock">Stokta</span> 
+                                                     } else { 
+                                                         <span class="badge-stock out-stock">Tükendi</span> 
+                                                     }
+                                                 }
+                                            </div>
+                                        </div>
+                                        <div class="catalog-price-row">
+                                            <div class="catalog-price">
+                                                @p.SalePrice.ToString("N2") <span class="small text-muted">@p.Currency</span>
+                                            </div>
+                                            @{
+                                                var isCardItemLoading = isCartLoading || IsProductLoading(p.SellerItemId);
+                                                var cardCartQty = GetCartQuantity(p.SellerItemId);
+                                            }
+                                            
+                                            @if (cardCartQty > 0)
+                                            {
+                                                <!-- Product is in cart - show quantity controls -->
+                                                <div class="quantity-controls" style="min-width: 100px;">
+                                                    <button class="qty-btn minus" 
+                                                            disabled="@isCardItemLoading"
+                                                            @onclick="() => UpdateCartQuantityDelta(p.SellerItemId, -1)"
+                                                            @onclick:stopPropagation="true"
+                                                            title="Miktarı azalt">
+                                                        <i class="fa-solid fa-minus"></i>
+                                                    </button>
+                                                    
+                                                    <input type="number" 
+                                                            value="@cardCartQty" 
+                                                            disabled="@isCardItemLoading"
+                                                            @onchange="@((ChangeEventArgs e) => OnCardQuantityChange(p.SellerItemId, e))"
+                                                            min="1"
+                                                            title="Sepetteki adet"
+                                                            @onclick:stopPropagation="true" />
+                                                            
+                                                    <button class="qty-btn plus" 
+                                                            disabled="@isCardItemLoading"
+                                                            @onclick="() => UpdateCartQuantityDelta(p.SellerItemId, 1)"
+                                                            @onclick:stopPropagation="true"
+                                                            title="Miktarı artır">
+                                                        <i class="fa-solid fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <!-- Product not in cart - show add button -->
+                                                <button class="btn-card-action" 
+                                                        @onclick="() => AddToCart(p.SellerItemId)"
+                                                        disabled="@isCardItemLoading"
+                                                        title="Sepete ekle">
+                                                    @if(isCardItemLoading) {
+                                                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                    } else {
+                                                        <i class="fa-solid fa-cart-plus"></i>
+                                                    }
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        </div>
+                    }
+                    </div> @* end results-container *@
+                </div> @* end col-12 *@
+            </div> @* end row *@
+        </div> @* end results-area *@
+    }
+    else
+    {
+        <!-- B2B DASHBOARD START SCREEN -->
+        <div class="b2b-dashboard-container b2b-animate">
+            
+            <!-- Widget 1: Recent Searches (Hidden - now in modal) -->
+            @* Recent Searches moved to modal - this section is hidden *@
+
+            <!-- User Dashboard - For CustomerB2B AND Plasiyer -->
+            @if (IsCustomerB2B() || IsPlasiyer())
+            {
+            <div class="modern-dashboard-container dashboard-full-width">
+                <div class="dashboard-header-modern">
+                    <div class="dashboard-header-content">
+                        <div class="dashboard-header-icon-wrapper">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h3 class="dashboard-header-title">
+                                @(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? "Plasiyer Paneli" : "Özet Bilgiler")
+                            </h3>
+                            <p class="dashboard-header-subtitle">
+                                @(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? "Müşteri ve sipariş takibi" : "Hesap durumunuz ve istatistikleriniz")
+                            </p>
+                        </div>
+                    </div>
+                    @if (IsPlasiyer() && Security.SelectedCustomerId.HasValue)
+                    {
+                        <div class="dashboard-header-right animate__animated animate__fadeIn">
+                            <span class="badge bg-white text-primary border border-primary-subtle shadow-sm px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-user-check text-primary"></i>
+                                <span class="fw-medium text-dark">Seçili Cari:</span>
+                                <strong class="text-primary">@Security.SelectedCustomerName</strong>
+                                <button type="button" class="btn-close-customer ms-2" @onclick="ClearSelectedCustomer" title="Cari Seçimini Kaldır">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </span>
+                        </div>
+                    }
+                </div>
+                
+                @if (isLoadingDashboard)
+                {
+                    <div class="dashboard-loading-state">
+                        <div class="dashboard-skeleton-loader">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <div class="dashboard-skeleton-card">
+                                    <div class="skeleton-icon"></div>
+                                    <div class="skeleton-content">
+                                        <div class="skeleton-line short"></div>
+                                        <div class="skeleton-line long"></div>
+                                        <div class="skeleton-line medium"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="modern-dashboard-grid">
+                        <!-- Sepet Toplam -->
+                        <div class="modern-dashboard-card card-cart" style="cursor: pointer;" @onclick="NavigateToCart">
+                            <div class="card-decoration"></div>
+                            <div class="card-icon-wrapper">
+                                <div class="card-icon-bg"></div>
+                                <i class="fa-solid fa-cart-shopping card-icon"></i>
+                            </div>
+                            <div class="card-content-wrapper">
+                                <div class="card-label">Sepet Toplam</div>
+                                <div class="card-main-value">@GetCartTotal()</div>
+                                <div class="card-secondary-info">
+                                    <i class="fa-solid fa-box"></i>
+                                    <span>@GetCartItemCount() ürün</span>
+                                </div>
+                            </div>
+                            <div class="card-hover-effect"></div>
+                        </div>
+
+                        <!-- Bekleyen Sipariş -->
+                        <div class="modern-dashboard-card card-pending" style="cursor: pointer;" @onclick="NavigateToPendingOrders">
+                            <div class="card-decoration"></div>
+                            <div class="card-icon-wrapper">
+                                <div class="card-icon-bg"></div>
+                                <i class="fa-solid fa-clock card-icon"></i>
+                            </div>
+                            <div class="card-content-wrapper">
+                                <div class="card-label">Bekleyen Sipariş</div>
+                                <div class="card-main-value">@GetPendingOrderCount() <span class="value-unit">Adet</span></div>
+                                <div class="card-secondary-info">
+                                    <span>@GetPendingOrderTotal()</span>
+                                </div>
+                            </div>
+                            <div class="card-hover-effect"></div>
+                        </div>
+
+                        <!-- Toplam Sipariş -->
+                        <div class="modern-dashboard-card card-total">
+                            <div class="card-decoration"></div>
+                            <div class="card-icon-wrapper">
+                                <div class="card-icon-bg"></div>
+                                <i class="fa-solid fa-boxes-stacked card-icon"></i>
+                            </div>
+                            <div class="card-content-wrapper">
+                                <div class="card-label">Toplam Sipariş</div>
+                                <div class="card-main-value">@GetTotalOrderCount() <span class="value-unit">Adet</span></div>
+                                <div class="card-secondary-info">
+                                    <span>@GetTotalOrderAmount()</span>
+                                </div>
+                            </div>
+                            <div class="card-hover-effect"></div>
+                        </div>
+
+                        <!-- Bakiye -->
+                        <!-- Bakiye / Bağlı Cari Sayısı -->
+                        <div class="modern-dashboard-card card-balance @(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? "balance-info" : (GetBalance() >= 0 ? "balance-positive" : "balance-negative"))" style="cursor: pointer;" @onclick='() => { if(IsPlasiyer() && !Security.SelectedCustomerId.HasValue) Navigation.NavigateTo("/plasiyer/customers"); else Navigation.NavigateTo("/b2b/customer-account-report"); }'>
+                            <div class="card-decoration"></div>
+                            <div class="card-icon-wrapper">
+                                <div class="card-icon-bg"></div>
+                                <i class="fa-solid @(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? "fa-users" : "fa-wallet") card-icon"></i>
+                            </div>
+                            <div class="card-content-wrapper">
+                                <div class="card-label">@(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? "Bağlı Cari" : "Bakiye")</div>
+                                <div class="card-main-value balance-value">
+                                    @(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? $"{linkedCustomerCount} Adet" : GetBalance().ToString("C"))
+                                </div>
+                                <div class="card-secondary-info d-flex flex-column align-items-start gap-1">
+                                    @if(IsPlasiyer() && !Security.SelectedCustomerId.HasValue)
+                                    {
+                                        <div class="small fw-semibold text-primary">
+                                            <i class="fa-solid fa-list me-1"></i> Tümünü Gör
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="small fw-semibold text-danger">
+                                            <i class="fa-solid fa-arrow-up me-1"></i> Borç: @GetTotalDebit().ToString("C")
+                                        </div>
+                                        <div class="small fw-semibold text-success">
+                                            <i class="fa-solid fa-arrow-down me-1"></i> Alacak: @GetTotalCredit().ToString("C")
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-hover-effect"></div>
+                        </div>
+                        <!-- Fatura Toplamı -->
+                        <div class="modern-dashboard-card card-invoice" style="cursor: pointer;" @onclick='() => Navigation.NavigateTo("/b2b/my-invoices")'>
+                            <div class="card-decoration"></div>
+                            <div class="card-icon-wrapper">
+                                <div class="card-icon-bg"></div>
+                                <i class="fa-solid fa-file-invoice-dollar card-icon"></i>
+                            </div>
+                            <div class="card-content-wrapper">
+                                <div class="card-label">Fatura Toplamı</div>
+                                <div class="card-main-value">@GetTotalInvoiceAmount()</div>
+                                <div class="card-secondary-info">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                    <span>@GetTotalInvoiceCount() fatura</span>
+                                </div>
+                            </div>
+                            <div class="card-hover-effect"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+            }
+
+        </div>
+
+        <!-- STATIC DASHBOARD FOOTER -->
+
+    }
+</div>
+
+@* VEHICLE MATCH MODAL *@
+@if (isVehicleMatchModalOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055; overflow-x: hidden; overflow-y: hidden;">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content rounded-4 shadow-lg border-0 overflow-hidden">
+                <div class="modal-header bg-success text-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-4">
+                        <h5 class="modal-title fw-bold mb-0"><i class="fa-solid fa-car-side me-2"></i>Araçtan Eşleşme</h5>
+                        <div class="form-check form-switch custom-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="modalStockSwitch" 
+                                   checked="@isModalOnlyInStock" 
+                                   @onchange="@(async (args) => await OnVehicleMatchStockSwitchChanged((bool)(args.Value ?? false)))">
+                            <label class="form-check-label text-white small user-select-none" for="modalStockSwitch" style="cursor:pointer">Stoktakiler</label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseVehicleMatchModal"></button>
+                </div>
+                <div class="modal-body p-0 overflow-hidden">
+                    <div class="vehicle-modal-columnar">
+                        <!-- Column 1: Manufacturers -->
+                        <div class="col-column">
+                            <div class="column-header">MARKA SEÇİNİZ</div>
+                            <div class="column-search-box">
+                                <div class="position-relative">
+                                    <i class="fa-solid fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="text" class="form-control rounded-pill" 
+                                           placeholder="Marka ara..." @bind="modalManufacturerSearch" @bind:event="oninput" />
+                                    @if (!string.IsNullOrWhiteSpace(modalManufacturerSearch))
+                                    {
+                                        <button type="button" @onclick="() => modalManufacturerSearch = string.Empty"
+                                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer;">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="scrollable-modal-list">
+                                @foreach(var manufacturerName in filteredModalManufacturers) {
+                                    <button class="modal-list-item @(modalSelectedManufacturer == manufacturerName ? "active" : "")" @onclick="() => OnModalManufacturerChanged(manufacturerName)">
+                                        <div class="d-flex justify-content-between align-items-center gap-2">
+                                            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                                <span>@manufacturerName</span>
+                                            </div>
+                                            @if(modalSelectedManufacturer == manufacturerName) {
+                                                <i class="fa-solid fa-chevron-right small opacity-50"></i>
+                                            }
+                                        </div>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Models -->
+                        <div class="col-column">
+                            <div class="column-header">MODEL SEÇİNİZ</div>
+                            <div class="column-search-box">
+                                <div class="position-relative">
+                                    <i class="fa-solid fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="text" class="form-control rounded-pill" 
+                                           placeholder="Model ara..." @bind="modalModelSearch" @bind:event="oninput" 
+                                           disabled="@(string.IsNullOrEmpty(modalSelectedManufacturer))" />
+                                    @if (!string.IsNullOrWhiteSpace(modalModelSearch))
+                                    {
+                                        <button type="button" @onclick="() => modalModelSearch = string.Empty"
+                                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer;">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="scrollable-modal-list @(string.IsNullOrEmpty(modalSelectedManufacturer) ? "opacity-50" : "")">
+                                @if (isModelLoading)
+                                {
+                                    <div class="d-flex justify-content-center align-items-center h-100 p-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Yükleniyor...</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @foreach(var modelName in filteredModalModels) {
+                                        <button class="modal-list-item @(modalSelectedModel == modelName ? "active" : "")" @onclick="() => OnModalModelChanged(modelName)">
+                                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                                <span>@modelName</span>
+                                                @if(modalSelectedModel == modelName) {
+                                                    <i class="fa-solid fa-chevron-right small opacity-50"></i>
+                                                }
+                                            </div>
+                                        </button>
+                                    }
+                                    @if(!string.IsNullOrEmpty(modalSelectedManufacturer) && !filteredModalModels.Any()) {
+                                        <div class="p-4 text-center text-muted">
+                                            <i class="fa-solid fa-circle-question d-block mb-2 fs-4"></i>
+                                            <span class="small">Model bulunamadı</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Column 3: Sub-Models -->
+                        <div class="col-column">
+                            <div class="column-header">TİP SEÇİNİZ</div>
+                            <div class="column-search-box">
+                                <div class="position-relative">
+                                    <i class="fa-solid fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="text" class="form-control rounded-pill" 
+                                           placeholder="Tip ara..." @bind="modalSubModelSearch" @bind:event="oninput" 
+                                           disabled="@(string.IsNullOrEmpty(modalSelectedModel))" />
+                                    @if (!string.IsNullOrWhiteSpace(modalSubModelSearch))
+                                    {
+                                        <button type="button" @onclick="() => modalSubModelSearch = string.Empty"
+                                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer;">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="scrollable-modal-list @(string.IsNullOrEmpty(modalSelectedModel) ? "opacity-50" : "")">
+                                @if (isSubModelLoading)
+                                {
+                                    <div class="d-flex justify-content-center align-items-center h-100 p-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Yükleniyor...</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @foreach(var sm in filteredModalSubModels) {
+                                        <button class="modal-list-item @(modalSelectedSubModel == sm.Key ? "active" : "")" @onclick="() => OnModalSubModelChanged(sm.Key)">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>@sm.Name</span>
+                                                @if(modalSelectedSubModel == sm.Key) {
+                                                    <i class="fa-solid fa-chevron-right small opacity-50"></i>
+                                                }
+                                            </div>
+                                        </button>
+                                    }
+                                    @if(!string.IsNullOrEmpty(modalSelectedModel) && !filteredModalSubModels.Any()) {
+                                        <div class="p-4 text-center text-muted">
+                                            <i class="fa-solid fa-circle-question d-block mb-2 fs-4"></i>
+                                            <span class="small">Tip bulunamadı</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+
+                        <!-- Column 4: DotParts (Part Groups) -->
+                        <div class="col-column">
+                            <div class="column-header">PARÇA GRUBU SEÇİNİZ</div>
+                            <div class="column-search-box">
+                                <div class="position-relative">
+                                    <i class="fa-solid fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="text" class="form-control rounded-pill" 
+                                           placeholder="Parça ara..." @bind="modalDotPartSearch" @bind:event="oninput" 
+                                           disabled="@(string.IsNullOrEmpty(modalSelectedSubModel))" />
+                                    @if (!string.IsNullOrWhiteSpace(modalDotPartSearch))
+                                    {
+                                        <button type="button" @onclick="() => modalDotPartSearch = string.Empty"
+                                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer;">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="scrollable-modal-list @(string.IsNullOrEmpty(modalSelectedSubModel) ? "opacity-50" : "")">
+                                @if (isDotPartLoading)
+                                {
+                                    <div class="d-flex justify-content-center align-items-center h-100 p-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Yükleniyor...</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @foreach(var dotPart in filteredModalDotParts) {
+                                        <button class="modal-list-item @(modalSelectedDotPart == dotPart.Name ? "active" : "")" @onclick="() => OnModalDotPartChanged(dotPart)">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>@dotPart.DisplayName.ToUpper()</span>
+                                                @if(modalSelectedDotPart == dotPart.Name) {
+                                                    <i class="fa-solid fa-check small opacity-50"></i>
+                                                }
+                                            </div>
+                                        </button>
+                                    }
+                                    @if(!string.IsNullOrEmpty(modalSelectedSubModel) && !filteredModalDotParts.Any()) {
+                                        <div class="p-4 text-center text-muted">
+                                            <i class="fa-solid fa-circle-question d-block mb-2 fs-4"></i>
+                                            <span class="small">Parça grubu bulunamadı</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Column 5: Summary -->
+                        <div class="col-column">
+                            <div class="column-header">SEÇİM ÖZETİ</div>
+                            <div class="p-4 flex-grow-1 overflow-auto">
+                               @if(!string.IsNullOrEmpty(modalSelectedManufacturer)) {
+                                   <div class="summary-card mb-2">
+                                       <div class="d-flex align-items-center gap-2">
+                                           <i class="fa-solid fa-industry text-success opacity-50"></i>
+                                           <div>
+                                               <div class="summary-label">MARKA</div>
+                                               <div class="summary-value">@modalSelectedManufacturer</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               }
+                               @if(!string.IsNullOrEmpty(modalSelectedModel)) {
+                                   <div class="summary-card mb-2">
+                                       <div class="d-flex align-items-center gap-2">
+                                           <i class="fa-solid fa-car-side text-success opacity-50"></i>
+                                           <div>
+                                               <div class="summary-label">MODEL</div>
+                                               <div class="summary-value">@modalSelectedModel</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               }
+                               @if(!string.IsNullOrEmpty(modalSelectedSubModel)) {
+                                   <div class="summary-card mb-2">
+                                       <div class="d-flex align-items-center gap-2">
+                                           <i class="fa-solid fa-microchip text-success opacity-50"></i>
+                                           <div>
+                                               <div class="summary-label">TİP</div>
+                                               <div class="summary-value">@modalSubModels.FirstOrDefault(x => x.Key == modalSelectedSubModel)?.Name</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               }
+                               @if(!string.IsNullOrEmpty(modalSelectedDotPart)) {
+                                   <div class="summary-card mb-2">
+                                       <div class="d-flex align-items-center gap-2">
+                                           <i class="fa-solid fa-gears text-success opacity-50"></i>
+                                           <div>
+                                               <div class="summary-label">PARÇA GRUBU</div>
+                                               <div class="summary-value">@modalSelectedDotPartDisplay</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               }
+                            </div>
+                            <div class="p-4 border-top bg-light">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-success btn-lg fw-bold shadow-sm py-3 rounded-3" 
+                                            @onclick="ApplyVehicleMatchFilters" 
+                                            disabled="@(string.IsNullOrEmpty(modalSelectedManufacturer))">
+                                        <i class="fa-solid fa-search me-2"></i> ARA
+                                    </button>
+                                    <button class="btn btn-link text-muted text-decoration-none" @onclick="CloseVehicleMatchModal">İptal</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<style>
+    .vehicle-modal-columnar {
+        display: flex;
+        height: 65vh;
+        min-height: 500px;
+        max-height: 700px;
+        background: #fff;
+        width: 100%;
+        overflow: hidden;
+    }
+    .col-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0; /* Important for flex items */
+        border-right: 1px solid #edf2f7;
+        background: #fff;
+    }
+    .col-column:last-child {
+        border-right: none;
+        background: #f8fafc;
+        flex: 0.8; /* Summary slightly narrower */
+    }
+    .scrollable-modal-list {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 20px;
+    }
+    .modal-list-item {
+        display: block;
+        width: 100%;
+        padding: 14px 20px;
+        border: none;
+        background: transparent;
+        text-align: left;
+        color: #4a5568;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.15s ease;
+        position: relative;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .modal-list-item:hover {
+        background: #f0fff4;
+        color: #2f855a;
+        padding-left: 25px;
+    }
+    .modal-list-item.active {
+        background: #f0fff4 !important;
+        color: #2f855a !important;
+        font-weight: 700;
+        border-right: 4px solid #38a169;
+    }
+    .column-header {
+        background: #f7fafc;
+        padding: 15px 20px;
+        font-weight: 700;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #718096;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #edf2f7;
+    }
+    
+    /* Search Input Styling */
+    .column-search-box {
+        padding: 12px 15px;
+        background: #fff;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .column-search-box .form-control {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        font-size: 0.85rem;
+        padding-left: 35px;
+    }
+    .column-search-box .fa-search {
+        font-size: 0.8rem;
+        color: #a0aec0;
+    }
+
+    .summary-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+    /* Modal Styles */
+    .vehicle-modal-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        border-bottom: none !important;
+        padding: 1.5rem !important;
+    }
+    .column-header {
+        background: #f8fafc;
+        padding: 12px 15px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: #64748b;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .modal-list-item {
+        width: 100%;
+        text-align: left;
+        padding: 12px 15px;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s;
+        font-size: 0.85rem;
+        color: #475569;
+    }
+    .modal-list-item:hover {
+        background: #f0fdf4;
+        color: #198754;
+        padding-left: 20px;
+    }
+    .modal-list-item.active {
+        background: #f0fdf4;
+        color: #198754;
+        font-weight: 600;
+        border-left: 4px solid #198754;
+    }
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .summary-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #94a3b8;
+        margin-bottom: 2px;
+    }
+    .summary-value {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .product-detail-modal-wrapper {
+        font-family: 'Inter', sans-serif;
+    }
+    .product-info-card {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    .product-price-badge {
+        background-color: #e6fffa;
+        color: #198754;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: inline-block;
+        font-weight: 700;
+        font-size: 1.25rem;
+        border: 1px solid #b2f5ea;
+    }
+    .product-stock-badge {
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+    }
+    .product-stock-badge.in-stock {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    .product-stock-badge.out-stock {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    /* Radzen Accordion Customization */
+    .product-detail-modal-wrapper .rz-accordion-header {
+        background-color: #f8f9fa !important;
+        color: #1a202c !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        padding: 10px 16px !important; /* Compact padding */
+        border: 1px solid #e2e8f0;
+        border-radius: 6px !important;
+        margin-bottom: 8px; /* Spacing between items */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        transition: all 0.2s ease;
+    }
+    .product-detail-modal-wrapper .rz-accordion-header:hover {
+        background-color: #f0fff4 !important; /* Light green tint on hover */
+        border-color: #c6f6d5;
+        color: #198754 !important;
+    }
+    /* When expanded/selected usually Radzen adds classes, but we can rely on standard styles */
+    .product-detail-modal-wrapper .rz-accordion-item-content {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        margin-top: -8px; /* Connect to header */
+        margin-bottom: 8px;
+        padding: 16px !important;
+    }
+    .product-detail-modal-wrapper .rz-accordion-header-icon {
+        color: #198754 !important;
+        font-size: 1.1rem !important;
+        margin-right: 8px;
+    }
+    /* Ensure icon and text are aligned */
+    .product-detail-modal-wrapper .rz-accordion-header a {
+        display: flex !important;
+        align-items: center;
+    }
+    
+    .similar-product-card {
+        transition: all 0.2s ease;
+        border: 1px solid #edf2f7;
+    }
+    .similar-product-card:hover {
+        background-color: #f0fff4 !important;
+        border-color: #c6f6d5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+</style>
+
+@code {
+    protected async Task OpenImageZoom(string url)
+    {
+        await DialogService.OpenAsync("", ds => 
+            @<div class="image-zoom-content position-relative d-flex justify-content-center align-items-center" style="width:100%; height:100%;" @onclick="() => ds.Close()">
+                <button class="close-zoom-btn position-absolute top-0 end-0 m-3" style="z-index: 1050; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer;" @onclick="() => ds.Close()" @onclick:stopPropagation="true">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <img src="@url" alt="Zoomed Image" style="max-width: 90vw; max-height: 90vh; object-fit: contain; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-radius: 8px; cursor: pointer;" @onclick:stopPropagation="true" />
+            </div>, 
+            new DialogOptions { 
+                Width = "100%", 
+                Height = "100%", 
+                ShowTitle = false, 
+                ShowClose = false,
+                CloseDialogOnEsc = true,
+                CssClass = "transparent-dialog",
+                Style = "background: rgba(0,0,0,0.7); box-shadow: none; border: none; padding: 0;"
+            });
+    }
+
+    protected async Task OpenVehicleModal(SellerProductViewModel product)
+    {
+        // [VIN-COMP-FIX] Prepare a unified list of compatible vehicles
+        // emphasizing the current search context if it exists.
+        var compatibilities = new List<ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto>();
+
+        // 1. If we are in a VIN search context, add the selected vehicle as the first item
+        // if it's not already in the product's own lists.
+        if (currentVinVehicle != null)
+        {
+            compatibilities.Add(new ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto
+            {
+                ManufacturerName = currentVinVehicle.ManufacturerName,
+                BaseModelName = currentVinVehicle.BaseModelName,
+                SubModelName = "ARAMA BAĞLAMI", // Special label for clarity
+                ManufacturerKey = currentVinVehicle.ManufacturerKey,
+                BaseModelKey = currentVinVehicle.BaseModelKey
+            });
+        }
+
+        // 2. Add vehicles from Parts (Rich data with Manufacturer/Model)
+        if (product.Parts != null && product.Parts.Any())
+        {
+            foreach (var part in product.Parts)
+            {
+                if (part.SubModelsJson != null && part.SubModelsJson.Any())
+                {
+                    foreach (var sm in part.SubModelsJson)
+                    {
+                        // Avoid duplicates with the currentVinVehicle (simple check)
+                        if (currentVinVehicle != null && 
+                            part.ManufacturerKey?.ToString() == currentVinVehicle.ManufacturerKey && 
+                            part.BaseModelKey?.ToString() == currentVinVehicle.BaseModelKey)
+                        {
+                            // If this is the same car, maybe update the first item's name if it was just a placeholder
+                            var contextItem = compatibilities.FirstOrDefault(c => c.SubModelName == "ARAMA BAĞLAMI");
+                            if (contextItem != null) contextItem.SubModelName = sm.Name;
+                            continue; 
+                        }
+
+                        compatibilities.Add(new ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto
+                        {
+                            ManufacturerName = part.ManufacturerName,
+                            BaseModelName = part.BaseModelName,
+                            SubModelName = sm.Name,
+                            ManufacturerKey = part.ManufacturerKey?.ToString(),
+                            BaseModelKey = part.BaseModelKey?.ToString()
+                        });
+                    }
+                }
+                else if (!string.IsNullOrEmpty(part.ManufacturerName))
+                {
+                    compatibilities.Add(new ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto
+                    {
+                        ManufacturerName = part.ManufacturerName,
+                        BaseModelName = part.BaseModelName,
+                        SubModelName = "Tüm Modeller",
+                        ManufacturerKey = part.ManufacturerKey?.ToString(),
+                        BaseModelKey = part.BaseModelKey?.ToString()
+                    });
+                }
+            }
+        }
+        // 3. Fallback to SubModelsJson (Statik katalog verisi - Fix labels here too)
+        else if (product.SubModelsJson != null && product.SubModelsJson.Any())
+        {
+            foreach (var sm in product.SubModelsJson)
+            {
+                compatibilities.Add(new ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto
+                {
+                    ManufacturerName = product.ManufacturerName,
+                    BaseModelName = product.BaseModelName,
+                    SubModelName = sm.Name,
+                    ManufacturerKey = product.ManufacturerKey,
+                    BaseModelKey = product.BaseModelKey
+                });
+            }
+        }
+
+        await DialogService.OpenAsync("", ds =>
+            @<div class="vehicle-modal-content-wrapper">
+                <div class="vehicle-modal-header p-4 border-bottom shadow-sm" style="background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-dark) 100%);">
+                    <div class="d-flex align-items-center justify-content-between w-100">
+                        <div>
+                            <h5 class="mb-1 fw-bold fs-4 text-white"><i class="fa-solid fa-car-side me-2"></i>Uyumlu Araçlar</h5>
+                            <small class="text-white-50">@product.ProductName</small>
+                        </div>
+                        <button class="btn btn-sm btn-light rounded-circle shadow-sm" style="width: 32px; height: 32px;" @onclick="() => ds.Close()">
+                            <i class="fa-solid fa-xmark text-success"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="vehicle-modal-body p-3" style="max-height: 550px; overflow-y: auto; background: #f8fafc;">
+                    @if (compatibilities.Any())
+                    {
+                        <div class="row g-2">
+                            @foreach (var v in compatibilities)
+                            {
+                                bool isContext = v.SubModelName == "ARAMA BAĞLAMI";
+                                <div class="col-md-6">
+                                    <div class="p-3 border rounded shadow-sm @(isContext ? "bg-success text-white border-success" : "bg-white")" style="transition: transform 0.2s;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-car @(isContext ? "text-white" : "text-success") opacity-75"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold small" style="line-height: 1.2;">@v.ManufacturerName @v.BaseModelName</div>
+                                                <div class="@(isContext ? "text-white-50" : "text-muted")" style="font-size: 0.75rem;">@v.SubModelName</div>
+                                            </div>
+                                            @if(isContext) {
+                                                <span class="badge bg-white text-success small" style="font-size:0.6rem">SEÇİLİ</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-5 text-muted">
+                            <i class="fa-solid fa-triangle-exclamation d-block mb-3 fs-2 opacity-25"></i>
+                            Uyumlu araç bilgisi bulunamadı.
+                        </div>
+                    }
+                </div>
+            </div>,
+            new DialogOptions {
+                Width = "700px",
+                ShowTitle = false,
+                ShowClose = false,
+                Style = "border-radius: 12px; overflow: hidden; padding: 0;"
+            });
+    }
+
+
+
+    protected async Task OpenProductDetailModal(SellerProductViewModel product)
+    {
+         // ML Instrumentation: Log Click with Field Tracking
+         if (!string.IsNullOrWhiteSpace(searchText))
+         {
+             var rank = searchResult.Data.IndexOf(product) + 1;
+             
+             // Use service to detect matched fields (DRY principle)
+             var fieldMatch = FieldMatcherService.DetectMatchedFields(searchText, product);
+             
+             _ = SearchAnalyticsService.LogInteractionAsync(new ecommerce.Domain.Shared.Dtos.Search.SearchInteractionDto
+             {
+                 SearchTerm = searchText,
+                 ProductId = product.SellerItemId,
+                 InteractionType = "Click",
+                 Rank = rank,
+                 UserId = Security?.User?.Id,
+                 MatchedFields = fieldMatch.MatchedFields,
+                 FieldScores = fieldMatch.FieldScores,
+                 PrimaryMatchField = fieldMatch.PrimaryMatchField
+             });
+         }
+
+         // Fetch similar products before opening the modal
+         var similarProducts = new List<SellerProductViewModel>();
+         if (product.OemCode != null && product.OemCode.Any())
+         {
+             // Array'den tüm OemCode'ları kullan
+             var result = await ProductSearchService.GetSimilarProductsAsync(product.OemCode);
+             if (result.Ok && result.Result != null)
+             {
+                 similarProducts = result.Result.Where(p => p.SalePrice > 0 && p.SellerItemId != product.SellerItemId).ToList();
+             }
+         }
+
+         await DialogService.OpenAsync<Modals.ProductDetailModal>($"Ürün Detayı: {product.PartNumber}",
+             new Dictionary<string, object> 
+             { 
+                 { "Product", product },
+                 { "SimilarProducts", similarProducts }
+             },
+             new DialogOptions 
+             { 
+                 Width = "900px",
+                 ShowTitle = false,
+                 ShowClose = false,
+                 Style = "border-radius: 16px; overflow: hidden; padding: 0; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-height: 85vh;"
+             });
+    }
+}
+
+<!-- Şasi Araç Seçim Modal -->
+@if (isVinVehicleSelectionModalOpen)
+{
+    <div class="modal fade show d-block d-flex align-items-center justify-content-center" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 2000;" @onclick="CloseVinVehicleSelectionModal">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable my-0" @onclick:stopPropagation="true" style="max-height: 90vh;">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                <!-- Modal Header -->
+                <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                    <div class="w-100">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="modal-title fw-bold text-dark mb-1">
+                                    <i class="fa-solid fa-car text-success me-2"></i>
+                                    Araç Seçimi
+                                </h5>
+                                <p class="text-muted small mb-0">
+                                    <i class="fa-solid fa-barcode me-1"></i>
+                                    Şasi: <span class="fw-bold">@currentVinNumber</span>
+                                </p>
+                            </div>
+                            <button type="button" class="btn-close" @onclick="CloseVinVehicleSelectionModal" aria-label="Kapat"></button>
+                        </div>
+                        <div class="alert alert-soft-success d-flex align-items-center mt-3 mb-0 py-2 border-0" role="alert" style="border-radius: 12px; background: rgba(25, 135, 84, 0.08); color: #0f5132;">
+                            <i class="fa-solid fa-info-circle me-3 fs-5"></i>
+                            <div class="small">
+                                Bu şasi için <strong>@vinMatchedVehicles.Count araç</strong> varyantı bulundu. Parçaları listelemek için lütfen uygun olanı seçin.
+                            </div>
+                        </div>
+                        
+                        <!-- Arama Kutusu -->
+                        @if (vinMatchedVehicles.Count > 0)
+                        {
+                            <div class="mt-3">
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    <div class="input-group flex-grow-1" style="max-width: 450px;">
+                                        <span class="input-group-text bg-white border-end-0" style="border-radius: 8px 0 0 8px;">
+                                            <i class="fa-solid fa-search text-muted"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control border-start-0 ps-0" 
+                                               placeholder="Araç ara (marka, model, yıl, WMI)..." 
+                                               style="border-radius: 0 8px 8px 0;"
+                                               @bind="vinVehicleSearchText" 
+                                               @bind:event="oninput" />
+                                        @if (!string.IsNullOrWhiteSpace(vinVehicleSearchText))
+                                        {
+                                            <button class="btn btn-outline-secondary border-start-0" 
+                                                    type="button" 
+                                                    @onclick="@(() => vinVehicleSearchText = "")"
+                                                    style="border-radius: 0 8px 8px 0; border-left: none;">
+                                                <i class="fa-solid fa-times"></i>
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <div class="form-check form-switch custom-switch mb-0" title="Sadece ürün bulunan araçları göster">
+                                        <input class="form-check-input" type="checkbox" id="modalStockFilter" checked="@showOnlyInStock" @onchange="@(args => OnModalStockToggle((bool)(args.Value ?? false)))" 
+                                               style="cursor:pointer; @(showOnlyInStock ? "background-color: #198754; border-color: #198754;" : "")">
+                                        <label class="form-check-label fw-bold small user-select-none mb-0 @(showOnlyInStock ? "text-success" : "text-dark")" for="modalStockFilter" style="cursor:pointer">
+                                            <i class="fa-solid fa-box-open me-1"></i>Sadece Stokta Olanlar
+                                        </label>
+                                    </div>
+
+                                    @if (FilteredVinVehicles.Count != vinMatchedVehicles.Count)
+                                    {
+                                        <small class="text-muted text-nowrap">
+                                            <i class="fa-solid fa-filter me-1"></i>
+                                            @FilteredVinVehicles.Count / @vinMatchedVehicles.Count araç
+                                        </small>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body p-4" style="max-height: 500px; overflow-y: auto;">
+                    @if (!FilteredVinVehicles.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fa-solid fa-search fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Arama kriterlerinize uygun araç bulunamadı.</p>
+                            <button class="btn btn-outline-primary btn-sm rounded-pill" @onclick="@(() => vinVehicleSearchText = "")">
+                                <i class="fa-solid fa-redo me-1"></i>Aramayı Temizle
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-2">
+                            @foreach (var vehicle in FilteredVinVehicles)
+                        {
+                            var oemCount = vehicle.OemParts?.Count ?? 0;
+                            var dpnCount = vehicle.DatProcessNumbers?.Count ?? 0;
+                            var yearRange = $"{vehicle.ModelYear}";
+                            
+                            <div class="col-12">
+                                <div class="vehicle-list-item d-flex align-items-center p-2 gap-3 shadow-none" 
+                                     @onclick="@(() => OnVinVehicleSelected(vehicle))">
+                                    
+                                    <!-- Icon Section -->
+                                    <div class="vehicle-icon-wrapper d-flex align-items-center justify-content-center">
+                                        <i class="fa-solid fa-car fs-5"></i>
+                                    </div>
+
+                                    <!-- Info Section -->
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                            <h6 class="mb-0 fw-bold text-dark text-truncate">
+                                                @vehicle.ManufacturerName @vehicle.BaseModelName
+                                            </h6>
+                                            <span class="badge bg-success text-white border-0 px-2 py-1 rounded shadow-sm" style="font-size: 0.75rem;">
+                                                @vehicle.ModelYear
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 text-muted small mt-2">
+                                            <span class="text-nowrap"><i class="fa-solid fa-barcode me-1 opacity-75"></i>WMI: <strong>@vehicle.Wmi</strong></span>
+                                            
+                                            <div class="vr mx-1 opacity-25"></div>
+
+                                            @{
+                                                var vKey = $"{vehicle.ManufacturerKey}_{vehicle.BaseModelKey}_{vehicle.Wmi}_{vehicle.VdsCode}_{vehicle.ModelYear}";
+                                                var hasStockCount = vinVehicleProductCounts.TryGetValue(vKey, out var pCount);
+                                            }
+
+                                            @if (dpnCount > 0)
+                                            {
+                                                <span class="badge bg-white text-success border border-success fw-bold px-2 py-1 rounded" style="font-size: 0.7rem; letter-spacing: 0.2px;" title="Bu araç için tanımlı parça tipi sayısı ve eşleşen ürünler">
+                                                    <i class="fa-solid fa-list-check me-1"></i>
+                                                    @if (hasStockCount)
+                                                    {
+                                                        @($"{dpnCount} Ref ({pCount} Ürün)")
+                                                    }
+                                                    else
+                                                    {
+                                                        @($"{dpnCount} Ref")
+                                                    }
+                                                </span>
+                                            }
+                                            else if (oemCount > 0)
+                                            {
+                                                <span class="badge bg-info text-white border-0 px-2 py-1 rounded" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.3px;">
+                                                    <i class="fa-solid fa-gears me-1"></i>
+                                                    @if (hasStockCount)
+                                                    {
+                                                        @($"# {oemCount} OEM Referans ({pCount} Ürün)")
+                                                    }
+                                                    else
+                                                    {
+                                                        @($"# {oemCount} OEM Referans")
+                                                    }
+                                                </span>
+                                            }
+
+                                            @{
+                                                if (hasStockCount)
+                                                {
+                                                    // Blue badge merged into green/info above.
+                                                }
+                                                else if (isCalculatingVinCounts)
+                                                {
+                                                    <div class="vr mx-1 opacity-25"></div>
+                                                    <span class="text-primary small" style="font-size: 0.7rem;">
+                                                        <span class="spinner-border spinner-border-sm me-1" role="status" style="width: 10px; height: 10px; border-width: 2px;"></span>
+                                                        Ürünler bulunuyor...
+                                                    </span>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Section -->
+                                    <div class="text-end d-none d-sm-block">
+                                        <i class="fa-solid fa-chevron-right text-muted opacity-25"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer border-0 pt-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" @onclick="CloseVinVehicleSelectionModal">
+                        <i class="fa-solid fa-times me-2"></i>İptal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2) !important;
+        border-color: #198754 !important;
+    }
+
+    .vehicle-list-item {
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        margin-bottom: 8px;
+        background: #fff;
+        border: 1px solid #f1f5f9 !important;
+    }
+
+    .vehicle-list-item:hover {
+        background: #f8fafc;
+        transform: translateY(-2px);
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .vehicle-icon-wrapper {
+        width: 44px;
+        height: 44px;
+        background: #f8fafc;
+        color: #94a3b8;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        border: 1px solid #f1f5f9;
+    }
+
+    .vehicle-list-item:hover .vehicle-icon-wrapper {
+        background: #fff;
+        color: #16a34a;
+        border-color: #dcfce7;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .bg-soft-primary {
+        background: rgba(37, 99, 235, 0.06);
+        color: #2563eb !important;
+        border: 1px solid rgba(37, 99, 235, 0.1);
+    }
+
+    .text-truncate {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .alert-soft-success {
+        border-left: 4px solid #16a34a !important;
+    }
+</style>

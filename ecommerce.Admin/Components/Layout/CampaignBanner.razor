@@ -1,0 +1,103 @@
+@using ecommerce.Admin.Domain.Dtos.DiscountDto
+@inject NavigationManager Navigation
+@inject ecommerce.Admin.Services.Interfaces.IDiscountCacheService DiscountCacheService
+
+<div class="campaign-banner-container" 
+     @onmouseenter="PauseAnimation" 
+     @onmouseleave="ResumeAnimation">
+    <div class="campaign-banner-track" style="animation-play-state: @(isPaused ? "paused" : "running");">
+        @foreach (var discount in activeDiscounts)
+        {
+            <div class="campaign-banner-item" @onclick="() => NavigateToCampaign(discount)" @onclick:stopPropagation="true">
+                <div class="campaign-banner-content">
+                    @if (discount.UsePercentage && discount.DiscountPercentage.HasValue)
+                    {
+                        <span class="campaign-badge">%@discount.DiscountPercentage.Value.ToString("N0") İNDİRİM</span>
+                    }
+                    else if (discount.DiscountAmount.HasValue)
+                    {
+                        <span class="campaign-badge">@discount.DiscountAmount.Value.ToString("C0") İNDİRİM</span>
+                    }
+                    <span class="campaign-title">@discount.Name</span>
+                    @if (!string.IsNullOrEmpty(discount.Description))
+                    {
+                        <span class="campaign-desc">@discount.Description</span>
+                    }
+                    <i class="fa-solid fa-arrow-right campaign-arrow"></i>
+                </div>
+            </div>
+        }
+        <!-- Duplicate for seamless loop -->
+        @foreach (var discount in activeDiscounts)
+        {
+            <div class="campaign-banner-item" @onclick="() => NavigateToCampaign(discount)" @onclick:stopPropagation="true">
+                <div class="campaign-banner-content">
+                    @if (discount.UsePercentage && discount.DiscountPercentage.HasValue)
+                    {
+                        <span class="campaign-badge">%@discount.DiscountPercentage.Value.ToString("N0") İNDİRİM</span>
+                    }
+                    else if (discount.DiscountAmount.HasValue)
+                    {
+                        <span class="campaign-badge">@discount.DiscountAmount.Value.ToString("C0") İNDİRİM</span>
+                    }
+                    <span class="campaign-title">@discount.Name</span>
+                    @if (!string.IsNullOrEmpty(discount.Description))
+                    {
+                        <span class="campaign-desc">@discount.Description</span>
+                    }
+                    <i class="fa-solid fa-arrow-right campaign-arrow"></i>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<DiscountWithProductsDto> activeDiscounts = new();
+    private bool isPaused = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCampaigns();
+    }
+
+    private async Task LoadCampaigns()
+    {
+        try
+        {
+            // Use cache service for faster loading
+            activeDiscounts = await DiscountCacheService.GetActiveDiscountsAsync();
+        }
+        catch
+        {
+            // Silent fail
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private void PauseAnimation()
+    {
+        isPaused = true;
+        StateHasChanged();
+    }
+
+    private void ResumeAnimation()
+    {
+        isPaused = false;
+        StateHasChanged();
+    }
+
+    private void NavigateToCampaign(DiscountWithProductsDto discount)
+    {
+        ApplyDiscountSearch(discount);
+    }
+
+    private void ApplyDiscountSearch(DiscountWithProductsDto discount)
+    {
+        // Navigate to product search with discount filter
+        Navigation.NavigateTo($"/product-search?discountId={discount.Id}");
+    }
+}

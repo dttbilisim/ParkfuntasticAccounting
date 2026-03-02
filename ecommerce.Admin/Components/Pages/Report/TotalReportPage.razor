@@ -1,0 +1,598 @@
+@page "/total-report"
+@using ecommerce.Admin.Domain.Dtos.ReportDto
+
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Toplam Rapor</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="cloud_download" Text="Raporu Çalıştır" Click="@(args => CallReport())" Variant="Variant.Flat" class="mt-2" Style="background-color:green"/>
+            @if(showExcelButton){
+                <RadzenButton Icon="cloud_download" Text="Excel olarak indir" id="ExcelButton" Click="@(args => ExcelExportClick())" download Variant="Variant.Flat" class="mt-2" Style="background-color:red"/>
+            }
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 d-flex align-items-center gap-3 flex-wrap shadow-sm">
+        <div class="row w-100">
+             <div class="col-md-3">
+                <RadzenDatePicker class="w-100" @bind-Value="@param1" Name="StartDate" Placeholder="Başlangıç Tarihi" DateFormat="dd/MM/yyyy"/>
+             </div>
+             <div class="col-md-3">
+                <RadzenDatePicker class="w-100" @bind-Value="@param2" Name="EndDate" Placeholder="Bitiş Tarihi" DateFormat="dd/MM/yyyy"/>
+             </div>
+        </div>
+    </RadzenCard>
+<RadzenDataList AllowVirtualization=@allowVirtualization Style="@(allowVirtualization ? "height:400px;overflow:auto;" : "")"
+                WrapItems="@(!allowVirtualization)" AllowPaging="@(!allowVirtualization)"
+                Data="@report" TItem="TotalReportDto" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+<Template Context="report">
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Net Satış Tutarı (Tamamlanan Sipariş)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.NetSatisTutari.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+
+    </RadzenRow>
+</RadzenCard>
+
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Sipariş Adeti </RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.SiparisAdeti)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">İade Tutarı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.IadeTutari.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">İade Adeti</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.IadeAdeti)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kampanyasız Sipariş Toplamı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KampanyasizSiparis.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kampanyalı Sipariş Toplamı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KampanyanliSiparis.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Sepette Bekleyen Sipariş Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.SepetteBekleyenUrunlerAdet)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Sepette Bekleyen Sipariş Tutarı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.SepetteBekleyenUrunlerToplami.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Aktif Alıcı Eczane Sayısı (İlanı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.buyercount)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Aktif Satıcı Eczane Sayısı (İlanı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.sellercount)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Aktif Alıcı ve Satıcı Eczane Sayısı (İlanı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.buyerandsellercount)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Yeni Aktif Alıcı Eczane Sayısı (İlanı Olmayan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.newbuyercount)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Yeni Aktif Satıcı Eczane Sayısı (İlanı Olmayan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.newsellercount)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Yeni Aktif Alıcı ve Satıcı Eczane Sayısı (İlanı Olmayan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.newbuyerandsellercount)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kayıt Olmuş Giriş Yapmış Üye Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KayitOlmusGirisYapmis)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kayıt Olmuş Giriş Yapmamış Üye Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KayitOlmusGirisYapmamis)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kayıt Olmuş Sipariş Vermemiş Eczane Sayısı </RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.LoginOlmusSiparisVermemis)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kayıt Olmuş Sipariş Vermiş Eczane Sayısı </RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.LoginOlmusSiparisVermis)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Aranan Ürün Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.ArananUrunSayisi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Toplam Kullanıcı Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.ToplamKullaniciSayisi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Aktif Eczane Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.AktifEczaneSayisi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Avm Eczane Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.AvmEczanesi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Cadde Eczane Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.CaddeEczanesi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Semt Eczane Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.SemtEczanesi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Asm Eczane Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.AsmEczanesi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Hastane Yakini Eczane Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.HastaneYakiniEczanesi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">İlanı Olan Depo İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.IlaniOlanDepo)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">İlanı Olan Eczane İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.IlaniOlanEczane)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">İlanı Olan İlaç Firması İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.IlaniOlanIlacFirmasi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Reçeteli İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.ReceteliIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Anne Bebek İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.AnneBebekIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Besin Takviyesi İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.BesinTakviyesiIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Medikal İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.MedikaliIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kişisel Bakım İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KisiselBakimiIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Sağlık Ürünleri İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.SaglikUrunleriIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Sarf Malzeme İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.SarfMalzemeIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kategorisiz İlan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KategorisizIlan)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Reçeteli İlan Total (Satışı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.ReceteliTotal.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Anne Bebek İlan Total (Satışı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.AnneBebekTotal.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Besin Takviyesi İlan Total (Satışı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.BesinTakviyesiTotal.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Medikal İlan Total (Satışı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.MedikalTotal.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kişisel Bakım İlan Total (Satışı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KisiselTotal.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Sağlık Ürünleri İlan Total (Satışı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.SaglikUrunleriTotal.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Kategorisiz İlan Total (Satışı Olan)</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.KategorisizTotal.ToString("n"))</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Puan Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.PuanSayisi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenCard Style="width: 100%;height: 45px; padding: 0;">
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="10" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">Yorum Sayısı</RadzenText>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4">
+            <RadzenText Style="width: 100%" TextStyle="TextStyle.H6">@(report.YorumSayisi)</RadzenText>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+</Template>
+</RadzenDataList>
+</div>
+
+@code {
+    public bool showExcelButton = false;
+}

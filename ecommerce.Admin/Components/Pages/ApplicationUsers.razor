@@ -1,0 +1,35 @@
+﻿@page "/application-users"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.Identity
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+
+<PageTitle>Sistem Kullanıcıları</PageTitle>
+
+<RadzenCard class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <RadzenText Text="Sistem Kullanıcıları" TextStyle="TextStyle.H5" class="rz-m-0" style="color:#598087"/>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap">
+        <RadzenButton Icon="add_circle_outline" Text="Yeni Kullanıcı" Click="@(() => OpenUpsertModal())" Variant="Variant.Flat"/>
+    </RadzenStack>
+</RadzenCard>
+
+<RadzenDataGrid @ref="Grid" TItem="IdentityUserListDto" ColumnWidth="50px" LoadData="LoadDataDebounce" Data="@GridData.Data" Count="@GridData.DataCount" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PageSize="25" AllowFilterDateInput="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Render="@OnRadzenGridRender" RowSelect="@OpenUpsertModal">
+    <Columns>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Property="@nameof(IdentityUserListDto.Id)" Title="ID" Width="70px" SortOrder="SortOrder.Descending"/>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Property="@nameof(IdentityUserListDto.UserName)" Title="Kullanıcı Adı" MinWidth="175px"/>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Property="@nameof(IdentityUserListDto.Email)" Title="Email" MinWidth="200px"/>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Property="@nameof(IdentityUserListDto.PhoneNumber)" Title="Telefon" MinWidth="75px"/>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Property="@nameof(IdentityUserListDto.FirstName)" Title="Adı" MinWidth="150px"/>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Property="@nameof(IdentityUserListDto.LastName)" Title="Soyadı" MinWidth="150px"/>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Title="Roller" MinWidth="200px" Filterable="false" Sortable="false">
+            <Template Context="user">
+                @string.Join(", ", user.Roles.Select(r => r.Name))
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="IdentityUserListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+            <Template Context="user">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => DeleteRow(user))" @onclick:stopPropagation="true"/>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>

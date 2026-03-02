@@ -1,0 +1,27 @@
+﻿@inherits RadzenComponent
+@typeparam TItem
+
+@if (IsValid)
+{
+    return;
+}
+
+@if (!string.IsNullOrEmpty(Name))
+{
+    <div style="@Style" class="@GetCssClass()" @attributes="@Attributes">
+        @Text
+    </div>
+}
+else if (ShowSummary && ValidatedFieldIdentifier == null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger" Title="Form geçerli değil!">
+        <ChildContent>
+            <ul>
+                @foreach (var (_, message) in ValidationMessages)
+                {
+                    <li>@message.Message</li>
+                }
+            </ul>
+        </ChildContent>
+    </RadzenAlert>
+}

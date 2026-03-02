@@ -1,0 +1,57 @@
+@page "/users"
+@using ecommerce.Admin.Components.Layout
+@layout MainLayout
+
+<PageTitle>Kullanıcılar</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Kullanıcılar</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Kullanıcı Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" 
+                            Data="users" 
+                            Count="count" 
+                            TItem="Domain.Dtos.UserDto.UserListDto" 
+                            LoadData="LoadData" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            AllowFilterDateInput="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            RowSelect="@EditRow"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Property="Id" Title="#" Width="70px" />
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Property="FirstName" Title="Ad" />
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Property="LastName" Title="Soyad" />
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Property="Email" Title="Email" />
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Property="PhoneNumber" Title="Telefon" />
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Property="WebUserType" Title="Kullanıcı Tipi" />
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Property="IsAproved" Title="Onaylı" />
+                    <RadzenDataGridColumn TItem="Domain.Dtos.UserDto.UserListDto" Title="İşlemler" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => GridDeleteButtonClick(args, data))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,914 @@
+@page "/"
+
+@using ecommerce.Web.Utility
+@using ecommerce.Web.Components.Pages.Components
+<section class="home-section-2 home-section-bg pt-0 overflow-hidden">
+    <div class="container-fluid p-0">
+        <div class="row">
+            <div class="col-12">
+
+
+                <SlickSlider SliderName="slider-animate" SliderId="slider-animate" Config="@SliderConfigs.SliderHomeBanner">
+                    @if (BannerItemList != null)
+                    {
+                        for (var i = 0; i < BannerItemList.Count; i++)
+                        {
+                            var item = BannerItemList[i];
+                            var isFirst = i == 0;
+                            <div class="home-contain rounded-0 p-0" style="overflow:hidden;">
+                                @if (!string.IsNullOrEmpty(item.FileName))
+                                {
+                                    <img style="@(item.FullSlider ? "width:100%; height:auto; object-fit:cover;" : null)"
+                                         src="@($"{CdnConfig.BaseUrl}/BannerImages/{item.FileName}")"
+                                         srcset="@($"{CdnConfig.BaseUrl}/BannerImages/{item.FileName}") 1920w, @($"{CdnConfig.BaseUrl}/BannerImages/1280/{item.FileName}") 1280w, @($"{CdnConfig.BaseUrl}/BannerImages/768/{item.FileName}") 768w, @($"{CdnConfig.BaseUrl}/BannerImages/480/{item.FileName}") 480w"
+                                         sizes="(max-width: 576px) 100vw, (max-width: 992px) 100vw, 100vw"
+                                         class="img-fluid bg-img"
+                                         width="1920" height="700"
+                                         loading="@(isFirst ? null : "lazy")"
+                                         decoding="async"
+                                         fetchpriority="@(isFirst ? "high" : "low")"
+                                         alt="@item.Title">
+                                }
+                                else
+                                {
+                                    <img style="@(item.FullSlider ? "width:100%; height:auto; object-fit:cover;" : null)"
+                                         src="assets/images/banner/no-image.jpg"
+                                         class="img-fluid bg-img"
+                                         width="1920" height="700"
+                                         loading="@(isFirst ? null : "lazy")"
+                                         decoding="async"
+                                         fetchpriority="@(isFirst ? "high" : "low")"
+                                         alt="Banner image">
+                                }
+                                <div class="home-detail position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center z-2">
+                                    <div class="container-fluid-lg">
+                                        <div>
+                                            <h6 class="ls-expanded theme-color text-uppercase">@item.Title</h6>
+                                            <h1 class="heding-2">@lang["Home.BannerSubtitle1"]</h1>
+                                            <h2 class="content-2">@lang["Home.BannerSubtitle2"]</h2>
+                                            <h5 class="text-content">@item.Description</h5>
+                                            @if (item.IsButton)
+                                            {
+                                                <button class="btn theme-bg-color btn-md text-white fw-bold mt-md-4 mt-2 mend-auto"
+                                                        onclick="@(item.IsNewTab ? $"window.open('{item.Url}', '_blank')" : $"location.href = '{item.Url}'")">
+                                                    @item.ButtonName <i class="fa-solid fa-arrow-right icon"></i>
+                                                </button>
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+
+                </SlickSlider>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Banner Section Start -->
+@* <section class="banner-section banner-small ratio_65"> *@
+@*     <div class="container-fluid-lg"> *@
+@*         <SlickSlider SliderName="slider-4-banner" SliderId="slider-4-banner" Config="@SliderConfigs.Slider4"> *@
+@*             <div> *@
+@*                 <div class="banner-contain-3 hover-effect"> *@
+@*                     <a href="javascript:void(0)"> *@
+@*                         <img src="../assets/images/grocery/banner/2.jpg" class="bg-img blur-up lazyload" alt="Dondurma İndirimi"> *@
+@*                     </a> *@
+@*                     <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto"> *@
+@*                         <div> *@
+@*                             <h5 class="fw-light mb-2">%50 İndirim</h5> *@
+@*                             <h4 class="fw-bold mb-0">Yazlık Dondurma</h4> *@
+@*                             <button onclick="location.href = '/leftsidebar';" *@
+@*                                     class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold"> *@
+@*                                 Hemen Alışveriş Yap *@
+@*                                 <i *@
+@*                                     class="fa-solid fa-chevron-right"> *@
+@*                                 </i> *@
+@*                             </button> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@* *@
+@*             <div> *@
+@*                 <div class="banner-contain-3 hover-effect"> *@
+@*                     <a href="javascript:void(0)"> *@
+@*                         <img src="../assets/images/grocery/banner/3.jpg" class="img-fluid bg-img" alt="Meyve Suları"> *@
+@*                     </a> *@
+@*                     <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto"> *@
+@*                         <div> *@
+@*                             <h5 class="fw-light mb-2">Günün Özel Ürünü</h5> *@
+@*                             <h4 class="fw-bold mb-0">Meyve Suyu Serisi</h4> *@
+@*                             <button onclick="location.href = '/leftsidebar';" *@
+@*                                     class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold"> *@
+@*                                 Hemen Alışveriş Yap *@
+@*                                 <i *@
+@*                                     class="fa-solid fa-chevron-right"> *@
+@*                                 </i> *@
+@*                             </button> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@* *@
+@*             <div> *@
+@*                 <div class="banner-contain-3 hover-effect"> *@
+@*                     <a href="javascript:void(0)"> *@
+@*                         <img src="../assets/images/grocery/banner/4.jpg" class="blur-up lazyload bg-img" alt="Sağlıklı Yaşam"> *@
+@*                     </a> *@
+@*                     <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto"> *@
+@*                         <div> *@
+@*                             <h5 class="fw-light mb-2">Kombinli Teklif</h5> *@
+@*                             <h4 class="fw-bold mb-0">Sağlıklı Ye, Sağlıklı Kal</h4> *@
+@*                             <button onclick="location.href = '/leftsidebar';" *@
+@*                                     class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold"> *@
+@*                                 Hemen Alışveriş Yap *@
+@*                                 <i *@
+@*                                     class="fa-solid fa-chevron-right"> *@
+@*                                 </i> *@
+@*                             </button> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@* *@
+@*             <div> *@
+@*                 <div class="banner-contain-3 hover-effect"> *@
+@*                     <a href="javascript:void(0)"> *@
+@*                         <img src="../assets/images/grocery/banner/5.jpg" class="blur-up lazyload bg-img" alt="Taze Meyveler"> *@
+@*                     </a> *@
+@*                     <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto"> *@
+@*                         <div> *@
+@*                             <h5 class="fw-light mb-2">Muhteşem Fırsatlar</h5> *@
+@*                             <h4 class="fw-bold mb-0">Meyve Gibi Taze</h4> *@
+@*                             <button onclick="location.href = '/leftsidebar';" *@
+@*                                     class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold"> *@
+@*                                 Hemen Alışveriş Yap *@
+@*                                 <i *@
+@*                                     class="fa-solid fa-chevron-right"> *@
+@*                                 </i> *@
+@*                             </button> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </SlickSlider> *@
+@*     </div> *@
+@* </section><!-- Banner Section End --> *@
+
+<!-- Category  -->
+<section class="category-section-3 py-5">
+    <div class="container-fluid-lg">
+        <div class="corporate-section-title mb-4">
+            <h2 class="fw-bold">@lang["ShopByCategories"]</h2>
+            <p>Aracınız için ihtiyacınız olan tüm parçaları kategorilerde keşfedin</p>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                @if (CategoryList?.Any() == true)
+                {
+                    <div class="category-slider-1">
+                        <SlickSlider SliderName="category-slider-1" SliderId="category" Config="@SliderConfigs.Category1" InitializeImmediately="true">
+                            @foreach (var category in CategoryList.OrderBy(x => x.Name))
+                            {
+                                <div class="px-2">
+                                    <a href="/product-search?catid=@category.Id&catname=@FriendlyUrlHelper.GetFriendlyTitle(category.Name!)" class="category-card-premium">
+                                        <div class="category-logo-wrapper">
+                                            <img class="img-fluid"
+                                                 src="@(string.IsNullOrEmpty(category.ImageUrl) ? "assets/images/category/rice.jpg" : $"{CdnConfig.CategoryImagesUrl}{category.ImageUrl}")"
+                                                 alt="@category.Name"
+                                                 loading="lazy" 
+                                                 decoding="async">
+                                        </div>
+                                        <span class="category-name-premium">@category.Name</span>
+                                    </a>
+                                </div>
+                            }
+                        </SlickSlider>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--- BRAND(MARKA)-->
+            <section class="brand-slider-section section-b-space section-light-bg">
+                <div class="container-fluid-lg">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="corporate-section-title mb-4">
+                                <h2 class="fw-bold">@lang["ShopByBrands"]</h2>
+                                <p>En seçkin markaların yedek parçalarını keşfedin</p>
+                            </div>
+
+                            @if (BrandList?.Any() == true)
+                            {
+                                <div class="category-slider-1">
+                                    <SlickSlider SliderName="brand-slider-1" SliderId="brand" Config="@SliderConfigs.Category1" InitializeImmediately="true">
+                                        @foreach (var brand in BrandList)
+                                        {
+                                            <div class="px-2">
+                                                <a href="/product-search?brandid=@brand.Id&brandname=@FriendlyUrlHelper.GetFriendlyTitle(brand.Name!)" class="brand-card-premium">
+                                                    <div class="brand-logo-wrapper">
+                                                        <img class="img-fluid"
+                                                             src="@(string.IsNullOrEmpty(brand.ImageUrl) ? "assets/images/category/rice.jpg" : $"{CdnConfig.BrandImagesUrl}{brand.ImageUrl}")"
+                                                             alt="@brand.Name" 
+                                                             loading="lazy" 
+                                                             decoding="async">
+                                                    </div>
+                                                    <span class="brand-name-premium">@brand.Name</span>
+                                                </a>
+                                            </div>
+                                        }
+                                    </SlickSlider>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+<!--- ÜRÜN --->
+<section class="product-section-3">
+    <div class="container-fluid-lg">
+        <div class="corporate-section-title mb-4">
+            <h2>@lang["Home.Product"]</h2>
+            <p>Sizler için seçtiğimiz öne çıkan yedek parçalar</p>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                @if (ProductList?.Any() == true)
+                {
+                    <SlickSlider SliderName="slider-7_1" SliderId="slider-7_1" Config="@SliderConfigs.Slider_7_1" InitializeImmediately="true">
+                        <ProductComponent Product="@ProductList" CartResult="@CartResult" />
+                    </SlickSlider>
+                }
+                else
+                {
+                    <div class="text-muted py-3">@lang["NoProducts"]</div>
+                }
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+
+<!-- Product Breakfast & Dairy Section Start -->
+@* <section class="product-section-4"> *@
+@* <div class="container-fluid-lg"> *@
+@* <div class="title"> *@
+@*     <h2>Breakfast & Dairy</h2> *@
+@* </div> *@
+@* <div class="row"> *@
+@* <div class="col-12"> *@
+@* <SlickSlider SliderName="slider-6" SliderId="slider-6" Config="@SliderConfigs.Slider6"> *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/1.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Bell pepper</h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp" data-wow-delay="0.05s"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/2.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Grassmilk</h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp" data-wow-delay="0.1s"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/3.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Kellogg's choco </h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp" data-wow-delay="0.15s"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/4.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Paneer</h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp" data-wow-delay="0.2s"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/5.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Bournvita</h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp" data-wow-delay="0.25s"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/6.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Tulsi</h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp" data-wow-delay="0.3s"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/7.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Kellogg's Muesli</h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <div class="product-box-4 wow fadeInUp" data-wow-delay="0.35s"> *@
+@*         <div class="product-image product-image-2"> *@
+@*             <a href="/product-detail"> *@
+@*                 <img src="../assets/images/grocery/product/breakfast/8.png" *@
+@*                      class="img-fluid blur-up lazyload" alt=""> *@
+@*             </a> *@
+@* *@
+@*             <ul class="option"> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View"> *@
+@*                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view"> *@
+@*                         <i class="iconly-Show icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Wishlist"> *@
+@*                     <a href="javascript:void(0)" class="notifi-wishlist"> *@
+@*                         <i class="iconly-Heart icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Compare"> *@
+@*                     <a href="/"> *@
+@*                         <i class="iconly-Swap icli"></i> *@
+@*                     </a> *@
+@*                 </li> *@
+@*             </ul> *@
+@*         </div> *@
+@* *@
+@*         <div class="product-detail"> *@
+@*             <ul class="rating"> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star" class="fill"></i> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <i data-feather="star"></i> *@
+@*                 </li> *@
+@*             </ul> *@
+@*             <a href="/product-detail"> *@
+@*                 <h5 class="name text-title">Low Fat Milk</h5> *@
+@*             </a> *@
+@*             <h5 class="price theme-color">$65.21<del>$71.25</del></h5> *@
+@*             <div class="addtocart_btn"> *@
+@*                 <button class="add-button addcart-button btn buy-button text-light"> *@
+@*                     <i class="fa-solid fa-plus"></i> *@
+@*                 </button> *@
+@*                 <div class="qty-box cart_qty"> *@
+@*                     <div class="input-group"> *@
+@*                         <button type="button" class="btn qty-left-minus" data-type="minus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-minus"></i> *@
+@*                         </button> *@
+@*                         <input class="form-control input-number qty-input" type="text" *@
+@*                                name="quantity" value="1"> *@
+@*                         <button type="button" class="btn qty-right-plus" data-type="plus" *@
+@*                                 data-field=""> *@
+@*                             <i class="fa fa-plus"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+@* </SlickSlider> *@
+@* </div> *@
+@* </div> *@
+@* </div> *@
+@* </section> *@
+
+
+<!-- Service Section Start -->
+<section class="service-section section-b-space">
+    <div class="container-fluid-lg">
+        <div class="row g-3 row-cols-xxl-5 row-cols-lg-3 row-cols-md-2">
+            <div>
+                <div class="service-contain-2">
+                    <svg class="icon-width">
+                        <use xlink:href="../assets/svg/svg/service-icon-4.svg#shipping"></use>
+                    </svg>
+                    <div class="service-detail">
+                        <h3>Ücretsiz Kargo</h3>
+                        <h6 class="text-content">Dünya çapında ücretsiz kargo</h6>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="service-contain-2">
+                    <svg class="icon-width">
+                        <use xlink:href="../assets/svg/svg/service-icon-4.svg#service"></use>
+                    </svg>
+                    <div class="service-detail">
+                        <h3>7/24 Hizmet</h3>
+                        <h6 class="text-content">7/24 Online Hizmet</h6>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="service-contain-2">
+                    <svg class="icon-width">
+                        <use xlink:href="../assets/svg/svg/service-icon-4.svg#pay"></use>
+                    </svg>
+                    <div class="service-detail">
+                        <h3>Online Ödeme</h3>
+                        <h6 class="text-content">Online ödeme imkanı</h6>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="service-contain-2">
+                    <svg class="icon-width">
+                        <use xlink:href="../assets/svg/svg/service-icon-4.svg#offer"></use>
+                    </svg>
+                    <div class="service-detail">
+                        <h3>Festival Fırsatı</h3>
+                        <h6 class="text-content">%50'ye varan Süper İndirim</h6>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="service-contain-2">
+                    <svg class="icon-width">
+                        <use xlink:href="../assets/svg/svg/service-icon-4.svg#return"></use>
+                    </svg>
+                    <div class="service-detail">
+                        <h3>%100 Orijinal</h3>
+                        <h6 class="text-content">%100 Para İadesi</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

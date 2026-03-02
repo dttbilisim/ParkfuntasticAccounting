@@ -1,0 +1,68 @@
+@using ecommerce.Admin.Domain.Dtos.PcPosDto;
+@attribute [Authorize]
+
+<PageTitle>PcPos</PageTitle>
+<div class="col-md-12">
+    <RadzenTemplateForm TItem="PcPosUpsertDto" Data="@pcpos" Visible="@(pcpos != null)" Submit="@FormSubmit">
+        <RadzenStack Gap="1rem" class="rz-p-2 rz-p-md-4">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12">
+                    <RadzenLabel Text="PcPos Adı" Component="Name" />
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@pcpos.Name" Name="Name" />
+                    <RadzenRequiredValidator Component="Name" Text="PcPos Adı Girmelisiniz" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Şirket" Component="Corporation" />
+                    <RadzenDropDown @bind-Value="pcpos.CorporationId" Data="@corporations" TextProperty="Name" ValueProperty="Id" Style="width: 100%; display: block;" Name="Corporation" Change="@OnCorporationChange" Placeholder="Şirket Seçiniz" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    <RadzenRequiredValidator Component="Corporation" Text="Şirket seçmelisiniz" DefaultValue="0" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Şube" Component="Branch" />
+                    <RadzenDropDown @bind-Value="pcpos.BranchId" Data="@branches" TextProperty="Name" ValueProperty="Id" Style="width: 100%; display: block;" Name="Branch" Change="@OnBranchChange" Placeholder="Şube Seçiniz" Disabled="@(pcpos.CorporationId == 0)" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    <RadzenRequiredValidator Component="Branch" Text="Şube seçmelisiniz" DefaultValue="0" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Depo" Component="Warehouse" />
+                    <RadzenDropDown @bind-Value="pcpos.WarehouseId" Data="@warehouses" TextProperty="Name" ValueProperty="Id" Style="width: 100%; display: block;" Name="Warehouse" Placeholder="Depo Seçiniz" Disabled="@(pcpos.BranchId == 0)" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    <RadzenRequiredValidator Component="Warehouse" Text="Depo seçmelisiniz" DefaultValue="0" />
+                </RadzenColumn>
+            </RadzenRow>
+            
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="6">
+                     <RadzenLabel Text="Ödeme Tipi Bağlantısı" Component="PaymentTypeId" />
+                     <RadzenDropDown Name="PaymentTypeId" 
+                                     @bind-Value="@pcpos.PaymentTypeId" 
+                                     Data="@PaymentTypeOptions" 
+                                     TextProperty="Text" 
+                                     ValueProperty="Value" 
+                                     Style="width:100%" 
+                                     Placeholder="POS için Ödeme Tipi Seçiniz..." 
+                                     AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                         <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status" />
+                         <RadzenLabel Text="Durum" Component="Status" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="1rem" class="rz-mt-4">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</div>
+
+

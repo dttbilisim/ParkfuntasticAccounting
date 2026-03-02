@@ -1,0 +1,134 @@
+@using ecommerce.Core.Utils;
+@using ecommerce.Admin.Domain.Dtos.Scheduler
+@attribute [Authorize]
+
+
+<PageTitle>Yeni Takvim Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="EducationCalendarUpsertDto" Data="@_EducationCalendar">
+
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Kullanıcı Tipi" Component="UserType" style="width: 100%"/>
+            </div>
+
+
+            <div class="col-md-9">
+                <RadzenDropDown TValue="UserType" style="display: block; width: 100%" Data="UserTypes" @bind-Value="@_EducationCalendar.UserTypeId" Name="UserType" Change="(args => ChangeUserType(args))" Placeholder="Seçiniz"/>
+            </div>
+        </div>
+
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Eczane Tipi" Component="UserType" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDownDataGrid Data="@pharmacyTypes"
+                                        TextProperty="Name"
+                                        ValueProperty="Id"
+                                        Placeholder="Seçiniz"
+                                        @bind-Value="@_EducationCalendar.PharmacyTypeId"
+                                        Name="PharmacyTypeId"
+                                        style="display: block; width: 100%"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        AllowClear="true"/>
+
+            </div>
+        </div>
+
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Adı" Component="Name" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_EducationCalendar.Name" Name="Name"/>
+            </div>
+        </div>
+           <div style="margin-bottom: 1rem" class="row">
+                    <div class="col-md-3">
+                        <RadzenLabel Text="Url" Component="Url" style="width: 100%"/>
+                    </div>
+                    <div class="col-md-9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_EducationCalendar.Url" Name="Url"/>
+                    </div>
+                </div>
+        <RadzenFormField Text="İçerik" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenHtmlEditor @bind-Value="@_EducationCalendar.Description" style="height: 300px; width: 100%">
+                    <RadzenHtmlEditorUndo/>
+                    <RadzenHtmlEditorRedo/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorBold/>
+                    <RadzenHtmlEditorItalic/>
+                    <RadzenHtmlEditorUnderline/>
+                    <RadzenHtmlEditorStrikeThrough/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorAlignLeft/>
+                    <RadzenHtmlEditorAlignCenter/>
+                    <RadzenHtmlEditorAlignRight/>
+                    <RadzenHtmlEditorJustify/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorIndent/>
+                    <RadzenHtmlEditorOutdent/>
+                    <RadzenHtmlEditorUnorderedList/>
+                    <RadzenHtmlEditorOrderedList/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorColor/>
+                    <RadzenHtmlEditorBackground/>
+                    <RadzenHtmlEditorRemoveFormat/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorSubscript/>
+                    <RadzenHtmlEditorSuperscript/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorLink/>
+                    <RadzenHtmlEditorUnlink/>
+                    <RadzenHtmlEditorImage/>
+                    <RadzenHtmlEditorFontName/>
+                    <RadzenHtmlEditorFontSize/>
+                    <RadzenHtmlEditorFormatBlock/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorSource/>
+                </RadzenHtmlEditor>
+            </ChildContent>
+
+        </RadzenFormField>
+        <RadzenRow>
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="Başlangıç Zamanı" Variant="Variant.Outlined" class="w-100">
+                    <ChildContent>
+                        <RadzenDatePicker @bind-Value="@_EducationCalendar.StartDate" ShowTime="false"  DateFormat="d" AllowClear="false"/>
+                    </ChildContent>
+
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6">
+                <RadzenFormField Text="Bitiş Zamanı" Variant="Variant.Outlined" class="w-100">
+                    <ChildContent>
+                        <RadzenDatePicker @bind-Value="@_EducationCalendar.EndDate" ShowTime="false" DateFormat="d" AllowClear="false"/>
+                    </ChildContent>
+
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+          <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Durum" Component="Status" style="width: 100%"/>
+                </div>
+                <div class="col-md-3">
+                    <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status"/>
+                </div>
+            </div>
+
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton Click="@Submit" ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="DialogService.Close"/>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

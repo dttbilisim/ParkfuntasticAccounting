@@ -1,0 +1,29 @@
+﻿@page "/upsert-producttier"
+@using ecommerce.Admin.Domain.Dtos.ProductTierDto;
+@attribute [Authorize]
+
+
+<PageTitle>Ürün Görseli Ekle/Düzenle</PageTitle>
+<RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kategori Kayıt Edilemedi!</RadzenAlert>
+<RadzenTemplateForm TItem="ProductTierUpsertDto" Data="@productTier" Visible="@(productTier != null)" Submit="@FormSubmit">
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Component="Tier" style="width: 100%" Text="Ürün Grupları" />
+        </div>
+        <div class="col-md-9">
+            <RadzenDropDown Data="@tiers" Multiple="false" style="width: 100%" TextProperty="Name" @bind-Value="@(productTier.TierId)" ValueProperty="Id" Name="TierId" 
+                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="IsSaveButtonDisabled" />
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+
+  

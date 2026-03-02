@@ -1,0 +1,55 @@
+@page "/branches"
+@using ecommerce.Admin.Domain.Dtos.HierarchicalDto
+@using ecommerce.Admin.Services.Interfaces
+@using ecommerce.Core.Models
+@using Radzen
+@using Radzen.Blazor
+@inject IBranchService BranchService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@layout MainLayout
+<PageTitle>Şube Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Şube Yönetimi</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click=@(args => OpenUpsertModal()) Text="Yeni Şube" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@branches" TItem="BranchListDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" SelectionMode="DataGridSelectionMode.Single" RowSelect="@(args => OpenUpsertModal(args.Id))">
+                <Columns>
+                    <RadzenDataGridColumn TItem="BranchListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="BranchListDto" Property="CorporationName" Title="Bağlı Şirket" />
+                    <RadzenDataGridColumn TItem="BranchListDto" Property="Name" Title="Şube Adı" />
+                    <RadzenDataGridColumn TItem="BranchListDto" Property="Code" Title="Şube Kodu" Width="150px" />
+                    <RadzenDataGridColumn TItem="BranchListDto" Property="IsActive" Title="Durum" Width="100px">
+                        <Template Context="data">
+                            @if (data.IsActive)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Pasif" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="BranchListDto" Property="CreatedDate" Title="Kayıt Tarihi" Width="200px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="BranchListDto" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteBranch(data.Id))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+</div>

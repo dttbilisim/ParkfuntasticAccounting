@@ -1,0 +1,106 @@
+@namespace ecommerce.Admin.Components.Pages.Plasiyer.Modals
+@using ecommerce.Admin.Domain.Dtos.CustomerAccountTransactionDto
+@using ecommerce.Core.Utils
+
+<div class="plasiyer-modal-container">
+    @if (IsLoading)
+    {
+        <div class="modal-loading-overlay">
+            <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        </div>
+    }
+
+    @if (Report != null)
+    {
+        <div class="balance-summary-grid mb-4">
+            <RadzenCard class="summary-card">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                    <div class="summary-icon debit-bg">
+                        <RadzenIcon Icon="trending_up" />
+                    </div>
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.Caption" class="m-0 text-secondary">Toplam Borç</RadzenText>
+                        <RadzenText TextStyle="TextStyle.H6" class="m-0 fw-bold">@Report.Transactions.Where(t => t.TransactionType == CustomerAccountTransactionType.Debit).Sum(t => t.Amount).ToString("C2")</RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenCard class="summary-card">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                    <div class="summary-icon credit-bg">
+                        <RadzenIcon Icon="trending_down" />
+                    </div>
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.Caption" class="m-0 text-secondary">Toplam Alacak</RadzenText>
+                        <RadzenText TextStyle="TextStyle.H6" class="m-0 fw-bold">@Report.Transactions.Where(t => t.TransactionType == CustomerAccountTransactionType.Credit).Sum(t => t.Amount).ToString("C2")</RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenCard class="@($"summary-card highlight-card {(Report.Balance >= 0 ? "border-danger" : "border-success")}")">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                    <div class="summary-icon @(Report.Balance >= 0 ? "debit-bg" : "credit-bg")">
+                        <RadzenIcon Icon="account_balance_wallet" />
+                    </div>
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.Caption" class="m-0 text-secondary">Güncel Bakiye</RadzenText>
+                        <RadzenText TextStyle="TextStyle.H5" class="@($"m-0 fw-bold {(Report.Balance >= 0 ? "text-danger" : "text-success")}")">
+                            @Math.Abs(Report.Balance).ToString("C2") @(Report.Balance >= 0 ? "(Borç)" : "(Alacak)")
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        </div>
+
+        <RadzenDataGrid Data="@Report.Transactions" TItem="CustomerAccountTransactionListDto" AllowPaging="true" PageSize="10" 
+                        AllowSorting="true" AllowFiltering="true" FilterMode="FilterMode.SimpleWithMenu"
+                        EmptyText="Hareket bulunamadı." class="plasiyer-grid">
+            <Columns>
+                <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="TransactionDate" Title="Tarih" Width="110px">
+                    <Template Context="t">
+                        <span class="text-secondary">@t.TransactionDate.ToString("dd.MM.yyyy")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="Description" Title="Açıklama" />
+                <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Title="Borç" Width="110px" TextAlign="TextAlign.Right">
+                    <Template Context="t">
+                        @if (t.TransactionType == CustomerAccountTransactionType.Debit)
+                        {
+                            <span class="text-danger fw-medium">@t.Amount.ToString("N2")</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">-</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Title="Alacak" Width="110px" TextAlign="TextAlign.Right">
+                    <Template Context="t">
+                        @if (t.TransactionType == CustomerAccountTransactionType.Credit)
+                        {
+                            <span class="text-success fw-medium">@t.Amount.ToString("N2")</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">-</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="BalanceAfterTransaction" Title="Bakiye" Width="130px" TextAlign="TextAlign.Right">
+                    <Template Context="t">
+                        <span class="fw-bold @(t.BalanceAfterTransaction >= 0 ? "text-danger" : "text-success")">
+                            @t.BalanceAfterTransaction.ToString("N2")
+                        </span>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    }
+    else if (!IsLoading)
+    {
+        <div class="modal-empty-state">
+            <RadzenIcon Icon="account_balance" Style="font-size: 3rem; color: var(--rz-text-disabled-color);" />
+            <RadzenText TextStyle="TextStyle.H6" Style="color: var(--rz-text-secondary-color);">Cari hesap raporu alınamadı.</RadzenText>
+        </div>
+    }
+</div>

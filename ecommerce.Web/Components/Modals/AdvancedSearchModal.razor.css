@@ -1,0 +1,82 @@
+.input-card-submodels {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.submodel-container {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e2e6ea;
+    min-height: 72px;
+}
+
+.submodel-container.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.submodel-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.submodel-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.submodel-card:hover {
+    border-color: var(--bs-success);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.submodel-card.active {
+    border-color: var(--bs-success);
+    background: rgba(0, 171, 85, 0.08);
+    box-shadow: 0 6px 16px rgba(0, 171, 85, 0.12);
+}
+
+.submodel-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2a2f3a;
+    line-height: 1.2;
+}
+
+.clear-input {
+    background: none;
+    border: none;
+    color: #adb5bd;
+    padding: 0;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clear-input:hover {
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .submodel-card {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+}
+

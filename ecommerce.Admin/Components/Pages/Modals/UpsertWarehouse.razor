@@ -1,0 +1,89 @@
+@page "/upsert-warehouse"
+@using ecommerce.Admin.Domain.Dtos.WarehouseDto
+@attribute [Authorize]
+
+<PageTitle>Depo Ekle/Düzenle</PageTitle>
+
+<div class="modal-wrapper">
+    <div class="modal-header-modern">
+        <h5 class="modal-title-modern">@(dto?.Id > 0 ? "Depo Düzenle" : "Yeni Depo Ekle")</h5>
+        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" Click="@CancelButtonClick" Size="ButtonSize.Small" />
+    </div>
+
+    <RadzenTemplateForm TItem="WarehouseUpsertDto" Data="@dto" Visible="@(dto != null)" Submit="@FormSubmit">
+        <div class="modal-content-body">
+            <div class="tab-content-wrapper">
+                <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">
+                    Depo Kayıt Edilemedi!
+                </RadzenAlert>
+
+                <RadzenStack Gap="1rem">
+                    @* İl *@
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="İl" Component="CityId" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="@dto.CityId" Data="@cities" TextProperty="Name" ValueProperty="Id"
+                                            Placeholder="İl Seçiniz" class="w-100 form-control-modern" Name="CityId"
+                                            Change="@OnCityChange" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    @* İlçe *@
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="İlçe" Component="TownId" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="@dto.TownId" Data="@towns" TextProperty="Name" ValueProperty="Id"
+                                            Placeholder="İlçe Seçiniz" class="w-100 form-control-modern" Name="TownId"
+                                            Disabled="@(!dto.CityId.HasValue)" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    @* Depo Adı *@
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Depo Adı" Component="WarehouseName" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Name="WarehouseName" @bind-Value="@dto.Name" class="w-100 form-control-modern" />
+                            <RadzenRequiredValidator Component="WarehouseName" Text="Depo adı gereklidir" Style="display: block; font-size: 0.8rem;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    @* Adres *@
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Adres" Component="Address" class="mt-2" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextArea Name="Address" @bind-Value="@dto.Address" class="w-100 form-control-modern" Rows="3" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    @* Durum *@
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Durum" Component="Status" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenCheckBox Name="Status" @bind-Value="@Status" />
+                                <RadzenLabel Text="Aktif" Component="Status" />
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </div>
+        </div>
+
+        <div class="modal-sticky-footer">
+            <RadzenButton Text="Vazgeç" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            <RadzenButton Text="Kaydet" ButtonType="ButtonType.Submit" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+        </div>
+    </RadzenTemplateForm>
+</div>

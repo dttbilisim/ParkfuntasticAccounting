@@ -1,0 +1,92 @@
+@using ecommerce.Domain.Shared.Dtos.Product
+@using ecommerce.Web.Domain.Dtos.Cart
+@inject ecommerce.Domain.Shared.Dtos.Options.CdnOptions CdnConfig
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="fas fa-store me-2"></i>
+        Satıcı Seçin
+    </h5>
+    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+</div>
+
+<div class="modal-body">
+    <div class="seller-selection-container">
+        <div class="product-info mb-4">
+            <div class="product-image-container">
+                <img src="@(
+                    SelectedProduct?.Images?.FirstOrDefault()?.FileGuid != null ? $"{CdnConfig.BaseUrl}/ProductImages/{SelectedProduct.Images.First().FileGuid}" : 
+                    SelectedProduct?.Images?.FirstOrDefault()?.FileName != null ? $"{CdnConfig.BaseUrl}/ProductImages/{SelectedProduct.Images.First().FileName}" : 
+                    "assets/images/product/category/4.jpg")" 
+                     class="product-image" 
+                     alt="@SelectedProduct?.Name">
+            </div>
+            <div class="product-details">
+                <h6 class="product-name">@SelectedProduct?.Name</h6>
+                <span class="product-brand">@SelectedProduct?.Brand?.Name</span>
+            </div>
+        </div>
+
+        <div class="sellers-list">
+            <h6 class="section-title">
+                <i class="fas fa-users me-2"></i>
+                Mevcut Satıcılar (@Sellers?.Count)
+            </h6>
+            
+            @if (Sellers?.Any() == true)
+            {
+                <div class="sellers-grid">
+                    @foreach (var seller in Sellers.OrderBy(s => s.SalePrice))
+                    {
+                        <div @key="seller.Id" class="seller-card" @onclick="() => SelectSeller(seller)">
+                            <div class="seller-info">
+                                <div class="seller-header">
+                                    <span class="seller-name">Satıcı #@seller.SellerId</span>
+                                    <span class="seller-price">@seller.SalePrice.ToString("C")</span>
+                                </div>
+                                <div class="seller-details">
+                                    @if (seller.Stock > 0)
+                                    {
+                                        <span class="stock-info text-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Stokta (@seller.Stock)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="stock-info text-danger">
+                                            <i class="fas fa-times-circle me-1"></i>
+                                            Stokta Yok
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="seller-action">
+                                <button class="btn btn-primary btn-sm" 
+                                        disabled="@(seller.Stock <= 0)"
+                                        @onclick="() => SelectSeller(seller)">
+                                    <i class="fas fa-shopping-cart me-1"></i>
+                                    Sepete Ekle
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-sellers">
+                    <i class="fas fa-store-slash fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Bu ürün için satıcı bulunamadı.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" @onclick="CloseModal">
+        <i class="fas fa-times me-1"></i>
+        İptal
+    </button>
+</div>

@@ -1,0 +1,27 @@
+@using ecommerce.Admin.Components.Layout
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                <PermissionGuard RouteData="@routeData">
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                        <NotAuthorized>
+                            @if (context.User.Identity?.IsAuthenticated == true)
+                            {
+                                <Error403 />
+                            }
+                            else
+                            {
+                                <RedirectToLogin />
+                            }
+                        </NotAuthorized>
+                    </AuthorizeRouteView>
+                </PermissionGuard>
+            </Found>
+            <NotFound>
+                <PageTitle>Sayfa Bulunamadı</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <Error404 />
+                </LayoutView>
+            </NotFound>
+        </Router>
+</CascadingAuthenticationState>

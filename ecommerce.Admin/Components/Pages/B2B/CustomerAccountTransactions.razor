@@ -1,0 +1,207 @@
+@page "/b2b/customer-account-transactions"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.CustomerAccountTransactionDto
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+
+<PageTitle>Cari Hareketler</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0 text-gray-800">Cari Hareketler</h1>
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 shadow-sm">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            <RadzenDropDown @bind-Value="FilterCustomerId"
+                            Data="FilterCustomers"
+                            TextProperty="DisplayName"
+                            ValueProperty="Id"
+                            Placeholder="Tüm Cariler"
+                            AllowClear="true"
+                            AllowFiltering="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="min-width: 260px;"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDatePicker @bind-Value="FilterStartDate"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Başlangıç Tarihi"
+                              Style="min-width: 160px;" />
+            <RadzenDatePicker @bind-Value="FilterEndDate"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Bitiş Tarihi"
+                              Style="min-width: 160px;" />
+            <RadzenButton Text="Filtrele" ButtonStyle="ButtonStyle.Primary" Icon="filter" Click="ApplyFilter" />
+            <label class="d-flex align-items-center gap-2 mb-0">
+                <RadzenCheckBox @bind-Value="GroupByCustomer" Change="@(async (bool _) => await ApplyFilter())" />
+                <span class="small">Grupla</span>
+            </label>
+            @if (FilterStartDate.HasValue || FilterEndDate.HasValue || FilterCustomerId.HasValue)
+            {
+                <RadzenButton Text="Temizle" ButtonStyle="ButtonStyle.Light" Icon="close" Click="ClearFilter" />
+            }
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="Grid"
+                           TItem="CustomerAccountTransactionListDto"
+                           Data="@Transactions"
+                           Count="@Count"
+                           LoadData="@LoadData"
+                           AllowPaging="true"
+                           PageSize="25"
+                           AllowSorting="true"
+                           AllowGrouping="true"
+                           ShowGroupPanel="false"
+                           PagerHorizontalAlign="HorizontalAlign.Left"
+                           ShowPagingSummary="true"
+                           RowSelect="@OnRowSelect"
+                           RowRender="@RowRender"
+                           SelectionMode="DataGridSelectionMode.Single"
+                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                           EmptyText="Cari hareket bulunamadı.">
+                <GroupHeaderTemplate>
+                    <div class="d-flex align-items-center gap-2 py-2 px-3 cari-group-header">
+                        <RadzenIcon Icon="person" Style="font-size: 1.1rem; opacity: 0.9;" />
+                        <span class="fw-semibold">@context.Data.Key</span>
+                        <span class="badge bg-secondary rounded-pill">@context.Data.Count hareket</span>
+                    </div>
+                </GroupHeaderTemplate>
+                <Columns>
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="Id" Title="Id" Width="70px" />
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="TransactionDate" Title="Tarih" Width="120px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="CustomerName" Title="Cari" Width="180px" />
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Title="Tip" Width="90px">
+                        <Template Context="ctx">
+                            <span class="badge @(ctx.TransactionType == CustomerAccountTransactionType.Debit ? "bg-danger" : "bg-success")">
+                                @(ctx.TransactionType == CustomerAccountTransactionType.Debit ? "Borç" : "Alacak")
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Title="Açıklama" Width="200px">
+                        <Template Context="ctx">
+                            <span class="cari-desc-wrap" title="@(ctx.Description ?? "")">@(ctx.Description ?? "-")</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Title="Sipariş" Width="120px">
+                        <Template Context="ctx">
+                            @if (ctx.OrderId.HasValue && ctx.OrderId.Value > 0)
+                            {
+                                <a href="javascript:void(0)" class="rz-link" @onclick:stopPropagation="true" @onclick="@(() => _ = OpenOrderDetail(ctx.OrderId!.Value))">@(ctx.OrderNumber ?? ctx.OrderId.ToString())</a>
+                            }
+                            else if (ctx.LinkedOrders != null && ctx.LinkedOrders.Any())
+                            {
+                                @foreach (var o in ctx.LinkedOrders)
+                                {
+                                    <a href="javascript:void(0)" class="rz-link d-block" @onclick:stopPropagation="true" @onclick="@(() => _ = OpenOrderDetail(o.OrderId))">@o.OrderNumber</a>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Title="Fatura" Width="120px">
+                        <Template Context="ctx">
+                            @if (ctx.InvoiceId.HasValue && ctx.InvoiceId.Value > 0)
+                            {
+                                <a href="javascript:void(0)" class="rz-link" @onclick:stopPropagation="true" @onclick="@(() => _ = OpenInvoiceDetail(ctx.InvoiceId!.Value))">@(ctx.InvoiceNo ?? ctx.InvoiceId.ToString())</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Title="Ödeme" Width="110px">
+                        <Template Context="ctx">
+                            @if (!string.IsNullOrEmpty(ctx.PaymentTypeName))
+                            {
+                                <span>@ctx.PaymentTypeName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="Amount" Title="Tutar" Width="110px" FormatString="{0:N2} ₺" TextAlign="TextAlign.Right" />
+                    <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" Property="BalanceAfterTransaction" Title="Yürüyen Bakiye" Width="130px" FormatString="{0:N2} ₺" TextAlign="TextAlign.Right">
+                        <Template Context="ctx">
+                            <span class="@(ctx.BalanceAfterTransaction >= 0 ? "text-danger" : "text-success")">₺@(ctx.BalanceAfterTransaction.ToString("N2"))</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+
+            @if (Transactions != null && Transactions.Any())
+            {
+                <div class="cari-footer-totals mt-3 pt-3 border-top">
+                    @if (CustomerSubtotals.Any())
+                    {
+                        <div class="mb-3">
+                            <div class="small text-muted fw-semibold mb-2">Cari bazlı alt toplamlar</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0" style="max-width: 720px;">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Cari</th>
+                                            <th class="text-end">Borç</th>
+                                            <th class="text-end">Alacak</th>
+                                            <th class="text-end">Net</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in CustomerSubtotals)
+                                        {
+                                            <tr>
+                                                <td><span class="text-truncate d-inline-block" style="max-width: 280px;" title="@row.CustomerName">@row.CustomerName</span></td>
+                                                <td class="text-end text-danger fw-semibold">₺@(row.Debit.ToString("N2"))</td>
+                                                <td class="text-end text-success fw-semibold">₺@(row.Credit.ToString("N2"))</td>
+                                                <td class="text-end fw-semibold @(row.Net >= 0 ? "text-danger" : "text-success")">₺@(row.Net.ToString("N2"))</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <div class="row g-2 align-items-center">
+                        <div class="col-auto">
+                            <span class="text-muted small">Sayfa toplamı — Borç:</span>
+                            <span class="fw-semibold text-danger ms-1">₺@(PageTotalDebit.ToString("N2"))</span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="text-muted small">Alacak:</span>
+                            <span class="fw-semibold text-success ms-1">₺@(PageTotalCredit.ToString("N2"))</span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="text-muted small">Net (bu sayfa):</span>
+                            <span class="fw-semibold ms-1 @(PageNet >= 0 ? "text-danger" : "text-success")">₺@(PageNet.ToString("N2"))</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .cari-group-header {
+        background: linear-gradient(90deg, rgba(89, 128, 135, 0.12) 0%, rgba(255,255,255,0) 100%);
+        border-left: 4px solid var(--rz-primary, #598087);
+    }
+    .cari-desc-wrap {
+        display: block;
+        max-width: 200px;
+        white-space: normal;
+        word-wrap: break-word;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+</style>

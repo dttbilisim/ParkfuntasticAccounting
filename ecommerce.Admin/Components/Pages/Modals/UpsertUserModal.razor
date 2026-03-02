@@ -1,0 +1,37 @@
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Core.Utils
+@layout MainLayout
+
+<RadzenTemplateForm TItem="Domain.Dtos.UserDto.UserUpsertDto" Data="model" Submit="Save">
+    <RadzenFieldset Text="Kullanıcı Bilgileri">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <RadzenTextBox @bind-Value="model.FirstName" Name="FirstName" Placeholder="Ad" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox @bind-Value="model.LastName" Name="LastName" Placeholder="Soyad" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox @bind-Value="model.Email" Name="Email" Placeholder="Email" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox @bind-Value="model.PhoneNumber" Name="Phone" Placeholder="Telefon" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenDropDown @bind-Value="model.WebUserType" Data="Enum.GetValues<WebUserType>()" Name="WebUserType" Style="width:100%" 
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.IsAproved" TValue="bool" />
+                <label class="ms-2">Onaylı</label>
+            </div>
+        </div>
+    </RadzenFieldset>
+
+    <div class="d-flex justify-content-end mt-3">
+        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Kapat" Click="Close" Style="margin-right:8px" />
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" Icon="save" />
+    </div>
+</RadzenTemplateForm>
+
+

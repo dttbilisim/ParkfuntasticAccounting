@@ -1,0 +1,926 @@
+@page "/orderdetail"
+@using ecommerce.Admin.Domain.Dtos.OrderDto;
+@using ecommerce.Core.Entities;
+@using ecommerce.Core.Utils;
+@using ecommerce.Admin.Domain.Dtos.SellerAddressDto;
+@attribute [Authorize]
+@inject IStringLocalizer<Culture_TR> Loc
+<PageTitle>Sipariş Bilgileri</PageTitle>
+
+
+<div class="col-md-12 order-detail-scope">
+
+<RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Client" Change="@OnTabChange">
+<Tabs>
+<RadzenTabsItem Text="Sipariş Bilgileri">
+    <RadzenFieldset Text="Sipariş Bilgileri">
+        <RadzenTemplateForm TItem="OrderListDto" Data="@order" Visible="@(order != null)">
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Sipariş" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" @bind-Value="@order!.OrderNumber" Name="OrderNumber" Disabled="true"/>
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Sipariş Durumu" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDown TValue="OrderStatusType" Data="@(Enum.GetValues<OrderStatusType>())" Value="@order.OrderStatusType" ValueChanged="@UpdateOrderStatus" class="w-100" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Sipariş Tarihi" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenDatePicker class="rz-full-width" @bind-Value="@order.CreatedDate" Name="CreatedDate" Disabled="true"/>
+                </div>
+            </div>
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="İndirim Tutarı" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenNumeric class="rz-full-width" @bind-Value="@order.DiscountTotal" Name="DiscountTotal" Disabled="true" Format="c"/>
+                </div>
+            </div>
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Sipariş Tutarı" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenNumeric class="rz-full-width" @bind-Value="@order.OrderTotal" Name="OrderTotal" Disabled="true" Format="c"/>
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Ödeme Tipi" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenNumeric class="rz-full-width" @bind-Value="@order.PaymentTypeId" Name="PaymentTypeId" Disabled="true"/>
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Ödeme Durumu" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" Value="@order.PaymentStatusResult" Disabled="true"/>
+                </div>
+            </div>
+              @if(order.IyzicoCancelDate != null){
+                <div class="row rz-form-row">
+                    <div class="col-md-3">
+                        <RadzenLabel Text="Ödeme İptal Tarihi" class="w-100"/>
+                    </div>
+                    <div class="col-md-9">
+                        <RadzenDatePicker class="rz-full-width" @bind-Value="@order.IyzicoCancelDate" Name="ShipmentDate" Disabled="true"/>
+                    </div>
+                </div>
+                <div class="row rz-form-row">
+                    <div class="col-md-3">
+                        <RadzenLabel Text="Ödeme İptal Mesajı" class="w-100"/>
+                    </div>
+                    <div class="col-md-9">
+                        <RadzenTextBox class="rz-full-width" Value="@order.IyzicoCanceledMessage" Disabled="true"/>
+                    </div>
+                </div>
+            }
+          
+
+
+            <div class="row">
+                <div class="col d-flex justify-content-end mt-3">
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </RadzenFieldset>
+
+</RadzenTabsItem>
+
+
+<RadzenTabsItem Text="Kargo Bilgileri">
+    <RadzenFieldset Text="Kargo Bilgileri">
+        <RadzenTemplateForm TItem="OrderListDto" Data="@order" Visible="@(order != null)">
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Satıcı Adı" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" @bind-Value="@order!.Seller!.Name" Name="SellerName" Disabled="true" Visible="@(order?.Seller != null)"/>
+                </div>
+            </div>
+            @if (BuyerCompany != null)
+            {
+                <div class="row rz-form-row">
+                    <div class="col-md-3">
+                        <RadzenLabel Text="Alıcı Adı" class="w-100"/>
+                    </div>
+                    <div class="col-md-9">
+                        <RadzenTextBox class="rz-full-width" @bind-Value="@BuyerCompany.FirstName" Disabled="true"/>
+                    </div>
+                </div>
+            }
+            @if (BuyerCompany != null)
+            {
+                <div class="row rz-form-row">
+                    <div class="col-md-3">
+                        <RadzenLabel Text="Alıcı Kargo Adresi" class="w-100"/>
+                    </div>
+                    <div class="col-md-9">
+                        <RadzenTextBox class="rz-full-width" @bind-Value="@FullAddress" Name="Address" Disabled="true"/>
+                    </div>
+                </div>
+            }
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Kargo Adı" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" Value="@(order.Cargo != null ? order.Cargo.Name : "")" Name="CargoName" Disabled="true"/>
+                </div>
+            </div>
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Kargo Takip Numarası" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" Value="@order.CargoTrackNumber" Name="CargoTrackNumber" Disabled="true"/>
+                </div>
+            </div>
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Kargo Takip Url" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" Value="@order.CargoTrackUrl" Name="CargoTrackUrl" Disabled="true"/>
+                </div>
+            </div>
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Kargo Ücreti" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" Value="@(Math.Round(order.CargoPrice, 2).ToString())" Name="CargoPrice" Disabled="true"/>
+                </div>
+            </div>
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Teslimat Tarihi" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" Value="@order.DeliveryDate.ToString()" Name="DeliveryDate" Disabled="true"/>
+                </div>
+            </div>
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Teslim Alan" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox class="rz-full-width" Value="@order.DeliveryTo" Name="DeliveryTo" Disabled="true"/>
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </RadzenFieldset>
+</RadzenTabsItem>
+
+
+<RadzenTabsItem Text="Ürün Bilgileri">
+    <div class="tab-flex-container">
+        <div class="fieldset-header-container p-3">
+            <span class="fieldset-header-title">
+                <RadzenIcon Icon="inventory_2" class="fieldset-header-icon text-primary" />
+                Ürün Bilgileri
+            </span>
+        </div>
+
+        <div class="grid-wrapper">
+            <RadzenDataGrid @ref="radzenDataGrid"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                AllowPaging="false"
+                AllowSorting="false"
+                Density="Density.Compact"
+                RenderMode="TabRenderMode.Client"
+                TItem="OrderItemViewModel"
+                Data="orderitemsGrouped"
+                Count="@count"
+                Style="flex: 1;"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                EqualsText="@Loc.GetString("EqualsText")"
+                NotEqualsText="@Loc.GetString("NotEqualsText")"
+                LessThanText="@Loc.GetString("LessThanText")"
+                LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                GreaterThanText="@Loc.GetString("GreaterThanText")"
+                GreaterThanOrEqualsText="@Loc.GetString("GreaterThanOrEqualsText")"
+                IsNullText="@Loc.GetString("IsNullText")"
+                IsNotNullText="@Loc.GetString("IsNotNullText")"
+                ApplyFilterText="@Loc.GetString("ApplyFilterText")"
+                ClearFilterText="@Loc.GetString("ClearFilterText")">
+                <Columns>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Id" Property="Item.ProductId" Width="80px" Filterable="false"/>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Kargo" Width="70px" Filterable="false" Sortable="false">
+                    <Template Context="vm">
+                        @if (vm.Item.CargoRequestHandled == true && !string.IsNullOrEmpty(vm.Item.CargoTrackNumber))
+                        {
+                            <div class="cargo-status-shipped" title="Kargoya Verildi - @vm.Item.CargoTrackNumber">
+                                <i class="fa fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="cargo-status-pending" title="Kargoya Verilmedi">
+                                <i class="fa fa-clock" style="color: #64748b; font-size: 18px;"></i>
+                            </div>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Adı" Property="Item.ProductName" Filterable="false"/>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Adet" Property="Item.Quantity" Filterable="false" Width="50px"/>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Birim Fiyatı" Property="Item.Price" Filterable="false" Width="100px">
+                    <Template Context="vm">
+                        <span class="price-val">₺@vm.Item.Price.ToString("N2")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Toplam Fiyatı" Property="Item.TotalPrice" Filterable="false" Width="120px">
+                    <Template Context="vm">
+                        <span class="price-val">₺@vm.Item.TotalPrice.ToString("N2")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            </RadzenDataGrid>
+                </div>
+
+                @if (order != null)
+                {
+                    <div class="order-summary-footer">
+                        <div class="summary-content">
+                            <div class="summary-line">
+                                <span class="sum-label">Alt Toplam</span>
+                                <span class="price-val">₺@order.ProductTotal.ToString("N2")</span>
+                            </div>
+                            <div class="summary-line discount">
+                                <span class="sum-label">İndirim Toplamı</span>
+                                <span class="price-val">₺@((order.DiscountTotal ?? 0).ToString("N2"))</span>
+                            </div>
+                            <div class="summary-line">
+                                <span class="sum-label">Kargo Toplamı</span>
+                                <span class="price-val">₺@order.CargoPrice.ToString("N2")</span>
+                            </div>
+                            <div class="summary-line grand-total">
+                                <span class="sum-label">Toplam</span>
+                                <span class="price-val">₺@order.GrandTotal.ToString("N2")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </RadzenTabsItem>
+
+<RadzenTabsItem Text="Tedarikci Depo">
+    <div class="tab-flex-container">
+        <div class="fieldset-header-container p-3 d-flex align-items-center justify-content-between">
+            <span class="fieldset-header-title mb-0">
+                <RadzenIcon Icon="warehouse" class="fieldset-header-icon text-warning mr-2" />
+                Tedarikci Depo
+            </span>
+            <div class="d-flex gap-2">
+                <RadzenButton Click="@CheckStocks" 
+                               Text="Depo Stoklarını Kontrol Et" 
+                               Icon="refresh" 
+                               ButtonStyle="ButtonStyle.Success" 
+                               Variant="Variant.Flat" 
+                               IsBusy="@_isCheckingStocks"
+                               class="btn-stock-update-small rounded-pill" />
+                
+                <RadzenButton Click="@CreateSupplierOrder" 
+                               Text="@(IsSupplierOrderCreated ? "Sipariş Oluşturuldu" : "Tedarikçi Siparişi Oluştur")" 
+                               Icon="@(IsSupplierOrderCreated ? "done_all" : "assignment_turned_in")" 
+                               ButtonStyle="@(IsSupplierOrderCreated ? ButtonStyle.Success : ButtonStyle.Info)" 
+                               Variant="Variant.Flat" 
+                               IsBusy="@_isAddingToCart"
+                               Disabled="@((order?.Seller?.Id != 1 && order?.Seller?.Id != 3 && order?.Seller?.Id != 4) || IsSupplierOrderCreated)"
+                               class="btn-stock-update-small rounded-pill" />
+                
+                @if (order?.Seller?.Id == 1 && IsSupplierOrderCreated)
+                {
+                    <RadzenButton Click="@CancelSupplierOrder" 
+                               Text="Siparişi İptal Et" 
+                               Icon="cancel" 
+                               ButtonStyle="ButtonStyle.Danger" 
+                               Variant="Variant.Flat" 
+                               class="btn-stock-update-small rounded-pill ml-2" />
+                }
+            </div>
+        </div>
+
+        <div class="grid-wrapper">
+            <RadzenDataGrid @ref="radzenDataGrid"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                AllowPaging="false"
+                AllowSorting="false"
+                Density="Density.Compact"
+                RenderMode="TabRenderMode.Client"
+                TItem="OrderItemViewModel"
+                LoadData="@LoadData"
+                Data="orderitemsGrouped"
+                Count="@count"
+                Style="flex: 1;"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                ExpandMode="DataGridExpandMode.Single"
+                RowSelect="@(args => radzenDataGrid.ExpandRow(args))"
+                EqualsText="@Loc.GetString("EqualsText")"
+                NotEqualsText="@Loc.GetString("NotEqualsText")"
+                LessThanText="@Loc.GetString("LessThanText")"
+                LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                GreaterThanText="@Loc.GetString("GreaterThanText")"
+                GreaterThanOrEqualsText="@Loc.GetString("GreaterThanOrEqualsText")"
+                IsNullText="@Loc.GetString("IsNullText")"
+                IsNotNullText="@Loc.GetString("IsNotNullText")"
+                ApplyFilterText="@Loc.GetString("ApplyFilterText")"
+                ClearFilterText="@Loc.GetString("ClearFilterText")">
+                <GroupHeaderTemplate>
+                    <div class="cargo-group-header @(IsCreatingCargo ? "loading" : "")">
+                        <div class="cargo-icon-wrapper">
+                            <i class="fa-solid fa-box" style="color: #10b981; font-size: 18px;"></i>
+                        </div>
+                        <span class="cargo-group-title">@context.Data!.Key</span>
+                        <span class="cargo-group-count">(@context.Data.Count ürün)</span>
+                        @{
+                            var groupItems = (context.Data.Items ?? Array.Empty<object>()).Cast<OrderItemViewModel>().ToList();
+                            var isGroupShipped = groupItems.All(vm => vm.Item.CargoRequestHandled == true);
+                        }
+
+                        @if (isGroupShipped)
+                        {
+                            <span class="cargo-status-badge">
+                                <i class="fa fa-check-circle"></i> Kargolandı
+                            </span>
+                            
+                            @* Cancel button - only for Sendeo cargo *@
+                            @if (!string.IsNullOrEmpty(order?.Cargo?.Name) && order.Cargo.Name.ToLower().Contains("sendeo"))
+                            {
+                                <button class="btn-cancel-cargo" 
+                                        @onclick="@(() => CancelCargoForGroup(context.Data.Key.ToString(), groupItems))"
+                                        disabled="@IsCancellingCargo">
+                                    @if (IsCancellingCargo)
+                                    {
+                                        <i class="fa fa-spinner fa-spin"></i> <span>İptal Ediliyor...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa fa-times-circle"></i> <span>Kargoyu İptal Et</span>
+                                    }
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <button class="btn-create-cargo" 
+                                    @onclick="@(() => CreateCargoForGroup(context.Data.Key.ToString(), groupItems))"
+                                    disabled="@(IsCreatingCargo || !_isStocksChecked)">
+                                @if (IsCreatingCargo)
+                                {
+                                    <i class="fa fa-spinner fa-spin"></i> <span>Oluşturuluyor...</span>
+                                }
+                                else
+                                {
+                                    @if (!string.IsNullOrEmpty(order?.Cargo?.Name))
+                                    {
+                                        <i class="fa fa-truck"></i> <span>@order.Cargo.Name ile Gönder</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa fa-truck"></i> <span>Kargo Oluştur</span>
+                                    }
+                                }
+                            </button>
+                        }
+                    </div>
+                </GroupHeaderTemplate>
+                <Columns>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Id" Property="Item.ProductId" Width="80px" Filterable="false"/>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Kargo" Width="70px" Filterable="false" Sortable="false">
+                    <Template Context="vm">
+                        @if (vm.Item.CargoRequestHandled == true && !string.IsNullOrEmpty(vm.Item.CargoTrackNumber))
+                        {
+                            <div class="cargo-status-shipped" title="Kargoya Verildi - @vm.Item.CargoTrackNumber">
+                                <i class="fa fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="cargo-status-pending" title="Kargoya Verilmedi">
+                                <i class="fa fa-clock" style="color: #64748b; font-size: 18px;"></i>
+                            </div>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Adı" Property="Item.ProductName" Filterable="false"/>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Adet" Property="Item.Quantity" Filterable="false" Width="50px"/>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Birim Fiyatı" Property="Item.Price" Filterable="false" Width="100px">
+                    <Template Context="vm">
+                        <span class="price-val">₺@vm.Item.Price.ToString("N2")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Toplam Fiyatı" Property="Item.TotalPrice" Filterable="false" Width="120px">
+                    <Template Context="vm">
+                        <span class="price-val">₺@vm.Item.TotalPrice.ToString("N2")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Depo Stoğu" Filterable="false" Width="220px">
+                    <Template Context="vm">
+                        @{ 
+                            var stockInfo = "";
+                            var hasStockInfo = ItemStocks != null && ItemStocks.TryGetValue(vm.Item.Id, out stockInfo) && !string.IsNullOrEmpty(stockInfo);
+                        }
+
+                        @if (hasStockInfo)
+                        {
+                            @if (stockInfo == "Stok Yok" || vm.AssignedWH == "Stok Yok")
+                            {
+                                <div class="stock-status-empty">
+                                    <span class="status-dot bg-danger-dot"></span>
+                                    Stok Yok
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="stock-container">
+                                    @{
+                                        // Eşleşen depoyu bul
+                                        string? matchedWhInfo = null;
+                                        SellerAddressListDto? matchedAddress = null;
+                                        string? matchedFriendlyName = null;
+                                        bool isMatchFound = false;
+
+                                        if (!string.IsNullOrEmpty(vm.AssignedWH) && vm.AssignedWH != "API'de Mevcut" && vm.AssignedWH != "Atanmadı")
+                                        {
+                                            var warehouses = stockInfo?.Split(new[] { ',', '|' }, StringSplitOptions.RemoveEmptyEntries);
+                                            
+                                            // Önceden hesapla ve sadece sonucu render et
+                                            if (warehouses != null)
+                                            {
+                                                foreach (var WH in warehouses)
+                                                {
+                                                    var parts = WH.Split(':');
+                                                    var whName = parts[0].Trim();
+                                                    var address = GetSellerAddressByWH(whName);
+                                                    var friendlyName = address != null && !string.IsNullOrEmpty(address.Title) ? address.Title : (whName + " (Tanımsız)");
+
+                                                    if (friendlyName.Equals(vm.AssignedWH, StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        matchedWhInfo = WH;
+                                                        matchedAddress = address;
+                                                        matchedFriendlyName = friendlyName;
+                                                        isMatchFound = true;
+                                                        break; // Render tree dışında break kullanımı güvenlidir
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (isMatchFound && !string.IsNullOrEmpty(matchedWhInfo))
+                                        {
+                                            var parts = matchedWhInfo.Split(':');
+                                            var definitionMissing = matchedAddress == null;
+                                            
+                                            <div class="stock-item-wrapper">
+                                                <div class="stock-row">
+                                                    <span class="wh-name-v2 @(definitionMissing ? "text-warning" : "")">@matchedFriendlyName</span>
+                                                    @if (definitionMissing)
+                                                    {
+                                                        <i class="fa fa-triangle-exclamation text-warning ml-1" title="Depo tanımı yapılmamış"></i>
+                                                    }
+                                                    @if (parts.Length > 1)
+                                                    {
+                                                        <span class="wh-count-v2">@parts[1].Trim()</span>
+                                                    }
+                                                </div>
+                                                @if (matchedAddress != null)
+                                                {
+                                                    <RadzenButton Icon="info" 
+                                                                    ButtonStyle="ButtonStyle.Info" 
+                                                                    Size="ButtonSize.ExtraSmall" 
+                                                                    Variant="Variant.Text" 
+                                                                    Click="@(() => ShowAddressDetail(matchedAddress))" 
+                                                                    class="wh-info-btn"
+                                                                    Tooltip="@matchedAddress.Title" />
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            // Eşleşme yoksa ham veriyi göster
+                                            <div class="stock-info-text">
+                                                <i class="fa fa-info-circle mr-1 text-info"></i>
+                                                <span class="text-wrap">@stockInfo</span>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        }
+                        else if (_isCheckingStocks)
+                        {
+                            <div class="status-placeholder text-center">
+                                <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.ExtraSmall" />
+                            </div>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="AssignedWH" Property="AssignedWH" Visible="false" />
+            </Columns>
+            </RadzenDataGrid>
+                </div>
+
+                @if (order != null)
+                {
+                    <div class="order-summary-footer">
+                        <div class="summary-content">
+                            <div class="summary-line">
+                                <span class="sum-label">Alt Toplam</span>
+                                <span class="price-val">₺@order.ProductTotal.ToString("N2")</span>
+                            </div>
+                            <div class="summary-line discount">
+                                <span class="sum-label">İndirim Toplamı</span>
+                                <span class="price-val">₺@((order.DiscountTotal ?? 0).ToString("N2"))</span>
+                            </div>
+                            <div class="summary-line">
+                                <span class="sum-label">Kargo Toplamı</span>
+                                <span class="price-val">₺@order.CargoPrice.ToString("N2")</span>
+                            </div>
+                            <div class="summary-line grand-total">
+                                <span class="sum-label">Toplam</span>
+                                <span class="price-val">₺@order.GrandTotal.ToString("N2")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </RadzenTabsItem>
+
+
+<RadzenTabsItem Text="Satıcı Bilgileri">
+    <RadzenFieldset Text="Satıcı Bilgileri">
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Satıcı Adı" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                @if (order?.Seller != null)
+                {
+                    <RadzenTextBox class="rz-full-width" Value="@order.Seller.Name" Disabled="true"/>
+                }
+            </div>
+        </div>
+        
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="İl" Component="CityId" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                @if (SellerCompany != null)
+                {
+                    <RadzenDropDownDataGrid Data="@Sellercities" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" class="rz-full-width" @bind-Value="@SellerCompany.CityId" Name="CityId" Disabled FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+                }
+            </div>
+        </div>
+
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="İlçe" Component="TownId" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                @if (SellerCompany != null)
+                {
+                    <RadzenDropDownDataGrid Data="@Sellertowns" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" class="rz-full-width" @bind-Value="@SellerCompany.TownId" Disabled Name="TownId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+                }
+            </div>
+        </div>
+
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="E-Mail Adresi" Component="EmailAddress" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                @if (SellerCompany != null)
+                {
+                    <RadzenTextBox class="rz-full-width" @bind-Value="@SellerCompany.EmailAddress" Disabled Name="EmailAddress"/>
+                }
+            </div>
+        </div>
+
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Telefon Numarası" Component="PhoneNumber" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                @if (SellerCompany != null)
+                {
+                    <RadzenTextBox class="rz-full-width" @bind-Value="@SellerCompany.PhoneNumber" Disabled Name="PhoneNumber"/>
+                }
+            </div>
+        </div>
+
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Adres" Component="PhoneNumber" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                @if (SellerCompany != null)
+                {
+                    <RadzenTextArea Rows="5" class="rz-full-width" @bind-Value="@SellerCompany.Address" Disabled Name="Address"/>
+                }
+            </div>
+        </div>
+    </RadzenFieldset>
+</RadzenTabsItem>
+
+<RadzenTabsItem Text="Alıcı Bilgileri">
+    <RadzenFieldset Text="Alıcı Bilgileri">
+        <RadzenTemplateForm TItem="OrderListDto" Data="@order" Visible="@(order != null)">
+            @if (BuyerCompany != null)
+            {
+                <div class="row rz-form-row">
+                    <div class="col-md-3">
+                        <RadzenLabel Text="Alıcı Adı" class="w-100"/>
+                    </div>
+                    <div class="col-md-9">
+                        <RadzenTextBox class="rz-full-width" @bind-Value="@BuyerCompany.FirstName" Disabled="true"/>
+                    </div>
+                </div>
+            }
+            
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="İl" Component="CityId" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    @if (BuyerCompany != null)
+                    {
+                        <RadzenDropDownDataGrid Data="@Buyercities" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" class="rz-full-width" @bind-Value="@BuyerCompany.CityId" Name="CityId" Disabled FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+                    }
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="İlçe" Component="TownId" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    @if (BuyerCompany != null)
+                    {
+                        <RadzenDropDownDataGrid Data="@Buyertowns" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" class="rz-full-width" @bind-Value="@BuyerCompany.TownId" Disabled Name="TownId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+                    }
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="E-Mail Adresi" Component="EmailAddress" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    @if (BuyerCompany != null)
+                    {
+                        <RadzenTextBox class="rz-full-width" @bind-Value="@BuyerCompany.EmailAddress" Disabled Name="EmailAddress"/>
+                    }
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Telefon Numarası" Component="PhoneNumber" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    @if (BuyerCompany != null)
+                    {
+                        <RadzenTextBox class="rz-full-width" @bind-Value="@BuyerCompany.PhoneNumber" Disabled Name="PhoneNumber"/>
+                    }
+                </div>
+            </div>
+
+            <div class="row rz-form-row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Adres" Component="PhoneNumber" class="w-100"/>
+                </div>
+                <div class="col-md-9">
+                    @if (BuyerCompany != null)
+                    {
+                        <RadzenTextArea Rows="5" class="rz-full-width" @bind-Value="@BuyerCompany.Address" Disabled Name="Address"/>
+                    }
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </RadzenFieldset>
+</RadzenTabsItem>
+<RadzenTabsItem Text="Fatura Bilgileri">
+    <RadzenFieldset Text="Fatura Bilgileri">
+        @{
+            // e-Fatura kesilmişse formu pasif yap
+            var hasEInvoice = order?.LinkedInvoices != null && order.LinkedInvoices.Any(li => !string.IsNullOrEmpty(li.Ettn));
+        }
+
+        @* Bağlı Faturalar — Sadece ETTN ve PDF İndirme *@
+        @if (order?.LinkedInvoices != null && order.LinkedInvoices.Any())
+        {
+            <div class="mb-3">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fa-solid fa-file-invoice" style="color: #16a34a; font-size: 1rem;"></i>
+                    <span style="font-weight: 600; color: #15803d; font-size: 0.85rem;">Kesilen Faturalar</span>
+                </div>
+                <table class="table table-sm table-bordered mb-0" style="font-size: 0.8rem;">
+                    <thead style="background: #f1f5f9;">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">PDF</th>
+                            <th style="width: 120px;">Fatura No</th>
+                            <th>ETTN</th>
+                            <th style="width: 80px;" class="text-center">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var inv in order.LinkedInvoices)
+                        {
+                            var isEInvoiced = !string.IsNullOrEmpty(inv.Ettn);
+                            var isCancelled = inv.EInvoiceStatus?.ToUpperInvariant() == "IPTAL";
+                            var rowBg = isCancelled ? "#fff5f5" : (isEInvoiced ? "#f0fdf4" : "transparent");
+                            <tr style="background: @rowBg;">
+                                <td class="text-center align-middle">
+                                    @if (isEInvoiced && !isCancelled)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-success border-0 p-0"
+                                                @onclick="@(() => DownloadLinkedEInvoicePdf(inv))"
+                                                disabled="@(_isDownloadingEInvoice)"
+                                                title="e-Fatura PDF İndir">
+                                            @if (_isDownloadingEInvoice)
+                                            {
+                                                <i class="fas fa-spinner fa-spin" style="font-size: 1rem;"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-file-pdf" style="font-size: 1.1rem; color: #16a34a;"></i>
+                                            }
+                                        </button>
+                                    }
+                                </td>
+                                <td class="align-middle" style="font-weight: 500;">@inv.InvoiceNo</td>
+                                <td class="align-middle">
+                                    @if (isEInvoiced)
+                                    {
+                                        <code style="background: #e5e7eb; padding: 1px 6px; border-radius: 3px; font-size: 0.7rem; letter-spacing: 0.2px; user-select: all; word-break: break-all;">@inv.Ettn</code>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #94a3b8; font-size: 0.75rem;">—</span>
+                                    }
+                                </td>
+                                <td class="text-center align-middle">
+                                    @if (!string.IsNullOrEmpty(inv.EInvoiceStatus))
+                                    {
+                                        <span class="badge" style="background: @(isCancelled ? "#dc3545" : "#059669"); color: #fff; font-size: 0.65rem;">@inv.EInvoiceStatus</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (hasEInvoice)
+            {
+                <div class="alert d-flex align-items-center gap-2 py-2 px-3 mb-3" role="alert"
+                     style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid #86efac; border-radius: 8px;">
+                    <i class="fa-solid fa-circle-info" style="color: #16a34a;"></i>
+                    <span style="font-weight: 500; color: #15803d; font-size: 0.8rem;">
+                        e-Fatura kesildiği için manuel fatura yükleme devre dışıdır.
+                    </span>
+                </div>
+            }
+        }
+
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Fatura Tipi" Component="InvoiceType" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDown TValue="UserType" class="rz-full-width" Data="InvoiceType" Name="UserType" Change="(args => ChangeInvoiceType(args))" Placeholder="Seçiniz" 
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Disabled="@hasEInvoice" />
+            </div>
+        </div>
+
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Fatura Tarihi" Component="LblInvoiceDate" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenDatePicker class="rz-full-width" @bind-Value="@InvoiceUpsertDto.InvoiceDate" Name="InvoiceDate" DateFormat="dd/MM/yyyy" Disabled="@hasEInvoice" />
+            </div>
+          
+        </div>
+        <div class="row rz-form-row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Fatura Yükleyiniz" Component="InvoiceType" class="w-100"/>
+            </div>
+            <div class="col-md-9">
+                <InputFile OnChange="@(e => LoadFiles(e, "OrderInvoice"))" class="mb-2" accept="application/pdf" disabled="@hasEInvoice" />
+            </div>
+            <div class="col d-flex justify-content-end mt-btn-custom">
+                <RadzenButton  Click="SaveInvoice" ButtonStyle="ButtonStyle.Primary" Icon="save" Text="Fatura Ekle" class="mr-btn-custom" Variant="Variant.Flat" Disabled="@hasEInvoice" />
+            </div>
+        </div>
+         <RadzenDataGrid @ref="radzenDataGridInvoice"
+                            AllowFiltering="false"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="false"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="false"
+                       
+                            Data="@_orderInvoiceList"
+                            TItem="OrderInvoiceListDto"
+                            ColumnWidth="300px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            PageSize="10"
+                          >
+                <Columns>
+                    <RadzenDataGridColumn TItem="OrderInvoiceListDto" Title="Id" Property="Id" Width="50px"/>
+                    <RadzenDataGridColumn TItem="OrderInvoiceListDto" Title="Fatura Tarihi" Property="InvoiceDate" Width="50px"/>
+                    <RadzenDataGridColumn TItem="OrderInvoiceListDto" Title="Sipariş No" Property="OrderId" Width="70px"/>
+                                    <RadzenDataGridColumn TItem="OrderInvoiceListDto" Title="Fatura Tipi" Property="InvoiceType" Width="70px"/>
+                    <RadzenDataGridColumn TItem="OrderInvoiceListDto" Title="Fatura Path" Property="InvoicePath"/>
+                       <RadzenDataGridColumn TItem="OrderInvoiceListDto" Width="100px" Title="Evrak Linki">
+                                             <Template Context="OrderInvoiceListDto">
+                                                   <a href="@(BaseUrl + "/" +OrderInvoiceListDto.FileName )" target="_blank">Faturayı Aç</a>
+                                               </Template>
+                                         </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="OrderInvoiceListDto" Title="Aksiyon" Width="40px" TextAlign="TextAlign.Center">
+                        <Template Context="OrderInvoiceListDto">
+                           
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                              Shade="Shade.Dark" Variant="Variant.Flat"
+                                              Click=@(args => DeleteInvoice(OrderInvoiceListDto.Id)) @onclick:stopPropagation="true"/>
+                            
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+
+    </RadzenFieldset>
+</RadzenTabsItem>
+
+</Tabs>
+
+</RadzenTabs>
+
+</div>
+
+@code {
+    protected async Task ShowAddressDetail(SellerAddressListDto address)
+    {
+        await DialogService.OpenAsync($"Şube Detayı: {address.Title}", ds => 
+            @<div class="p-3">
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold">Şube Adı:</div>
+                    <div class="col-8">@address.Title</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold">Şehir/İlçe:</div>
+                    <div class="col-8">@address.CityName / @address.TownName</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold">Adres:</div>
+                    <div class="col-8">@address.Address</div>
+                </div>
+                @if (!string.IsNullOrEmpty(address.PhoneNumber))
+                {
+                    <div class="row mb-2">
+                        <div class="col-4 fw-bold">Telefon:</div>
+                        <div class="col-8">@address.PhoneNumber</div>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(address.Email))
+                {
+                    <div class="row mb-2">
+                        <div class="col-4 fw-bold">E-posta:</div>
+                        <div class="col-8">@address.Email</div>
+                    </div>
+                }
+                <div class="d-flex justify-content-end mt-4">
+                    <RadzenButton Text="Kapat" Click="() => ds.Close()" ButtonStyle="ButtonStyle.Light" class="rounded-pill" />
+                </div>
+            </div>, new DialogOptions { Width = "500px", Height = "auto" });
+    }
+}

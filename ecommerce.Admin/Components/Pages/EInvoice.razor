@@ -1,0 +1,258 @@
+@page "/einvoice"
+@layout MainLayout
+@using ecommerce.Odaksodt.Dtos.Invoice
+@using Radzen
+@using Radzen.Blazor
+@attribute [Authorize]
+
+<PageTitle>e-Fatura Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fa-solid fa-file-invoice me-2" style="color: #598087;"></i>
+                e-Fatura Yönetimi
+            </h1>
+        </div>
+    </div>
+
+    @* Tab Yapısı *@
+    <div class="card shadow mb-4">
+        <div class="card-header p-0" style="background: #fff; border-bottom: 2px solid #e9ecef;">
+            <ul class="nav nav-tabs" style="border-bottom: none;">
+                <li class="nav-item">
+                    <button class="nav-link @(_activeTab == 0 ? "active" : "")" 
+                            style="@(_activeTab == 0 ? "color: #598087; border-bottom: 3px solid #598087; font-weight: 600;" : "color: #6c757d;")"
+                            @onclick="() => SwitchTab(0)">
+                        <i class="fa-solid fa-inbox me-1"></i> Gelen Faturalar
+                        @if (_inboxTotalCount > 0)
+                        {
+                            <span class="badge bg-success ms-1">@_inboxTotalCount</span>
+                        }
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @(_activeTab == 1 ? "active" : "")"
+                            style="@(_activeTab == 1 ? "color: #598087; border-bottom: 3px solid #598087; font-weight: 600;" : "color: #6c757d;")"
+                            @onclick="() => SwitchTab(1)">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Giden Faturalar
+                        @if (_outboxTotalCount > 0)
+                        {
+                            <span class="badge bg-info ms-1">@_outboxTotalCount</span>
+                        }
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body">
+            @* Filtre Alanı *@
+            <div class="row mb-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Başlangıç Tarihi</label>
+                    <RadzenDatePicker @bind-Value="_startDate" DateFormat="dd.MM.yyyy" Style="width: 100%;" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Bitiş Tarihi</label>
+                    <RadzenDatePicker @bind-Value="_endDate" DateFormat="dd.MM.yyyy" Style="width: 100%;" />
+                </div>
+                @if (_activeTab == 1)
+                {
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Firma Adı / VKN</label>
+                        <RadzenTextBox @bind-Value="_searchText" Placeholder="Ara..." Style="width: 100%;" />
+                    </div>
+                }
+                <div class="col-md-3 d-flex gap-2">
+                    <RadzenButton Text="Sorgula" Icon="search" ButtonStyle="ButtonStyle.Primary" 
+                                  Click="@SearchClick" Disabled="@_isLoading" />
+                    <RadzenButton Text="Temizle" Icon="clear" ButtonStyle="ButtonStyle.Light" 
+                                  Click="@ClearFilters" Disabled="@_isLoading" />
+                </div>
+            </div>
+
+            @if (_isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border" style="color: #598087;" role="status"></div>
+                    <p class="mt-2 text-muted">Faturalar yükleniyor...</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>
+                    @_errorMessage
+                </div>
+            }
+            else
+            {
+                @* Gelen Faturalar Tab *@
+                @if (_activeTab == 0)
+                {
+                    <RadzenDataGrid TItem="InboxInvoiceItemDto"
+                                    Data="@_inboxInvoices"
+                                    Count="@_inboxTotalCount"
+                                    AllowPaging="true"
+                                    PageSize="20"
+                                    AllowSorting="true"
+                                    AllowColumnResize="true"
+                                    Density="Density.Compact"
+                                    AllowAlternatingRows="false"
+                                    PagerHorizontalAlign="HorizontalAlign.Left"
+                                    ShowPagingSummary="true"
+                                    Style="min-height: 400px;">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="DocNo" Title="Belge No" Width="160px" />
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="AccountName" Title="Firma Adı" />
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="Identifier" Title="VKN/TCKN" Width="130px" />
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="DocDate" Title="Belge Tarihi" Width="120px" FormatString="{0:dd.MM.yyyy}" />
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="Profile" Title="Profil" Width="140px">
+                                <Template Context="inv">
+                                    <RadzenBadge BadgeStyle="@(inv.Profile == "TEMELFATURA" ? BadgeStyle.Info : BadgeStyle.Warning)" Text="@inv.Profile" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="InvoiceType" Title="Fatura Tipi" Width="110px" />
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="TaxExclusiveAmount" Title="Matrah" Width="120px" FormatString="{0:N2}" TextAlign="TextAlign.Right" />
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="TaxTotal" Title="KDV" Width="100px" FormatString="{0:N2}" TextAlign="TextAlign.Right" />
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="PayableAmount" Title="Toplam" Width="130px" TextAlign="TextAlign.Right">
+                                <Template Context="inv">
+                                    <strong style="color: #598087;">@inv.PayableAmount.ToString("N2") @inv.CurrencyCode</strong>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="DocStatus" Title="Durum" Width="120px" TextAlign="TextAlign.Center">
+                                <Template Context="inv">
+                                    <RadzenBadge BadgeStyle="@GetStatusBadgeStyle(inv.DocStatus)" Text="@inv.DocStatus" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Title="İşlem" Width="80px" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+                                <Template Context="inv">
+                                    @if (!string.IsNullOrEmpty(inv.Ettn))
+                                    {
+                                        <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small"
+                                                      Click="@(() => PreviewInboxClick(inv))"
+                                                      Disabled="@(_isPreviewing)"
+                                                      title="Fatura Görüntüle" />
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="InboxInvoiceItemDto" Property="Ettn" Title="ETTN" Width="280px" />
+                        </Columns>
+                    </RadzenDataGrid>
+                }
+
+                @* Giden Faturalar Tab *@
+                @if (_activeTab == 1)
+                {
+                    <RadzenDataGrid TItem="OutboxInvoiceItemDto"
+                                    Data="@_outboxInvoices"
+                                    Count="@_outboxTotalCount"
+                                    AllowPaging="true"
+                                    PageSize="20"
+                                    AllowSorting="true"
+                                    AllowColumnResize="true"
+                                    Density="Density.Compact"
+                                    AllowAlternatingRows="false"
+                                    PagerHorizontalAlign="HorizontalAlign.Left"
+                                    ShowPagingSummary="true"
+                                    Style="min-height: 400px;">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="DocNo" Title="Belge No" Width="160px" />
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="AccountName" Title="Firma Adı" />
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="Identifier" Title="VKN/TCKN" Width="130px" />
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="DocDate" Title="Belge Tarihi" Width="120px" FormatString="{0:dd.MM.yyyy}" />
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="Profile" Title="Profil" Width="140px">
+                                <Template Context="inv">
+                                    <RadzenBadge BadgeStyle="@(inv.Profile == "TEMELFATURA" ? BadgeStyle.Info : BadgeStyle.Warning)" Text="@inv.Profile" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="InvoiceType" Title="Fatura Tipi" Width="110px" />
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="TaxExclusiveAmount" Title="Matrah" Width="120px" FormatString="{0:N2}" TextAlign="TextAlign.Right" />
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="TaxTotal" Title="KDV" Width="100px" FormatString="{0:N2}" TextAlign="TextAlign.Right" />
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="PayableAmount" Title="Toplam" Width="130px" TextAlign="TextAlign.Right">
+                                <Template Context="inv">
+                                    <strong style="color: #598087;">@inv.PayableAmount.ToString("N2") @inv.CurrencyCode</strong>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="DocStatus" Title="Durum" Width="120px" TextAlign="TextAlign.Center">
+                                <Template Context="inv">
+                                    <RadzenBadge BadgeStyle="@GetStatusBadgeStyle(inv.DocStatus)" Text="@inv.DocStatus" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Title="İşlem" Width="110px" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+                                <Template Context="inv">
+                                    @if (!string.IsNullOrEmpty(inv.Ettn))
+                                    {
+                                        <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small"
+                                                      Click="@(() => PreviewOutboxClick(inv))"
+                                                      Disabled="@(_isPreviewing)"
+                                                      title="Fatura Görüntüle" class="me-1" />
+                                        <RadzenButton Icon="download" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"
+                                                      Click="@(() => DownloadOutboxClick(inv))"
+                                                      Disabled="@(_isDownloading)"
+                                                      title="Fatura İndir" />
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="OutboxInvoiceItemDto" Property="Ettn" Title="ETTN" Width="280px" />
+                        </Columns>
+                    </RadzenDataGrid>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@* Fatura Önizleme Modal *@
+@if (_showPreviewModal)
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div style="background: #fff; border-radius: 12px; width: 90vw; max-width: 1100px; height: 85vh; box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden;">
+            @* Modal Başlık *@
+            <div style="background: linear-gradient(135deg, #598087 0%, #3d5a5e 100%); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <span style="color: #fff; font-weight: 600; font-size: 15px;">
+                    <i class="fa-solid fa-eye me-2"></i>
+                    Fatura Önizleme — @_previewDocNo
+                </span>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.ExtraSmall"
+                              Click="@ClosePreview" title="Kapat" />
+            </div>
+
+            @* Modal İçerik *@
+            <div style="flex: 1; overflow: hidden; position: relative;">
+                @if (_isPreviewLoading)
+                {
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                        <div class="spinner-border" style="color: #598087;" role="status"></div>
+                        <span class="ms-3 text-muted">Fatura yükleniyor...</span>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(_previewError))
+                {
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 40px;">
+                        <div class="alert alert-danger d-flex align-items-center" style="max-width: 500px;">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i>
+                            @_previewError
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <iframe srcdoc="@_previewHtml" style="width: 100%; height: 100%; border: none;"></iframe>
+                }
+            </div>
+
+            @* Modal Alt Butonlar *@
+            <div style="padding: 10px 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: end; gap: 8px; flex-shrink: 0;">
+                @if (!string.IsNullOrEmpty(_previewHtml))
+                {
+                    <RadzenButton Text="Yeni Sekmede Aç" Icon="open_in_new" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small"
+                                  Click="@OpenPreviewInNewTab" />
+                }
+                <RadzenButton Text="Kapat" Icon="close" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small"
+                              Click="@ClosePreview" />
+            </div>
+        </div>
+    </div>
+}

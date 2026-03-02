@@ -1,0 +1,63 @@
+﻿@page "/upsert-productImage"
+@using ecommerce.Admin.Domain.Dtos.ProductImageDto;
+@attribute [Authorize]
+
+
+<PageTitle>Ürün Görseli Ekle/Düzenle</PageTitle>
+<RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kategori Kayıt Edilemedi!</RadzenAlert>
+<RadzenTemplateForm TItem="ProductImageUpsertDto" Data="@productImage" Visible="@(productImage != null)" Submit="@FormSubmit">
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Dosya" Component="File" style="width: 100%" />
+        </div>
+        <div class="col-md-9">
+            <InputFile OnChange="LoadFiles" class="mb-2" accept="image/webp,image/jpg,image/png,image/jpeg" />
+        </div>
+    </div>
+
+    @if (Id.HasValue)
+    {
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Yüklenen Görsel" Component="File" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                @if (productImage.FileName != null)
+                {
+                    if (productImage.FileName.Contains(".png") == true)
+                    {
+                        <RadzenImage Path="@($"data:image/png;base64,{Convert.ToBase64String(productImage.Base64Str)}")" Style="width: 2rem;" />
+                    }
+                   
+                    else if (productImage.FileName.Contains(".jpeg") == true || productImage.FileName.Contains(".jpg") == true)
+                    {
+                        <RadzenImage Path="@($"data:image/jpeg;base64,{Convert.ToBase64String(productImage.Base64Str)}")" Style="width: 2rem;" />
+                    }
+                    else if (productImage.FileName.Contains(".gif") == true)
+                    {
+                        <RadzenImage Path="@($"data:image/gif;base64,{Convert.ToBase64String(productImage.Base64Str)}")" Style="width: 2rem;" />
+                    }
+                }
+            </div>
+        </div>
+    }
+
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Sıra" Component="Order" style="width: 100%" />
+        </div>
+        <div class="col-md-9">
+            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@productImage.Order" Name="Order" Min="@productImageMaxOrderNumber" Max="@productImageMaxOrderNumber" />
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="IsSaveButtonDisabled" />
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+        </div>
+    </div>
+</RadzenTemplateForm>

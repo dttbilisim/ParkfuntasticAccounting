@@ -1,0 +1,38 @@
+@page "/product-image-import"
+@layout MainLayout
+
+<PageTitle>Ürün Resim Watermark</PageTitle>
+<p>@message</p>
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+              <RadzenText Text="Toplu Ürün Fotoğrafı Aktarımı" TextStyle="TextStyle.H5" class="rz-m-0" />   
+        </div>
+  
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+
+    
+        <div class="col-md-9">
+            <InputFile OnChange="LoadFiles" class="mb-2" accept="image/webp,image/jpg,image/png,image/jpeg" multiple  />
+        </div>
+    </div>
+</RadzenCard>
+
+   
+
+@code {
+    public  string message;
+    
+}
+    
+
+
+
+
+
+
+
+

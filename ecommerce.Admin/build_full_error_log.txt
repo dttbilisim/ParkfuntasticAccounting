@@ -1,0 +1,7 @@
+ 12:11>/Users/sezgin/Repos/ecommerce/ecommerce.Admin.Services/Concreate/CorporationService.cs(46,79): error CS0246: The type or namespace name 'ITenantProvider' could not be found (are you missing a using directive or an assembly reference?) [/Users/sezgin/Repos/ecommerce/ecommerce.Admin.Services/ecommerce.Admin.Domain.csproj]
+
+Build FAILED.
+    675 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:03.53

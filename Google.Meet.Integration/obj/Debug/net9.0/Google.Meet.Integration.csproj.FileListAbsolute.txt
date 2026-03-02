@@ -1,0 +1,13 @@
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/bin/Debug/net9.0/Google.Meet.Integration.deps.json
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/bin/Debug/net9.0/Google.Meet.Integration.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/bin/Debug/net9.0/Google.Meet.Integration.pdb
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.csproj.AssemblyReference.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.GeneratedMSBuildEditorConfig.editorconfig
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.AssemblyInfoInputs.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.AssemblyInfo.cs
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.csproj.CoreCompileInputs.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.sourcelink.json
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/refint/Google.Meet.Integration.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/Google.Meet.Integration.pdb
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/Google.Meet.Integration/obj/Debug/net9.0/ref/Google.Meet.Integration.dll

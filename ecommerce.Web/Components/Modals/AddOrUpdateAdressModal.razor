@@ -1,0 +1,260 @@
+@using ecommerce.Core.Entities.Authentication
+@using ecommerce.Core.Utils
+@using ecommerce.Web.Utility
+
+
+<RadzenTemplateForm TItem="UserAddress" Data="EditableAddress" Submit="SaveChanges">
+    <div class="modal fade show modern-address-modal" style="display: block;" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <!-- Modern Header -->
+                <div class="modal-header border-0 pb-0">
+                    <div class="modal-title-wrapper">
+                        <i class="ri-map-pin-user-fill modal-icon"></i>
+                        <h5 class="modal-title mb-0">@lang["AddNewAddress"]</h5>
+                    </div>
+                    @* <button type="button" class="btn-close-modern" @onclick="CloseModal"> *@
+                    @*     <i class="ri-close-line"></i> *@
+                    @* </button> *@
+                </div>
+
+                <!-- Compact Body -->
+                <div class="modal-body pt-3">
+                    <div class="form-grid">
+                        <!-- Row 1: Adres İsmi & Ad Soyad -->
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="ri-bookmark-line"></i>
+                                @lang["AdressName"]
+                            </label>
+                            <RadzenTextBox @bind-Value="EditableAddress.AddressName" 
+                                         Name="AdressName" 
+                                         Placeholder="@lang["AdressName"]" 
+                                         class="input-modern" />
+                            <RadzenRequiredValidator Component="AdressName" Text="@lang["RequiredField"]" />
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="ri-user-line"></i>
+                                @lang["FullName"]
+                            </label>
+                            <RadzenTextBox @bind-Value="EditableAddress.FullName" 
+                                         Name="FullName" 
+                                         Placeholder="@lang["FullName"]" 
+                                         class="input-modern" />
+                            <RadzenRequiredValidator Component="FullName" Text="@lang["RequiredField"]" />
+                        </div>
+
+                        <!-- Row 2: Email & Telefon -->
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="ri-mail-line"></i>
+                                @lang["Address.Email"]
+                            </label>
+                            <RadzenTextBox @bind-Value="EditableAddress.Email" 
+                                         Name="Email" 
+                                         Placeholder="@lang["Address.Email"]" 
+                                         class="input-modern" />
+                            <RadzenRequiredValidator Component="Email" Text="@lang["RequiredField"]" />
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="ri-phone-line"></i>
+                                @lang["AddressPhone"]
+                            </label>
+                            <RadzenTextBox @bind-Value="EditableAddress.PhoneNumber" 
+                                         Name="PhoneNumber" 
+                                         Placeholder="@lang["AddressPhone"]" 
+                                         class="input-modern" />
+                            <RadzenRequiredValidator Component="PhoneNumber" Text="@lang["RequiredField"]" />
+                        </div>
+
+                        <!-- Row 3: İl & İlçe -->
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="ri-map-pin-line"></i>
+                                @lang["AdressCity"]
+                            </label>
+                            <RadzenDropDown TValue="int?" Name="CityId"
+                                          @bind-Value="EditableAddress.CityId"
+                                          Change="@OnCityChanged"
+                                          Data="@CityList"
+                                          TextProperty="Name"
+                                          ValueProperty="Id"
+                                          Placeholder="@lang["CitySelect"]"
+                                          
+                                          class="dropdown-modern" />
+                            <RadzenRequiredValidator Component="CityId" Text="@lang["RequiredField"]" />
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="ri-building-line"></i>
+                                @lang["AdressTown"]
+                            </label>
+                            <RadzenDropDown TValue="int?" Name="TownId"
+                                          @bind-Value="EditableAddress.TownId"
+                                          Change="@OnTownChanged"
+                                          Data="@TownList"
+                                          TextProperty="Name"
+                                          ValueProperty="Id"
+                                          Placeholder="@lang["TownSelect"]"
+                                          
+                                          class="dropdown-modern" />
+                            <RadzenRequiredValidator Component="TownId" Text="@lang["RequiredField"]" />
+                        </div>
+
+                        @* TC Kimlik No with IsDefault Checkbox - Same Row *@
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="ri-id-card-line"></i>
+                                TC Kimlik No
+                            </label>
+                            <div class="tc-container">
+                                <RadzenTextBox @bind-Value="EditableAddress.IdentityNumber" 
+                                             Name="IdentityNumber" 
+                                             Placeholder="TC Kimlik Numarası" 
+                                             MaxLength="11"
+                                             class="input-modern tc-input-wrapper" />
+                                <div class="default-address-wrapper">
+                                    <RadzenCheckBox @bind-Value="EditableAddress.IsDefault" Name="IsDefault" />
+                                    <label for="IsDefault" class="default-address-label">
+                                        <i class="ri-star-line" style="color: #067a65;"></i>
+                                        Varsayılan Adres
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Conditional Vergi Fields for B2B Users ONLY *@
+                        @if (CurrentUser != null && CurrentUser.WebUserType == ecommerce.Core.Utils.WebUserType.B2B)
+                        {
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">
+                                    <i class="ri-building-4-line"></i>
+                                    Vergi Dairesi
+                                </label>
+                                <RadzenTextBox @bind-Value="CurrentUser.VatOffice" 
+                                             Name="VatOffice" 
+                                             Placeholder="Vergi Dairesi" 
+                                             class="input-modern" />
+                            </div>
+
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">
+                                    <i class="ri-file-list-3-line"></i>
+                                    Vergi Numarası
+                                </label>
+                                <RadzenTextBox @bind-Value="CurrentUser.VatNumber" 
+                                             Name="VatNumber" 
+                                             Placeholder="Vergi Numarası" 
+                                             MaxLength="10"
+                                             class="input-modern" />
+                            </div>
+                        }
+
+                        <!-- Row 4: Adres Detayı (Full Width) -->
+                        <div class="form-group-modern full-width">
+                            <label class="form-label-modern">
+                                <i class="ri-map-2-line"></i>
+                                @lang["AddressDetail"]
+                            </label>
+                            <RadzenTextArea @bind-Value="EditableAddress.Address" 
+                                          Name="Address" 
+                                          Placeholder="@lang["AddressDetail"]" 
+                                          class="textarea-modern"
+                                          Rows="2" />
+                            <RadzenRequiredValidator Component="Address" Text="@lang["RequiredField"]" />
+                        </div>
+                        
+                        @* Invoice Address Section *@
+                        <div class="form-group-modern full-width invoice-section">
+                            <div class="invoice-checkbox-container">
+                                <RadzenCheckBox @bind-Value="EditableAddress.IsSameAsDeliveryAddress" Name="IsSameAsDeliveryAddress" />
+                                <label for="IsSameAsDeliveryAddress" class="invoice-checkbox-label">
+                                    <i class="ri-file-list-3-line" style="color: #067a65;"></i>
+                                    Fatura Adresi Teslimat Adresi ile Aynı
+                                </label>
+                            </div>
+                            
+                            @if (!EditableAddress.IsSameAsDeliveryAddress)
+                            {
+                                <div class="row g-2 invoice-fields-row">
+                                    @* Fatura İl *@
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="ri-map-pin-line"></i>
+                                                Fatura İl
+                                            </label>
+                                            <RadzenDropDown TValue="int?" Name="InvoiceCityId"
+                                                          @bind-Value="EditableAddress.InvoiceCityId"
+                                                          Change="@OnInvoiceCityChanged"
+                                                          Data="@InvoiceCityList"
+                                                          TextProperty="Name"
+                                                          ValueProperty="Id"
+                                                          Placeholder="Fatura İli Seçin"
+                                                          
+                                                          class="dropdown-modern" />
+                                        </div>
+                                    </div>
+                                    
+                                    @* Fatura İlçe *@
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="ri-building-line"></i>
+                                                Fatura İlçe
+                                            </label>
+                                            <RadzenDropDown TValue="int?" Name="InvoiceTownId"
+                                                          @bind-Value="EditableAddress.InvoiceTownId"
+                                                          Change="@OnInvoiceTownChanged"
+                                                          Data="@InvoiceTownList"
+                                                          TextProperty="Name"
+                                                          ValueProperty="Id"
+                                                          Placeholder="Fatura İlçesi Seçin"
+                                                          
+                                                          class="dropdown-modern" />
+                                        </div>
+                                    </div>
+                                    
+                                    @* Fatura Adres Detayı *@
+                                    <div class="col-12">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="ri-map-2-line"></i>
+                                                Fatura Adres Detayı
+                                            </label>
+                                            <RadzenTextArea @bind-Value="EditableAddress.InvoiceAddress" 
+                                                          Name="InvoiceAddress" 
+                                                          Placeholder="Fatura Adres Detayı" 
+                                                          class="textarea-modern"
+                                                          Rows="3" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modern Footer -->
+                <div class="modal-footer border-0 pt-0">
+                    <RadzenButton Text="@lang["Save"]" 
+                                ButtonStyle="ButtonStyle.Primary" 
+                                Type="Submit" 
+                                Icon="save" 
+                                Class="btn-save-modern" />
+                    <RadzenButton Text="@lang["Cancel"]" 
+                                ButtonStyle="ButtonStyle.Light" 
+                                Click="@CloseModal" 
+                                Icon="cancel" 
+                                Class="btn-cancel-modern" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+</RadzenTemplateForm>

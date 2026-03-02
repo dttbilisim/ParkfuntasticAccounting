@@ -1,0 +1,375 @@
+@using System.Linq
+@using ecommerce.Core.Utils
+@using ecommerce.EFCore.Migrations
+@using ecommerce.Web.Domain.Dtos.Cart
+
+<!-- Desktop Layout (md and up) -->
+@if(Product?.Any() == true){
+    foreach(var product in Product){
+        <div class="col-xxl-3 col-xl-4 col-lg-6 col-md-6 h-100" @key="@("desk-" + product.SellerItemId)">
+            <div class="product-box-4 h-100">
+                <a href="/product-detail?productId=@product.SellerItemId&brandId=@product.Brand?.Id">
+                    <div class="product-image product-image-2" style="position: relative;">
+                        <img src="@_appStateManager.GetProductImageUrl(product.Images)" 
+                            loading="lazy"
+                            class="img-fluid blur-up lazyload" alt="@product.ProductName"
+                            onerror="@_appStateManager.GetImageFallbackScript()">
+
+                        <span class="price-badge">
+                            @product.SalePrice.ToString("C")
+                        </span>
+                        <ul class="option">
+                            <li data-bs-toggle="tooltip" data-bs-placement="top" title="@lang["AddToWishList"]">
+                                <a href="javascript:void(0)" class="notifi-wishlist" @onclick="() => ToggleFavorite(product!)">
+                                    <i class="iconly-Heart icli"
+                                       style="color:inherit">
+                                    </i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </a>
+
+                <div class="product-detail">
+                    <div class="text-center mt-2">
+                        @if(product.Brand != null && !string.IsNullOrEmpty(product.Brand.Name)){
+                            <span class="badge bg-white text-dark mb-2 d-inline-block px-2 py-1 brand-badge" style="font-size: 0.75rem; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                                @product.Brand.Name
+                            </span>
+                        }
+                        <div class="stock-status @(product.Stock > 0 ? "in-stock" : "out-of-stock")">
+                            <i class="fa-solid @(product.Stock > 0 ? "fa-box" : "fa-circle-exclamation")"></i>
+                            <span>
+                                @(product.Stock > 0
+                                    ? $"{lang["Product.InStockLabel"] ?? "Stokta"}"
+                                    : lang["Product.OutOfStockLabel"] ?? "Stokta Yok")
+                            </span>
+                            @if (product.SalePrice > 0 && !string.IsNullOrEmpty(product.SellerName))
+                            {
+                                <span class="ms-1" style="font-weight: 400; opacity: 0.7; font-size: 0.9em;">(@product.SellerName)</span>
+                            }
+                        </div>
+                        <a href="/product-detail?productId=@product.SellerItemId&brandId=@product.Brand?.Id">
+                            <h5 class="name text-title text-break product-name-fixed-height" title="@product.ProductName">
+                                @product.ProductName
+                            </h5>
+                        </a>
+                        @if(!string.IsNullOrEmpty(product.GroupCode))
+                        {
+                            <div class="d-flex flex-wrap align-items-center gap-1 mt-1 mb-2" style="min-height: 24px;">
+                                <span class="text-secondary fw-bold me-1" style="font-size: 10px; opacity: 0.8;">OEM:</span>
+                                <span class="d-inline-flex align-items-center justify-content-center"
+                                      style="font-size: 9px; background-color: #f1f5f9; color: #334155; padding: 2px 5px; border-radius: 3px; border: 1px solid #e2e8f0; font-weight: 600;">
+                                    @product.GroupCode
+                                </span>
+                            </div>
+                        }
+                    @if(IsPerfectCompatibility(product)){
+                        var matchingCars = GetMatchingCarSummaries(product);
+                        var bannerClass = matchingCars.Count > 0 ? "compatibility-banner has-tooltip" : "compatibility-banner";
+                        <div class="@bannerClass">
+                            <span class="compatibility-banner-icon">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </span>
+                            <span class="compatibility-banner-title">@lang["Product.PerfectCompatibilityBadge"]</span>
+                            @if(matchingCars.Count > 0){
+                                <div class="compatibility-tooltip">
+                                    @foreach(var carSummary in matchingCars.Distinct()){
+                                        <div @key="carSummary" class="compatibility-tooltip-item">@carSummary</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    </div>
+
+                    <div class="add-to-cart-box mt-2">
+
+                        @{
+                            var qty = CartResult?.Sellers?
+                                .SelectMany(s => s.Items)
+                                .Where(i => i.ProductSellerItemId == product.SellerItemId)
+                                .Select(i => i.Quantity)
+                                .DefaultIfEmpty(0)
+                                .Sum() ?? 0;
+                            if(qty > 0){
+                                <div @key="@("qty-" + product.SellerItemId)">
+                                <div class="cart_qty qty-box" style="display:block !important; visibility:visible; opacity:1;">
+                                        <div class="input-group position-relative">
+                                            @{
+                                                var minQty = Math.Max(1, (int)product.MinSaleAmount);
+                                                var isAtMinimum = qty <= minQty;
+                                                var qtyToRemove = isAtMinimum ? qty : Math.Max(1, (int)product.Step);
+                                            }
+                                            <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId}, false, qtyToRemove)" class="qty-left-minus" data-type="minus" data-field="" disabled="@BusyProducts.Contains(product.SellerItemId)">
+                                                <i class="fa-solid @(isAtMinimum ? "fa-trash" : "fa-minus")"></i>
+                                            </button>
+                                            <input class="form-control input-number qty-input" id="@product.ProductId" value="@qty" readonly type="number">
+                                            <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId}, true, Math.Max(1, (int)product.Step))" class="qty-right-plus" data-type="plus" data-field="" disabled="@(product.MaxSaleAmount > 0 && qty + Math.Max(1, (int)product.Step) > product.MaxSaleAmount)">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+                                </div>
+                                </div>
+                            } else {
+                                <button @onclick="() => HandleProductAddToCart(product)" class="btn btn-add-cart addcart-button" tabindex="0">
+                                    @lang["AddButon"]
+                                    <span class="add-icon">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </span>
+                                </button>
+                            }
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<!-- Desktop Layout for Favorites -->
+@if(FavoriteProducts?.Any() == true){
+    foreach(var product in FavoriteProducts){
+        <div class="col-xxl-3 col-xl-4 col-lg-6 col-md-6 h-100" @key="@("fav-desk-" + product.Id)">
+            <div class="product-box-4 h-100">
+                <a href="/product-detail?productId=@(product.SellerItemId ?? product.Id)">
+                    <div class="product-image product-image-2" style="position: relative;">
+                        <img src="@_appStateManager.GetProductImageUrl(product.FileName, null)" loading="lazy" class="img-fluid blur-up lazyload" alt="@product.Name"
+                             onerror="@_appStateManager.GetImageFallbackScript()">
+                    </div>
+                </a>
+
+                <div class="product-detail">
+                    <div class="text-center mt-2">
+                        <a href="/product-detail?productId=@(product.SellerItemId ?? product.Id)">
+                            <h5 class="name text-title text-break product-name-fixed-height" title="@product.Name">
+                                @product.Name
+                            </h5>
+                        </a>
+                        @{
+                            var favoriteInStock = product.SellerItemId.HasValue;
+                            var favoriteStockText = favoriteInStock
+                                ? lang["Product.InStockLabel"] ?? "Stokta"
+                                : lang["Product.OutOfStockLabel"] ?? "Stokta Yok";
+                        }
+                        <div class="stock-status @(favoriteInStock ? "in-stock" : "out-of-stock")">
+                            <i class="fa-solid @(favoriteInStock ? "fa-box" : "fa-circle-exclamation")"></i>
+                            <span>@favoriteStockText</span>
+                        </div>
+                        @if(product is{CategoryName: not null}){
+                            <span class="badge bg-light text-dark mt-2">@product.CategoryName</span>
+                        }
+                    </div>
+
+                    <div class="add-to-cart-box mt-2">
+                        @{
+                            // Check if product is in cart
+                            var qty = product.SellerItemId.HasValue ? (CartResult?.Sellers?
+                                .SelectMany(s => s.Items)
+                                .Where(i => i.ProductSellerItemId == product.SellerItemId.Value)
+                                .Select(i => i.Quantity)
+                                .DefaultIfEmpty(0)
+                                .Sum() ?? 0) : 0;
+                        }
+                        @if(qty > 0 && product.SellerItemId.HasValue){
+                            <div @key="@("fav-qty-" + product.Id)">
+                                <div class="cart_qty qty-box" style="display:block !important; visibility:visible; opacity:1;">
+                                    <div class="input-group position-relative">
+                                        <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId.Value}, false)" class="qty-left-minus" data-type="minus">
+                                            <i class="fa-solid @(qty == 1 ? "fa-trash" : "fa-minus")"></i>
+                                        </button>
+                                        <input class="form-control input-number qty-input" id="@product.Id" value="@qty" readonly type="number">
+                                        <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId.Value}, true)" class="qty-right-plus" data-type="plus">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        } else if(product.SellerItemId.HasValue) {
+                            <button @onclick="() => AddToCart(product)" class="btn btn-add-cart addcart-button" tabindex="0">
+                                @lang["AddButon"]
+                                <span class="add-icon">
+                                    <i class="fa-solid fa-plus"></i>
+                                </span>
+                            </button>
+                        } else {
+                            <button class="btn btn-secondary addcart-button" tabindex="0" disabled>
+                                @lang["OutOfStock"]
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<!-- Mobile Layout (sm and down) - Works for both regular products and favorites -->
+@if((Product?.Any() == true) || (FavoriteProducts?.Any() == true)){
+    <div class="mobile-products-container d-block d-md-none">
+        <div class="mobile-products-grid">
+            @if(Product?.Any() == true){
+                @foreach(var product in Product){
+                    <div @key="@("mob-" + product.SellerItemId)" class="mobile-product-card-wrapper">
+                        <div class="mobile-product-card">
+                            <!-- Product Image & Actions -->
+                            <div class="mobile-product-image-container">
+                                <a href="/product-detail?productId=@product.SellerItemId&brandId=@product.Brand?.Id" class="mobile-product-link">
+                                    <img src="@_appStateManager.GetProductImageUrl(product.Images)"
+                                         loading="lazy"
+                                         class="mobile-product-image"
+                                         alt="@product.ProductName"
+                                         onerror="@_appStateManager.GetImageFallbackScript()">
+                                </a>
+                                <span class="price-badge">
+                                    @product.SalePrice.ToString("C")
+                                </span>
+/* ... (omitting middle unchanged parts for brevity if tool supports it, but replace_file_content needs contiguous block. I will do separate calls or one big block if close) */
+/* The lines are far apart (244 and 335). I will do separate calls. */
+                                <ul class="mobile-product-options">
+                                    <li data-bs-toggle="tooltip" data-bs-placement="top" title="@lang["AddToWishList"]">
+                                        <a href="javascript:void(0)" class="notifi-wishlist" @onclick="() => ToggleFavorite(product!)">
+                                            <i class="iconly-Heart icli"
+                                               style="color:inherit">
+                                            </i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Product Details -->
+                            <div class="mobile-product-info">
+                                <div class="mobile-product-details">
+                                    @if(product.Brand != null && !string.IsNullOrEmpty(product.Brand.Name)){
+                                        <span class="mobile-product-brand">@product.Brand.Name</span>
+                                    }
+                                    <a href="/product-detail?productId=@product.SellerItemId&brandId=@product.Brand?.Id" class="mobile-product-link">
+                                        <h6 class="mobile-product-name">@product.ProductName</h6>
+                                    </a>
+                                @if(IsPerfectCompatibility(product)){
+                                    var matchingCars = GetMatchingCarSummaries(product);
+                                    var bannerClass = matchingCars.Count > 0 ? "compatibility-banner mobile has-tooltip" : "compatibility-banner mobile";
+                                    <div class="@bannerClass">
+                                        <span class="compatibility-banner-icon">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                        </span>
+                                        <span class="compatibility-banner-title">@lang["Product.PerfectCompatibilityBadge"]</span>
+                                        @if(matchingCars.Count > 0){
+                                            <div class="compatibility-tooltip">
+                                                @foreach(var carSummary in matchingCars.Distinct()){
+                                                    <div @key="carSummary" class="compatibility-tooltip-item">@carSummary</div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                </div>
+
+                                <!-- Price & Add to Cart -->
+                                <div class="mobile-product-actions">
+                                    @{
+                                        var qty = CartResult?.Sellers?
+                                            .SelectMany(s => s.Items)
+                                            .Where(i => i.ProductSellerItemId == product.SellerItemId)
+                                            .Select(i => i.Quantity)
+                                            .DefaultIfEmpty(0)
+                                            .Sum() ?? 0;
+                                    }
+                                    @if(qty > 0){
+                                        <div @key="@("mob-qty-" + product.SellerItemId)" class="mobile-cart-qty">
+                                            @{
+                                                var minQtyMobile = Math.Max(1, (int)product.MinSaleAmount);
+                                                var isAtMinimumMobile = qty <= minQtyMobile;
+                                                var qtyToRemoveMobile = isAtMinimumMobile ? qty : Math.Max(1, (int)product.Step);
+                                            }
+                                            <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId}, false, qtyToRemoveMobile)" class="mobile-qty-btn">
+                                                <i class="fa-solid @(isAtMinimumMobile ? "fa-trash" : "fa-minus")"></i>
+                                            </button>
+                                            <span class="mobile-qty-value">@qty</span>
+                                            <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId}, true, Math.Max(1, (int)product.Step))" class="mobile-qty-btn" disabled="@(product.MaxSaleAmount > 0 && qty + Math.Max(1, (int)product.Step) > product.MaxSaleAmount)">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    } else {
+                                        <button @onclick="() => HandleProductAddToCart(product)" class="mobile-add-to-cart-btn">
+                                            <i class="fa-solid fa-plus me-1"></i>
+                                            @lang["AddButon"]
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if(FavoriteProducts?.Any() == true){
+                @foreach(var product in FavoriteProducts){
+                    <div @key="@("fav-mob-" + product.Id)" class="mobile-favorite-card-wrapper">
+                        <div class="mobile-favorite-card">
+                            <!-- Product Image & Remove Button -->
+                            <div class="mobile-favorite-image-container">
+                                <a href="/product-detail?productId=@(product.SellerItemId ?? product.Id)" class="mobile-product-link">
+                                    <img src="@_appStateManager.GetProductImageUrl(product.FileName, null)"
+                                         loading="lazy"
+                                         class="mobile-favorite-image"
+                                         alt="@product.Name"
+                                         onerror="@_appStateManager.GetImageFallbackScript()">
+                                </a>
+                                <button class="mobile-favorite-remove" @onclick="() => RemoveFromFavorite(product.Id)">
+                                    <i class="fa-solid fa-x"></i>
+                                </button>
+                            </div>
+
+                            <!-- Product Details -->
+                            <div class="mobile-favorite-info">
+                                <div class="mobile-favorite-details">
+                                    <a href="/product-detail?productId=@(product.SellerItemId ?? product.Id)" class="mobile-product-link">
+                                        <h6 class="mobile-favorite-title">@product.Name</h6>
+                                    </a>
+                                    @if(product is{CategoryName: not null}){
+                                        <span class="mobile-favorite-category">@product.CategoryName</span>
+                                    }
+                                    <p class="mobile-favorite-description">@product.Description</p>
+                                </div>
+
+                                <!-- Price & Add to Cart -->
+                                <div class="mobile-favorite-actions">
+                                    @{
+                                        var favQty = product.SellerItemId.HasValue ? (CartResult?.Sellers?
+                                            .SelectMany(s => s.Items)
+                                            .Where(i => i.ProductSellerItemId == product.SellerItemId.Value)
+                                            .Select(i => i.Quantity)
+                                            .DefaultIfEmpty(0)
+                                            .Sum() ?? 0) : 0;
+                                    }
+                                    @if(favQty > 0 && product.SellerItemId.HasValue){
+                                        <div @key="@("fav-mob-qty-" + product.Id)" class="mobile-cart-qty">
+                                            <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId.Value}, false)" class="mobile-qty-btn">
+                                                <i class="fa-solid @(favQty == 1 ? "fa-trash" : "fa-minus")"></i>
+                                            </button>
+                                            <span class="mobile-qty-value">@favQty</span>
+                                            <button @onclick="() => CartInsert(new CartItemUpsertDto{Quantity=1,ProductSellerItemId=product.SellerItemId.Value}, true)" class="mobile-qty-btn">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    } else if(product.SellerItemId.HasValue) {
+                                        <button class="mobile-favorite-add-btn" @onclick="() => AddToCart(product)">
+                                            <i class="fa-solid fa-plus me-1"></i>
+                                            @lang["AddButon"]
+                                        </button>
+                                    } else {
+                                        <button class="mobile-favorite-add-btn" disabled>
+                                            @lang["OutOfStock"]
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}

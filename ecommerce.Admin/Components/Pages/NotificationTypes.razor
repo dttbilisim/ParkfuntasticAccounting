@@ -1,0 +1,51 @@
+﻿@page "/notificationtypes"
+@using ecommerce.Admin.Domain.Dtos.NotificationTypeDto
+@using ecommerce.Admin.Components.Layout
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Bildirim Tipi Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Bildirim Tipi Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Bildirim Tipi Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" 
+                            LoadData="@LoadData" 
+                            Data="@notificationTypes" 
+                            Count="@count" 
+                            TItem="NotificationTypeListDto" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="NotificationTypeListDto" Property="Id" Title="#" Width="70px" TextAlign="TextAlign.Center"/>
+                    <RadzenDataGridColumn TItem="NotificationTypeListDto" Property="Name" Title="Adı" />
+                    <RadzenDataGridColumn TItem="NotificationTypeListDto" Title="İşlemler" TextAlign="TextAlign.Center" Width="100px" Filterable="false" Sortable="false">
+                        <Template Context="notificationType">
+                             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(notificationType))" @onclick:stopPropagation="true" class="me-1"/>
+                             <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => GridDeleteButtonClick(args, notificationType))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

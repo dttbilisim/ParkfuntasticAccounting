@@ -1,0 +1,85 @@
+@page "/upsert-bannersubitems"
+@using ecommerce.Admin.Domain.Dtos.BannerSubItemDto;
+@attribute [Authorize]
+
+<PageTitle>Banner Item Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Banner Alt Öğesi Kayıt Edilemedi!</RadzenAlert>
+
+    <RadzenTemplateForm TItem="BannerSubItemUpsertDto" Data="@BannerSubItem" Visible="@(BannerSubItem != null)" Submit="@FormSubmit">
+
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Banner Alt Öğe Adı" Component="Title" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@BannerSubItem.Title" Name="Title" />
+                <RadzenRequiredValidator Component="Title" Text="Başlık Girmelisiniz" />
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Banner Sırası" Component="Order" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@BannerSubItem.Order" Name="Order" />
+                <RadzenRequiredValidator Component="Order" Text="Banner Alt Öğesi için sıra Girmelisiniz" />
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Url" Component="Order" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@BannerSubItem.Url" Name="Url" />
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Yeni Sekmede Aç" Component="IsNewTab" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@BannerSubItem.IsNewTab" Name="IsNewTab" />
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Dosya" Component="File" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <InputFile OnChange="LoadFiles" class="mb-2" accept="image/webp,image/png,image/gif,image/jpeg" />
+            </div>
+        </div>
+
+        @if (BannerSubItem.FileGuid != null)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Yüklenen Görsel" Component="File" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenImage Path="@($"data:image/jpeg;base64,{Convert.ToBase64String(BannerSubItem.Base64Str)}")" Style="width: 100px;" />
+                </div>
+            </div>
+        }
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+

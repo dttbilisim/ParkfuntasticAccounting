@@ -1,0 +1,90 @@
+@using ecommerce.Admin.Services.Interfaces
+@using ecommerce.Domain.Shared.Dtos
+@inject IOnlineUserService OnlineUserService
+@rendermode InteractiveServer
+
+<RadzenCard Class="rz-p-0" style="border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; height: 100%;">
+    <div class="rz-p-4 border-bottom d-flex justify-content-between align-items-center">
+        <RadzenText TextStyle="TextStyle.H6" style="font-weight: 600; margin-bottom: 0;">
+            Online Kullanıcılar
+            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@_users.Count.ToString()" Class="ms-2" />
+        </RadzenText>
+        <RadzenButton Icon="refresh" Click="LoadUsers" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" class="rounded-circle" />
+    </div>
+    <div style="max-height: 400px; overflow-y: auto;">
+        <RadzenDataGrid Data="@_users" TItem="OnlineUserDto" AllowPaging="false" AllowSorting="false" GridLines="DataGridGridLines.None" Class="custom-grid">
+            <Columns>
+                <RadzenDataGridColumn TItem="OnlineUserDto" Property="Username" Title="Kullanıcı">
+                    <Template Context="user">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle rz-background-color-success-lighter d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                <RadzenIcon Icon="person" style="font-size: 1rem; color: var(--rz-success);" />
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">@user.Username</div>
+                                <div style="font-size: 0.75rem; color: var(--rz-text-disabled-color);">@user.IpAddress</div>
+                            </div>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OnlineUserDto" Property="LastPageUrl" Title="Son Sayfa">
+                    <Template Context="user">
+                        <span title="@user.LastPageUrl" style="font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; max-width: 200px;">
+                            @user.LastPageUrl
+                        </span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OnlineUserDto" Property="LastActiveTime" Title="Aktivite" Width="100px">
+                    <Template Context="user">
+                        <span style="font-size: 0.8rem;">@GetTimeAgo(user.LastActiveTime)</span>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</RadzenCard>
+
+@code {
+    private List<OnlineUserDto> _users = new();
+    private System.Threading.Timer _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+        // Auto refresh every 30 seconds
+        _timer = new System.Threading.Timer(async _ => 
+        { 
+            try
+            {
+                await InvokeAsync(async () => 
+                { 
+                     await LoadUsers(); 
+                     StateHasChanged(); 
+                });
+            }
+            catch {}
+        }, null, 30000, 30000);
+    }
+
+    private async Task LoadUsers()
+    {
+        _users = await OnlineUserService.GetOnlineUsersAsync(60); // Last 60 minutes
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
+    private string GetTimeAgo(DateTime dt)
+    {
+        // Adjust for timezone if needed, but dt is usually Utc from my previous code 
+        // (actually I created it as UtcNow). 
+        // However, redis storage and retrieval might affect it. 
+        // Let's assume Utc.
+        var span = DateTime.UtcNow - dt;
+        if (span.TotalSeconds < 60) return $"{span.Seconds}sn";
+        if (span.TotalMinutes < 60) return $"{span.Minutes}dk";
+        return dt.ToString("HH:mm");
+    }
+}

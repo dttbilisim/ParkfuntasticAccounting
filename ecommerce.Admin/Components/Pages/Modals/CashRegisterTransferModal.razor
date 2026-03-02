@@ -1,0 +1,96 @@
+@using ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
+@using ecommerce.Admin.Domain.Dtos.CashRegisterDto
+@using Radzen
+@using Radzen.Blazor
+
+<RadzenTemplateForm Data="@Model" Submit="@(async (CashRegisterTransferDto _) => await FormSubmit())">
+    <div class="cash-transfer-modal">
+        <div class="cash-movement-modal__body">
+            <p class="text-muted small mb-3">Kaynak kasadan çıkış ve hedef kasaya giriş olarak iki hareket oluşturulur (muhasebe mantığı).</p>
+
+            <div class="cash-movement-modal__section">
+                <span class="cash-movement-modal__section-title">Kaynak & Hedef Kasa</span>
+                <div class="cash-movement-modal__row">
+                    <div class="cash-movement-modal__field">
+                        <RadzenLabel Text="Kaynak Kasa" Component="Source" class="small" />
+                        <RadzenDropDown @bind-Value="@Model.SourceCashRegisterId"
+                                        Data="@CashRegisterList"
+                                        TextProperty="Name"
+                                        ValueProperty="Id"
+                                        Change="@(_ => OnSourceCashRegisterChange())"
+                                        Style="width:100%"
+                                        Placeholder="Kaynak kasa seçiniz" />
+                    </div>
+                    <div class="cash-movement-modal__field">
+                        <RadzenLabel Text="Hedef Kasa" Component="Target" class="small" />
+                        <RadzenDropDown @bind-Value="@Model.TargetCashRegisterId"
+                                        Data="@FilteredTargetCashRegisters"
+                                        TextProperty="Name"
+                                        ValueProperty="Id"
+                                        Style="width:100%"
+                                        Placeholder="@(Model.SourceCashRegisterId == 0 ? "Önce kaynak seçiniz" : "Hedef kasa seçiniz")"
+                                        Disabled="@(Model.SourceCashRegisterId == 0)" />
+                    </div>
+                </div>
+                <div class="cash-movement-modal__field mt-2">
+                    <span class="cash-movement-modal__section-title">Döviz (kaynak kasaya göre)</span>
+                    <span class="fw-semibold">@CurrencyDisplay</span>
+                </div>
+            </div>
+
+            <div class="cash-movement-modal__section">
+                <span class="cash-movement-modal__section-title">Tutar & Tarih</span>
+                <div class="cash-movement-modal__row">
+                    <div class="cash-movement-modal__field">
+                        <RadzenLabel Text="Tutar" Component="Amount" class="small" />
+                        <RadzenNumeric @bind-Value="@Model.Amount"
+                                       Style="width:100%"
+                                       Format="N2"
+                                       Min="@((decimal?)0.01)"
+                                       ShowUpDown="false" />
+                    </div>
+                    <div class="cash-movement-modal__field">
+                        <RadzenLabel Text="İşlem Tarihi" Component="TransactionDate" class="small" />
+                        <RadzenDatePicker @bind-Value="@Model.TransactionDate"
+                                          DateFormat="dd.MM.yyyy HH:mm"
+                                          ShowTime="true"
+                                          Style="width:100%"
+                                          Placeholder="Tarih" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="cash-movement-modal__section">
+                <RadzenLabel Text="Açıklama (opsiyonel)" Component="Description" class="small" />
+                <RadzenTextArea @bind-Value="@Model.Description"
+                                Style="width:100%"
+                                Rows="2"
+                                Placeholder="Virman açıklaması..." />
+            </div>
+        </div>
+
+        <div class="cash-movement-modal__footer">
+            <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Virman Oluştur" ButtonStyle="ButtonStyle.Primary" Icon="swap_horiz" IsBusy="@Saving" Size="ButtonSize.Small" />
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+<style>
+    .cash-transfer-modal {
+        display: flex;
+        flex-direction: column;
+        max-height: 85vh;
+        min-width: 420px;
+    }
+    .cash-transfer-modal .cash-movement-modal__header,
+    .cash-transfer-modal .cash-movement-modal__body,
+    .cash-transfer-modal .cash-movement-modal__footer {
+        padding: 12px 16px;
+    }
+    .cash-transfer-modal .cash-movement-modal__row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+</style>

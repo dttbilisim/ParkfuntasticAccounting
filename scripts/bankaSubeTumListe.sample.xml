@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Örnek TCMB formatı - gerçek veri için eft.tcmb.gov.tr'den indirin -->
+<ListeBankaSube>
+  <Banka>
+    <BankaKodu>46</BankaKodu>
+    <BankaAdi>AKBANK T.A.Ş.</BankaAdi>
+    <SubeListesi>
+      <Sube>
+        <SubeKodu>001</SubeKodu>
+        <SubeAdi>GENEL MÜDÜRLÜK</SubeAdi>
+        <IlAdi>İSTANBUL</IlAdi>
+        <IlceAdi>KADIKÖY</IlceAdi>
+        <Adres>Örnek Adres 1</Adres>
+      </Sube>
+      <Sube>
+        <SubeKodu>002</SubeKodu>
+        <SubeAdi>ANKARA ŞUBESİ</SubeAdi>
+        <IlAdi>ANKARA</IlAdi>
+        <IlceAdi>ÇANKAYA</IlceAdi>
+        <Adres>Örnek Adres 2</Adres>
+      </Sube>
+    </SubeListesi>
+  </Banka>
+  <Banka>
+    <BankaKodu>10</BankaKodu>
+    <BankaAdi>ZİRAAT BANKASI A.Ş.</BankaAdi>
+    <SubeListesi>
+      <Sube>
+        <SubeKodu>001</SubeKodu>
+        <SubeAdi>MERKEZ</SubeAdi>
+        <IlAdi>ANKARA</IlAdi>
+        <IlceAdi>ÇANKAYA</IlceAdi>
+        <Adres>Örnek Adres 3</Adres>
+      </Sube>
+    </SubeListesi>
+  </Banka>
+</ListeBankaSube>

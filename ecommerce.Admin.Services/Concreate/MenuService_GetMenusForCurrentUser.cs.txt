@@ -1,0 +1,95 @@
+
+        public async Task<IActionResult<List<Menu>>> GetMenusForCurrentUser()
+        {
+            var response = OperationResult.CreateResult<List<Menu>>();
+            
+            try
+            {
+                // Get userId from claims (secure - backend only)
+                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+                {
+                    _logger.LogWarning("User not authenticated or userId claim not found");
+                    response.Result = new List<Menu>();
+                    return response;
+                }
+                
+                // Get all menus
+                var allMenusResponse = await GetMenuHierarchy();
+                if (!allMenusResponse.Ok || allMenusResponse.Result == null)
+                {
+                    response.Result = new List<Menu>();
+                    return response;
+                }
+                
+                var allMenus = allMenusResponse.Result;
+                
+                // Get role-based menu IDs from user claims
+                var roleMenuIds = new List<int>();
+                var roles = _httpContextAccessor.HttpContext?.User?.FindAll(ClaimTypes.Role);
+                if (roles != null)
+                {
+                    var roleMenuRepo = _uow.GetRepository<RoleMenu>();
+                    var roleIds = roles.Select(r => r.Value).ToList();
+                    
+                    var roleMenus = await roleMenuRepo.GetAllAsync(
+                        predicate: rm => roleIds.Contains(rm.Role.Name)
+                    );
+                    
+                    roleMenuIds = roleMenus.Select(rm => rm.MenuId).ToList();
+                }
+                
+                // Get user-specific menu IDs
+                var userMenuIds = new List<int>();
+                var userMenuResponse = await _userMenuService.GetUserMenusByUserId(userId);
+                if (user MenuResponse.Ok && userMenuResponse.Result != null)
+                {
+                    userMenuIds = userMenuResponse.Result.Select(um => um.MenuId).ToList();
+                }
+                
+                // Combine both (union)
+                var allowedMenuIds = roleMenuIds.Union(userMenuIds).ToHashSet();
+                
+                _logger.LogInformation($"User {userId}: Role menus={roleMenuIds.Count}, User menus={userMenuIds.Count}, Total={allowedMenuIds.Count}");
+                
+                // Filter menus recursively
+                response.Result = FilterMenusByPermissions( allMenus, allowedMenuIds);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetMenusForCurrentUser error");
+                response.SetException(ex);
+            }
+            
+            return response;
+        }
+        
+        private List<Menu> FilterMenusByPermissions(List<Menu> allMenus, HashSet<int> allowedMenuIds)
+        {
+            var filtered = new List<Menu>();
+            
+            foreach (var menu in allMenus)
+            {
+                if (allowedMenuIds.Contains(menu.Id))
+                {
+                    var menuCopy = new Menu
+                    {
+                        Id = menu.Id,
+                        Name = menu.Name,
+                        Path = menu.Path,
+                        Icon = menu.Icon,
+                        ParentId = menu.ParentId,
+                        InverseParent = new List<Menu>()
+                    };
+                    
+                    if (menu.InverseParent != null && menu.InverseParent.Count > 0)
+                    {
+                        menuCopy.InverseParent = FilterMenusByPermissions(menu.InverseParent.ToList(), allowedMenuIds);
+                    }
+                    
+                    filtered.Add(menuCopy);
+                }
+            }
+            
+            return filtered;
+        }

@@ -1,0 +1,333 @@
+﻿@using ecommerce.Admin.Domain.Dtos.DiscountDto;
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+@using ecommerce.Core.Utils;
+@using ecommerce.Admin.Components.Pages.Modals.Rules
+@using ecommerce.Core.Models
+@using ecommerce.Domain.Shared.Rules.Providers
+@using ecommerce.Admin.Domain.Dtos.CompanyDto
+
+<PageTitle>İndirim Ekle/Düzenle</PageTitle>
+
+<RadzenTemplateForm TItem="DiscountUpsertDto" Data="@Discount" Visible="@(!Id.HasValue || Discount.Id > 0)" Submit="@FormSubmit" OnInvalidSubmit="ShowErrors">
+    <RadzenFluentValidator @ref="DiscountFluentValidator" Validator="@DiscountValidator"/>
+
+    <RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTabsItem Text="Genel Bilgiler">
+                <RadzenStack>
+                    <RadzenFormField Text="İndirim Adı" Variant="Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@Discount.Name"/>
+                        </ChildContent>
+                        <Helper>
+                            <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.Name)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                        </Helper>
+                    </RadzenFormField>
+                       <RadzenFormField Text="İndirim Açıklama Alanı" Variant="Variant.Outlined">
+                                            <ChildContent>
+                                                <RadzenTextBox @bind-Value="@Discount.Description"/>
+                                            </ChildContent>
+                                          
+                                        </RadzenFormField>
+                        <RadzenFormField Text="Kampanya Linki" Variant="Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@Discount.CampaignLink"/>
+                        </ChildContent>
+                     </RadzenFormField>
+                    <RadzenFormField Text="İndirim Tipi" Variant="Variant.Outlined">
+                        <ChildContent>
+                            <RadzenDropDown Data="@(Enum.GetValues<DiscountType>())" @bind-Value="@Discount.DiscountType" Change="@DiscountTypeChanged" class="w-100" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.DiscountType)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="İndirim Atanan Ögeler" Variant="Variant.Outlined" Visible="@(Discount.DiscountType != null && !new[] { DiscountType.AssignedToCart }.Contains(Discount.DiscountType.Value))">
+                        <ChildContent>
+                            <RadzenStack Gap="0px" Visible="AssignedItemsLoading" class="rz-mt-2">
+                                <RadzenText Text="YÜKLENİYOR" TextStyle="TextStyle.Overline" TextAlign="TextAlign.Center"/>
+                                <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="height: 10px"/>
+                            </RadzenStack>
+                            <RadzenDropDown Visible="@(!AssignedItemsLoading)" @bind-Value="@Discount.AssignedEntityIds" Multiple="true" Chips="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" VirtualizationOverscanCount="10" AllowVirtualization="true" MaxSelectedLabels="10" AllowClear="true" AllowSelectAll="false" Data="@AssignedItems.Data" Count="AssignedItems.DataCount" LoadData="@LoadAssignedItems" TextProperty="@nameof(NameValue.Value)" ValueProperty="@nameof(NameValue.Name)" class="w-100"/>
+                        </ChildContent>
+                        <Helper>
+                            <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.AssignedEntityIds)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                        </Helper>
+                    </RadzenFormField>
+                      <RadzenFormField Text="İndirim Atanan Satıcılar" Variant="Variant.Outlined" Visible="@(Discount.DiscountType != null && !new[] { DiscountType.AssignedToCart }.Contains(Discount.DiscountType.Value))">
+                                            <ChildContent>
+                                                <RadzenStack Gap="0px" Visible="AssignedItemsLoading" class="rz-mt-2">
+                                                    <RadzenText Text="YÜKLENİYOR" TextStyle="TextStyle.Overline" TextAlign="TextAlign.Center"/>
+                                                    <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="height: 10px"/>
+                                                </RadzenStack>
+                                                <RadzenDropDown  @bind-Value="@Discount.AssignedSellerIds" Multiple="true" Chips="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" VirtualizationOverscanCount="10" AllowVirtualization="true" MaxSelectedLabels="10" AllowClear="true" AllowSelectAll="false" Data="@AssignedSellerItems.Data" Count="AssignedSellerItems.DataCount" LoadData="@LoadAssignedSellerItems" TextProperty="@nameof(NameValue.Value)" ValueProperty="@nameof(NameValue.Name)" class="w-100"/>
+                                            </ChildContent>
+                                            <Helper>
+                                                <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.AssignedSellerIds)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                            </Helper>
+                                        </RadzenFormField>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn SizeMD="4">
+                            <RadzenCheckBox TValue="bool" Name="UsePercentage" @bind-Value="@Discount.UsePercentage" Change="@UsePercentageChanged"/>
+                            <RadzenLabel Text="Yüzde Kullan" Component="UsePercentage" class="rz-ml-2"/>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="8">
+                            <RadzenStack Visible="@(Discount.UsePercentage)" Orientation="Orientation.Horizontal">
+                                <RadzenFormField Text="İndirim Oranı" class="w-100">
+                                    <ChildContent>
+                                        <RadzenNumeric @bind-Value="@Discount.DiscountPercentage" ShowUpDown="true"/>
+                                    </ChildContent>
+                                    <Helper>
+                                        <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.DiscountPercentage)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                    </Helper>
+                                </RadzenFormField>
+                                <RadzenFormField Text="Maks. İndirim Tutarı" class="w-100">
+                                    <ChildContent>
+                                        <RadzenNumeric @bind-Value="@Discount.MaximumDiscountAmount" ShowUpDown="true"/>
+                                    </ChildContent>
+                                    <Helper>
+                                        <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.MaximumDiscountAmount)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                    </Helper>
+                                </RadzenFormField>
+                            </RadzenStack>
+                            <RadzenFormField Text="İndirim Tutarı" class="w-100" Visible="@(!Discount.UsePercentage)">
+                                <ChildContent>
+                                    <RadzenNumeric @bind-Value="@Discount.DiscountAmount" ShowUpDown="true"/>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.DiscountAmount)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Başlangıç Zamanı" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenDatePicker @bind-Value="@Discount.StartDate" ShowTime="true" DateFormat="g" AllowClear="true"/>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.StartDate)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Bitiş Zamanı" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenDatePicker @bind-Value="@Discount.EndDate" ShowTime="true" DateFormat="g" AllowClear="true"/>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.EndDate)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="İndirim Sınırı" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenDropDown TValue="DiscountLimitationType" Data="@(Enum.GetValues<DiscountLimitationType>())" @bind-Value="@Discount.DiscountLimitation" Change="@DiscountLimitationTypeChanged" class="w-100" 
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.DiscountLimitation)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6" Visible="@(Discount.DiscountLimitation != DiscountLimitationType.Unlimited)">
+                            <RadzenFormField Text="Sınırlama Sayısı" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenNumeric @bind-Value="@Discount.LimitationTimes"/>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.LimitationTimes)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenCheckBox TValue="bool" Name="Status" Value="@(Discount.Status == (int) EntityStatus.Active)" ValueChanged="@((v) => Discount.Status = v ? (int) EntityStatus.Active : (int) EntityStatus.Passive)"/>
+                            <RadzenLabel Text="Aktif" Component="Status" class="rz-ml-2"/>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenCheckBox Name="IsCumulative" @bind-Value="@Discount.IsCumulative"/>
+                            <RadzenLabel Text="Diğer İndirimlerle Birleştirilebilir" Component="IsCumulative" class="rz-ml-2"/>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="Kupon Bilgileri">
+                <RadzenStack>
+                    <RadzenRow>
+                        <RadzenColumn SizeSM="6">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" Wrap="FlexWrap.Wrap">
+                                <RadzenCheckBox @bind-Value="@Discount.RequiresCouponCode" Name="RequiresCouponCode"/>
+                                <RadzenLabel Text="Kupon Kodu Gerektirir" Component="RequiresCouponCode"/>
+                                <RadzenText TextStyle="TextStyle.Caption" class="w-100" Text="İşaretlenirse indirim sadece kupon kodu girilerek kullanılabilir. İşaretlenmezse indirim koşullar sağlanıyorsa otomatik olarak uygulanır ve tanımlı kupon kodları kullanılamaz."/>
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="6">
+                            <RadzenFormField Text="Genel Kupon Kodu" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Stretch" Wrap="FlexWrap.Wrap" Gap="0.5rem">
+                                        <RadzenTextBox @bind-Value="@Discount.CouponCode" ReadOnly="@LoadingCouponCode"/>
+                                        <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" class="rz-border-radius-0" Icon="auto_mode" Text="Oluştur" Click="@(async () => Discount.CouponCode = await GenerateCouponCode())" Disabled="@LoadingCouponCode"/>
+                                    </RadzenStack>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.CouponCode)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenFieldset Text="Şirketlere Tanımlı Kupon Kodları">
+                        <RadzenStack AlignItems="AlignItems.End" class="mb-2">
+                            <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="add_circle_outline" Text="Kupon Ekle" Click="@InsertDiscountCompanyCouponRow"/>
+                        </RadzenStack>
+                        <RadzenDataGrid @ref="DiscountCompanyCouponDataGrid" TItem="DiscountCompanyCouponUpsertDto" AllowAlternatingRows="false" AllowFiltering="false" AllowPaging="false" EditMode="DataGridEditMode.Single" Data="@Discount.CompanyCoupons" Render="@OnRadzenGridRender">
+                            <Columns>
+                                <RadzenDataGridColumn Context="companyCoupon" TItem="DiscountCompanyCouponUpsertDto" Property="CompanyId" Title="Şirket" MinWidth="150px">
+                                    <Template>
+                                        @companyCoupon.Company.CompanyInformation
+                                    </Template>
+                                    <EditTemplate>
+                                        <RadzenDropDown Data="@Companies.Data" Count="@Companies.DataCount" LoadData="@LoadCompanies" @bind-Value="@DiscountCompanyCouponToEdit.CompanyId" Disabled="@(DiscountCompanyCouponToEdit.Id > 0)" AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowVirtualization="true" TextProperty="@nameof(CompanyListDto.CompanyInformation)" ValueProperty="@nameof(CompanyListDto.Id)" class="w-100"/>
+                                    </EditTemplate>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Context="companyCoupon" TItem="DiscountCompanyCouponUpsertDto" Property="CouponCode" Title="Kupon Kodu" MinWidth="100px">
+                                    <EditTemplate>
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Stretch" Wrap="FlexWrap.Wrap" Gap="0.5rem" class="w-100">
+                                            <RadzenTextBox @bind-Value="@DiscountCompanyCouponToEdit.CouponCode" ReadOnly="@LoadingCouponCode" class="flex-fill"/>
+                                            <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Icon="auto_mode" Text="Oluştur" Click="@(async () => DiscountCompanyCouponToEdit.CouponCode = await GenerateCouponCode())" Disabled="@LoadingCouponCode"/>
+                                        </RadzenStack>
+                                    </EditTemplate>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Context="companyCoupon" TItem="DiscountCompanyCouponUpsertDto" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="120px">
+                                    <Template>
+                                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" Click="@(() => EditDiscountCompanyCouponRow(companyCoupon))" @onclick:stopPropagation="true"/>
+                                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => DeleteDiscountCompanyCouponRow(companyCoupon))" @onclick:stopPropagation="true"/>
+                                    </Template>
+                                    <EditTemplate>
+                                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Small" Click="@(() => SaveDiscountCompanyCouponRow(companyCoupon))"/>
+                                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => CancelDiscountCompanyCouponEdit(companyCoupon))"/>
+                                    </EditTemplate>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenFieldset>
+                </RadzenStack>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="Hediye Ürün" Visible="@(Discount.DiscountType.HasValue && !new[] {  DiscountType.AssignedToCargo,DiscountType.AssignedToCart }.Contains(Discount.DiscountType.Value))">
+                <RadzenStack>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                                <RadzenCheckBox @bind-Value="@Discount.HasGiftProducts" Name="HasGiftProducts"/>
+                                <RadzenLabel Text="Hediye Ürüne Sahip" Component="HasGiftProducts"/>
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6" Visible="@Discount.HasGiftProducts">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap" Gap="10px">
+                                <RadzenCheckBox @bind-Value="@Discount.UseSingleGiftProduct" Name="UseSingleGiftProduct"/>
+                                <RadzenLabel Text="Tek Hediye Ürün Ver" Component="UseSingleGiftProduct"/>
+                                <RadzenText TextStyle="TextStyle.Caption" class="w-100" Text="Seçilmediği taktirde sepette ilişkili olduğu ürünlerin maks adedi kadar hediye ürün verilmektedir. Seçilirse sadece 1 adet hediye ürün verilmektedir."/>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenFormField Text="Hediye Ürünler" Variant="Variant.Outlined" Visible="@Discount.HasGiftProducts">
+                        <ChildContent>
+                            <RadzenDropDown  TValue="List<int>" @bind-Value="@Discount.GiftProductIds" Multiple="true" Chips="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" VirtualizationOverscanCount="10" AllowVirtualization="true" MaxSelectedLabels="10" AllowClear="true" AllowSelectAll="false" Data="@Products.Data" Count="Products.DataCount" LoadData="@LoadProducts" TextProperty="@nameof(ProductListDto.Name)" ValueProperty="@nameof(ProductListDto.Id)" class="w-100"/>
+                        </ChildContent>
+                        <Helper>
+                            <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.GiftProductIds)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Hediyeyi Veren Satıcı" Variant="Variant.Outlined" Visible="@Discount.HasGiftProducts">
+                        <ChildContent>
+                            <RadzenDropDown TValue="int?" @bind-Value="@Discount.GiftProductSellerId" SelectedItem="@(LoadedCompanies.GetValueOrDefault(Discount.GiftProductSellerId ?? 0))" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" VirtualizationOverscanCount="10" AllowVirtualization="true" MaxSelectedLabels="10" AllowClear="true" AllowSelectAll="false" Data="@Companies.Data" Count="Companies.DataCount" LoadData="@LoadCompanies" TextProperty="@nameof(CompanyListDto.CompanyInformation)" ValueProperty="@nameof(CompanyListDto.Id)" class="w-100"/>
+                        </ChildContent>
+                        <Helper>
+                            <RadzenText TextStyle="TextStyle.Caption" class="w-100" Text="Satıcı seçildiği taktirde hediye ürün seçilen satıcıdan sepete eklenmektedir. Seçilmezse indirim uygulanan her satıcı için, hediye ürüne ait geçerli ilanları varsa hediye ürün kendilerinden verilmektedir."/>
+                            <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.GiftProductIds)" class="@DiscountFluentValidator.GetErrorCssClass()"/>
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenStack>
+            </RadzenTabsItem>
+
+            @* <RadzenTabsItem Text="İçerik" Visible="@(!Discount.RequiresCouponCode)"> *@
+            @*     <RadzenStack> *@
+            @*         <RadzenFormField Text="Resim" Variant="Variant.Outlined" class="w-100"> *@
+            @*             <ChildContent> *@
+            @*                 <RadzenRow class="rz-m-2"> *@
+            @*                     <RadzenColumn Size="12"> *@
+            @*                         <InputFile OnChange="@(args => SaveImageFile(args.File))" accept="image/png, image/jpeg, image/gif" class="w-100 rz-shadow-1 rz-background-color-white rz-p-2 rz-border-radius-1"/> *@
+            @*                     </RadzenColumn> *@
+            @*                     <RadzenColumn Size="12"> *@
+            @*                         <RadzenImage Path="@FileHelper.GetFileUrl(Discount.ImagePath)" Visible="@(Discount.ImagePath != null)" class="img-fluid"/> *@
+            @*                     </RadzenColumn> *@
+            @*                 </RadzenRow> *@
+            @*             </ChildContent> *@
+            @*             <Helper> *@
+            @*                 <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.ImagePath)" class="@DiscountFluentValidator.GetErrorCssClass()"/> *@
+            @*             </Helper> *@
+            @*         </RadzenFormField> *@
+            @*         <RadzenFormField Text="İçerik" Variant="Variant.Outlined" class="w-100"> *@
+            @*             <ChildContent> *@
+            @*                 <RadzenHtmlEditor @bind-Value="@Discount.Description" Name="Description" style="height: 400px; width: 100%"> *@
+            @*                     <RadzenHtmlEditorUndo/> *@
+            @*                     <RadzenHtmlEditorRedo/> *@
+            @*                     <RadzenHtmlEditorSeparator/> *@
+            @*                     <RadzenHtmlEditorBold/> *@
+            @*                     <RadzenHtmlEditorItalic/> *@
+            @*                     <RadzenHtmlEditorUnderline/> *@
+            @*                     <RadzenHtmlEditorStrikeThrough/> *@
+            @*                     <RadzenHtmlEditorSeparator/> *@
+            @*                     <RadzenHtmlEditorAlignLeft/> *@
+            @*                     <RadzenHtmlEditorAlignCenter/> *@
+            @*                     <RadzenHtmlEditorAlignRight/> *@
+            @*                     <RadzenHtmlEditorJustify/> *@
+            @*                     <RadzenHtmlEditorSeparator/> *@
+            @*                     <RadzenHtmlEditorIndent/> *@
+            @*                     <RadzenHtmlEditorOutdent/> *@
+            @*                     <RadzenHtmlEditorUnorderedList/> *@
+            @*                     <RadzenHtmlEditorOrderedList/> *@
+            @*                     <RadzenHtmlEditorSeparator/> *@
+            @*                     <RadzenHtmlEditorColor/> *@
+            @*                     <RadzenHtmlEditorBackground/> *@
+            @*                     <RadzenHtmlEditorRemoveFormat/> *@
+            @*                     <RadzenHtmlEditorSeparator/> *@
+            @*                     <RadzenHtmlEditorSubscript/> *@
+            @*                     <RadzenHtmlEditorSuperscript/> *@
+            @*                     <RadzenHtmlEditorSeparator/> *@
+            @*                     <RadzenHtmlEditorLink/> *@
+            @*                     <RadzenHtmlEditorUnlink/> *@
+            @*                     <HtmlEditorImage/> *@
+            @*                     <RadzenHtmlEditorFontName/> *@
+            @*                     <RadzenHtmlEditorFontSize/> *@
+            @*                     <RadzenHtmlEditorFormatBlock/> *@
+            @*                     <RadzenHtmlEditorSeparator/> *@
+            @*                     <RadzenHtmlEditorSource/> *@
+            @*                 </RadzenHtmlEditor> *@
+            @*             </ChildContent> *@
+            @*             <Helper> *@
+            @*                 <RadzenText Text="@DiscountFluentValidator.GetValidationMessage(r => r.Description)" class="@DiscountFluentValidator.GetErrorCssClass()"/> *@
+            @*             </Helper> *@
+            @*         </RadzenFormField> *@
+            @*     </RadzenStack> *@
+            @* </RadzenTabsItem> *@
+
+            <RadzenTabsItem Text="İndirim Kuralları">
+                <RuleBuilder @bind-MainRule="@Discount.Rule" Scope="@DiscountFieldDefinitions.Scope"/>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" BusyText="Kaydediliyor..." IsBusy="Saving" Variant="Variant.Flat" class="rz-mr-1"/>
+    </RadzenStack>
+</RadzenTemplateForm>

@@ -1,0 +1,43 @@
+@page "/survey-result/{Id:int}"
+@using ecommerce.Admin.Domain.Dtos.SurveyDto
+@inherits OwningComponentBase
+@layout MainLayout
+
+<PageTitle>Anketler</PageTitle>
+
+<RadzenCard class="mb-3 d-flex align-items-center justify-content-between">
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0" AlignItems="AlignItems.Start">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="5px">
+            <RadzenText Text="Anket Sonucu" TextStyle="TextStyle.H5" class="rz-m-0"/>
+            <RadzenBadge IsPill="true" Variant="Variant.Flat" BadgeStyle="BadgeStyle.Info">
+                <b>@SurveyAnswers.DataCount</b> Yanıt
+            </RadzenBadge>
+        </RadzenStack>
+        <RadzenLink Icon="arrow_back" Path="/surveys" Text="Anketler" class="rz-m-0 rz-text-overline rz-color-base-600 rz-display-flex rz-align-items-center gap-1"/>
+    </RadzenStack>
+</RadzenCard>
+
+<RadzenRow>
+    <RadzenColumn SizeSM="9">
+        <RadzenDataGrid @ref="DataGrid" ColumnWidth="100px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PageSize="25" AllowFilterDateInput="true" TItem="SurveyAnswerListDto" LoadData="@LoadData" Count="@SurveyAnswers.DataCount" Data="@SurveyAnswers.Data" Render="@OnRadzenGridRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+            <Columns>
+                <RadzenDataGridColumn TItem="SurveyAnswerListDto" Property="Id" Filterable="false" Visible="false" SortOrder="SortOrder.Descending"/>
+                <RadzenDataGridColumn TItem="SurveyAnswerListDto" Property="CompanyAccountName" Title="Şirket Adı" MinWidth="200px"/>
+                <RadzenDataGridColumn TItem="SurveyAnswerListDto" Property="UserFirstName" Title="Kullanıcı Adı" Width="150px"/>
+                <RadzenDataGridColumn TItem="SurveyAnswerListDto" Property="UserLastName" Title="Kullanıcı Soyadı" Width="150px"/>
+                <RadzenDataGridColumn TItem="SurveyAnswerListDto" Property="SurveyOptionTitle" Title="Seçenek" MinWidth="300px"/>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenColumn>
+    <RadzenColumn SizeSM="3">
+        <RadzenChart>
+            <RadzenDonutSeries Data="@SurveyAnswerStatistics" Title="Yanıt Sayısı" CategoryProperty="Summary" ValueProperty="TotalCount">
+                <TitleTemplate>
+                    <div class="rz-donut-content">
+                        Yanıt Dağılımı
+                    </div>
+                </TitleTemplate>
+            </RadzenDonutSeries>
+        </RadzenChart>
+    </RadzenColumn>
+</RadzenRow>

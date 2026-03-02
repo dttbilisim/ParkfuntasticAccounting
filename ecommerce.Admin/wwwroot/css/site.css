@@ -1,0 +1,702 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+:root {
+    font-size: var(--rz-root-font-size);
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color: var(--rz-text-color);
+    font-size: var(--rz-body-font-size);
+    line-height: var(--rz-body-line-height);
+    background-color: var(--rz-body-background-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global font consistency - ensure all elements use Inter */
+*,
+*::before,
+*::after {
+    font-family: inherit;
+}
+
+/* Radzen components font override */
+.rz-sidebar,
+.rz-panel-menu,
+.rz-panel-menu-item,
+.rz-panel-menu-item-text,
+.rz-navigation-item-text,
+.rz-header,
+.rz-body,
+.rz-button,
+.rz-inputtext,
+.rz-dropdown,
+.rz-datagrid,
+.rz-card,
+.rz-profile-menu {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+/* Product names and content areas */
+.product-search-root,
+.b2b-orders-page,
+.catalog-card,
+.catalog-info h5,
+.fw-semibold,
+.fw-bold,
+.order-accordion-item,
+.product-name,
+.table td {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+/* Enhanced text contrast and readability - Make all text more vibrant and readable */
+body,
+.rz-body,
+.rz-card,
+.rz-datagrid,
+.product-search-root,
+.b2b-orders-page {
+    color: #0f172a !important;
+    /* Slate 900 - Very dark for maximum contrast */
+}
+
+/* Table headers - Make them bold and darker */
+.rz-datagrid thead th,
+.table thead th,
+.rz-datagrid-header th,
+table thead th {
+    color: #0f172a !important;
+    /* Very dark */
+    font-weight: 700 !important;
+    /* Bold */
+    font-size: 0.875rem !important;
+}
+
+/* Product names and descriptions - Make them darker and bolder */
+.rz-datagrid tbody td,
+.table tbody td,
+.product-name,
+.catalog-info h5,
+.fw-semibold {
+    color: #1e293b !important;
+    /* Slate 800 - Dark */
+    font-weight: 500 !important;
+    /* Medium weight for better readability */
+}
+
+/* Sidebar menu items - Make them brighter and more readable */
+.rz-sidebar .rz-panel-menu-item-text,
+.rz-sidebar .rz-navigation-item-text,
+.rz-panel-menu-item-text {
+    color: #f1f5f9 !important;
+    /* Slate 100 - Very light for dark background */
+    font-weight: 500 !important;
+    /* Medium weight */
+    opacity: 1 !important;
+    /* Remove any opacity */
+}
+
+.rz-sidebar .rz-panel-menu-item.rz-state-active .rz-panel-menu-item-text,
+.rz-sidebar .rz-panel-menu-item.rz-state-selected .rz-panel-menu-item-text,
+.rz-sidebar .rz-panel-menu-item:hover .rz-panel-menu-item-text {
+    color: #ffffff !important;
+    /* Pure white for active/hover */
+    font-weight: 600 !important;
+    /* Semi-bold */
+}
+
+/* Text muted - Make less muted, more readable */
+.text-muted,
+small.text-muted {
+    color: #475569 !important;
+    /* Slate 600 - Darker than default muted */
+    font-weight: 400 !important;
+}
+
+/* Secondary text - Make it darker */
+.text-secondary {
+    color: #334155 !important;
+    /* Slate 700 - Darker */
+    font-weight: 500 !important;
+}
+
+/* Input placeholders - Make them more visible */
+::placeholder,
+::-webkit-input-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder {
+    color: #64748b !important;
+    /* Slate 500 - Darker placeholder */
+    opacity: 0.8 !important;
+}
+
+/* Labels and form text - Make them darker */
+label,
+.form-label,
+.form-check-label {
+    color: #1e293b !important;
+    /* Slate 800 */
+    font-weight: 500 !important;
+}
+
+/* Buttons text - Ensure good contrast */
+.btn,
+.rz-button {
+    font-weight: 600 !important;
+    /* Semi-bold for buttons */
+}
+
+/* Code and monospace text - Make them darker */
+.code-mono,
+code {
+    color: #0f172a !important;
+    /* Very dark */
+    font-weight: 600 !important;
+}
+
+/* Badge text - Ensure readability */
+.badge,
+.rz-badge {
+    font-weight: 600 !important;
+}
+
+/* Footer text - Ensure it's bright */
+footer,
+.footer-bar {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+.rz-body {
+    --rz-body-padding: 0;
+}
+
+a {
+    color: var(--rz-link-color);
+}
+
+a:hover,
+a:focus {
+    color: var(--rz-link-hover-color);
+}
+
+.blazor-error-boundary {
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3LjgyOSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0kgOTMuNTI5NSAyNjMuNTc2IDkzLjUyOTUgMjY2LjExNiA5My41Mjk1IDI2Ny4zODcgOTIuMjgzNyAyNjcuMzg3IDg5Ljc5MjEgMjU5Ljc4NiA4Ny4zMDA1IDI2Ni4xMTYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+    padding: 1rem 1rem 1rem 3.7rem;
+    color: white;
+}
+
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
+
+.loading-progress {
+    position: relative;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    margin: 20vh auto 1rem auto;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke: #e0e0e0;
+    stroke-width: 0.6rem;
+    transform-origin: 50% 50%;
+    transform: rotate(-90deg);
+}
+
+.loading-progress circle:last-child {
+    stroke: #1b6ec2;
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+}
+
+.loading-progress-text:after {
+    content: var(--blazor-load-percentage-text, "Loading");
+}
+
+.fp-group-container,
+.fp-rule-container {
+    position: relative
+}
+
+.fp-rule-list> :first-child::before {
+    top: -12px
+}
+
+.fp-rule-list> :last-child::after {
+    display: none
+}
+
+.fp-rule-list> ::before {
+    border-width: 0 0 2px 2px;
+    height: 25px;
+    top: -10px
+}
+
+.fp-rule-list> ::after,
+.fp-rule-list> ::before {
+    border-style: dotted;
+    content: '';
+    left: -12px;
+    position: absolute;
+    width: 10px
+}
+
+.fp-rule-list> ::after {
+    border-width: 0 0 0 2px;
+    height: calc(100% - 17px);
+    top: 17px
+}
+
+.fp-rule-list>.fp-rule-container::before {
+    height: calc(50% + 8px)
+}
+
+.fp-rule-list>.fp-rule-container:not(:first-child)::before {
+    height: calc(50% + 12px)
+}
+
+.fp-rule-list>.fp-rule-container::after {
+    height: calc(50% + 6px);
+    top: calc(50% - 3px)
+}
+
+.fp-rule-list>.fp-group-container:first-child {
+    margin-top: 0
+}
+
+.fp-rule-list .fp-group-container::before {
+    left: -12px
+}
+
+.fp-rule-list .fp-group-container::after {
+    left: -12px
+}
+
+.fp-rule-list .fp-group-container {
+    margin-left: 0;
+    margin-bottom: 12px;
+    width: 100%
+}
+
+.fp-rule-list {
+    padding-top: 12px;
+}
+
+.fp-group-container {
+    padding: 0;
+}
+
+.fp-rule-container {
+    border: none;
+    border-radius: 0;
+    margin-bottom: 12px;
+}
+
+.fp-rule-list>.fp-group-container {
+    padding-bottom: 12px
+}
+
+.fp-group-container .fp-rule-list>.fp-group-container {
+    padding-bottom: 0
+}
+
+.fp-group-body {
+    padding-left: 20px
+}
+
+.fp-group-body .fp-rule-container {
+    height: auto;
+    margin-top: 0;
+    padding-right: 12px
+}
+
+.fp-group-body .fp-rule-container.fp-joined-rule {
+    border-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0
+}
+
+.fp-group-container {
+    border-color: #d3d3d3
+}
+
+.fp-rule-list .fp-group-container {
+    background-color: #fff
+}
+
+.fp-rule-list> ::after,
+.fp-rule-list> ::before {
+    border-color: #e0e0e0
+}
+
+.fp-rule-list .card.rule-expression {
+    margin-bottom: 0;
+}
+
+.rz-cell-filter-label {
+    max-width: 100%;
+}
+
+.rz-tabview-top>.rz-tabview-nav {
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+
+.rz-tabview-top>.rz-tabview-nav li {
+    flex: 0 0 auto;
+}
+
+.rz-custom-header {
+    flex: 1 1 auto;
+}
+
+.rz-dialog {
+    height: auto !important;
+}
+
+.rz-fieldset {
+    border: var(--rz-fieldset-border);
+    border-radius: var(--rz-fieldset-border-radius);
+    max-height: 500px;
+}
+
+/* DAT Sync - Selected Vehicle Type Styling */
+.selected-vehicle-type {
+    border: 3px solid #007bff !important;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+}
+
+/* GLOBAL LEFT ALIGNMENT FIX FOR ALL RADZEN DROPDOWNS & INPUTS */
+
+/* Force dropdown container to align left */
+.rz-dropdown {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+
+/* Force dropdown label (the text inside) to align left with no auto margins */
+.rz-dropdown .rz-dropdown-label,
+.rz-dropdown-label {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    width: 100% !important;
+    display: block !important;
+    overflow: hidden;
+}
+
+/* All text inputs */
+.rz-textbox,
+.rz-inputtext,
+input.rz-inputtext,
+.rz-spinner-input,
+input.rz-spinner-input,
+.rz-numeric input,
+.rz-textarea {
+    text-align: left !important;
+    padding-left: 1rem !important;
+}
+
+/* Dropdown items in the panel */
+.rz-dropdown-items li,
+.rz-dropdown-item,
+.rz-multiselect-items li,
+.rz-multiselect-item {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+
+/* Placeholder text */
+::placeholder,
+::-webkit-input-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder {
+    text-align: left !important;
+}
+
+/* Quantity Controls (Ported from Web) - Compact Version */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #fff;
+    padding: 1px;
+    width: fit-content;
+}
+
+.qty-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.qty-btn:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.qty-btn:active:not(:disabled) {
+    background-color: #e2e8f0;
+}
+
+.qty-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.qty-btn i {
+    font-size: 9px;
+}
+
+/* Input within controls - Compact */
+.quantity-controls input {
+    width: 32px;
+    text-align: center;
+    border: none;
+    font-weight: 600;
+    font-size: 11px;
+    color: #0f172a;
+    padding: 0;
+    margin: 0 2px;
+    background: transparent;
+}
+
+.quantity-controls input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Remove spin buttons from number input */
+.quantity-controls input::-webkit-outer-spin-button,
+.quantity-controls input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Unified Green Overrides #0e947a */
+:root {
+    --bs-success: #0e947a;
+    --bs-success-rgb: 14, 148, 122;
+    --b2b-primary: #0e947a;
+}
+
+.text-success {
+    color: #0e947a !important;
+}
+
+.bg-success {
+    background-color: #0e947a !important;
+}
+
+.btn-success {
+    background-color: #0e947a !important;
+    border-color: #0e947a !important;
+}
+
+.btn-outline-success {
+    color: #0e947a !important;
+    border-color: #0e947a !important;
+}
+
+.btn-outline-success:hover {
+    background-color: #0e947a !important;
+    color: white !important;
+}
+
+.btn-primary {
+    background-color: #0e947a !important;
+    border-color: #0e947a !important;
+}
+
+/* Notification Z-Index Fix - Always show above modals/drawers */
+.rz-notification-container,
+.rz-messages,
+div[class*="notification"],
+.notification-wrapper,
+.rz-notification {
+    z-index: 10002 !important;
+}
+
+/* Notification items should also have high z-index */
+.rz-notification-item {
+    z-index: 10003 !important;
+}
+
+/* Enhanced Tooltip Styling - Radzen-like tooltips for data-tooltip attributes */
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+/* Custom tooltip styling - Radzen-like appearance */
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background-color: #1e293b;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    z-index: 10000;
+    pointer-events: none;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    max-width: 300px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.4;
+    opacity: 0;
+    animation: tooltipFadeIn 0.2s ease-in-out forwards;
+}
+
+[data-tooltip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1e293b;
+    margin-bottom: 2px;
+    z-index: 10001;
+    pointer-events: none;
+    opacity: 0;
+    animation: tooltipFadeIn 0.2s ease-in-out forwards;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* For elements that truncate text, show full text on hover */
+.text-truncate[data-tooltip]:hover {
+    overflow: visible;
+    white-space: normal;
+}
+
+/* Radzen Tooltip - Site Green Background - Comprehensive Override */
+.rz-tooltip,
+.rz-popup.rz-tooltip,
+div[class*="rz-tooltip"],
+div[class*="rz-popup"][class*="tooltip"],
+.rz-popup-content.rz-tooltip-content {
+    background-color: #0e947a !important;
+    background: #0e947a !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Radzen Tooltip Arrow - All possible arrow positions */
+.rz-tooltip-arrow,
+.rz-tooltip-arrow::before,
+.rz-popup-arrow,
+.rz-popup-arrow::before,
+div[class*="rz-tooltip"][class*="arrow"]::before {
+    border-top-color: #0e947a !important;
+    border-bottom-color: #0e947a !important;
+    border-left-color: #0e947a !important;
+    border-right-color: #0e947a !important;
+}
+
+/* Override any inline styles or Radzen default blue */
+.rz-popup[style*="background"],
+.rz-tooltip[style*="background"],
+div[class*="rz-tooltip"][style*="background"] {
+    background-color: #0e947a !important;
+    background: #0e947a !important;
+}
+
+/* Fix Radzen Dialog Z-Index to appear above header */
+.rz-dialog-wrapper {
+    z-index: 2101 !important;
+}
+
+/* Ensure all popups (dropdowns, datepickers, etc.) are above content */
+.rz-popup,
+.rz-dropdown-panel,
+.rz-lookup-panel,
+.rz-multiselect-panel,
+.rz-autocomplete-panel,
+.rz-datepicker-panel {
+    z-index: 2200 !important;
+}
+
+/* Custom Green Scrollbar for Sidebar */
+.rz-sidebar::-webkit-scrollbar,
+.rz-panel-menu::-webkit-scrollbar {
+    width: 10px;
+    background-color: rgba(119, 243, 133, 0.1);
+}
+
+.rz-sidebar::-webkit-scrollbar-thumb,
+.rz-panel-menu::-webkit-scrollbar-thumb {
+    background-color: #0e947a;
+    /* Green */
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.rz-sidebar::-webkit-scrollbar-track,
+.rz-panel-menu::-webkit-scrollbar-track {
+    background-color: transparent;
+}

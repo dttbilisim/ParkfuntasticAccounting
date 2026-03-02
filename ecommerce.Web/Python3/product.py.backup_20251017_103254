@@ -1,0 +1,235 @@
+root@mail:~/transfer# cat product.py
+import subprocess
+import time
+from datetime import datetime
+from elasticsearch import Elasticsearch, helpers
+from elasticsearch.helpers import BulkIndexError
+import psycopg2
+from decimal import Decimal
+
+def log_with_time(message, start=None):
+    if start:
+        elapsed = time.time() - start
+        print(f"{message} ⏱️ {elapsed:.2f}s")
+    else:
+        print(message)
+
+# 1. Run brand.py and category.py
+log_with_time("🚀 Running brand.py and category.py...")
+for script in ["brand.py", "category.py"]:
+    start = time.time()
+    subprocess.run(["python3", script])
+    log_with_time(f"✅ {script} completed", start)
+
+# 2. PostgreSQL connection
+pg_conn = psycopg2.connect(
+    host="localhost",
+    port=5454,
+    database="MarketPlace",
+    user="myinsurer",
+    password="Posmdh0738"
+)
+pg_cursor = pg_conn.cursor()
+
+# 3. Stored procedures
+log_with_time("🔄 Running stored procedures...")
+procedure_calls = [
+    "CALL sync_products_from_otoismails();",
+    "CALL sync_products_from_remars();",
+    "CALL sync_products_from_dega();",
+    "CALL sync_products_from_basbugs();"
+]
+for proc in procedure_calls:
+    start = time.time()
+    print(f"⚙️  Executing: {proc}")
+    pg_cursor.execute(proc)
+    pg_conn.commit()
+    log_with_time(f"✅ Completed: {proc.strip()}", start)
+
+# 4. Run createcategory.py
+#start = time.time()
+#log_with_time("🚀 Running createcategory.py...")
+#subprocess.run(["python3", "createcategory.py"])
+#log_with_time("✅ createcategory.py completed", start)
+
+# 5. Elasticsearch setup
+es = Elasticsearch(
+    ["http://localhost:9200"],
+    basic_auth=("elastic", "itO5M3EZrbc96K_42ah3"),
+)
+
+# 5.1. Delete existing index and create new one with nested mapping
+if es.indices.exists(index="product_index"):
+    es.indices.delete(index="product_index")
+
+mapping = {
+    "mappings": {
+        "properties": {
+            "Categories": {
+                "type": "nested",
+                "properties": {
+                    "Id": {"type": "integer"},
+                    "Name": {"type": "text"}
+                }
+            },
+            "Images": {
+                "type": "nested",
+                "properties": {
+                    "Id": {"type": "integer"},
+                    "FileName": {"type": "text"},
+                    "FileGuid": {"type": "text"}
+                }
+            },
+            "GroupCodes": {
+                "type": "nested",
+                "properties": {
+                    "Id": {"type": "integer"},
+                    "GroupCode": {"type": "text"}
+                }
+            },
+            "SellerItems": {
+                "type": "nested",
+                "properties": {
+                    "Id": {"type": "integer"},
+                    "SellerId": {"type": "integer"},
+                    "Stock": {"type": "integer"},
+                    "CostPrice": {"type": "double"},
+                    "SalePrice": {"type": "double"},
+                    "Commision": {"type": "double"},
+                    "Currency": {"type": "keyword"},
+                    "Unit": {"type": "text"},
+                    "Status": {"type": "integer"},
+                    "CreatedDate": {"type": "date"},
+                    "ModifiedDate": {"type": "date"},
+                    "CreatedId": {"type": "integer"},
+                    "ModifiedId": {"type": "integer"}
+                }
+            },
+            "Brand": {
+                "properties": {
+                    "Id": {"type": "integer"},
+                    "Name": {"type": "text"}
+                }
+            },
+            "Tax": {
+                "properties": {
+                    "Id": {"type": "integer"},
+                    "Name": {"type": "text"}
+                }
+            }
+        }
+    }
+}
+es.indices.create(index="product_index", body=mapping)
+log_with_time("📦 New index created with nested mapping")
+
+# 6. Data transfer from PostgreSQL to Elasticsearch
+batch_size = 50000
+offset = 0
+total_indexed = 0
+log_with_time("🚀 Starting Elasticsearch data transfer...")
+
+while True:
+    sql = f'''
+    SELECT p.*, 
+      json_agg(DISTINCT jsonb_build_object('Id', c."Id", 'Name', c."Name")) FILTER (WHERE c."Id" IS NOT NULL) AS "Categories",
+      json_agg(DISTINCT jsonb_build_object('Id', i."Id", 'FileName', i."FileName", 'FileGuid', i."FileGuid")) FILTER (WHERE i."Id" IS NOT NULL) AS "Images",
+      jsonb_build_object('Id', b."Id", 'Name', b."Name") AS "Brand",
+      jsonb_build_object('Id', t."Id", 'Name', t."Name") AS "Tax",
+      json_agg(DISTINCT jsonb_build_object('Id', g."Id", 'GroupCode', g."GroupCode")) FILTER (WHERE g."Id" IS NOT NULL) AS "GroupCodes",
+      json_agg(DISTINCT jsonb_build_object(
+        'Id', si."Id", 'SellerId', si."SellerId", 'Stock', si."Stock", 'CostPrice', si."CostPrice",
+        'SalePrice', si."SalePrice", 'Commision', si."Commision", 'Currency', si."Currency",
+        'Unit', si."Unit", 'Status', si."Status", 'CreatedDate', si."CreatedDate",
+        'ModifiedDate', si."ModifiedDate", 'CreatedId', si."CreatedId", 'ModifiedId', si."ModifiedId"
+      )) FILTER (WHERE si."Id" IS NOT NULL) AS "SellerItems"
+    FROM "Product" p
+    LEFT JOIN "ProductCategories" pc ON pc."ProductId" = p."Id"
+    LEFT JOIN "Category" c ON c."Id" = pc."CategoryId"
+    LEFT JOIN "ProductImages" i ON i."ProductId" = p."Id"
+    LEFT JOIN "Brand" b ON b."Id" = p."BrandId"
+    LEFT JOIN "Tax" t ON t."Id" = p."TaxId"
+    LEFT JOIN "ProductGroupCodes" g ON g."ProductId" = p."Id"
+    LEFT JOIN "SellerItems" si ON si."ProductId" = p."Id"
+    WHERE si."Stock">0
+    GROUP BY p."Id", b."Id", t."Id"
+    LIMIT {batch_size} OFFSET {offset};
+    '''
+
+    start = time.time()
+    pg_cursor.execute(sql)
+    columns = [desc[0] for desc in pg_cursor.description]
+    rows = pg_cursor.fetchall()
+    if not rows:
+        log_with_time("⚡️ All products have been indexed to Elasticsearch.")
+        break
+
+    actions = []
+    for row in rows:
+        product = dict(zip(columns, row))
+        for k, v in product.items():
+            if isinstance(v, datetime):
+                product[k] = v.isoformat()
+            elif isinstance(v, Decimal):
+                product[k] = float(v)
+            elif isinstance(v, list):
+                for i in range(len(v)):
+                    if isinstance(v[i], dict):
+                        for kk, vv in v[i].items():
+                            if isinstance(vv, datetime):
+                                v[i][kk] = vv.isoformat()
+                            elif isinstance(vv, Decimal):
+                                v[i][kk] = float(vv)
+        actions.append({
+            "_index": "product_index",
+            "_id": product.get("Id"),
+            "_source": product
+        })
+
+    try:
+        success, _ = helpers.bulk(es, actions)
+        total_indexed += success
+        log_with_time(f"✅ Batch indexed: {success} products, Total: {total_indexed}", start)
+    except BulkIndexError as e:
+        print(f"❌ Error: {len(e.errors)} documents failed.")
+        for err in e.errors[:3]:
+            print(err)
+
+    offset += batch_size
+
+# 7. Maintenance
+log_with_time("🧩 Running ANALYZE + WAL switch + CHECKPOINT...")
+maintenance_sqls = [
+    'ANALYZE "Product";',
+    'ANALYZE "SellerItems";',
+    'ANALYZE "Brand";',
+    'ANALYZE "ProductGroupCodes";',
+    'ANALYZE "ProductCategories";',
+    'ANALYZE "ProductImages";',
+    'ANALYZE "Category";',
+    'ANALYZE "Tax";',
+    'ANALYZE "CarBrands";',
+    'ANALYZE "CarModels";',
+    'ANALYZE "CarEngines";',
+    'ANALYZE "CarGearboxes";',
+    'ANALYZE "CarFuelTypes";',
+    'ANALYZE "CarVins";',
+    'ANALYZE "CarSpecs";',
+    'ANALYZE "CarOriginalNumbers";',
+    'ANALYZE "CarYears";',
+    'ANALYZE "OemToCars";',
+    'SELECT pg_switch_wal();',
+    'CHECKPOINT;'
+]
+for sql in maintenance_sqls:
+    start = time.time()
+    print(f"🔄 {sql.strip()}")
+    pg_cursor.execute(sql)
+    pg_conn.commit()
+    log_with_time(f"✅ {sql.strip()} completed", start)
+
+# 8. Close
+pg_cursor.close()
+pg_conn.close()
+log_with_time(f"🎯 All operations completed. Total indexed products: {total_indexed}")
+root@mail:~/transfer#  burda urunler satici başlı mi ekliyor yoksa en ucuz olanımı atiyor elastic searche ?

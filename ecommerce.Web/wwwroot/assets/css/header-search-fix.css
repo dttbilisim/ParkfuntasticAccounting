@@ -1,0 +1,71 @@
+/* ===== Header Search Compact Alignment Fix ===== */
+/* Targets actual markup: .top-nav .navbar-top .middle-box */
+
+.top-nav .navbar-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-nav .navbar-top .middle-box {
+  flex: 1 1 640px;
+  min-width: 0; /* allow flex item to shrink without horizontal scroll */
+  max-width: 700px;
+  margin: 0; /* left align instead of centering */
+}
+
+.top-nav .navbar-top .middle-box .search-box {
+  width: 100%;
+}
+
+.top-nav .navbar-top .middle-box .search-input-group {
+  display: flex;
+  align-items: center; /* keep controls aligned */
+  width: 100%;
+  gap: 0; /* keep tight alignment */
+  position: relative !important;
+  overflow: visible !important; /* prevent icon/button clipping */
+  /*height: auto !important;*/
+  min-height: 44px !important;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.top-nav .navbar-top .middle-box .search-input-group .form-control {
+  flex: 1 1 auto;
+  min-width: 0; /* critical for long placeholders */
+  height: 44px !important; /* match button height */
+  border-right: none !important;
+  border-radius: 12px 0 0 12px !important;
+  box-sizing: border-box;
+  z-index: 1;
+  padding-right: 48px !important; /* space for advanced button */
+}
+
+/* Advanced search button alignment next to input */
+.top-nav .navbar-top .middle-box .search-input-group .search-advanced-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 36px !important;
+  width: 40px !important;
+  padding: 0;
+  margin: 0;
+  border-left: none;
+  border-radius: 8px !important;
+  background: var(--theme-color);
+  color: #fff;
+  line-height: 1;
+  z-index: 2; /* stay above input */
+}
+
+@media (max-width: 768px) {
+  .top-nav .navbar-top .middle-box {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,43 @@
+@inherits LayoutComponentBase
+
+<RadzenDialog />
+<RadzenNotification />
+<RadzenTooltip />
+<RadzenContextMenu />
+
+<RadzenLayout style="background: url('images/login.jpg'); background-size: cover; display: flex; align-items: center; justify-content: center;">
+    <RadzenBody Style="background-color: transparent; width: 100%; display: flex; align-items: center; justify-content: center;">
+        <div class="container-fluid d-flex justify-content-center align-items-center" style="height: 100vh;">
+            <div class="row w-100 justify-content-center">
+                <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+                    <RadzenCard class="login-card" style="padding: 0; overflow: hidden; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); border: none;">
+                        <div class="container-fluid p-0">
+                            <div class="row m-0">
+                                <div class="col-12 col-md-6 d-flex flex-column justify-content-center align-items-start p-5 text-white" 
+                                     style="background: linear-gradient(135deg, var(--rz-primary-light) 0%, var(--rz-primary) 50%, var(--rz-primary-darker) 100%); min-height: 400px; position: relative;">
+                                    
+                                    <!-- Decorative subtle circle -->
+                                    <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.1);"></div>
+                                    <div style="position: absolute; bottom: -30px; right: -30px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.1);"></div>
+
+                                    <h1 style="font-weight: 800; font-size: 2.5rem; margin-bottom: 1rem; position: relative; z-index: 1;">Hoşgeldiniz!</h1>
+                                    <p style="font-size: 1.1rem; opacity: 0.9; position: relative; z-index: 1;">
+                                        Kullanıcı adı ve şifrenizle giriş yapabilirsiniz.
+                                    </p>
+                                </div>
+                                <div class="col-12 col-md-6 p-5 bg-white d-flex flex-column justify-content-center">
+                                    @Body
+                                </div>
+                            </div>
+                        </div>
+                    </RadzenCard>
+                    <div class="text-center mt-4">
+                        <RadzenText TextStyle="TextStyle.Caption" Style="color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                            ECommerce Admin v.1.0.0, Copyright Ⓒ @DateTime.Now.Year
+                        </RadzenText>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </RadzenBody>
+</RadzenLayout>

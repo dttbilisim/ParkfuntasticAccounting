@@ -1,0 +1,59 @@
+@page "/upsert-product-stock"
+@using ecommerce.Admin.Domain.Dtos.ProductStockDto
+@using ecommerce.Admin.Domain.Dtos.WarehouseShelfDto
+@using ecommerce.Admin.Domain.Dtos.WarehouseDto
+@attribute [Authorize]
+
+<PageTitle>Stok Ekle/Düzenle</PageTitle>
+
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Stok Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="ProductStockUpsertDto" Data="@dto" Visible="@(dto != null)" Submit="@FormSubmit">
+        
+         <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Depo" Component="Warehouse" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                 <RadzenDropDownDataGrid Data="@warehouses" TextProperty="Name" ValueProperty="Id" Placeholder="Depo Seçiniz" style="display: block; width: 100%" @bind-Value="@selectedWarehouseId" Name="Warehouse" Change="@OnWarehouseChange" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Raf" Component="Shelf" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                 <RadzenDropDownDataGrid Data="@shelves" TextProperty="Code" ValueProperty="Id" Placeholder="Raf Seçiniz" style="display: block; width: 100%" @bind-Value="@dto.WarehouseShelfId" Name="Shelf" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Disabled="@(shelves == null || shelves.Count == 0)" AllowFiltering="true" />
+                 <RadzenRequiredValidator Component="Shelf" Text="Raf Seçmelisiniz" DefaultValue="0" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Adet" Component="Quantity" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@dto.Quantity" Name="Quantity" Min="0" />
+                <RadzenRequiredValidator Component="Quantity" Text="Geçerli bir miktar giriniz" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenCheckBox @bind-Value="@Status" />
+                <RadzenLabel Text="Aktif" Style="margin-left: 5px; vertical-align: middle;" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

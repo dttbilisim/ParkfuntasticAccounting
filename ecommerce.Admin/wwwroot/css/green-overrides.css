@@ -1,0 +1,34 @@
+/* Unified Green Overrides #0e947a */
+:root {
+    --bs-success: #0e947a;
+    --bs-success-rgb: 14, 148, 122;
+    --b2b-primary: #0e947a;
+}
+
+.text-success {
+    color: #0e947a !important;
+}
+
+.bg-success {
+    background-color: #0e947a !important;
+}
+
+.btn-success {
+    background-color: #0e947a !important;
+    border-color: #0e947a !important;
+}
+
+.btn-outline-success {
+    color: #0e947a !important;
+    border-color: #0e947a !important;
+}
+
+.btn-outline-success:hover {
+    background-color: #0e947a !important;
+    color: white !important;
+}
+
+.btn-primary {
+    background-color: #0e947a !important;
+    border-color: #0e947a !important;
+}

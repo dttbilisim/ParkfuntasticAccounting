@@ -1,0 +1,60 @@
+﻿@page "/filter-product"
+@using ecommerce.Admin.Domain.Dtos.ProductDto;
+@using ecommerce.Core.Utils;
+@attribute [Authorize]
+
+<PageTitle>Ürün Filtrele</PageTitle>
+
+<div class="col-md-12">
+
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Ürün Kayıt Edilemedi!</RadzenAlert>
+
+    <RadzenTemplateForm TItem="ProductCustomFilterDto" Data="@_filter" Visible="@(_filter != null)" Submit="FormSubmit">
+        <br />
+        <RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Client" Change="TabChange">
+            <Tabs>
+                <RadzenTabsItem Text="Filtrele">
+                    <RadzenFieldset Text="Ürün Bilgileri">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+                            </div>
+                            <div class="col-md-7">
+                                @*<RadzenDropDown Data="@Enum.GetValues(typeof(EntityStatusForFilter))"
+                                TValue="EntityStatusForFilter?"
+                                @bind-Value = "Status"
+                                AllowClear=true
+                                Placeholder="Durum seçiniz"
+                                Style="width: 100%; max-width: 400px;" />*@
+                                <RadzenCheckBox @bind-Value="_filter.Status"></RadzenCheckBox>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <RadzenLabel Text="Ürün Fotoğrafı olmayanlar" Component="ProductsWithoutImage" style="width: 100%" />
+                            </div>
+                            <div class="col-md-7">
+                                <RadzenCheckBox @bind-Value="_filter.ProductsWithoutImage"></RadzenCheckBox>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <RadzenLabel Text="Ürün Kategorisi olmayanlar" Component="ProductsWithoutCategory" style="width: 100%" />
+                            </div>
+                            <div class="col-md-7">
+                                <RadzenCheckBox @bind-Value="_filter.ProductsWithoutCategory"></RadzenCheckBox>
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+        <br />
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="filter_alt" Text="Filtrele" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Temizle" Variant="Variant.Flat" Click="ClearButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

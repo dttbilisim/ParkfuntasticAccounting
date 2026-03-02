@@ -1,0 +1,8 @@
+﻿@if (MainRule != null)
+{
+    <CascadingValue Name="@nameof(FieldScopeDefinition)" Value="@FieldScopeDefinition">
+        <CascadingValue Name="@nameof(RuleValidator)" Value="@RuleValidator">
+            <RuleBuilderGroup @bind-GroupExpression="MainRule"></RuleBuilderGroup>
+        </CascadingValue>
+    </CascadingValue>
+}

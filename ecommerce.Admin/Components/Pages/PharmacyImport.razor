@@ -1,0 +1,77 @@
+@page "/pharmacy-import"
+@using ecommerce.Admin.Domain.Dtos.CompanyDto
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Eczane Data Import</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Eczane Data Import</h1>
+        </div>
+        <div class="col-6 text-end">
+             @* <RadzenButton Icon="add_circle_outline" Text="Yeni Kullanıcı Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" /> *@
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 d-flex align-items-center gap-3 flex-wrap shadow-sm">
+        <div style="margin-bottom: 1rem" class="row w-100">
+            <div class="col-md-3">
+                <RadzenLabel Text="Dosya" Component="File" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <InputFile OnChange="LoadFiles" class="mb-2" accept="json"/>
+            </div>
+        </div>
+    </RadzenCard>
+
+    <div class="row mb-3">
+        <div class="col-md-12">
+             <RadzenCard>
+                <div style="margin-bottom: 1rem;" class="row">
+                    <div style="color: @(resultStyle == "insert" ? "#508D69" : "#FF8F8F")" class="col-md-8">
+                        @if(transTotal > 0){
+                            <RadzenLabel Text="Aktarılan">Toplam Kayıt: @transTotal / Aktarılan Kayıt: @transCount Aktarılan Eczane: @transName </RadzenLabel>
+                        }
+                    </div>
+                </div>
+            </RadzenCard>
+        </div>
+    </div>
+
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true"
+                        
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            PagerAlwaysVisible=true
+                            PageSize=25
+                            AllowFilterDateInput=true
+                            TItem="PharmacyDataDto"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@pharmacyDatas"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            FilterMode="FilterMode.Simple">
+
+                <Columns>
+
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="Id" Title="Id" Width="10px">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="PharmacyType" Title="Eczane Tipi" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="PharmacyName" Title="Eczane Adı" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="GlnNumber" Title="Gln Kodu" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="Email" Title="Email" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="StatusText" Title="Durumu" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="City" Title="İl" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PharmacyDataDto" Property="Town" Title="İlçe" Width="50px"></RadzenDataGridColumn>
+
+
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

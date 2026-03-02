@@ -1,0 +1,473 @@
+@using ecommerce.Admin.Domain.Dtos.InvoiceDto
+<link href="css/invoice-compact.css" rel="stylesheet" />
+@using ecommerce.Admin.Domain.Dtos.Customer
+@using ecommerce.Admin.Domain.Dtos.SalesPersonDto
+@using Radzen
+@using Radzen.Blazor
+@using ecommerce.Admin.Domain.Dtos.ProductUnitDto
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+
+@if (Invoice == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+@if (Invoice != null)
+{
+    <RadzenTemplateForm @ref="invoiceForm" TItem="InvoiceUpsertDto" Data="@Invoice" Submit="@FormSubmitSync">
+        <div class="modal-content-body-compact">
+            @* e-Fatura/e-Arşiv gönderilmiş fatura uyarısı *@
+            @if (IsReadOnly)
+            {
+                <div class="alert d-flex align-items-center gap-3 mb-2 py-2 px-3" role="alert"
+                     style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid #86efac; border-radius: 8px;">
+                    <i class="fa-solid fa-lock" style="font-size: 1.1rem; color: #16a34a;"></i>
+                    <div class="flex-grow-1">
+                        <span style="font-weight: 600; color: #15803d; font-size: 0.85rem;">
+                            Bu fatura @(Invoice.IsEInvoice ? "e-Fatura" : "e-Arşiv") olarak gönderilmiştir — düzenleme yapılamaz.
+                        </span>
+                        @if (!string.IsNullOrEmpty(Invoice.EInvoiceStatus))
+                        {
+                            <span class="badge ms-2" style="background: #059669; color: #fff; font-size: 0.7rem;">@Invoice.EInvoiceStatus</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* ETTN ve e-Fatura durum bilgisi — her zaman göster *@
+            @if (!string.IsNullOrEmpty(Invoice.Ettn))
+            {
+                <div class="d-flex align-items-center gap-2 mb-2 py-2 px-3" 
+                     style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-fingerprint" style="color: #598087;"></i>
+                    <span style="color: #475569; font-weight: 500;">ETTN:</span>
+                    <code style="background: #e5e7eb; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; letter-spacing: 0.3px; user-select: all;">@Invoice.Ettn</code>
+                    @if (!string.IsNullOrEmpty(Invoice.EInvoiceStatus))
+                    {
+                        <span class="badge ms-auto" style="background: @(Invoice.EInvoiceStatus?.ToUpperInvariant() == "IPTAL" ? "#dc3545" : "#059669"); color: #fff; font-size: 0.7rem;">@Invoice.EInvoiceStatus</span>
+                    }
+                </div>
+            }
+
+            <div class="row g-2">
+                <!-- Left: Main Form -->
+                <div class="col-lg-9">
+                    <div class="pro-card">
+                        <div class="pro-card-title">
+                            GENEL BİLGİLER
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <label class="pro-label">Fatura Tipi</label>
+                                <RadzenDropDown @bind-Value="@Invoice.InvoiceTypeId" Data="@InvoiceTypes" TextProperty="Name" ValueProperty="Id" TValue="int?" class="w-100" PopupStyle="z-index:10005;" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Disabled="@IsReadOnly" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="pro-label">Seri / No</label>
+                                <div class="d-flex gap-1">
+                                    <RadzenTextBox @bind-Value="@Invoice.InvoiceSerialNo" Style="width: 50px !important" MaxLength="3" Placeholder="Seri" Disabled="@IsReadOnly" />
+                                    <RadzenTextBox @bind-Value="@Invoice.InvoiceNo" class="flex-grow-1" Placeholder="No" Disabled="@IsReadOnly" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="pro-label">Tarih</label>
+                                <RadzenDatePicker @bind-Value="@Invoice.InvoiceDate" DateFormat="dd.MM.yyyy" class="w-100" PopupStyle="z-index: 10005;" Disabled="@IsReadOnly" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="pro-label">Depo</label>
+                                <RadzenDropDown @bind-Value="@Invoice.WarehouseId" Data="@WarehouseOptions" TextProperty="Name" ValueProperty="Id" TValue="int?" class="w-100" PopupStyle="z-index:10005;" 
+                                                Change="@OnWarehouseChangeSync" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Disabled="@IsReadOnly" />
+                            </div>
+                        </div>
+                        <div class="row g-2 mt-1">
+                            <div class="col-md-4">
+                                <label class="pro-label">Şube</label>
+                                <div class="py-2 px-2 border rounded bg-light" style="min-height: 2.25rem; font-size: 0.9rem;">
+                                    @(WarehouseOptions?.FirstOrDefault(w => w.Id == Invoice?.WarehouseId)?.BranchName ?? (Invoice?.BranchId > 0 ? "Şube #" + Invoice.BranchId : "Depo seçildiğinde atanır"))
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-12">
+                                <label class="pro-label">Cari (Müşteri) Seçimi</label>
+                                <div class="pro-search-bar" style="background-color: transparent; border: none; padding: 0; position: relative;">
+                                    <RadzenAutoComplete @bind-Value="@selectedCustomerSearch" Data="@Customers" TextProperty="Name" 
+                                                       LoadData="@LoadCustomers" Placeholder="Cari hesap ara (İsim veya Kod)..." 
+                                                       Change="@((object args) => OnCustomerChangeSync(args))" class="flex-grow-1" PopupStyle="z-index:10005;" Disabled="@IsReadOnly">
+                                        <Template Context="customer">
+                                            @{
+                                                var codeAndPhone = string.Concat(customer.Code ?? "", " | ", customer.Phone ?? "");
+                                            }
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex flex-column">
+                                                    <span style="font-weight:600;">@(customer.Name ?? "")</span>
+                                                    <small class="text-muted">@codeAndPhone</small>
+                                                </div>
+                                            </div>
+                                        </Template>
+                                    </RadzenAutoComplete>
+                                    @if (!string.IsNullOrEmpty(selectedCustomerSearch) && !IsReadOnly)
+                                    {
+                                        <RadzenIcon Icon="close" Style="position: absolute; right: 55px; top: 10px; cursor: pointer; color: #999; z-index: 10;" 
+                                                   @onclick="@(() => OnCustomerChangeSync(null))" />
+                                    }
+                                    <RadzenButton Click="@(() => LoadCustomers(new LoadDataArgs { Filter = selectedCustomerSearch }))" ButtonStyle="ButtonStyle.Info" ButtonType="ButtonType.Button" class="pro-btn" Disabled="@(isCustomerLoading || IsReadOnly)">
+                                        <div class="d-flex align-items-center">
+                                            @if (isCustomerLoading)
+                                            {
+                                                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.ExtraSmall" />
+                                            }
+                                            else
+                                            {
+                                                <RadzenIcon Icon="search" />
+                                            }
+                                        </div>
+                                    </RadzenButton>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-4">
+                                <label class="pro-label">Ödeme Tipi</label>
+                                <RadzenDropDown @bind-Value="@Invoice!.PaymentTypeId" Data="@PaymentTypeOptions" TextProperty="Text" ValueProperty="Value" TValue="int?" Change="@((object args) => OnPaymentTypeChangeSync(args))" class="w-100" PopupStyle="z-index:10005;" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Disabled="@IsReadOnly" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="pro-label">Kasa / Hesap</label>
+                                <RadzenDropDown @bind-Value="@Invoice.CashRegisterId" Data="@CashRegisterOptions" TextProperty="Text" ValueProperty="Value" TValue="int?" Disabled="@(!(CashRegisterOptions?.Any() ?? false) || IsReadOnly)" class="w-100" PopupStyle="z-index:10005;" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="pro-label">Plasiyer</label>
+                                <RadzenDropDown @bind-Value="@Invoice.SalesPersonId" Data="@SalesPersonOptions" TextProperty="Text" ValueProperty="Value" TValue="int?" class="w-100" PopupStyle="z-index:10005;" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Disabled="@IsReadOnly" />
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (_orderAccordionItems != null && _orderAccordionItems.Any())
+                    {
+                        <div class="pro-card">
+                            <div class="pro-card-title d-flex justify-content-between align-items-center">
+                                <span><i class="fa-solid fa-boxes-stacked me-1"></i> SİPARİŞ DETAYLARI</span>
+                                <span class="badge bg-primary">@_orderAccordionItems.Count sipariş</span>
+                            </div>
+                            @foreach (var order in _orderAccordionItems)
+                            {
+                                var isExpanded = _expandedOrderIds.Contains(order.OrderId);
+                                <div class="border rounded mb-2" style="overflow: hidden;">
+                                    @* Accordion başlık *@
+                                    <div class="d-flex align-items-center justify-content-between px-3 py-2" 
+                                         style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); cursor: pointer; user-select: none;"
+                                         @onclick="@(() => ToggleOrderAccordion(order.OrderId))">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid @(isExpanded ? "fa-chevron-down" : "fa-chevron-right")" 
+                                               style="font-size: 0.7rem; color: #64748b; transition: transform 0.2s;"></i>
+                                            <span style="font-weight: 700; font-size: 0.82rem; color: #1e293b;">
+                                                @order.OrderNumber
+                                            </span>
+                                            <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 0.65rem;">
+                                                @order.StatusText
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span style="font-size: 0.72rem; color: #64748b;">
+                                                @order.CreatedDate.ToString("dd.MM.yyyy")
+                                            </span>
+                                            <span style="font-size: 0.72rem; color: #64748b;">
+                                                @order.Items.Count ürün
+                                            </span>
+                                            <span style="font-weight: 700; font-size: 0.82rem; color: #059669;">
+                                                @order.OrderTotal.ToString("N2") ₺
+                                            </span>
+                                        </div>
+                                    </div>
+                                    @* Accordion içerik *@
+                                    @if (isExpanded)
+                                    {
+                                        <div style="border-top: 1px solid #e2e8f0;">
+                                            <table class="table table-sm table-hover mb-0" style="font-size: 0.75rem;">
+                                                <thead style="background: #f8fafc;">
+                                                    <tr>
+                                                        <th style="padding: 4px 8px; font-weight: 600; color: #475569;">#</th>
+                                                        <th style="padding: 4px 8px; font-weight: 600; color: #475569;">Ürün Adı</th>
+                                                        <th style="padding: 4px 8px; font-weight: 600; color: #475569; text-align: center;">Miktar</th>
+                                                        <th style="padding: 4px 8px; font-weight: 600; color: #475569; text-align: right;">Birim Fiyat</th>
+                                                        <th style="padding: 4px 8px; font-weight: 600; color: #475569; text-align: right;">İskonto</th>
+                                                        <th style="padding: 4px 8px; font-weight: 600; color: #475569; text-align: right;">Toplam</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{ int siraNo = 1; }
+                                                    @foreach (var item in order.Items)
+                                                    {
+                                                        <tr>
+                                                            <td style="padding: 4px 8px; color: #94a3b8;">@(siraNo++)</td>
+                                                            <td style="padding: 4px 8px; font-weight: 500; color: #1e293b;">@item.ProductName</td>
+                                                            <td style="padding: 4px 8px; text-align: center; font-weight: 600;">@item.Quantity</td>
+                                                            <td style="padding: 4px 8px; text-align: right;">@item.Price.ToString("N2") ₺</td>
+                                                            <td style="padding: 4px 8px; text-align: right; color: #dc2626;">
+                                                                @(item.DiscountAmount > 0 ? $"-{item.DiscountAmount:N2} ₺" : "-")
+                                                            </td>
+                                                            <td style="padding: 4px 8px; text-align: right; font-weight: 700; color: #2563eb;">
+                                                                @item.TotalPrice.ToString("N2") ₺
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                            @if (order.CargoPrice > 0)
+                                            {
+                                                <div class="d-flex justify-content-between px-3 py-1" style="background: #fffbeb; border-top: 1px solid #fde68a; font-size: 0.72rem;">
+                                                    <span style="color: #92400e; font-weight: 500;">Kargo Ücreti</span>
+                                                    <span style="color: #92400e; font-weight: 600;">@order.CargoPrice.ToString("N2") ₺</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="pro-card">
+                        <div class="pro-card-title d-flex justify-content-between align-items-center">
+                            <span>ÜRÜN KALEMLERİ</span>
+                        </div>
+                        
+                        <div class="pro-search-bar mb-2" style="position: relative;">
+                            <RadzenAutoComplete @bind-Value="@selectedProductCode" Data="@productSearchResults" TextProperty="Name" 
+                                               LoadData="@LoadProducts" Placeholder="Barkod veya Ürün Adı ile ara..." 
+                                               Change="@((object args) => OnProductSearchChanged(args))" class="flex-grow-1" PopupStyle="z-index:10005;" Disabled="@IsReadOnly">
+                                <Template Context="product">
+                                    @{
+                                        var productSubtext = string.Concat(product.Barcode ?? "", " | ", product.Brand?.Name ?? "Markasız");
+                                        var productPriceText = product.Price.ToString("N2") + " TL";
+                                    }
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex flex-column">
+                                            <span style="font-weight:600;">@(product.Name ?? "")</span>
+                                            <small class="text-muted">@productSubtext</small>
+                                        </div>
+                                        <span style="font-weight:700; color:#2563eb; font-size: 1.1em;">@productPriceText</span>
+                                    </div>
+                                </Template>
+                            </RadzenAutoComplete>
+                            @if (!string.IsNullOrEmpty(selectedProductCode) && !IsReadOnly)
+                            {
+                                <RadzenIcon Icon="close" Style="position: absolute; right: 85px; top: 10px; cursor: pointer; color: #999; z-index: 10;" 
+                                           @onclick="@ClearProductSearch" />
+                            }
+                            <RadzenButton Click="@AddProductFromSearch" ButtonStyle="ButtonStyle.Success" ButtonType="ButtonType.Button" class="pro-btn" Disabled="@(isProductLoading || IsReadOnly)">
+                                <div class="d-flex align-items-center">
+                                    @if (isProductLoading)
+                                    {
+                                        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.ExtraSmall" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenIcon Icon="add" class="me-1" />
+                                        <span>EKLE</span>
+                                    }
+                                </div>
+                            </RadzenButton>
+                            <div class="d-flex align-items-center gap-2 px-2 border-start">
+                                <RadzenCheckBox @bind-Value="@Invoice.IsVatIncluded" Name="IsVatIncluded" Change="@((bool args) => OnRecalculateTotalsBool(args))" Disabled="@IsReadOnly" />
+                                <label for="IsVatIncluded" class="pro-label m-0">KDV DAHİL</label>
+                            </div>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <RadzenDataGrid @ref="itemsGrid" TItem="InvoiceItemUpsertDto" Data="@Invoice.Items" 
+                                           AllowColumnResize="true" class="pro-invoice-grid" GridLines="DataGridGridLines.Both"
+                                           RowRender="@RowRender" Style="min-width: 900px;" EmptyText="Listede ürün yok">
+                                <Columns>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="#" Width="40px" textAlign="TextAlign.Center">
+                                        <Template Context="item">
+                                            @item.Order
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="ÜRÜN DETAYI" Width="auto">
+                                        <Template Context="item">
+                                            <div style="font-weight:600; font-size:12px; color:#1e293b; white-space: normal; line-height: 1.2; margin-bottom: 2px;">
+                                                @item.ProductName
+                                            </div>
+                                            <div style="font-size:10px; color:#64748b;">@item.ProductCode</div>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="BİRİM" Width="90px">
+                                        <Template Context="item">
+                                            @if (item.ProductId > 0 && !IsReadOnly)
+                                            {
+                                                <RadzenDropDown TValue="int?" @bind-Value="@item.ProductUnitId" Data="@GetProductUnitsForItem(item)" 
+                                                                TextProperty="UnitName" ValueProperty="Id" 
+                                                                Change="@((object args) => OnUnitChange(args, item))" class="w-100" PopupStyle="z-index:10005;" 
+                                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                            }
+                                            else
+                                            {
+                                                <span class="d-block py-1">@item.Unit</span>
+                                            }
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="MİKTAR" Width="120px">
+                                        <Template Context="item">
+                                            <RadzenNumeric @bind-Value="@item.Quantity" TValue="decimal" Format="N2" class="w-100 d-block" 
+                                                           ShowUpDown="false" Change="@((decimal v) => OnCalculateItemTotalDecimal(v, item))" Disabled="@IsReadOnly" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="FİYAT" Width="140px">
+                                        <Template Context="item">
+                                            <RadzenNumeric @bind-Value="@item.Price" TValue="decimal" Format="N2" class="w-100 d-block" 
+                                                           ShowUpDown="false" Change="@((decimal v) => OnCalculateItemTotalPrice(v, item))" Disabled="@IsReadOnly" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="İSK %" Width="140px">
+                                        <Template Context="item">
+                                            <RadzenNumeric @bind-Value="@item.Discount1" TValue="decimal" Format="0" class="w-100 d-block text-center" 
+                                                           ShowUpDown="false" Change="@((decimal v) => OnCalculateItemTotalDiscount(v, item))" Disabled="@IsReadOnly" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="KDV" Width="60px" TextAlign="TextAlign.Center">
+                                        <Template Context="item">
+                                            <span class="badge bg-light text-dark">%@item.VatRate.ToString("N0")</span>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Title="TOPLAM" Width="140px" TextAlign="TextAlign.Right">
+                                        <Template Context="item">
+                                            <span style="font-weight:700; color:#2563eb;">@item.TotalCurrency.ToString("N2")</span>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="InvoiceItemUpsertDto" Width="50px" TextAlign="TextAlign.Center">
+                                        <Template Context="item">
+                                            @if (!IsReadOnly)
+                                            {
+                                                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" 
+                                                              Click="@(() => RemoveInvoiceItemSync(item))" />
+                                            }
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                </Columns>
+                            </RadzenDataGrid>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Summary -->
+                <div class="col-lg-3">
+                    <div class="pro-card sticky-top">
+                        <div class="pro-card-title">
+                             FİNANSAL ÖZET
+                        </div>
+                        
+                        <div class="pro-field mb-2">
+                            <label class="pro-label">Döviz ve Kur</label>
+                            <div class="d-flex gap-1 align-items-center">
+                                <RadzenDropDown @bind-Value="@Invoice.CurrencyId" Data="@CurrencyOptions" TextProperty="Text" ValueProperty="Value" 
+                                               TValue="int?" Change="@((object args) => OnCurrencyChangeSync(args))" class="flex-grow-1" PopupStyle="z-index:10005;" 
+                                               AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Disabled="@IsReadOnly" />
+                                <RadzenNumeric @bind-Value="@Invoice.ExchangeRate" ShowUpDown="false" Style="width: 180px !important; display: block;" 
+                                               Disabled="@(IsTry || IsReadOnly)" TValue="decimal" Change="@OnExchangeRateChange" />
+                            </div>
+                        </div>
+
+                        <table class="pro-summary-table">
+                            <tr>
+                                <td class="pro-summary-label">Ara Toplam (Matrah)</td>
+                                <td class="pro-summary-value">@Invoice.TotalAmountCurrency.ToString("N2") @Invoice.CurrencyCode</td>
+                            </tr>
+                            <tr>
+                                <td class="pro-summary-label">İskonto Toplamı (-)</td>
+                                <td class="pro-summary-value text-danger">@Invoice.DiscountTotalCurrency.ToString("N2") @Invoice.CurrencyCode</td>
+                            </tr>
+                            @foreach (var vat in VatAmountsByRate)
+                            {
+                                <tr>
+                                    <td class="pro-summary-label">KDV %@vat.Rate.ToString("N0") (+)</td>
+                                    <td class="pro-summary-value">@vat.Amount.ToString("N2") @Invoice.CurrencyCode</td>
+                                </tr>
+                            }
+                            <tr class="@(VatAmountsByRate.Any() ? "border-top" : "")">
+                                <td class="pro-summary-label">KDV Toplamı (+)</td>
+                                <td class="pro-summary-value">@Invoice.VatTotalCurrency.ToString("N2") @Invoice.CurrencyCode</td>
+                            </tr>
+                        </table>
+
+                        <div class="pro-total-row">
+                            <span class="pro-total-label">GENEL TOPLAM</span>
+                            <span class="pro-total-value">
+                                @Invoice.GeneralTotalCurrency.ToString("N2")
+                                <small>@Invoice.CurrencyCode</small>
+                            </span>
+                        </div>
+
+                        @if (!IsTry)
+                        {
+                            <div class="pro-try-summary mt-2">
+                                <div class="pro-try-header">TRY KARŞILIĞI (KUR: @Invoice.ExchangeRate.ToString("N4"))</div>
+                                <div class="pro-try-content d-flex flex-column gap-1">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="info-label">Ara Toplam:</span>
+                                        <span class="info-value">@Invoice.TotalAmount.ToString("N2") ₺</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="info-label">İskonto:</span>
+                                        <span class="info-value text-danger">@Invoice.DiscountTotal.ToString("N2") ₺</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="info-label">KDV:</span>
+                                        <span class="info-value">@Invoice.VatTotal.ToString("N2") ₺</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1 pt-1 border-top">
+                                        <span class="info-label" style="font-weight:800; color: #1e293b;">GENEL TOPLAM:</span>
+                                        <span class="info-value" style="font-size:12px; font-weight:900; color: #059669;">@Invoice.GeneralTotal.ToString("N2") ₺</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(CustomerWorkingTypeStr))
+                        {
+                            <div class="pro-customer-info mt-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="info-label">ÇALIŞMA TİPİ:</span>
+                                    <span class="info-value">@CustomerWorkingTypeStr</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="info-label">VADE:</span>
+                                    <span class="info-value">@(CustomerMaturity ?? 0) GÜN</span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mt-2">
+                            <label class="pro-label">Açıklama / Not</label>
+                            <RadzenTextArea @bind-Value="@Invoice.Description" Rows="6" class="w-100" Style="font-size:11px;" Disabled="@IsReadOnly" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pro-modal-footer">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-primary px-3 py-2">@(Invoice.Items?.Count ?? 0) ÜRÜN KALEMİ</span>
+            </div>
+            <div class="d-flex gap-2">
+                @if (IsReadOnly)
+                {
+                    <RadzenButton Text="KAPAT" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" class="pro-btn" />
+                }
+                else
+                {
+                    <RadzenButton Text="İPTAL" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" class="pro-btn" />
+                    <RadzenButton ButtonType="ButtonType.Button" Click="@ManualSubmit" Text="FATURAYI KAYDET" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" class="pro-btn" />
+                }
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}

@@ -1,0 +1,76 @@
+@page "/menus"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Components.Shared
+@using ecommerce.Admin.Domain.Dtos.MenuDto
+@layout MainLayout
+
+<PageTitle>Menü Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Menü Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Menü Ekle" Click="@(() => OpenUpsertModal())" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="Grid" 
+                            TItem="MenuListDto" 
+                            LoadData="LoadData" 
+                            Data="@GridItems" 
+                            Count="@GridCount" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            AllowFilterDateInput="true" 
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+                            RowSelect="@OpenUpsertModal"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="MenuListDto" Property="Id" Title="ID" Width="70px" SortOrder="SortOrder.Descending" />
+                    <RadzenDataGridColumn TItem="MenuListDto" Property="Name" Title="Menü Adı" />
+                    <RadzenDataGridColumn TItem="MenuListDto" Property="ParentName" Title="Üst Menü" />
+                    <RadzenDataGridColumn TItem="MenuListDto" Title="Roller" Sortable="false" Filterable="false">
+                        <Template Context="menu">
+                            @if (menu.RoleNames != null && menu.RoleNames.Any())
+                            {
+                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                    @foreach (var role in menu.RoleNames)
+                                    {
+                                        <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@role" Variant="Variant.Flat" />
+                                    }
+                                </div>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MenuListDto" Property="Path" Title="Yol" />
+                    <RadzenDataGridColumn TItem="MenuListDto" Property="Icon" Title="İkon" Width="150px">
+                        <Template Context="menu">
+                            @if (!string.IsNullOrEmpty(menu.Icon))
+                            {
+                                <RadzenIcon Icon="@menu.Icon" class="rz-mr-1" />
+                                <span>@menu.Icon</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MenuListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="menu">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => DeleteRow(menu))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

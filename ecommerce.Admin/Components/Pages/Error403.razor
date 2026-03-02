@@ -1,0 +1,24 @@
+@page "/access-denied"
+@page "/error-403"
+@attribute [AllowAnonymous]
+@using ecommerce.Admin.Components.Layout
+@layout MainLayout
+
+<PageTitle>Erişim Engellendi</PageTitle>
+
+<div class="row d-flex justify-content-center align-items-center" style="height: 60vh;">
+    <div class="col-md-6 text-center">
+        <RadzenIcon Icon="lock" style="font-size: 6rem; color: var(--rz-danger);" Class="mb-4" />
+        <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H1" Class="mb-3" style="font-weight: 700;">Erişim Engellendi (403)</RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" Class="mb-4" style="color: var(--rz-text-secondary);">
+            Bu sayfayı görüntülemek için yeterli yetkiniz bulunmamaktadır.
+        </RadzenText>
+        
+        <div class="d-flex justify-content-center gap-3">
+            <RadzenButton Text="Ana Sayfaya Dön" Icon="home" ButtonStyle="ButtonStyle.Primary" Click="@(() => NavigationManager.NavigateTo("/"))" />
+            <RadzenButton Text="Geri Dön" Icon="arrow_back" ButtonStyle="ButtonStyle.Light" Click="@(() => NavigationManager.NavigateTo("javascript:history.back()"))" />
+        </div>
+    </div>
+</div>
+
+@inject NavigationManager NavigationManager

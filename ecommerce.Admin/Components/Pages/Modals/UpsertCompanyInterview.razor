@@ -1,0 +1,97 @@
+@using ecommerce.Admin.Domain.Dtos.CompanyCargoDto;
+@using Blazored.FluentValidation
+@using ecommerce.Admin.Domain.Dtos.CompanyDto
+@attribute [Authorize]
+
+<PageTitle>Görüşme Detayları</PageTitle>
+
+<div class="col-md-12">
+
+    <RadzenTemplateForm TItem="CompanyInterviewDto" Data="@_companyInterviewDto" Visible="@(_companyInterviewDto != null)" Submit="@FormSubmit">
+
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Görüşme Tarihi" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenDatePicker @bind-Value="_companyInterviewDto.Created" class="w-100"  />
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Görüşülen Kişi" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox Name="InterviewPersonel" style="width: 100%" @bind-Value="@_companyInterviewDto.InterviewPersonel"/>
+                <RadzenRequiredValidator Text="Görüşülen kişi zorunludur. " Component="InterviewPersonel"/>
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Görüşme Detayı" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenFormField Text="İçerik" Variant="Variant.Outlined" class="w-100">
+                    <ChildContent>
+                        <RadzenHtmlEditor Name="Message" @bind-Value="@_companyInterviewDto.Message" style="height: 400px; width: 100%">
+                            <RadzenHtmlEditorUndo/>
+                            <RadzenHtmlEditorRedo/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorBold/>
+                            <RadzenHtmlEditorItalic/>
+                            <RadzenHtmlEditorUnderline/>
+                            <RadzenHtmlEditorStrikeThrough/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorAlignLeft/>
+                            <RadzenHtmlEditorAlignCenter/>
+                            <RadzenHtmlEditorAlignRight/>
+                            <RadzenHtmlEditorJustify/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorIndent/>
+                            <RadzenHtmlEditorOutdent/>
+                            <RadzenHtmlEditorUnorderedList/>
+                            <RadzenHtmlEditorOrderedList/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorColor/>
+                            <RadzenHtmlEditorBackground/>
+                            <RadzenHtmlEditorRemoveFormat/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorSubscript/>
+                            <RadzenHtmlEditorSuperscript/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorLink/>
+                            <RadzenHtmlEditorUnlink/>
+                            <RadzenHtmlEditorImage/>
+                            <RadzenHtmlEditorFontName/>
+                            <RadzenHtmlEditorFontSize/>
+                            <RadzenHtmlEditorFormatBlock/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorSource/>
+                        </RadzenHtmlEditor>
+                       
+                    </ChildContent>
+                   
+                </RadzenFormField>
+                <RadzenRequiredValidator Text="Not alanı zorunludur. " Component="Message"/>
+            </div>
+        </div>
+
+     @if(_companyInterviewDto.Updated != null){
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Güncelleme Tarihi" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDatePicker ReadOnly="true" @bind-Value="_companyInterviewDto.Updated" class="w-100"  />
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

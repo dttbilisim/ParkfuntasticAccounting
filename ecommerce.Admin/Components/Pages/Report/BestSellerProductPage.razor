@@ -1,0 +1,54 @@
+@page "/report-best-seller-product"
+@using ecommerce.Admin.Domain.Dtos.ReportDto
+@using ecommerce.Admin.Components.Shared
+
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+
+<PageTitle>En çok Satılan Ürünler</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">En çok Satılan Ürünler</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="cloud_download" Text="Raporu Çalıştır" Click="@(args => CallReport())" Variant="Variant.Flat" class="mt-2" Style="background-color:green" />
+            @if (showExcelButton)
+            {
+                <RadzenButton Icon="cloud_download" Text="Excel olarak indir" id="ExcelButton" Click="@(args => ExcelExportClick())" download Variant="Variant.Flat" class="mt-2" Style="background-color:red" />
+            }
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 d-flex align-items-center gap-3 flex-wrap shadow-sm">
+        <div class="row w-100">
+             <div class="col-md-3">
+                <RadzenDatePicker class="w-100" @bind-Value="@param1" Name="StartDate" Placeholder="Başlangıç Tarihi" DateFormat="dd/MM/yyyy" />
+             </div>
+             <div class="col-md-3">
+                <RadzenDatePicker class="w-100"  @bind-Value="@param2" Name="EndDate" Placeholder="Bitiş Tarihi" DateFormat="dd/MM/yyyy" />
+             </div>
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px"  AllowPaging="true"  PagerAlwaysVisible=true PageSize=20 AllowFilterDateInput=true TItem="BestSellerproductDto"  LoadData="@LoadData" Count="@count" Data="@data"  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="BestSellerproductDto" Property="ProductName" Title="Ürün Adı" Width="100px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="BestSellerproductDto" Property="Brand" Title="Marka" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="BestSellerproductDto" Property="Quantity" Title="Miktar" Width="50px"></RadzenDataGridColumn>
+                      <RadzenDataGridColumn FormatString="{0:n2}" TItem="BestSellerproductDto" Property="Total" Title="Toplam" Width="50px"></RadzenDataGridColumn>
+           
+                  
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+@code {
+    public bool showExcelButton = false;
+}

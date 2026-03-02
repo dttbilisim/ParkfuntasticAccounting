@@ -1,0 +1,76 @@
+@page "/product-import"
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Toplu Ürün Aktarımı</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Toplu Ürün Aktarımı</h1>
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 d-flex align-items-center gap-3 flex-wrap shadow-sm">
+         <div style="width: 100%; overflow: hidden;">
+            <div style="width: 600px; float: left;">
+                 <a class="rz-button rz-button-md rz-variant-flat rz-primary rz-shade-default" href="excel/productData.xlsx" target="_blank"> Örnek Ürün Şablonu İndir</a>
+            </div>
+      
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-9">
+                <InputFile OnChange="LoadFiles" class="mb-2" accept="json"/>
+            </div>
+        </div>
+    </RadzenCard>
+
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <RadzenCard>
+                <div style="margin-bottom: 1rem;" class="row">
+                    <div style="color: @(resultStyle == "insert" ? "#508D69" : "#FF8F8F")" class="col-md-8">
+                        @if(transTotal > 0){
+                            <RadzenLabel Text="Aktarılan">Toplam Kayıt: @transTotal / Aktarılan Kayıt: @transCount Aktarılan Ürün: @transName </RadzenLabel>
+                        }
+                    </div>
+                </div>
+            </RadzenCard>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true"
+
+                        AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true
+                            TItem="ProductTransactionDto"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@pharmacyDatas"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            FilterMode="FilterMode.Simple">
+
+                <Columns>
+
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Id" Title="Id" Width="20px">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Product" Title="Ürün Adı" Width="150px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Category" Title="Kategori" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Manufacturer" Title="Üretici" Width="50px"></RadzenDataGridColumn>
+                
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Barcode" Title="Barkod" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Form" Title="Türü" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Length" Title="Uzunluk" Width="30px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Height" Title="Yükseklik" Width="30px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="Width" Title="Genişlik" Width="30px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTransactionDto" Property="ReatilPrice" Title="PSF" Width="30px"></RadzenDataGridColumn>
+
+
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,54 @@
+﻿@page "/staticpages"
+@using ecommerce.Admin.Domain.Dtos.StaticPageDto;
+@using ecommerce.Core.Utils;
+@layout MainLayout
+
+<PageTitle>Statik Sayfa Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Hakkımızda Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Sayfa Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid 
+                @ref="radzenDataGrid" 
+                ColumnWidth="200px" 
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                AllowPaging="true" 
+                AllowSorting="true" 
+                PagerAlwaysVisible=true 
+                PageSize=25 
+                AllowFilterDateInput=true 
+                TItem="StaticPageListDto" 
+                RowSelect="@EditRow" 
+                LoadData="@LoadData" 
+                Count="@count" 
+                Data="@staticPageList" 
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="StaticPageListDto" Property="Id" Title="Id" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="StaticPageListDto" Property="StaticPageType" Title="Sayfa Tipi" Width="50px"></RadzenDataGridColumn>
+                  
+                    <RadzenDataGridColumn TItem="StaticPageListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            @if (data.Status != EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                          Shade="Shade.Dark" Variant="Variant.Flat"
+                                          Click=@(args => GridDeleteButtonClick(args, data)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

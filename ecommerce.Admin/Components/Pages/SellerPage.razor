@@ -1,0 +1,67 @@
+@page "/sellers"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.SellerDto
+@layout MainLayout
+
+<PageTitle>Satıcılar</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Satıcılar</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Satıcı Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid"
+                            Data="sellers"
+                            Count="count"
+                            TItem="SellerListDto"
+                            LoadData="LoadData"
+                            AllowFiltering="true"
+                            FilterMode="FilterMode.Advanced"
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            AllowFilterDateInput="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            RowSelect="@EditRow"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="Id" Title="#" Width="70px" />
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="Name" Title="Ad" />
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="Email" Title="Email" />
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="PhoneNumber" Title="Telefon" />
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="Commission" Title="Komisyon" FormatString="{0:P2}" />
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="CityName" Title="İl" />
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="TownName" Title="İlçe" />
+                    <RadzenDataGridColumn TItem="SellerListDto" Property="Address" Title="Adres" />
+                    <RadzenDataGridColumn TItem="SellerListDto"
+                                          Title="İşlemler"
+                                          Filterable="false"
+                                          Sortable="false"
+                                          TextAlign="TextAlign.Center"
+                                          Width="100px">
+                        <Template Context="data">
+                            <RadzenButton Icon="delete"
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          Size="ButtonSize.Small"
+                                          Click="@(args => GridDeleteButtonClick(args, data))"
+                                          @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+

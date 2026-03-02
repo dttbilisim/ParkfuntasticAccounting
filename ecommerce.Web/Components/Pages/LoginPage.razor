@@ -1,0 +1,93 @@
+@page "/login"
+<section class="breadcrumb-section pt-0">
+    <div class="container-fluid-lg">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-contain">
+                    <h2 class="mb-2">@lang["Login"]</h2>
+                    <nav>
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="/">
+                                    <i class="fa-solid fa-house"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@lang["Login"]</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- log in section start -->
+<section class="log-in-section background-image-2 section-b-space">
+    <div class="container-fluid-lg w-100">
+        <div class="row">
+            <div class="col-xxl-6 col-xl-5 col-lg-6 d-lg-block d-none ms-auto">
+                <div class="image-contain">
+                    <img src="../assets/images/inner-page/log-in.png" class="img-fluid" alt="">
+                </div>
+            </div>
+
+            <div class="col-xxl-4 col-xl-5 col-lg-6 col-12 mx-auto">
+                <div class="log-in-box">
+                    <div class="log-in-title">
+                        <h3>@lang["RegisterContent"]</h3>
+                        <h4>@lang["LoginSubTitle"]</h4>
+                    </div>
+
+                    <div class="input-box">
+                        <EditForm class="row g-4" Model="@loginModel" OnValidSubmit="@LoginAsync">
+                            <FluentValidationValidator />
+
+                            <div class="col-12">
+                                <div class="form-floating theme-form-floating log-in-form">
+                                    <InputText type="email" class="form-control" id="email" @bind-Value="loginModel.Email" placeholder="E-posta Adresi" />
+                                    <label for="email">@lang["LoginMail"]</label>
+                                    <ValidationMessage For="@(() => loginModel.Email)" />
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating theme-form-floating log-in-form position-relative">
+                                    <RadzenTextBox @bind-Value="loginModel.Password"
+                                                   Name="Password"
+                                                   id="password"
+                                                   Placeholder="@lang["LoginPassword"]"
+                                                   Type="@(showPassword ? "text" : "password")"
+                                                   class="form-control" Style="padding-right: 45px;" />
+                                    <label for="password">@lang["LoginPassword"]</label>
+                                    <button type="button" class="btn btn-sm btn-light position-absolute end-0 top-50 translate-middle-y me-2"
+                                            @onclick="() => showPassword = !showPassword"
+                                            style="z-index: 2;">
+                                        <i class="fa-solid @(showPassword ? "fa-eye-slash" : "fa-eye")" style="pointer-events: none;"></i>
+                                    </button>
+                                    <ValidationMessage For="@(() => loginModel.Password)" />
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-12">
+                                <button class="btn btn-animation w-100 justify-content-center" type="submit">@lang["LoginSubmit"]</button>
+                            </div>
+                        </EditForm>
+                    </div>
+
+
+                    <div class="text-center mt-3">
+                        <span class="text-muted">@lang["LoginRegister"]</span>
+                        <a href="/register" class="fw-semibold ms-1">@lang["LoginRegister2"]</a>
+                    </div>
+
+                    <div class="text-center mt-2">
+                        <a href="/forgot-password" class="fw-semibold text-decoration-underline">@lang["LoginForgotPassword"]</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

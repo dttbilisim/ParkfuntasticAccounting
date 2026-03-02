@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "dgSpecHash": "w0cF/IOtFd0=",
+  "success": true,
+  "projectFilePath": "/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/ProductSearch.csproj",
+  "expectedPackageFiles": [
+    "/Users/efeeskin/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
+    "/Users/efeeskin/.nuget/packages/restsharp/108.0.3/restsharp.108.0.3.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'RestSharp' 108.0.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4rr6-2v9v-wcpc",
+      "libraryId": "RestSharp",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
+}

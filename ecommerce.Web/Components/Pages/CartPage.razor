@@ -1,0 +1,527 @@
+@page "/cart"
+@using ecommerce.Web.Components.Shared.Cart
+@using ecommerce.Web.Domain.Dtos.Cart
+
+<BreadcrumbComponent BreadcrumbText="@lang["Cart.breadcrumb"]"/>
+
+<!-- Modern Cart Section - Desktop Only -->
+<section class="modern-cart-section d-none d-lg-block">
+    <div class="container-fluid-lg">
+        @if (CartResult?.Sellers != null && CartResult.Sellers.Any())
+        {
+            <div class="row g-4">
+                <!-- Cart Items - Left Column -->
+                <div class="col-lg-8">
+                    <div class="modern-cart-container">
+                        <!-- Cart Header -->
+                        @* <div class="cart-header"> *@
+                        @*     <h2 class="cart-title"> *@
+                        @*         <i class="fas fa-shopping-cart me-2"></i> *@
+                        @*         @lang["Cart.ShoppingCart"] *@
+                        @*     </h2> *@
+                        @*     <div class="cart-count-badge"> *@
+                        @*         @CartResult.CartCount @lang["Cart.Items"] *@
+                        @*     </div> *@
+                        @* </div> *@
+
+
+                        <!-- Seller Groups -->
+                        @foreach (var seller in CartResult.Sellers)
+                        {
+                            <div class="seller-group">
+                                <!-- Seller Header -->
+                                <div class="seller-header">
+                                    <div class="seller-info">
+                                        <div class="seller-checkbox">
+                                            <input type="checkbox" checked="@(!seller.IsAllItemsPassive)"
+                                                   id="seller-@seller.SellerId" 
+                                                   class="seller-checkbox-input"
+                                                   @onchange="(e) => OnSellerCheckboxChanged(seller.SellerId, e)">
+                                        </div>
+                                        <i class="fas fa-store me-2"></i>
+                                        <span class="seller-name">@seller.SellerName</span>
+                                    </div>
+                                </div>
+
+                                <!-- Products -->
+                                <div class="products-list">
+                                    @foreach (var item in seller.Items)
+                                    {
+                                        <div class="product-card" @key="@($"{item.Id}-{item.ProductSellerItemId}")">
+                                            <!-- Product Checkbox -->
+                                            <div class="product-checkbox-wrapper">
+                                                <input type="checkbox" 
+                                                       checked="@(item.Status == 1)"
+                                                       id="product-@item.ProductSellerItemId" 
+                                                       class="product-checkbox-input"
+                                                       @onchange="(e) => OnProductCheckboxChanged(item.ProductSellerItemId, e)">
+                                            </div>
+                                            
+                                            <!-- Product Image -->
+                                            <div class="product-image">
+                                                <a href="/product-detail?productId=@item.ProductSellerItemId">
+                                                    <img src="@_appStateManager.ResolveImageUrl(item.PictureUrl)" 
+                                                         alt="@item.ProductName"
+                                                         loading="lazy"
+                                                         onerror="this.onerror=null; this.src='/assets/images/no-product-image.png';">
+                                                </a>
+                                            </div>
+
+                                            <!-- Product Details -->
+                                            <div class="product-details">
+                                                <div class="product-info">
+                                                    <a href="/product-detail?productId=@item.ProductSellerItemId" class="product-name" @onclick:stopPropagation="true">
+                                                        @item.ProductName
+                                                    </a>
+                                                </div>
+                                                @if(item.IsPerfectCompatibility)
+                                                {
+                                                    <div class="cart-compatibility-badge in-cart">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        @lang["Product.PerfectCompatibilityBadge"]
+                                                    </div>
+                                                }
+                                                
+                                                @if(item.DiscountAmount > 0 && item.AppliedDiscounts?.Count > 0)
+                                                {
+                                                    <div class="product-promotions">
+                                                        @foreach(var disc in item.AppliedDiscounts)
+                                                        {
+                                                            <span class="promo-badge">
+                                                                <i class="fas fa-tag me-1"></i>
+                                                                @disc.Name 
+                                                                @if(disc.UsePercentage)
+                                                                {
+                                                                    <text>(@((disc.DiscountPercentage ?? 0m).ToString("N0"))%)</text>
+                                                                } 
+                                                                else 
+                                                                {
+                                                                    <text>(@((disc.DiscountAmount ?? 0m).ToString("C")))</text>
+                                                                }
+                                                            </span>
+                                                        }
+                                                        <span class="savings-badge">
+                                                            <i class="fas fa-gift me-1"></i>
+                                                            @lang["Cart.Savings"] @((item.DisplaySavings * item.Quantity).ToString("C"))
+                                                        </span>
+                                                    </div>
+                                                }
+
+                                                <!-- Price & Quantity -->
+                                                <div class="product-actions">
+                                                    <div class="price-section">
+                                                        <div class="unit-price">@item.UnitPrice.ToString("C")</div>
+                                                        <div class="total-price">@((item.UnitPrice * item.Quantity).ToString("C"))</div>
+                                                    </div>
+                                                    
+                                                    <div class="quantity-section">
+                                                        <div class="quantity-controls">
+                                                            <button @onclick="() => UpdateQty(item.ProductSellerItemId, false)" 
+                                                                    @onclick:stopPropagation="true"
+                                                                    class="qty-btn minus" 
+                                                                    disabled="@(BusyProducts.Contains(item.ProductSellerItemId) || item.Quantity <= Math.Max(1, item.MinSellCount))">
+                                                                <i class="fas fa-minus"></i>
+                                                            </button>
+                                                            <span class="qty-value">@item.Quantity</span>
+                                                            <button @onclick="() => UpdateQty(item.ProductSellerItemId, true)" 
+                                                                    @onclick:stopPropagation="true"
+                                                                    class="qty-btn plus" 
+                                                                    disabled="@(BusyProducts.Contains(item.ProductSellerItemId) || (item.MaxSellCount > 0 && item.Quantity + Math.Max(1, (int)item.Step) > item.MaxSellCount))">
+                                                                <i class="fas fa-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    
+
+                                                    <div class="action-buttons">
+                                                        <button class="cart-remove-icon-btn" 
+                                                                title="@lang["Cart.RemoveFromCart"]" 
+                                                                @onclick="async () => await RemoveItem(item.Id)"
+                                                                @onclick:stopPropagation="true"
+                                                                @onclick:preventDefault="true">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Cargo Selection -->
+                                <div class="seller-cargo-container">
+                                    <CartCargoSelector Seller="seller"
+                                                       SelectedCargo="seller.SelectedCargo"
+                                                       SelectedCargoChanged="@((CartCargoDto cargo) => OnSellerCargoChangedAsync(seller, cargo))"
+                                                       IsDisabled="seller.IsAllItemsPassive"
+                                                       HideHeader="true" />
+                                </div>
+
+                                <!-- Seller Footer (Total Only) -->
+                                <div class="seller-footer">
+                                    <div class="seller-footer-row">
+                                        <span class="summary-label">@lang["Cart.Total"]</span>
+                                        <span class="summary-price">@seller.OrderTotal.ToString("C")</span>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        }
+                </div>
+            </div>
+
+                <!-- Order Summary - Right Column -->
+                <div class="col-lg-4">
+                    <div class="order-summary-card">
+                        <div class="summary-header">
+                            <h3>@lang["Cart.OrderSummary"]</h3>
+                        </div>
+
+                        <div class="summary-content">
+                            <!-- Discounts -->
+                            @if(CartResult.DiscountSummaries?.Any() == true)
+                            {
+                                <div class="discounts-section">
+                                    @foreach(var d in CartResult.DiscountSummaries)
+                                    {
+                                        <div class="discount-item">
+                                            <div class="discount-info">
+                                                <i class="fas fa-tag me-2"></i>
+                                                <span>@d.Name</span>
+                                                @if(d.Percentage.HasValue) 
+                                                {
+                                                    <span class="discount-percentage">(@d.Percentage.Value.ToString("N0")%)</span>
+                                                }
+                                            </div>
+                                            <div class="discount-amount text-success">
+                                                @d.Amount.ToString("C")
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Coupon Section -->
+                            <div class="coupon-section">
+                                <h6>@lang["Cart.CouponCode"]</h6>
+                                <div class="coupon-input-group">
+                                    @if(CartResult.IsCouponCodeApplied)
+                                    {
+                                        <button class="btn-remove-coupon w-100" @onclick="CouponDelete">
+                                            <i class="fas fa-times me-2"></i>
+                                            @lang["Cart.RemoveCoupon"]
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <input @bind-value="couponCode" 
+                                               class="coupon-input" 
+                                               placeholder="@lang["Cart.EnterCoupon"]">
+                                        <button class="btn-apply-coupon" @onclick="CouponApply">
+                                            @lang["Cart.Apply"]
+                                        </button>
+                                    }
+                                </div>
+                                
+                                @if(CartResult.IsCouponCodeApplied)
+                                {
+                                    var couponMessage = string.Format(lang["Cart.CouponAppliedFormat"], CartResult.AppliedCouponCode);
+                                    <div class="coupon-success">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        @couponMessage
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Summary Totals -->
+                        <div class="summary-totals">
+                            <div class="total-row">
+                                <span>@lang["Cart.Subtotal"]</span>
+                                <span>@CartResult.SubTotal.ToString("C")</span>
+                            </div>
+                            <div class="total-row cargo-row">
+                                <span>@lang["Cart.CargoPriceLabel"]</span>
+                                <span>@((CartResult.CargoPrice - CartResult.CargoDiscount).ToString("C"))</span>
+                            </div>
+                            <div class="total-row discount-row">
+                                <span>@lang["Cart.Discount"]</span>
+                                <span class="text-success">-@CartResult.OrderTotalDiscount.ToString("C")</span>
+                            </div>
+                            <div class="total-row final-total">
+                                <span>@lang["Cart.Total"]</span>
+                                <span class="final-price">@CartResult.OrderTotal.ToString("C")</span>
+                            </div>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <div class="checkout-section">
+                            <a href="/checkout" class="btn-checkout">
+                                <i class="fas fa-credit-card me-2"></i>
+                                @lang["Cart.Checkout"]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Mobile Cart Section -->
+<div class="mobile-cart-section d-block d-lg-none">
+    @if (CartResult?.Sellers != null && CartResult.Sellers.Any())
+    {
+        <div class="mobile-cart-container">
+            <!-- Mobile Cart Header -->
+            <div class="mobile-cart-header">
+                <h2>@lang["Cart.ShoppingCart"]</h2>
+                <div class="mobile-cart-count">@CartResult.CartCount @lang["Cart.Items"]</div>
+            </div>
+
+            <!-- Mobile Products -->
+            <div class="mobile-products-list">
+                @foreach (var seller in CartResult.Sellers)
+                {
+                    <!-- Seller Header -->
+                    <div class="mobile-seller-header">
+                        <div class="seller-info">
+                            <div class="seller-checkbox">
+                                <input type="checkbox" checked="@(!seller.IsAllItemsPassive)"
+                                       id="mobile-seller-@seller.SellerId" 
+                                       class="seller-checkbox-input"
+                                       @onchange="(e) => OnSellerCheckboxChanged(seller.SellerId, e)">
+                            </div>
+                            <i class="fas fa-store me-2"></i>
+                            <span>@seller.SellerName</span>
+                        </div>
+                        <div class="seller-total">@seller.OrderTotal.ToString("C")</div>
+                    </div>
+
+                    @foreach (var item in seller.Items)
+                    {
+                        <div class="mobile-product-card" @key="@($"{item.Id}-{item.ProductSellerItemId}")">
+                            <!-- Product Checkbox -->
+                            <div class="mobile-product-checkbox-wrapper">
+                                <input type="checkbox" 
+                                       checked="@(item.Status == 1)"
+                                       id="mobile-product-@item.ProductSellerItemId" 
+                                       class="product-checkbox-input"
+                                       @onchange="(e) => OnProductCheckboxChanged(item.ProductSellerItemId, e)">
+                            </div>
+                            
+                            <!-- Product Image -->
+                            <div class="mobile-product-image">
+                                <a href="/product-detail?productId=@item.ProductSellerItemId">
+                                    <img src="@_appStateManager.ResolveImageUrl(item.PictureUrl)" 
+                                         alt="@item.ProductName"
+                                         loading="lazy"
+                                         onerror="this.onerror=null; this.src='/assets/images/no-product-image.png';">
+                                </a>
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="mobile-product-info">
+                                <a href="/product-detail?productId=@item.ProductSellerItemId" class="mobile-product-name">
+                                    @item.ProductName
+                                </a>
+                                
+                                @if(item.IsPerfectCompatibility)
+                                {
+                                    <div class="cart-compatibility-badge mobile">
+                                        <i class="fas fa-check-circle"></i>
+                                        @lang["Product.PerfectCompatibilityBadge"]
+                                    </div>
+                                }
+                                
+                                @if(item.DiscountAmount > 0 && item.AppliedDiscounts?.Count > 0)
+                                {
+                                    <div class="mobile-promotions">
+                                        @foreach(var disc in item.AppliedDiscounts)
+                                        {
+                                            <span class="mobile-promo-badge">
+                                                @disc.Name 
+                                                @if(disc.UsePercentage)
+                                                {
+                                                    <text>(@((disc.DiscountPercentage ?? 0m).ToString("N0"))%)</text>
+                                                }
+                                                else
+                                                {
+                                                    <text>(@((disc.DiscountAmount ?? 0m).ToString("C")))</text>
+                                                }
+                                            </span>
+                                        }
+                                        <span class="mobile-savings-badge">
+                                            @lang["Cart.Savings"] @((item.DisplaySavings * item.Quantity).ToString("C"))
+                                        </span>
+                                    </div>
+                                }
+
+                                <!-- Price & Quantity -->
+                                <div class="mobile-product-actions">
+                                    <div class="mobile-price-section">
+                                        <div class="mobile-unit-price">@item.UnitPrice.ToString("C")</div>
+                                        <div class="mobile-total-price">@((item.UnitPrice * item.Quantity).ToString("C"))</div>
+                                    </div>
+                                    
+                                    <div class="mobile-quantity-section">
+                                        <div class="mobile-quantity-controls">
+                                            <button @onclick="() => UpdateQty(item.ProductSellerItemId, false)" 
+                                                    @onclick:stopPropagation="true"
+                                                    class="mobile-qty-btn minus" 
+                                                    disabled="@(BusyProducts.Contains(item.ProductSellerItemId) || item.Quantity <= Math.Max(1, item.MinSellCount))">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <span class="mobile-qty-value">@item.Quantity</span>
+                                            <button @onclick="() => UpdateQty(item.ProductSellerItemId, true)" 
+                                                    @onclick:stopPropagation="true"
+                                                    class="mobile-qty-btn plus" 
+                                                    disabled="@(BusyProducts.Contains(item.ProductSellerItemId) || (item.MaxSellCount > 0 && item.Quantity + Math.Max(1, (int)item.Step) > item.MaxSellCount))">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    
+
+                                    <button class="cart-remove-icon-btn" 
+                                            title="@lang["Cart.RemoveFromCart"]"
+                                            @onclick="async () => await RemoveItem(item.Id)"
+                                            @onclick:stopPropagation="true"
+                                            @onclick:preventDefault="true">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Seller Footer (Mobile) -->
+                    <div class="seller-footer mobile">
+                        <div class="seller-footer-left">
+                            <i class="fas fa-truck me-2"></i>
+                            <span class="seller-footer-title">@lang["Cart.ShippingOptions"]</span>
+                        </div>
+                        <div class="seller-footer-right">
+                            <CartCargoSelector Seller="seller"
+                                               SelectedCargo="seller.SelectedCargo"
+                                               SelectedCargoChanged="@((CartCargoDto cargo) => OnSellerCargoChangedAsync(seller, cargo))"
+                                               Class="in-footer"
+                                               IsDisabled="seller.IsAllItemsPassive"
+                                               HideHeader="true" />
+                        </div>
+                    </div>
+                    
+                }
+            </div>
+
+            <!-- Mobile Order Summary -->
+            <div class="mobile-order-summary">
+                <div class="mobile-summary-header">
+                    <h3>@lang["Cart.OrderSummary"]</h3>
+                </div>
+
+                <div class="mobile-summary-content">
+                    <!-- Discounts -->
+                    @if(CartResult.DiscountSummaries?.Any() == true)
+                    {
+                        <div class="mobile-discounts">
+                            @foreach(var d in CartResult.DiscountSummaries)
+                            {
+                                <div class="mobile-discount-item">
+                                    <div class="discount-info">
+                                        <i class="fas fa-tag me-2"></i>
+                                        <span>@d.Name</span>
+                                        @if(d.Percentage.HasValue)
+                                        {
+                                            <span class="discount-percentage">(@d.Percentage.Value.ToString("N0")%)</span>
+                                        }
+                                    </div>
+                                    <div class="discount-amount">@d.Amount.ToString("C")</div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Coupon -->
+                    <div class="mobile-coupon-section">
+                        <h6>@lang["Cart.CouponCode"]</h6>
+                        <div class="mobile-coupon-input">
+                            @if(CartResult.IsCouponCodeApplied)
+                            {
+                                <button class="mobile-btn-remove-coupon" @onclick="CouponDelete">
+                                    <i class="fas fa-times me-2"></i>
+                                    @lang["Cart.RemoveCoupon"]
+                                </button>
+                            }
+                            else
+                            {
+                                <input @bind-value="couponCode" 
+                                       class="mobile-coupon-input-field" 
+                                       placeholder="@lang["Cart.EnterCoupon"]">
+                                <button class="mobile-btn-apply-coupon" @onclick="CouponApply">
+                                    @lang["Cart.Apply"]
+                                </button>
+                            }
+                        </div>
+                        
+                        @if(CartResult.IsCouponCodeApplied)
+                        {
+                            var couponMessage = string.Format(lang["Cart.CouponAppliedFormat"], CartResult.AppliedCouponCode);
+                            <div class="mobile-coupon-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                @couponMessage
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Mobile Totals -->
+                <div class="mobile-summary-totals">
+                    <div class="mobile-total-row">
+                        <span>@lang["Cart.Subtotal"]</span>
+                        <span>@CartResult.SubTotal.ToString("C")</span>
+                    </div>
+                    <div class="mobile-total-row cargo-row">
+                        <span>@lang["Cart.CargoPriceLabel"]</span>
+                        <span>@((CartResult.CargoPrice - CartResult.CargoDiscount).ToString("C"))</span>
+                    </div>
+                    <div class="mobile-total-row discount-row">
+                        <span>@lang["Cart.Discount"]</span>
+                        <span class="text-success">-@CartResult.OrderTotalDiscount.ToString("C")</span>
+                    </div>
+                    <div class="mobile-total-row final-total">
+                        <span>@lang["Cart.Total"]</span>
+                        <span class="final-price">@CartResult.OrderTotal.ToString("C")</span>
+                    </div>
+                </div>
+
+                <!-- Mobile Checkout Button -->
+                <div class="mobile-checkout-section">
+                    <a href="/checkout" class="mobile-btn-checkout">
+                        <i class="fas fa-credit-card me-2"></i>
+                        @lang["Cart.Checkout"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Mobile Empty Cart -->
+        <div class="mobile-empty-cart">
+            <div class="mobile-empty-content">
+                <div class="mobile-empty-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>@lang["Cart.EmptyTitle"]</h3>
+                <p>@lang["Cart.EmptyDescription"]</p>
+                <a href="/" class="mobile-btn-start-shopping">
+                    <i class="fas fa-shopping-bag me-2"></i>
+                    @lang["Cart.StartShopping"]
+                </a>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,49 @@
+@namespace ecommerce.Admin.Components.Pages.Plasiyer.Modals
+@using ecommerce.Admin.Domain.Dtos.OrderDto
+@using ecommerce.Core.Utils
+
+<div class="plasiyer-modal-container">
+    @if (IsLoading)
+    {
+        <div class="modal-loading-overlay">
+            <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        </div>
+    }
+
+    @if (Orders == null && !IsLoading)
+    {
+        <div class="modal-empty-state">
+            <RadzenIcon Icon="inventory_2" Style="font-size: 3rem; color: var(--rz-text-disabled-color);" />
+            <RadzenText TextStyle="TextStyle.H6" Style="color: var(--rz-text-secondary-color);">Sipariş bilgisi bulunamadı.</RadzenText>
+        </div>
+    }
+    else
+    {
+        <RadzenDataGrid Data="@Orders" TItem="OrderListDto" AllowPaging="true" PageSize="10" 
+                        AllowFiltering="true" FilterMode="FilterMode.SimpleWithMenu" AllowSorting="true"
+                        EmptyText="Sipariş bulunamadı." class="plasiyer-grid">
+            <Columns>
+                <RadzenDataGridColumn TItem="OrderListDto" Property="OrderNumber" Title="Sipariş No" Width="140px">
+                    <Template Context="order">
+                        <span class="fw-bold text-primary">@order.OrderNumber</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderListDto" Property="CreatedDate" Title="Tarih" Width="150px">
+                    <Template Context="order">
+                        <span class="text-secondary">@order.CreatedDate.ToString("dd.MM.yyyy HH:mm")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderListDto" Property="OrderTotal" Title="Toplam" Width="130px" TextAlign="TextAlign.Right">
+                    <Template Context="order">
+                        <span class="fw-bold">@order.OrderTotal.ToString("C2")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OrderListDto" Property="OrderStatusType" Title="Durum" Width="140px" TextAlign="TextAlign.Center">
+                    <Template Context="order">
+                        <RadzenBadge BadgeStyle="@GetStatusStyle(order.OrderStatusType)" Text="@GetEnumDescription(order.OrderStatusType)" class="status-badge" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    }
+</div>

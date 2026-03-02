@@ -1,0 +1,70 @@
+@using Blazored.FluentValidation
+@using ecommerce.Admin.Domain.Dtos.ProductUnitDto
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+@using ecommerce.Admin.Domain.Dtos.UnitDto
+@using Radzen
+@using Radzen.Blazor
+
+@if (productUnit == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <RadzenTemplateForm TItem="ProductUnitUpsertDto" Data="@productUnit" Submit="@(async (ProductUnitUpsertDto args) => { await FormSubmit(args); })" OnInvalidSubmit="ShowErrors">
+        <FluentValidationValidator @ref="_fluentValidationValidator" />
+        <div class="modal-content-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <RadzenLabel Text="Ürün" Component="ProductId" />
+                    <RadzenDropDown Name="ProductId" 
+                                    @bind-Value="@productUnit.ProductId" 
+                                    Data="@Products" 
+                                    TextProperty="Name" 
+                                    ValueProperty="Id" 
+                                    class="w-100 form-control-modern" 
+                                    AllowClear="true" 
+                                    AllowFiltering="true"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    Disabled="@ProductId.HasValue"
+                                    Placeholder="Ürün seçiniz..." />
+                    <ValidationMessage For="@(() => productUnit.ProductId)" />
+                </div>
+                <div class="col-md-6">
+                    <RadzenLabel Text="Birim" Component="UnitId" />
+                    <RadzenDropDown Name="UnitId" 
+                                    @bind-Value="@productUnit.UnitId" 
+                                    Data="@Units" 
+                                    TextProperty="Name" 
+                                    ValueProperty="Id" 
+                                    class="w-100 form-control-modern" 
+                                    AllowClear="true" 
+                                    AllowFiltering="true"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    Placeholder="Birim seçiniz..." />
+                    <ValidationMessage For="@(() => productUnit.UnitId)" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <RadzenLabel Text="Barkod" Component="Barcode" />
+                    <RadzenTextBox Name="Barcode" @bind-Value="@productUnit.Barcode" class="w-100 form-control-modern" Placeholder="Opsiyonel" />
+                    <ValidationMessage For="@(() => productUnit.Barcode)" />
+                </div>
+                <div class="col-md-6">
+                    <RadzenLabel Text="Birim Değeri" Component="UnitValue" />
+                    <RadzenNumeric Name="UnitValue" @bind-Value="@productUnit.UnitValue" TValue="decimal" class="w-100 form-control-modern" />
+                    <ValidationMessage For="@(() => productUnit.UnitValue)" />
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-sticky-footer d-flex justify-content-end gap-2">
+            <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" />
+        </div>
+    </RadzenTemplateForm>
+}

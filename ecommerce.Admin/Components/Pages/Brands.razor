@@ -1,0 +1,72 @@
+@page "/brands"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.BrandDto;
+@using ecommerce.Admin.Resources
+@using ecommerce.Core.Utils;
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+
+<PageTitle>Marka Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Marka Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click="@AddButtonClick" Text="Yeni Marka Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="BrandListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@brands"
+                            CellRender="@RowRender"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="BrandListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="BrandListDto" Property="Name" Title="Marka Adı" />
+                    <RadzenDataGridColumn TItem="BrandListDto" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="brand">
+                            @if (brand.Status == 1)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="Pasif" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="BrandListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="brand">
+                            @if (brand.Status != EntityStatus.Deleted.GetHashCode())
+                            {
+                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@((args) => EditRow(brand))" @onclick:stopPropagation="true" class="me-1" />
+                                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click=@(args => GridDeleteButtonClick(args, brand)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+</div>

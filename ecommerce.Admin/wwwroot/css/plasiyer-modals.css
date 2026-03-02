@@ -1,0 +1,100 @@
+/* Plasiyer Modal Styles */
+
+.plasiyer-modal-container {
+    position: relative;
+    min-height: 200px;
+}
+
+.modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    border-radius: var(--rz-border-radius);
+}
+
+.modal-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    gap: 1rem;
+}
+
+.plasiyer-grid {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.status-badge {
+    font-size: 0.75rem !important;
+    padding: 0.4rem 0.8rem !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+}
+
+/* Balance Summary Grid */
+.balance-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.summary-card {
+    padding: 1rem !important;
+    border: 1px solid var(--rz-border-color) !important;
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summary-icon i {
+    font-size: 1.5rem !important;
+    color: white !important;
+}
+
+.debit-bg {
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+}
+
+.credit-bg {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+.highlight-card {
+    background: #f8fafc !important;
+}
+
+.border-danger {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.border-success {
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Plasiyer Page Styles */
+.plasiyer-title {
+    color: var(--rz-primary) !important;
+    font-weight: 700 !important;
+}
+
+.selected-customer-row {
+    background-color: rgba(14, 148, 122, 0.1) !important;
+    border-left: 4px solid var(--rz-primary) !important;
+}

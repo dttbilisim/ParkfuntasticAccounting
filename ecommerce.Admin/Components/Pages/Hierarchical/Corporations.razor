@@ -1,0 +1,55 @@
+@page "/corporations"
+@using ecommerce.Admin.Domain.Dtos.HierarchicalDto
+@using ecommerce.Admin.Services.Interfaces
+@using ecommerce.Core.Models
+@using Radzen
+@using Radzen.Blazor
+@inject ICorporationService CorporationService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@layout MainLayout
+<PageTitle>Şirket Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Şirket Yönetimi</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click=@(args => OpenUpsertModal()) Text="Yeni Şirket" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@corporations" TItem="CorporationListDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" SelectionMode="DataGridSelectionMode.Single" RowSelect="@(args => OpenUpsertModal(args.Id))">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CorporationListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="CorporationListDto" Property="Name" Title="Şirket Adı" />
+                    <RadzenDataGridColumn TItem="CorporationListDto" Property="TaxNumber" Title="Vergi No" Width="150px" />
+                    <RadzenDataGridColumn TItem="CorporationListDto" Property="TaxOffice" Title="Vergi Dairesi" Width="150px" />
+                    <RadzenDataGridColumn TItem="CorporationListDto" Property="IsActive" Title="Durum" Width="100px">
+                        <Template Context="data">
+                            @if (data.IsActive)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Pasif" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CorporationListDto" Property="CreatedDate" Title="Kayıt Tarihi" Width="200px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="CorporationListDto" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteCorporation(data.Id))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+</div>

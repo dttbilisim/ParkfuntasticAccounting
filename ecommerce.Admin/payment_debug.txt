@@ -1,0 +1,1830 @@
+
+--- MANUAL REQUEST GEN (22.01.2026 20:53:16) ---
+PlainText: 41970.84|N/A Musteri|https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53|ver3|Auth|tr|B66AD3B53|https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53|5|639047119961814030|3d_pay_hosting||@Yedeksen0707
+Hash: tZjecr/il1w0qLEh5rEoqi447mURGYRT3pGrqzwG24DvU3hn4oCDADeAzaV61KFseSQsRWTvM1/udEtBcZtJ9Q==
+Params: {"amount":"41970.84","BillToName":"N/A Musteri","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53","hash":"tZjecr/il1w0qLEh5rEoqi447mURGYRT3pGrqzwG24DvU3hn4oCDADeAzaV61KFseSQsRWTvM1/udEtBcZtJ9Q==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66AD3B53","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53","refreshtime":"5","rnd":"639047119961814030","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='N/A Musteri' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53' />
+<input type='hidden' name='hash' value='tZjecr/il1w0qLEh5rEoqi447mURGYRT3pGrqzwG24DvU3hn4oCDADeAzaV61KFseSQsRWTvM1/udEtBcZtJ9Q==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66AD3B53' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AD3B53' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047119961814030' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 20:54:17) ---
+PlainText: 41970.84|N/A Musteri|https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973|ver3|Auth|tr|B66AD7973|https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973|5|639047120577451130|3d_pay_hosting||@Yedeksen0707
+Hash: in6XyOebCqWhtRpgl1R9KsvyuH2THY9iKYYwB34knXMCz98GJ+djr/b4/W7/wl15prEeXrG1TxCyc61PBG/zZQ==
+Params: {"amount":"41970.84","BillToName":"N/A Musteri","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973","hash":"in6XyOebCqWhtRpgl1R9KsvyuH2THY9iKYYwB34knXMCz98GJ\u002Bdjr/b4/W7/wl15prEeXrG1TxCyc61PBG/zZQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66AD7973","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973","refreshtime":"5","rnd":"639047120577451130","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='N/A Musteri' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973' />
+<input type='hidden' name='hash' value='in6XyOebCqWhtRpgl1R9KsvyuH2THY9iKYYwB34knXMCz98GJ+djr/b4/W7/wl15prEeXrG1TxCyc61PBG/zZQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66AD7973' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AD7973' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047120577451130' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:04:17) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165|ver3|Auth|tr|B66AFD165|https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165|5|639047126578410930|3d_pay_hosting||@Yedeksen0707
+Hash: zcTxuuRC2xg9B7CVqaGKezK4MmGvUkh/UksaTlm9uyDZL6mOrY/1lfl0KkSRe/azkIVBB2/9fmn4JSmTEZ0YAw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165","hash":"zcTxuuRC2xg9B7CVqaGKezK4MmGvUkh/UksaTlm9uyDZL6mOrY/1lfl0KkSRe/azkIVBB2/9fmn4JSmTEZ0YAw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66AFD165","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165","refreshtime":"5","rnd":"639047126578410930","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165' />
+<input type='hidden' name='hash' value='zcTxuuRC2xg9B7CVqaGKezK4MmGvUkh/UksaTlm9uyDZL6mOrY/1lfl0KkSRe/azkIVBB2/9fmn4JSmTEZ0YAw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66AFD165' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66AFD165' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047126578410930' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:21:12) ---
+PlainText: 42675.95|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B3C858|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B3C858|ver3|Auth|tr|B66B3C858|https://admin.yedeksen.com/admin-checkout/callback?token=B66B3C858|5|639047136729901180|3d_pay_hosting|12|@Yedeksen0707
+Hash: N9TclNCln/IhK+Ci2AXGK9bA5dWUMMzwRb6tl0yTewOxKZMSif7k2+FwfQbmKMMM+R5RQ7q32AUSJ53twdDTKg==
+Params: {"amount":"42675.95","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B3C858","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B3C858","hash":"N9TclNCln/IhK\u002BCi2AXGK9bA5dWUMMzwRb6tl0yTewOxKZMSif7k2\u002BFwfQbmKMMM\u002BR5RQ7q32AUSJ53twdDTKg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B3C858","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B3C858","refreshtime":"5","rnd":"639047136729901180","storetype":"3d_pay_hosting","taksit":"12"}
+--------------------
+
+--- MANUAL REQUEST GEN (22.01.2026 21:25:38) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274|ver3|Auth|tr|B66B4D274|https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274|5|639047139384044610|3d_pay_hosting||@Yedeksen0707
+Hash: 5hxfL6FBQjLpbfnLYJTRzwYgpmV5H8k8MgTj2m3AEiVSLJl9EFxj26pTDma1ivBhEuqkLDXElz3l88gZi/7dTA==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274","hash":"5hxfL6FBQjLpbfnLYJTRzwYgpmV5H8k8MgTj2m3AEiVSLJl9EFxj26pTDma1ivBhEuqkLDXElz3l88gZi/7dTA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B4D274","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274","refreshtime":"5","rnd":"639047139384044610","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274' />
+<input type='hidden' name='hash' value='5hxfL6FBQjLpbfnLYJTRzwYgpmV5H8k8MgTj2m3AEiVSLJl9EFxj26pTDma1ivBhEuqkLDXElz3l88gZi/7dTA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B4D274' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B4D274' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047139384044610' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:34:24) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012|ver3|Auth|tr|B66B6E012|https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012|5|639047144645518150|3d_pay_hosting||@Yedeksen0707
+Hash: UzTgk8jaosSWEP//W5QT7MYt7/g77IGsAFS/hsKZoSlTDQdWQiqUEuTMBJxMdpHFtXRwpEZU63dB4fawb6aMCw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012","hash":"UzTgk8jaosSWEP//W5QT7MYt7/g77IGsAFS/hsKZoSlTDQdWQiqUEuTMBJxMdpHFtXRwpEZU63dB4fawb6aMCw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B6E012","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012","refreshtime":"5","rnd":"639047144645518150","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012' />
+<input type='hidden' name='hash' value='UzTgk8jaosSWEP//W5QT7MYt7/g77IGsAFS/hsKZoSlTDQdWQiqUEuTMBJxMdpHFtXRwpEZU63dB4fawb6aMCw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B6E012' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E012' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047144645518150' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:34:31) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759|ver3|Auth|tr|B66B6E759|https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759|5|639047144714857750|3d_pay_hosting||@Yedeksen0707
+Hash: wbTMVXm3YKjKFBJ5+kB4qVhat1SEY61WbY4yVt9FqoctVFyBYJfBSJWpPgLBvVViTiuoUmXW2SEXAWXS1NEL9Q==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759","hash":"wbTMVXm3YKjKFBJ5\u002BkB4qVhat1SEY61WbY4yVt9FqoctVFyBYJfBSJWpPgLBvVViTiuoUmXW2SEXAWXS1NEL9Q==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B6E759","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759","refreshtime":"5","rnd":"639047144714857750","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759' />
+<input type='hidden' name='hash' value='wbTMVXm3YKjKFBJ5+kB4qVhat1SEY61WbY4yVt9FqoctVFyBYJfBSJWpPgLBvVViTiuoUmXW2SEXAWXS1NEL9Q==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B6E759' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B6E759' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047144714857750' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:35:39) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87|ver3|Auth|tr|B66B72B87|https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87|5|639047145396731220|3d_pay_hosting||@Yedeksen0707
+Hash: WfJ3fAoLZrfIK+BUNZai0RraSiy+VdafOw3HzVIcnjW9Qf7u5O+qA2RQQe9P0tYZz+dvjW+9EgL9995yjWECig==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87","hash":"WfJ3fAoLZrfIK\u002BBUNZai0RraSiy\u002BVdafOw3HzVIcnjW9Qf7u5O\u002BqA2RQQe9P0tYZz\u002BdvjW\u002B9EgL9995yjWECig==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B72B87","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87","refreshtime":"5","rnd":"639047145396731220","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87' />
+<input type='hidden' name='hash' value='WfJ3fAoLZrfIK+BUNZai0RraSiy+VdafOw3HzVIcnjW9Qf7u5O+qA2RQQe9P0tYZz+dvjW+9EgL9995yjWECig==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B72B87' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B72B87' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047145396731220' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:35:42) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82|ver3|Auth|tr|B66B72E82|https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82|5|639047145426637020|3d_pay_hosting||@Yedeksen0707
+Hash: wtTWOzBcchIdrDv+0o7N1tnHIkkjvV6Kk4Wp01Uwg8MQcPFfmu1Ab0FpaEfjeEPMHNUvDqNI/xM8t0PiM4XZNw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82","hash":"wtTWOzBcchIdrDv\u002B0o7N1tnHIkkjvV6Kk4Wp01Uwg8MQcPFfmu1Ab0FpaEfjeEPMHNUvDqNI/xM8t0PiM4XZNw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B72E82","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82","refreshtime":"5","rnd":"639047145426637020","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82' />
+<input type='hidden' name='hash' value='wtTWOzBcchIdrDv+0o7N1tnHIkkjvV6Kk4Wp01Uwg8MQcPFfmu1Ab0FpaEfjeEPMHNUvDqNI/xM8t0PiM4XZNw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B72E82' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B72E82' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047145426637020' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:35:52) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874|ver3|Auth|tr|B66B73874|https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874|5|639047145523249770|3d_pay_hosting||@Yedeksen0707
+Hash: l8iE2OqvBwNYYJCKyfkm+D4O6+h+Np0Nc58cMjaS/V8GamPBBTFNp3wVqEIBVCw9EqOiBjREEEEVm+9BrDc0Bw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874","hash":"l8iE2OqvBwNYYJCKyfkm\u002BD4O6\u002Bh\u002BNp0Nc58cMjaS/V8GamPBBTFNp3wVqEIBVCw9EqOiBjREEEEVm\u002B9BrDc0Bw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B73874","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874","refreshtime":"5","rnd":"639047145523249770","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874' />
+<input type='hidden' name='hash' value='l8iE2OqvBwNYYJCKyfkm+D4O6+h+Np0Nc58cMjaS/V8GamPBBTFNp3wVqEIBVCw9EqOiBjREEEEVm+9BrDc0Bw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B73874' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B73874' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047145523249770' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:37:32) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96|ver3|Auth|tr|B66B79B96|https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96|5|639047146522655670|3d_pay_hosting||@Yedeksen0707
+Hash: 1IJJpzuFEABVin6CSCl/JzDox32aD0K3nyxhbkUDd92I4qpWnO3Uyf6tE+Tx1BskwCIX6hM0kE95k8ThevvBlA==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96","hash":"1IJJpzuFEABVin6CSCl/JzDox32aD0K3nyxhbkUDd92I4qpWnO3Uyf6tE\u002BTx1BskwCIX6hM0kE95k8ThevvBlA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B79B96","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96","refreshtime":"5","rnd":"639047146522655670","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96' />
+<input type='hidden' name='hash' value='1IJJpzuFEABVin6CSCl/JzDox32aD0K3nyxhbkUDd92I4qpWnO3Uyf6tE+Tx1BskwCIX6hM0kE95k8ThevvBlA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B79B96' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B79B96' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047146522655670' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:46:21) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42|ver3|Auth|tr|B66B9AD42|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42|5|639047151817266160|3d_pay_hosting||@Yedeksen0707
+Hash: u4NSF/e6RNJsoJZqb34aqGxuwBNxiciU7lTyvT7xTu3TXzZ1eBHNxXTH9k1POqJ7TZe3oFpIVw6YhicUSsthDg==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42","hash":"u4NSF/e6RNJsoJZqb34aqGxuwBNxiciU7lTyvT7xTu3TXzZ1eBHNxXTH9k1POqJ7TZe3oFpIVw6YhicUSsthDg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B9AD42","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42","refreshtime":"5","rnd":"639047151817266160","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42' />
+<input type='hidden' name='hash' value='u4NSF/e6RNJsoJZqb34aqGxuwBNxiciU7lTyvT7xTu3TXzZ1eBHNxXTH9k1POqJ7TZe3oFpIVw6YhicUSsthDg==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B9AD42' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9AD42' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047151817266160' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:46:43) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212|ver3|Auth|tr|B66B9C212|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212|5|639047152032555760|3d_pay_hosting||@Yedeksen0707
+Hash: /ad2rxRuXcXScaF7ygflxAK1ZK0CUKV5WgQoSh1kcF01slpMNBRgO0RMzFbaOlbi/PViBUVOYa2QcyAo+1kkyg==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212","hash":"/ad2rxRuXcXScaF7ygflxAK1ZK0CUKV5WgQoSh1kcF01slpMNBRgO0RMzFbaOlbi/PViBUVOYa2QcyAo\u002B1kkyg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B9C212","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212","refreshtime":"5","rnd":"639047152032555760","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212' />
+<input type='hidden' name='hash' value='/ad2rxRuXcXScaF7ygflxAK1ZK0CUKV5WgQoSh1kcF01slpMNBRgO0RMzFbaOlbi/PViBUVOYa2QcyAo+1kkyg==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B9C212' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9C212' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047152032555760' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (22.01.2026 21:47:01) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450|ver3|Auth|tr|B66B9D450|https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450|5|639047152211987300|3d_pay_hosting||@Yedeksen0707
+Hash: lCIL2+RqFNzDXeBK7KyDdJBXyx4zv3HOaB3fc+PqAAyuDnA1r3plnw9gzI+DdiEzqidT5QZ/H/lswYvSq3iffQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450","hash":"lCIL2\u002BRqFNzDXeBK7KyDdJBXyx4zv3HOaB3fc\u002BPqAAyuDnA1r3plnw9gzI\u002BDdiEzqidT5QZ/H/lswYvSq3iffQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B66B9D450","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450","refreshtime":"5","rnd":"639047152211987300","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450' />
+<input type='hidden' name='hash' value='lCIL2+RqFNzDXeBK7KyDdJBXyx4zv3HOaB3fc+PqAAyuDnA1r3plnw9gzI+DdiEzqidT5QZ/H/lswYvSq3iffQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B66B9D450' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B66B9D450' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047152211987300' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:18:30) ---
+PlainText: 42021.21|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676|ver3|Auth|tr|B673FC676|https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676|5|639047495109553270|3d_pay_hosting|3|@Yedeksen0707
+Hash: F65ajNb8P8cvWASAyUIg9YFuwPIZl5DNnvySVaktR2vhwrYp6j26gBTppGiEKuIyojk9SLCWbyh95JwLITn2rw==
+Params: {"amount":"42021.21","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676","hash":"F65ajNb8P8cvWASAyUIg9YFuwPIZl5DNnvySVaktR2vhwrYp6j26gBTppGiEKuIyojk9SLCWbyh95JwLITn2rw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B673FC676","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676","refreshtime":"5","rnd":"639047495109553270","storetype":"3d_pay_hosting","taksit":"3"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42021.21' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676' />
+<input type='hidden' name='hash' value='F65ajNb8P8cvWASAyUIg9YFuwPIZl5DNnvySVaktR2vhwrYp6j26gBTppGiEKuIyojk9SLCWbyh95JwLITn2rw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B673FC676' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B673FC676' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047495109553270' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='3' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:21:01) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80|ver3|Auth|tr|B67405D80|https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80|5|639047496618286910|3d_pay_hosting||@Yedeksen0707
+Hash: rJx2AEnilMNjg0b1t5EMyG4i3XsNp9u6Km07R+kAa5uXq+lwadwri4REQA2FJXL4uhqe3LDHsEFPHaFzCDYpxQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80","hash":"rJx2AEnilMNjg0b1t5EMyG4i3XsNp9u6Km07R\u002BkAa5uXq\u002Blwadwri4REQA2FJXL4uhqe3LDHsEFPHaFzCDYpxQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67405D80","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80","refreshtime":"5","rnd":"639047496618286910","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80' />
+<input type='hidden' name='hash' value='rJx2AEnilMNjg0b1t5EMyG4i3XsNp9u6Km07R+kAa5uXq+lwadwri4REQA2FJXL4uhqe3LDHsEFPHaFzCDYpxQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67405D80' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67405D80' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047496618286910' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:22:32) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834|ver3|Auth|tr|B6740B834|https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834|5|639047497526159010|3d_pay_hosting||@Yedeksen0707
+Hash: cZxtrLSwcvfIirxRbrRbbQvU24N+WKyMrsu78eKxwXCErB/NjxIKPDHvddVj6GvxdHS7vUF77lslE0FJNXRDxQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834","hash":"cZxtrLSwcvfIirxRbrRbbQvU24N\u002BWKyMrsu78eKxwXCErB/NjxIKPDHvddVj6GvxdHS7vUF77lslE0FJNXRDxQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6740B834","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834","refreshtime":"5","rnd":"639047497526159010","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834' />
+<input type='hidden' name='hash' value='cZxtrLSwcvfIirxRbrRbbQvU24N+WKyMrsu78eKxwXCErB/NjxIKPDHvddVj6GvxdHS7vUF77lslE0FJNXRDxQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6740B834' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6740B834' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047497526159010' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:37:19) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77|ver3|Auth|tr|B67442F77|https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77|5|639047506398569530|3d_pay_hosting||@Yedeksen0707
+Hash: DFQXmXnc6uAMorAk8WVUC/nLmq9Qr0m0fCbhd7wxHRu/Zb5BYBYHnFvIkWHO8JDBYfKwEh/JBwwxD7Ed8Y/ffQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77","hash":"DFQXmXnc6uAMorAk8WVUC/nLmq9Qr0m0fCbhd7wxHRu/Zb5BYBYHnFvIkWHO8JDBYfKwEh/JBwwxD7Ed8Y/ffQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67442F77","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77","refreshtime":"5","rnd":"639047506398569530","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77' />
+<input type='hidden' name='hash' value='DFQXmXnc6uAMorAk8WVUC/nLmq9Qr0m0fCbhd7wxHRu/Zb5BYBYHnFvIkWHO8JDBYfKwEh/JBwwxD7Ed8Y/ffQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67442F77' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67442F77' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047506398569530' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:38:10) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67446293|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67446293|ver3|Auth|tr|B67446293|https://admin.yedeksen.com/admin-checkout/callback?token=B67446293|5|639047506906570150|3d_pay_hosting||@Yedeksen0707
+Hash: mTWlg4hz6OaXFMuNXfKLOOnf5RtgjtCVJMmbnv0qe/jLP7wb2Ofq5F98YlmmW9N+ZKfOtMTVg37iPuaEJ31gwg==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67446293","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67446293","hash":"mTWlg4hz6OaXFMuNXfKLOOnf5RtgjtCVJMmbnv0qe/jLP7wb2Ofq5F98YlmmW9N\u002BZKfOtMTVg37iPuaEJ31gwg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67446293","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67446293","refreshtime":"5","rnd":"639047506906570150","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67446293' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67446293' />
+<input type='hidden' name='hash' value='mTWlg4hz6OaXFMuNXfKLOOnf5RtgjtCVJMmbnv0qe/jLP7wb2Ofq5F98YlmmW9N+ZKfOtMTVg37iPuaEJ31gwg==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67446293' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67446293' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047506906570150' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:40:14) ---
+PlainText: 42021.21|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49|ver3|Auth|tr|B6744DE49|https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49|5|639047508144894460|3d_pay_hosting|3|@Yedeksen0707
+Hash: YWazntVbIAJFi/FWJAithQ7Lni3wEX49r7uirUKoFEblVmY2p6q8SF1OIETi3GV9Ooeat6VxY8an/tKTz0OkFw==
+Params: {"amount":"42021.21","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49","hash":"YWazntVbIAJFi/FWJAithQ7Lni3wEX49r7uirUKoFEblVmY2p6q8SF1OIETi3GV9Ooeat6VxY8an/tKTz0OkFw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6744DE49","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49","refreshtime":"5","rnd":"639047508144894460","storetype":"3d_pay_hosting","taksit":"3"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42021.21' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49' />
+<input type='hidden' name='hash' value='YWazntVbIAJFi/FWJAithQ7Lni3wEX49r7uirUKoFEblVmY2p6q8SF1OIETi3GV9Ooeat6VxY8an/tKTz0OkFw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6744DE49' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6744DE49' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047508144894460' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='3' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:40:25) ---
+PlainText: 42021.21|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947|ver3|Auth|tr|B6744E947|https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947|5|639047508255223450|3d_pay_hosting|3|@Yedeksen0707
+Hash: /EMRodAdrCnejYWK6VeGU4ovrnJx7P+3VpPGFaEf4qVjkqWVQ2LhLblSyw1Fnumyqt5DF536Df7L2zGYaw0zMg==
+Params: {"amount":"42021.21","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947","hash":"/EMRodAdrCnejYWK6VeGU4ovrnJx7P\u002B3VpPGFaEf4qVjkqWVQ2LhLblSyw1Fnumyqt5DF536Df7L2zGYaw0zMg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6744E947","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947","refreshtime":"5","rnd":"639047508255223450","storetype":"3d_pay_hosting","taksit":"3"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42021.21' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947' />
+<input type='hidden' name='hash' value='/EMRodAdrCnejYWK6VeGU4ovrnJx7P+3VpPGFaEf4qVjkqWVQ2LhLblSyw1Fnumyqt5DF536Df7L2zGYaw0zMg==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6744E947' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6744E947' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047508255223450' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='3' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:45:41) ---
+PlainText: 42445.11|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67462466|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67462466|ver3|Auth|tr|B67462466|https://admin.yedeksen.com/admin-checkout/callback?token=B67462466|5|639047511411868390|3d_pay_hosting|9|@Yedeksen0707
+Hash: Yo5WaD47857JmTucr7X2UENanxaR1a0PyQHjhWVOnQs5xv407pApGbhN1aoWQHXxRPeuQBQERSlvTSMhiWv8+Q==
+Params: {"amount":"42445.11","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67462466","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67462466","hash":"Yo5WaD47857JmTucr7X2UENanxaR1a0PyQHjhWVOnQs5xv407pApGbhN1aoWQHXxRPeuQBQERSlvTSMhiWv8\u002BQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67462466","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67462466","refreshtime":"5","rnd":"639047511411868390","storetype":"3d_pay_hosting","taksit":"9"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42445.11' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67462466' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67462466' />
+<input type='hidden' name='hash' value='Yo5WaD47857JmTucr7X2UENanxaR1a0PyQHjhWVOnQs5xv407pApGbhN1aoWQHXxRPeuQBQERSlvTSMhiWv8+Q==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67462466' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67462466' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047511411868390' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='9' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:45:53) ---
+PlainText: 42445.11|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67463146|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67463146|ver3|Auth|tr|B67463146|https://admin.yedeksen.com/admin-checkout/callback?token=B67463146|5|639047511533096940|3d_pay_hosting|9|@Yedeksen0707
+Hash: WxtbtclP6fNV1Q+IErq+Fgle18n26tNK715Hpb15vPuD3f6B1fqjwEShApIf3TDvoK6pXt4CoLmWNMP57ZDRJA==
+Params: {"amount":"42445.11","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67463146","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67463146","hash":"WxtbtclP6fNV1Q\u002BIErq\u002BFgle18n26tNK715Hpb15vPuD3f6B1fqjwEShApIf3TDvoK6pXt4CoLmWNMP57ZDRJA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67463146","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67463146","refreshtime":"5","rnd":"639047511533096940","storetype":"3d_pay_hosting","taksit":"9"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42445.11' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67463146' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67463146' />
+<input type='hidden' name='hash' value='WxtbtclP6fNV1Q+IErq+Fgle18n26tNK715Hpb15vPuD3f6B1fqjwEShApIf3TDvoK6pXt4CoLmWNMP57ZDRJA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67463146' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67463146' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047511533096940' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='9' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:48:26) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78|ver3|Auth|tr|B6746CA78|https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78|5|639047513067572310|3d_pay_hosting||@Yedeksen0707
+Hash: a6BL4Ti05Fyd0NXgXTjh0z+l0b2fO+LwR3MI4UTzq6Frl991sIzBNG2UhSwWI/eWW7seoIY9De2YQ10eNAHOoA==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78","hash":"a6BL4Ti05Fyd0NXgXTjh0z\u002Bl0b2fO\u002BLwR3MI4UTzq6Frl991sIzBNG2UhSwWI/eWW7seoIY9De2YQ10eNAHOoA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6746CA78","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78","refreshtime":"5","rnd":"639047513067572310","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78' />
+<input type='hidden' name='hash' value='a6BL4Ti05Fyd0NXgXTjh0z+l0b2fO+LwR3MI4UTzq6Frl991sIzBNG2UhSwWI/eWW7seoIY9De2YQ10eNAHOoA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6746CA78' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6746CA78' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047513067572310' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:48:34) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170|ver3|Auth|tr|B6746D170|https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170|5|639047513141175670|3d_pay_hosting||@Yedeksen0707
+Hash: KONbYwOzSYn7x7+MR9YQbkgC/gKDUJN8CBcToJ9WVQxlrafJ75KqslSuA4SS1OFpt/cWPWK4RzDzHTnSaFctSw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170","hash":"KONbYwOzSYn7x7\u002BMR9YQbkgC/gKDUJN8CBcToJ9WVQxlrafJ75KqslSuA4SS1OFpt/cWPWK4RzDzHTnSaFctSw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6746D170","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170","refreshtime":"5","rnd":"639047513141175670","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170' />
+<input type='hidden' name='hash' value='KONbYwOzSYn7x7+MR9YQbkgC/gKDUJN8CBcToJ9WVQxlrafJ75KqslSuA4SS1OFpt/cWPWK4RzDzHTnSaFctSw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6746D170' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6746D170' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047513141175670' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:52:50) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119|ver3|Auth|tr|B6747D119|https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119|5|639047515700561840|3d_pay_hosting||@Yedeksen0707
+Hash: ue4ZzV8WVp0aVvT9xAhx8QEsmcg+Lc89lHip/nVOcoQjSMsgoIH5T6QA4fEXjeK9xg52Z6iDRQ9q9yk9FcG3vw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119","hash":"ue4ZzV8WVp0aVvT9xAhx8QEsmcg\u002BLc89lHip/nVOcoQjSMsgoIH5T6QA4fEXjeK9xg52Z6iDRQ9q9yk9FcG3vw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6747D119","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119","refreshtime":"5","rnd":"639047515700561840","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119' />
+<input type='hidden' name='hash' value='ue4ZzV8WVp0aVvT9xAhx8QEsmcg+Lc89lHip/nVOcoQjSMsgoIH5T6QA4fEXjeK9xg52Z6iDRQ9q9yk9FcG3vw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6747D119' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6747D119' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047515700561840' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:52:56) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858|ver3|Auth|tr|B6747D858|https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858|5|639047515764338530|3d_pay_hosting||@Yedeksen0707
+Hash: IoruDgVtiLZL/hFNB0KSQGvOEW5ZlE3huxtB0H1OVmYYiTYbi7hdvAaxDIJQK2h5EmK94akS68m+3NRdYSaWfQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858","hash":"IoruDgVtiLZL/hFNB0KSQGvOEW5ZlE3huxtB0H1OVmYYiTYbi7hdvAaxDIJQK2h5EmK94akS68m\u002B3NRdYSaWfQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6747D858","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858","refreshtime":"5","rnd":"639047515764338530","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858' />
+<input type='hidden' name='hash' value='IoruDgVtiLZL/hFNB0KSQGvOEW5ZlE3huxtB0H1OVmYYiTYbi7hdvAaxDIJQK2h5EmK94akS68m+3NRdYSaWfQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6747D858' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6747D858' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047515764338530' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:55:42) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40|ver3|Auth|tr|B67487E40|https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40|5|639047517428463780|3d_pay_hosting||@Yedeksen0707
+Hash: XEXeouE3N8D3En3AaBaSXLFwJP+FP+ypWdYgd0eS0MoGbjywHzwdkn+1EquIOmw+vmQw8GaXzD+7v4whxW3tQw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40","hash":"XEXeouE3N8D3En3AaBaSXLFwJP\u002BFP\u002BypWdYgd0eS0MoGbjywHzwdkn\u002B1EquIOmw\u002BvmQw8GaXzD\u002B7v4whxW3tQw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67487E40","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40","refreshtime":"5","rnd":"639047517428463780","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40' />
+<input type='hidden' name='hash' value='XEXeouE3N8D3En3AaBaSXLFwJP+FP+ypWdYgd0eS0MoGbjywHzwdkn+1EquIOmw+vmQw8GaXzD+7v4whxW3tQw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67487E40' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67487E40' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047517428463780' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 07:55:59) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61|ver3|Auth|tr|B67488F61|https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61|5|639047517594004900|3d_pay_hosting||@Yedeksen0707
+Hash: lkccCm4HRS0JEIeA/JdQknbwVgEbxodmjEiyLoKIWHxmsqRkJJAaSHq5o71kZ/4tEoEf2fL6V2xT7E9EeJzSuQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61","hash":"lkccCm4HRS0JEIeA/JdQknbwVgEbxodmjEiyLoKIWHxmsqRkJJAaSHq5o71kZ/4tEoEf2fL6V2xT7E9EeJzSuQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67488F61","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61","refreshtime":"5","rnd":"639047517594004900","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61' />
+<input type='hidden' name='hash' value='lkccCm4HRS0JEIeA/JdQknbwVgEbxodmjEiyLoKIWHxmsqRkJJAaSHq5o71kZ/4tEoEf2fL6V2xT7E9EeJzSuQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67488F61' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67488F61' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047517594004900' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:04:00) ---
+PlainText: 42445.11|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036|ver3|Auth|tr|B674A7036|https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036|5|639047522407470350|3d_pay_hosting|9|@Yedeksen0707
+Hash: wMJdTe1tuXTOQQT+F0TmXxof4in+xykDCrM/dM0W8jqEhjPOIEwMBugd97cp12X0UpQDOGpGSgG1Ohtq8yPZ3w==
+Params: {"amount":"42445.11","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036","hash":"wMJdTe1tuXTOQQT\u002BF0TmXxof4in\u002BxykDCrM/dM0W8jqEhjPOIEwMBugd97cp12X0UpQDOGpGSgG1Ohtq8yPZ3w==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674A7036","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036","refreshtime":"5","rnd":"639047522407470350","storetype":"3d_pay_hosting","taksit":"9"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42445.11' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036' />
+<input type='hidden' name='hash' value='wMJdTe1tuXTOQQT+F0TmXxof4in+xykDCrM/dM0W8jqEhjPOIEwMBugd97cp12X0UpQDOGpGSgG1Ohtq8yPZ3w==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674A7036' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674A7036' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047522407470350' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='9' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:09:21) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189|ver3|Auth|tr|B674BB189|https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189|5|639047525614590500|3d_pay_hosting||@Yedeksen0707
+Hash: WzYIkfhvA599QglwylFeQQJlY0FcUa2Lh4BTM73+WkJC77i3YiDaHompH+3lRigEWwhRxotqG40uUj5f2pvfUA==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189","hash":"WzYIkfhvA599QglwylFeQQJlY0FcUa2Lh4BTM73\u002BWkJC77i3YiDaHompH\u002B3lRigEWwhRxotqG40uUj5f2pvfUA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674BB189","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189","refreshtime":"5","rnd":"639047525614590500","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189' />
+<input type='hidden' name='hash' value='WzYIkfhvA599QglwylFeQQJlY0FcUa2Lh4BTM73+WkJC77i3YiDaHompH+3lRigEWwhRxotqG40uUj5f2pvfUA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674BB189' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674BB189' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047525614590500' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:12:13) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91|ver3|Auth|tr|B674C5C91|https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91|5|639047527333012520|3d_pay_hosting||@Yedeksen0707
+Hash: 5C7z8s/lH/+9mH655wVdMxe5TQalAu8pyaHjB2v6LsB8zkL+kfYlXFudOj7nOVOLUBrTROLfshM4E13nWxKUrA==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91","hash":"5C7z8s/lH/\u002B9mH655wVdMxe5TQalAu8pyaHjB2v6LsB8zkL\u002BkfYlXFudOj7nOVOLUBrTROLfshM4E13nWxKUrA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674C5C91","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91","refreshtime":"5","rnd":"639047527333012520","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91' />
+<input type='hidden' name='hash' value='5C7z8s/lH/+9mH655wVdMxe5TQalAu8pyaHjB2v6LsB8zkL+kfYlXFudOj7nOVOLUBrTROLfshM4E13nWxKUrA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674C5C91' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674C5C91' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047527333012520' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:13:37) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178|ver3|Auth|tr|B674CB178|https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178|5|639047528174649590|3d_pay_hosting||@Yedeksen0707
+Hash: 9+1D93YZUi6yowSVDNq92YynqZl8I7tzfotTwfutndvCAGlglg3aw6e1/KaDlTe8K0oXt0v2NIh9PKl2QQrZoQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178","hash":"9\u002B1D93YZUi6yowSVDNq92YynqZl8I7tzfotTwfutndvCAGlglg3aw6e1/KaDlTe8K0oXt0v2NIh9PKl2QQrZoQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674CB178","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178","refreshtime":"5","rnd":"639047528174649590","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178' />
+<input type='hidden' name='hash' value='9+1D93YZUi6yowSVDNq92YynqZl8I7tzfotTwfutndvCAGlglg3aw6e1/KaDlTe8K0oXt0v2NIh9PKl2QQrZoQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674CB178' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674CB178' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047528174649590' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:15:39) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28|ver3|Auth|tr|B674D2B28|https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28|5|639047529395084070|3d_pay_hosting||@Yedeksen0707
+Hash: 3v1Si5fTWrU8WNSUwFNrnaDZVIY3ZErunk2N8eRkRQRgYj1Ng8akIISN4pzCtKfFwVu9AhOifo4GrK0YNsqfTA==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28","hash":"3v1Si5fTWrU8WNSUwFNrnaDZVIY3ZErunk2N8eRkRQRgYj1Ng8akIISN4pzCtKfFwVu9AhOifo4GrK0YNsqfTA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674D2B28","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28","refreshtime":"5","rnd":"639047529395084070","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28' />
+<input type='hidden' name='hash' value='3v1Si5fTWrU8WNSUwFNrnaDZVIY3ZErunk2N8eRkRQRgYj1Ng8akIISN4pzCtKfFwVu9AhOifo4GrK0YNsqfTA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674D2B28' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D2B28' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047529395084070' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:16:09) ---
+PlainText: 42394.75|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998|ver3|Auth|tr|B674D4998|https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998|5|639047529693457820|3d_pay_hosting|6|@Yedeksen0707
+Hash: 8Dx3eW1ICneDQarj4Gm325m96JIlT06efJm/AIUcvxTnSKsgxUHn/dyr5s8xLPupj4+aDtuU2VRfCrWwkm2cwg==
+Params: {"amount":"42394.75","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998","hash":"8Dx3eW1ICneDQarj4Gm325m96JIlT06efJm/AIUcvxTnSKsgxUHn/dyr5s8xLPupj4\u002BaDtuU2VRfCrWwkm2cwg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674D4998","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998","refreshtime":"5","rnd":"639047529693457820","storetype":"3d_pay_hosting","taksit":"6"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42394.75' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998' />
+<input type='hidden' name='hash' value='8Dx3eW1ICneDQarj4Gm325m96JIlT06efJm/AIUcvxTnSKsgxUHn/dyr5s8xLPupj4+aDtuU2VRfCrWwkm2cwg==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674D4998' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D4998' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047529693457820' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='6' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:16:21) ---
+PlainText: 42394.75|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589|ver3|Auth|tr|B674D5589|https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589|5|639047529813011460|3d_pay_hosting|6|@Yedeksen0707
+Hash: ZBw0paOy951EZfiMl90CdtVv38LDYWa18jPGAEbaiEVWvYaAy1HdXzE4OhY9xLi3b2Pxz6IPZNGcl5jUHI/vhQ==
+Params: {"amount":"42394.75","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589","hash":"ZBw0paOy951EZfiMl90CdtVv38LDYWa18jPGAEbaiEVWvYaAy1HdXzE4OhY9xLi3b2Pxz6IPZNGcl5jUHI/vhQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674D5589","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589","refreshtime":"5","rnd":"639047529813011460","storetype":"3d_pay_hosting","taksit":"6"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='42394.75' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589' />
+<input type='hidden' name='hash' value='ZBw0paOy951EZfiMl90CdtVv38LDYWa18jPGAEbaiEVWvYaAy1HdXzE4OhY9xLi3b2Pxz6IPZNGcl5jUHI/vhQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674D5589' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674D5589' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047529813011460' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='6' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:19:10) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49|ver3|Auth|tr|B674DFE49|https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49|5|639047531509448680|3d_pay_hosting||@Yedeksen0707
+Hash: ApcL9YoJhOoV1MQlfwVR78VBPeVKdZGIufamEKcXjkPBwyEsm7wcCcTJUqBUvrFI+ttXmoiqRjAesfGo9Bt/1w==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49","hash":"ApcL9YoJhOoV1MQlfwVR78VBPeVKdZGIufamEKcXjkPBwyEsm7wcCcTJUqBUvrFI\u002BttXmoiqRjAesfGo9Bt/1w==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674DFE49","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49","refreshtime":"5","rnd":"639047531509448680","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49' />
+<input type='hidden' name='hash' value='ApcL9YoJhOoV1MQlfwVR78VBPeVKdZGIufamEKcXjkPBwyEsm7wcCcTJUqBUvrFI+ttXmoiqRjAesfGo9Bt/1w==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674DFE49' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674DFE49' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047531509448680' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:19:57) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15|ver3|Auth|tr|B674E2D15|https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15|5|639047531974971820|3d_pay_hosting||@Yedeksen0707
+Hash: OOj7UNfsF7CxZk6y05D3WwCyM1TdhZl1VmJO8mOwaqhDi4qdkx02Q+QwjkNpk/oGnjBSBnQ2wK1iAn+CpOB4lw==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15","hash":"OOj7UNfsF7CxZk6y05D3WwCyM1TdhZl1VmJO8mOwaqhDi4qdkx02Q\u002BQwjkNpk/oGnjBSBnQ2wK1iAn\u002BCpOB4lw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674E2D15","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15","refreshtime":"5","rnd":"639047531974971820","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15' />
+<input type='hidden' name='hash' value='OOj7UNfsF7CxZk6y05D3WwCyM1TdhZl1VmJO8mOwaqhDi4qdkx02Q+QwjkNpk/oGnjBSBnQ2wK1iAn+CpOB4lw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674E2D15' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674E2D15' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047531974971820' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:21:45) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943|ver3|Auth|tr|B674E9943|https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943|5|639047533056571210|3d_pay_hosting||@Yedeksen0707
+Hash: nfvPU39aEWX9FvsrcdYdyo7hXVrX5u5FSaVyJvbwy60TXcfNvfnUDQ7UPqzq8Fec4ZByEXO12gsvmrBtBriA6w==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943","hash":"nfvPU39aEWX9FvsrcdYdyo7hXVrX5u5FSaVyJvbwy60TXcfNvfnUDQ7UPqzq8Fec4ZByEXO12gsvmrBtBriA6w==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674E9943","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943","refreshtime":"5","rnd":"639047533056571210","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943' />
+<input type='hidden' name='hash' value='nfvPU39aEWX9FvsrcdYdyo7hXVrX5u5FSaVyJvbwy60TXcfNvfnUDQ7UPqzq8Fec4ZByEXO12gsvmrBtBriA6w==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674E9943' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674E9943' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047533056571210' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:22:47) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723|ver3|Auth|tr|B674ED723|https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723|5|639047533678545190|3d_pay_hosting||@Yedeksen0707
+Hash: g+lNsyoiE+dv9k0Odg1fowq4RnF81KgiJ/EmunHQVKe4ErEKuTxw+y+aGKI1TI/i3A6sNUu0qZhlqqrd63KAqQ==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723","hash":"g\u002BlNsyoiE\u002Bdv9k0Odg1fowq4RnF81KgiJ/EmunHQVKe4ErEKuTxw\u002By\u002BaGKI1TI/i3A6sNUu0qZhlqqrd63KAqQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674ED723","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723","refreshtime":"5","rnd":"639047533678545190","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723' />
+<input type='hidden' name='hash' value='g+lNsyoiE+dv9k0Odg1fowq4RnF81KgiJ/EmunHQVKe4ErEKuTxw+y+aGKI1TI/i3A6sNUu0qZhlqqrd63KAqQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674ED723' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674ED723' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047533678545190' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:24:23) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737|ver3|Auth|tr|B674F3737|https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737|5|639047534635206070|3d_pay_hosting||@Yedeksen0707
+Hash: ZPaikTwt3lD2BgRF+blt3VCkKedKlwENOYs/RZY/97+9vym6ZJS8TLdohQcEmvZLxhNYrik0T4OgxHxiP9EC1Q==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737","hash":"ZPaikTwt3lD2BgRF\u002Bblt3VCkKedKlwENOYs/RZY/97\u002B9vym6ZJS8TLdohQcEmvZLxhNYrik0T4OgxHxiP9EC1Q==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B674F3737","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737","refreshtime":"5","rnd":"639047534635206070","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737' />
+<input type='hidden' name='hash' value='ZPaikTwt3lD2BgRF+blt3VCkKedKlwENOYs/RZY/97+9vym6ZJS8TLdohQcEmvZLxhNYrik0T4OgxHxiP9EC1Q==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B674F3737' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B674F3737' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047534635206070' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:38:25) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67528113|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67528113|ver3|Auth|tr|B67528113|https://admin.yedeksen.com/admin-checkout/callback?token=B67528113|5|639047543053840130|3d_pay_hosting||@Yedeksen0707
+Hash: cbLv3qRf5+7bvGEruOBW5D+N1HOoIBw9lmYnTlga/4bHfwMGXFn2lb54HqhuksU91Gv6X8jVuWL/1Ec8Sj7a9w==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67528113","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67528113","hash":"cbLv3qRf5\u002B7bvGEruOBW5D\u002BN1HOoIBw9lmYnTlga/4bHfwMGXFn2lb54HqhuksU91Gv6X8jVuWL/1Ec8Sj7a9w==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67528113","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67528113","refreshtime":"5","rnd":"639047543053840130","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67528113' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67528113' />
+<input type='hidden' name='hash' value='cbLv3qRf5+7bvGEruOBW5D+N1HOoIBw9lmYnTlga/4bHfwMGXFn2lb54HqhuksU91Gv6X8jVuWL/1Ec8Sj7a9w==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67528113' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67528113' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047543053840130' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:44:28) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21|ver3|Auth|tr|B6753EC21|https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21|5|639047546688027840|3d_pay_hosting||@Yedeksen0707
+Hash: Dn4XiwroWp+x/f/QbRpebk17p980PHAw7d2vrbK9iEpEcq3hjVrWCs3nNXNoa1w7g7EFAmD8XOrN9YWgWshS4A==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21","hash":"Dn4XiwroWp\u002Bx/f/QbRpebk17p980PHAw7d2vrbK9iEpEcq3hjVrWCs3nNXNoa1w7g7EFAmD8XOrN9YWgWshS4A==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6753EC21","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21","refreshtime":"5","rnd":"639047546688027840","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21' />
+<input type='hidden' name='hash' value='Dn4XiwroWp+x/f/QbRpebk17p980PHAw7d2vrbK9iEpEcq3hjVrWCs3nNXNoa1w7g7EFAmD8XOrN9YWgWshS4A==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6753EC21' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6753EC21' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047546688027840' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 08:49:28) ---
+PlainText: 41970.84|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67551864|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67551864|ver3|Auth|tr|B67551864|https://admin.yedeksen.com/admin-checkout/callback?token=B67551864|5|639047549689716320|3d_pay_hosting||@Yedeksen0707
+Hash: wwq0RS+1TxeTQclTcDXGrSXZMFYywgLNKElSQ9WQ8xmJP+lboabLMLRYjUnWKI8jaw+syuPMcngUz2/i8g9JBg==
+Params: {"amount":"41970.84","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67551864","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67551864","hash":"wwq0RS\u002B1TxeTQclTcDXGrSXZMFYywgLNKElSQ9WQ8xmJP\u002BlboabLMLRYjUnWKI8jaw\u002BsyuPMcngUz2/i8g9JBg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67551864","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67551864","refreshtime":"5","rnd":"639047549689716320","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='41970.84' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67551864' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67551864' />
+<input type='hidden' name='hash' value='wwq0RS+1TxeTQclTcDXGrSXZMFYywgLNKElSQ9WQ8xmJP+lboabLMLRYjUnWKI8jaw+syuPMcngUz2/i8g9JBg==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67551864' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67551864' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047549689716320' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 09:06:31) ---
+PlainText: 998.00|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697|ver3|Auth|tr|B67591697|https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697|5|639047559910294600|3d_pay_hosting||@Yedeksen0707
+Hash: XcPmdxVnJT2+jbgDFUMPDVKEa12xkLSKjfHNcl2MFA+giuqHP7vFi/9kCgi+tGRq+7JnlTpAmqS2IS7Bh4ZoTQ==
+Params: {"amount":"998.00","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697","hash":"XcPmdxVnJT2\u002BjbgDFUMPDVKEa12xkLSKjfHNcl2MFA\u002BgiuqHP7vFi/9kCgi\u002BtGRq\u002B7JnlTpAmqS2IS7Bh4ZoTQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67591697","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697","refreshtime":"5","rnd":"639047559910294600","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='998.00' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697' />
+<input type='hidden' name='hash' value='XcPmdxVnJT2+jbgDFUMPDVKEa12xkLSKjfHNcl2MFA+giuqHP7vFi/9kCgi+tGRq+7JnlTpAmqS2IS7Bh4ZoTQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67591697' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67591697?token=B67591697' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047559910294600' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 09:16:36) ---
+PlainText: 998.00|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326|ver3|Auth|tr|B675B7326|https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326|5|639047565961848370|3d_pay_hosting||@Yedeksen0707
+Hash: RO9BY7HdX3yuRZzEuu7wcc5gAVNBS/sfrQXGNcK5tVzs2dvM9ShUGzbIWRhoBB6YbroAG06FfxNiuO8To5GWnQ==
+Params: {"amount":"998.00","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326","hash":"RO9BY7HdX3yuRZzEuu7wcc5gAVNBS/sfrQXGNcK5tVzs2dvM9ShUGzbIWRhoBB6YbroAG06FfxNiuO8To5GWnQ==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B675B7326","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326","refreshtime":"5","rnd":"639047565961848370","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='998.00' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326' />
+<input type='hidden' name='hash' value='RO9BY7HdX3yuRZzEuu7wcc5gAVNBS/sfrQXGNcK5tVzs2dvM9ShUGzbIWRhoBB6YbroAG06FfxNiuO8To5GWnQ==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B675B7326' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B675B7326' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047565961848370' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (23.01.2026 16:01:05) ---
+PlainText: 1027.40|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077|ver3|Auth|tr|B67BA4077|https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077|5|639047808650709660|3d_pay_hosting|3|@Yedeksen0707
+Hash: t0AfluKpyf4LS4EUgmEvfZKfA33Eo2BKdmUaczOnB04pGr/zfK4QiqYTn+b+Z0QFRSTvHr2A0eMQoK6y9UL9Kw==
+Params: {"amount":"1027.40","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077","hash":"t0AfluKpyf4LS4EUgmEvfZKfA33Eo2BKdmUaczOnB04pGr/zfK4QiqYTn\u002Bb\u002BZ0QFRSTvHr2A0eMQoK6y9UL9Kw==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B67BA4077","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077","refreshtime":"5","rnd":"639047808650709660","storetype":"3d_pay_hosting","taksit":"3"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='1027.40' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077' />
+<input type='hidden' name='hash' value='t0AfluKpyf4LS4EUgmEvfZKfA33Eo2BKdmUaczOnB04pGr/zfK4QiqYTn+b+Z0QFRSTvHr2A0eMQoK6y9UL9Kw==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B67BA4077' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B67BA4077' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639047808650709660' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='3' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (26.01.2026 17:08:22) ---
+PlainText: 12575.53|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642|ver3|Auth|tr|B6BBE8642|https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642|5|639050441028402390|3d_pay_hosting||@Yedeksen0707
+Hash: EPBdd6G3doq8Va7pMISrTYTl4VQjNDZrPfZ1ew2c701osARsUKsUGlo0f2ouMc8pnT7KHN+k4R2jcm1Ue+PZXg==
+Params: {"amount":"12575.53","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642","hash":"EPBdd6G3doq8Va7pMISrTYTl4VQjNDZrPfZ1ew2c701osARsUKsUGlo0f2ouMc8pnT7KHN\u002Bk4R2jcm1Ue\u002BPZXg==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B6BBE8642","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642","refreshtime":"5","rnd":"639050441028402390","storetype":"3d_pay_hosting","taksit":""}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='12575.53' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642' />
+<input type='hidden' name='hash' value='EPBdd6G3doq8Va7pMISrTYTl4VQjNDZrPfZ1ew2c701osARsUKsUGlo0f2ouMc8pnT7KHN+k4R2jcm1Ue+PZXg==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B6BBE8642' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B6BBE8642' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639050441028402390' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.
+
+--- MANUAL REQUEST GEN (3.02.2026 18:54:11) ---
+PlainText: 9387.09|Sezgin OZTEMIR|https://admin.yedeksen.com/admin-checkout/callback?token=B76635369|700691706667|949|https://admin.yedeksen.com/admin-checkout/callback?token=B76635369|ver3|Auth|tr|B76635369|https://admin.yedeksen.com/admin-checkout/callback?token=B76635369|5|639057416517844170|3d_pay_hosting|6|@Yedeksen0707
+Hash: WtkbWz/puzqtCei1DMXo2AyObss39cdw9uk5z2ZoJVn4J/sPlofZzOZhUVgvWLNBp9nE9vESws411C0GroZkpA==
+Params: {"amount":"9387.09","BillToName":"Sezgin OZTEMIR","callbackUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B76635369","clientid":"700691706667","currency":"949","failUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B76635369","hash":"WtkbWz/puzqtCei1DMXo2AyObss39cdw9uk5z2ZoJVn4J/sPlofZzOZhUVgvWLNBp9nE9vESws411C0GroZkpA==","hashAlgorithm":"ver3","islemtipi":"Auth","lang":"tr","oid":"B76635369","okUrl":"https://admin.yedeksen.com/admin-checkout/callback?token=B76635369","refreshtime":"5","rnd":"639057416517844170","storetype":"3d_pay_hosting","taksit":"6"}
+--------------------
+
+CheckoutService Params Keys: HTMLContent
+
+--- RAW HTML FROM BANK ---
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title>
+<script>window.onload = function() { document.forms[0].submit(); }</script>
+</head>
+<body>
+<form action='https://sanalpos.isbank.com.tr/fim/est3Dgate' method='post' target='threeDIframe'>
+<input type='hidden' name='amount' value='9387.09' />
+<input type='hidden' name='BillToName' value='Sezgin OZTEMIR' />
+<input type='hidden' name='callbackUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B76635369' />
+<input type='hidden' name='clientid' value='700691706667' />
+<input type='hidden' name='currency' value='949' />
+<input type='hidden' name='failUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B76635369' />
+<input type='hidden' name='hash' value='WtkbWz/puzqtCei1DMXo2AyObss39cdw9uk5z2ZoJVn4J/sPlofZzOZhUVgvWLNBp9nE9vESws411C0GroZkpA==' />
+<input type='hidden' name='hashAlgorithm' value='ver3' />
+<input type='hidden' name='islemtipi' value='Auth' />
+<input type='hidden' name='lang' value='tr' />
+<input type='hidden' name='oid' value='B76635369' />
+<input type='hidden' name='okUrl' value='https://admin.yedeksen.com/admin-checkout/callback?token=B76635369' />
+<input type='hidden' name='refreshtime' value='5' />
+<input type='hidden' name='rnd' value='639057416517844170' />
+<input type='hidden' name='storetype' value='3d_pay_hosting' />
+<input type='hidden' name='taksit' value='6' />
+</form>
+</body></html>
+
+--------------------------
+Action: Unwrapping HTMLContent directly.

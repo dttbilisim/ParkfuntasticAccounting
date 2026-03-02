@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+    "profiles": {
+      "http": {
+        "commandName": "Project",
+        "dotnetRunMessages": false,
+        "launchBrowser": false,
+        "applicationUrl": "http://localhost:5100",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      },
+      "https": {
+        "commandName": "Project",
+        "dotnetRunMessages": false,
+        "launchBrowser": false,
+        "applicationUrl": "https://localhost:7266",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      },
+      "dev": {
+        "commandName": "Project",
+        "hotReloadProfile": "aspnetcore",
+        "hotReloadEnabled": true,
+        "dotnetRunMessages": true,
+        "launchBrowser": false,
+        "applicationUrl": "http://localhost:5100",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "DOTNET_WATCH_SUPPRESS_EMOJIS": "false",
+          "DOTNET_WATCH_RESTART_ON_RUDE_EDIT": "true",
+          "ASPNETCORE_DETAILEDERRORS": "true",
+          "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS": "false"
+        }
+      }
+    }
+  }

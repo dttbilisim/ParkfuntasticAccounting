@@ -1,0 +1,111 @@
+@page "/upsert-seller-address"
+@using ecommerce.Admin.Domain.Dtos.SellerAddressDto;
+@using ecommerce.Admin.Domain.Dtos.MembershipDto;
+@attribute [Authorize]
+
+<PageTitle>Satıcı Adresi Ekle/Düzenle</PageTitle>
+
+<div class="modal-wrapper">
+    <div class="modal-content-body">
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Adres Kayıt Edilemedi!</RadzenAlert>
+
+        <RadzenTemplateForm TItem="SellerAddressUpsertDto" Data="@model" Visible="@(model != null)" Submit="@FormSubmit">
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Başlık" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox Placeholder="Örn: Ana Depo, Şube Ofis" style="display: block; width: 100%" @bind-Value="@model.Title" Name="Title" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Stok Nerede" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox Placeholder="Örn: Raf 3, Depo A" style="display: block; width: 100%" @bind-Value="@model.StockWhereIs" Name="StockWhereIs" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Şehir" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDown TValue="int"
+                                    @bind-Value="model.CityId"
+                                    Data="cities"
+                                    TextProperty="Name"
+                                    ValueProperty="Id"
+                                    Change="OnCityChanged"
+                                    Placeholder="Şehir Seçiniz"
+                                    Style="display: block; width: 100%"
+                                    AllowFiltering="true"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="İlçe" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDown TValue="int"
+                                    @bind-Value="model.TownId"
+                                    Data="towns"
+                                    TextProperty="Name"
+                                    ValueProperty="Id"
+                                    Placeholder="İlçe Seçiniz"
+                                    Style="display: block; width: 100%"
+                                    AllowFiltering="true"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    Disabled="@(model.CityId == 0)" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Adres" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextArea Placeholder="Detaylı Adres" style="display: block; width: 100%" @bind-Value="@model.Address" Name="Address" Rows="3" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="E-posta" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox Placeholder="E-posta Adresi" style="display: block; width: 100%" @bind-Value="@model.Email" Name="Email" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Telefon" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox Placeholder="Telefon Numarası" style="display: block; width: 100%" @bind-Value="@model.PhoneNumber" Name="PhoneNumber" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Varsayılan Adres" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenCheckBox @bind-Value="@model.IsDefault" Name="IsDefault" />
+                </div>
+            </div>
+            
+            <div class="modal-sticky-footer">
+                 <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" Class="me-2" />
+                 <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Variant="Variant.Flat" />
+            </div>
+
+        </RadzenTemplateForm>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+/* TOOLTIP - EN BASİT YÖNTEM */
+.brand-tooltip {
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.manufacturer-item:hover .brand-tooltip {
+    opacity: 1;
+}
+

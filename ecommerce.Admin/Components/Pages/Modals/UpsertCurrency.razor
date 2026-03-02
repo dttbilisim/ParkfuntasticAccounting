@@ -1,0 +1,90 @@
+@page "/upsert-currency"
+@using ecommerce.Admin.Domain.Dtos.CurrencyDto
+@attribute [Authorize]
+
+<PageTitle>Kur Ekle/Düzenle</PageTitle>
+
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter"
+                 Variant="Variant.Flat"
+                 Size="AlertSize.Small"
+                 AlertStyle="AlertStyle.Danger"
+                 Visible="@errorVisible">
+        Kur kaydedilemedi!
+    </RadzenAlert>
+
+    <RadzenTemplateForm TItem="CurrencyUpsertDto"
+                        Data="@currency"
+                        Visible="@(currency != null)"
+                        Submit="@FormSubmit">
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <RadzenLabel Text="Kur Kodu" Component="CurrencyCode" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currency.CurrencyCode" Name="CurrencyCode" />
+                <RadzenRequiredValidator Component="CurrencyCode" Text="Kur kodu girmelisiniz" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <RadzenLabel Text="Kur Adı" Component="CurrencyName" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currency.CurrencyName" Name="CurrencyName" />
+                <RadzenRequiredValidator Component="CurrencyName" Text="Kur adı girmelisiniz" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <RadzenLabel Text="Döviz Alış" Component="ForexBuying" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenNumeric TValue="decimal" style="display: block; width: 100%" @bind-Value="@currency.ForexBuying" Name="ForexBuying" />
+            </div>
+            <div class="col-md-3">
+                <RadzenLabel Text="Döviz Satış" Component="ForexSelling" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenNumeric TValue="decimal" style="display: block; width: 100%" @bind-Value="@currency.ForexSelling" Name="ForexSelling" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status" />
+            </div>
+            <div class="col-md-3">
+                <RadzenLabel Text="Kuru Sabitle" Component="IsStatic" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@currency.IsStatic" Name="IsStatic" />
+              
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              ButtonType="ButtonType.Submit"
+                              Icon="save"
+                              Text="Kaydet"
+                              Style="margin-right: 0.5rem"
+                              Variant="Variant.Flat"
+                              Disabled="@IsSaveButtonDisabled" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light"
+                              Text="Vazgeç"
+                              Variant="Variant.Flat"
+                              Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+
+

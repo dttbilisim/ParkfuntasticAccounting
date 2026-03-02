@@ -1,0 +1,66 @@
+@using ecommerce.Admin.Domain.Dtos.SupportLineDto
+@using ecommerce.Core.Utils
+
+<PageTitle>Talep Görüntüle</PageTitle>
+
+<RadzenTemplateForm TItem="SupportLineUpsertDto" Data="@SupportLine" Visible="@(SupportLine.Id > 0)" Submit="@FormSubmit">
+    <RadzenStack>
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenFormField Text="İletişim Tipi" Variant="Variant.Outlined" class="w-100">
+                    <RadzenTextBox Value="@SupportLine.SupportLineType.GetDisplayDescription()" ReadOnly="true"/>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Visible="@(SupportLine.SupportLineType == SupportLineType.OrderSupport)">
+                <RadzenFormField Text="İletişim Tercihi" Variant="Variant.Outlined" class="w-100">
+                    <RadzenTextBox Value="@(SupportLine.SupportLineReturnType?.GetDisplayDescription())" ReadOnly="true"/>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow>
+            <RadzenColumn SizeSM="6">
+                <RadzenFormField Text="Ad" Variant="Variant.Outlined" class="w-100">
+                    <RadzenTextBox @bind-Value="@SupportLine.FirstName" ReadOnly="true"/>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="6">
+                <RadzenFormField Text="Soyad" Variant="Variant.Outlined" class="w-100">
+                    <RadzenTextBox @bind-Value="@SupportLine.LastName" ReadOnly="true"/>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow>
+            <RadzenColumn SizeSM="6">
+                <RadzenFormField Text="Email" Variant="Variant.Outlined" class="w-100">
+                    <RadzenTextBox @bind-Value="@SupportLine.Email" ReadOnly="true"/>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="6">
+                <RadzenFormField Text="Telefon" Variant="Variant.Outlined" class="w-100">
+                    <RadzenTextBox @bind-Value="@SupportLine.PhoneNumber" ReadOnly="true"/>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenFormField Text="Konu" Variant="Variant.Outlined" class="w-100" Visible="@(SupportLine.SupportLineType != SupportLineType.ContactForm)">
+            <RadzenTextBox @bind-Value="@SupportLine.FrequentlyAskedQuestionName" ReadOnly="true"/>
+        </RadzenFormField>
+
+        <RadzenFormField Text="Mesaj" Variant="Variant.Outlined" class="w-100">
+            <RadzenTextArea @bind-Value="@SupportLine.Description" ReadOnly="true" Rows="10"/>
+        </RadzenFormField>
+
+        <hr class="rz-m-0"/>
+
+        <RadzenFormField Text="Not" Variant="Variant.Outlined" Rows="4" class="w-100">
+            <RadzenTextArea @bind-Value="@SupportLine.Note"/>
+        </RadzenFormField>
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" BusyText="Kaydediliyor..." IsBusy="Saving" Variant="Variant.Flat" class="rz-mr-1"/>
+    </RadzenStack>
+</RadzenTemplateForm>

@@ -1,0 +1,163 @@
+@page "/upsert-cargo"
+@using ecommerce.Admin.Domain.Dtos.CargoDto;
+@using ecommerce.Admin.Domain.Dtos.CargoPropertyDto;
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+
+<PageTitle>Kargo</PageTitle>
+<div class="col-md-12">
+    <RadzenTemplateForm TItem="CargoUpsertDto" Data="@cargo" Visible="@(cargo != null)" Submit="@FormSubmit" OnInvalidSubmit="ShowErrors">
+
+
+        <RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Client">
+            <Tabs>
+                <RadzenTabsItem Text="Kargo Bilgiler">
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Kargo Adı" Component="Name" style="width: 100%" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cargo.Name" Name="Name" />
+                            <RadzenRequiredValidator Component="Name" Text="Kargo Adı Girmelisiniz" />
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Kargo Mesajı" style="width: 100%" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cargo.Message" Name="Message"/>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Kargo Tipi" Component="CargoType" style="width: 100%" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenDropDown @bind-Value="@cargo.CargoType" Data="@cargoTypeOptions" TextProperty="Text" ValueProperty="Value" Style="display: block; width: 100%" Name="CargoType" />
+                        </div>
+                    </div>
+                    @if (cargo.CargoType == CargoType.BicopsExpress)
+                    {
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Tek Ücret (₺)" Component="Amount" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenNumeric @bind-Value="@cargo.Amount" Style="display: block; width: 100%;" Name="Amount" />
+                                <small class="text-muted">Bu km'ye kadar sabit ücret uygulanır.</small>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Kapsanan Km" Component="CoveredKm" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenNumeric @bind-Value="@cargo.CoveredKm" Style="display: block; width: 100%;" Name="CoveredKm" Min="0" />
+                                <small class="text-muted">Tek ücretle kapsanan mesafe (km).</small>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Km Başı Ek Ücret (₺)" Component="PricePerExtraKm" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenNumeric @bind-Value="@cargo.PricePerExtraKm" Style="display: block; width: 100%;" Name="PricePerExtraKm" Min="0" />
+                                <small class="text-muted">Kapsanan km sonrası her km için eklenen tutar.</small>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Varsayılan Ücret (₺)" Component="Amount" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenNumeric @bind-Value="@cargo.Amount" Style="display: block; width: 100%;" Name="Amount" />
+                            </div>
+                        </div>
+                    }
+                    @if (cargo.CargoType != CargoType.BicopsExpress)
+                    {
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Desi Fazlası Tutarı" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenNumeric style="display: block; width: 100%;" @bind-Value="@cargo.CargoOverloadPrice" Name="Message"/>
+                            </div>
+                        </div>
+                    }
+
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenCheckBox TValue="bool" @bind-Value="@cargo.StatusBool" Name="StatusBool" />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+                        </div>
+                    </div>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="Kargo Detay Bilgiler">
+
+                    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Medium" AlertStyle="AlertStyle.Warning" Visible="@IsCargoSaved">Önce kargo kaydetmelisiniz!</RadzenAlert>
+
+                    <div style="width: 100%; overflow: hidden;" class="mb-2">
+                        <div style="float:right">
+                            <RadzenButton Icon="add_circle_outline" Text="Kargo Özellik Ekle" Variant="Variant.Flat" Click="AddCargoPropertyButtonClick" class="mt-2" Visible="@IsShowButton" />
+                        </div>
+                    </div>
+
+                    <RadzenDataGrid AllowFiltering="false"
+                                    AllowColumnResize="true"
+                                    AllowAlternatingRows="false"
+                                    FilterMode="FilterMode.Advanced"
+                                    AllowSorting="false"
+                                    AllowPaging="true"
+                                    PagerHorizontalAlign="HorizontalAlign.Left"
+                                    ShowPagingSummary="false"
+                                    Data="@cargoProperties"
+                                    TItem="CargoPropertyListDto"
+                                    ColumnWidth="300px"
+                                    LogicalFilterOperator="LogicalFilterOperator.Or"
+                                    RowSelect="EditCargoPropertyButtonClick"
+                                    PageSize="10">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="CargoPropertyListDto" Title="Id" Property="Id" Width="50px" />
+                            <RadzenDataGridColumn TItem="CargoPropertyListDto" Title="Boyut" Property="Size" />
+                            <RadzenDataGridColumn TItem="CargoPropertyListDto" Title="Desi">
+                                <Template Context="data">
+                                    @(data.DesiMinValue + " - " + data.DesiMaxValue)
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CargoPropertyListDto" Title="Ekstra Ücret" Property="Price" />
+                            <RadzenDataGridColumn TItem="CargoPropertyListDto" Width="70px">
+                                <Template Context="cargoProperty">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                                  Shade="Shade.Dark" Variant="Variant.Flat"
+                                                  Click=@(args => GridDeleteCargoPropertyButtonClick(args, cargoProperty)) @onclick:stopPropagation="true" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+
+
+
+
+    </RadzenTemplateForm>
+</div>
+

@@ -1,0 +1,121 @@
+@using ecommerce.Admin.Domain.Dtos.SellerItemDto
+@using ecommerce.Admin.Domain.Dtos.SellerDto
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+@using ecommerce.Core.Utils
+
+@if (model == null)
+{
+    <p>Yükleniyor...</p>
+}
+else
+{
+    <RadzenTemplateForm Data="@model" Submit="@(async (SellerItemUpsertDto args) => { await OnSubmit(args); })">
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenFieldset Text="İlan Bilgileri">
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Satıcı" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenDropDown Data="@sellers" TextProperty="Name" ValueProperty="Id"
+                                            Placeholder="Satıcı Seçiniz" style="width: 100%;"
+                                            @bind-Value="model.SellerId" Name="SellerId"
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            <RadzenRequiredValidator Component="SellerId" Text="Satıcı seçimi zorunludur" Popup="true" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Ürün" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenDropDownDataGrid TValue="int" ValueProperty="Id" TextProperty="Name"
+                                                    Data="@products" LoadData="@LoadProducts"
+                                                    Placeholder="Ürün Ara (İsim veya Barkod)" style="width: 100%;"
+                                                    @bind-Value="model.ProductId" Name="ProductId"
+                                                    AllowFiltering="true"
+                                                    Count="@productsCount"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    SearchTextPlaceholder="Ara...">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="Barcode" Title="Barkod" Width="120px" />
+                                    <RadzenDropDownDataGridColumn Property="Name" Title="Ürün Adı" />
+                                    <RadzenDropDownDataGridColumn Property="Brand.Name" Title="Marka" Width="120px" />
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+                            <RadzenRequiredValidator Component="ProductId" Text="Ürün seçimi zorunludur" Popup="true" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Stok" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenNumeric @bind-Value="model.Stock" Name="Stock" style="width: 100%;" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Satış Fiyatı" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenNumeric @bind-Value="model.SalePrice" Name="SalePrice" style="width: 100%;" Format="c2" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Maliyet Fiyatı" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenNumeric @bind-Value="model.CostPrice" Name="CostPrice" style="width: 100%;" Format="c2" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Komisyon (%)" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenNumeric @bind-Value="model.Commision" Name="Commision" style="width: 100%;" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Para Birimi" />
+                        </div>
+                        <div class="col-md-9">
+                             <RadzenTextBox @bind-Value="model.Currency" Name="Currency" style="width: 100%;" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Birim" />
+                        </div>
+                        <div class="col-md-9">
+                             <RadzenTextBox @bind-Value="model.Unit" Name="Unit" style="width: 100%;" />
+                        </div>
+                    </div>
+                     <div class="row mb-3">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Durum" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenSelectBar @bind-Value="model.Status" Name="Status">
+                                <Items>
+                                    <RadzenSelectBarItem Text="Aktif" Value="1" />
+                                    <RadzenSelectBarItem Text="Pasif" Value="0" />
+                                </Items>
+                            </RadzenSelectBar>
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" ButtonStyle="ButtonStyle.Success" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" style="display: inline-block; margin-left: 10px;" Text="İptal" Click="@Cancel" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}

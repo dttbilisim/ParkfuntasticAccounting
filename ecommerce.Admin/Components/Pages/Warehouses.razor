@@ -1,0 +1,69 @@
+@page "/warehouses"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.WarehouseDto
+@using ecommerce.Admin.Resources
+@using ecommerce.Core.Utils
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Depo Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Depo Yönetimi</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click="@AddButtonClick" Text="Yeni Depo Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="WarehouseListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@warehouses"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="WarehouseListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="WarehouseListDto" Property="Name" Title="Depo Adı" Width="200px" />
+                    <RadzenDataGridColumn TItem="WarehouseListDto" Property="Address" Title="Adres" />
+                    <RadzenDataGridColumn TItem="WarehouseListDto" Property="Status" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="item">
+                            @if (item.Status == 1)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Pasif" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="WarehouseListDto" Title="İşlem" Filterable="false" Sortable="false" Width="130px" TextAlign="TextAlign.Center">
+                        <Template Context="item">
+                            <RadzenButton Tooltip="Rafları Yönet" Icon="shelves" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small" Click=@(args => NavigateToShelves(args, item)) @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@((args) => EditRow(item))" @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click=@(args => GridDeleteButtonClick(args, item)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

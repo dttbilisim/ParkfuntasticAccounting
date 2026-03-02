@@ -1,0 +1,248 @@
+@page "/"
+@using ecommerce.Admin.Domain.Dtos.DashboardDto
+@using ecommerce.Admin.Components.Shared
+@layout MainLayout
+@attribute [Authorize]
+<PageTitle>B2B Panel</PageTitle>
+
+@if (Security.User != null && !Security.User.CustomerId.HasValue)
+{
+    <div class="row pt-4 px-4">
+        <div class="col-12">
+            <!-- Dashboard Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" style="font-weight: 700; margin-bottom: 0;">Genel Bakış</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2" Class="rz-color-base-500">@DateTime.Now.ToString("dd MMMM yyyy, dddd")</RadzenText>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="row mb-4">
+                <!-- Row 1: Key Performance Indicators -->
+                <div class="col-xl-3 col-lg-6 mb-3">
+                    <RadzenCard Class="dashboard-stats-card h-100 rz-p-4 rz-variant-flat" style="border-radius: 16px; border-left: 5px solid var(--rz-primary);">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon-wrapper rz-p-3 rz-background-color-primary-lighter rounded-circle me-3">
+                                <RadzenIcon Icon="people" style="font-size: 1.5rem; color: var(--rz-primary);" />
+                            </div>
+                            <div>
+                                <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-base-500 mb-0" style="font-weight: 600;">KULLANICI</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H4" style="font-weight: 800; margin-bottom: 0;">@TotalUsers</RadzenText>
+                            </div>
+                        </div>
+                    </RadzenCard>
+                </div>
+                <div class="col-xl-3 col-lg-6 mb-3">
+                    <RadzenCard Class="dashboard-stats-card h-100 rz-p-4 rz-variant-flat" style="border-radius: 16px; border-left: 5px solid var(--rz-info);">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon-wrapper rz-p-3 rz-background-color-info-lighter rounded-circle me-3">
+                                <RadzenIcon Icon="shopping_bag" style="font-size: 1.5rem; color: var(--rz-info);" />
+                            </div>
+                            <div>
+                                <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-base-500 mb-0" style="font-weight: 600;">SİPARİŞ</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H4" style="font-weight: 800; margin-bottom: 0;">@OrderSummary.TotalOrders</RadzenText>
+                            </div>
+                        </div>
+                    </RadzenCard>
+                </div>
+                <div class="col-xl-3 col-lg-6 mb-3">
+                    <RadzenCard Class="dashboard-stats-card h-100 rz-p-4 rz-variant-flat" style="border-radius: 16px; border-left: 5px solid var(--rz-success);">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon-wrapper rz-p-3 rz-background-color-success-lighter rounded-circle me-3">
+                                <RadzenIcon Icon="payments" style="font-size: 1.5rem; color: var(--rz-success);" />
+                            </div>
+                            <div>
+                                <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-base-500 mb-0" style="font-weight: 600;">TOPLAM GELİR</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H5" style="font-weight: 800; margin-bottom: 0;">@OrderSummary.TotalRevenue.ToString("C2")</RadzenText>
+                            </div>
+                        </div>
+                    </RadzenCard>
+                </div>
+                <div class="col-xl-3 col-lg-6 mb-3">
+                    <RadzenCard Class="dashboard-stats-card h-100 rz-p-4 rz-variant-flat" style="border-radius: 16px; border-left: 5px solid var(--rz-warning);">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon-wrapper rz-p-3 rz-background-color-warning-lighter rounded-circle me-3">
+                                <RadzenIcon Icon="fiber_new" style="font-size: 1.5rem; color: var(--rz-warning);" />
+                            </div>
+                            <div>
+                                <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-base-500 mb-0" style="font-weight: 600;">YENİ GELİR</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H5" style="font-weight: 800; margin-bottom: 0;">@OrderSummary.NewOrdersRevenue.ToString("C2")</RadzenText>
+                            </div>
+                        </div>
+                    </RadzenCard>
+                </div>
+            </div>
+
+            <!-- Row 2: Secondary Revenue Breakdowns -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-lg-6 mb-3">
+                    <RadzenCard Class="dashboard-stats-card h-100 rz-p-3 rz-variant-flat" style="border-radius: 12px; background-color: #f0fdf4; border-left: 4px solid var(--rz-success);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <RadzenText TextStyle="TextStyle.Subtitle2" style="font-weight: 700; color: #166534;" Class="mb-0">TAMAMLANAN</RadzenText>
+                            <RadzenText TextStyle="TextStyle.H6" style="font-weight: 800; color: var(--rz-success);">@OrderSummary.CompletedOrdersRevenue.ToString("C2")</RadzenText>
+                        </div>
+                    </RadzenCard>
+                </div>
+                <div class="col-xl-3 col-lg-6 mb-3">
+                    <RadzenCard Class="dashboard-stats-card h-100 rz-p-3 rz-variant-flat" style="border-radius: 12px; background-color: #fef2f2; border-left: 4px solid var(--rz-danger);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <RadzenText TextStyle="TextStyle.Subtitle2" style="font-weight: 700; color: #991b1b;" Class="mb-0">İPTAL EDİLEN</RadzenText>
+                            <RadzenText TextStyle="TextStyle.H6" style="font-weight: 800; color: var(--rz-danger);">@OrderSummary.CancelledOrdersRevenue.ToString("C2")</RadzenText>
+                        </div>
+                    </RadzenCard>
+                </div>
+            </div>
+            
+            <!-- Row 3: Seller Sync Status -->
+            @if (TenantProvider.IsGlobalAdmin)
+            {
+                <div class="row mb-4">
+                    <div class="col-12">
+                         <ecommerce.Admin.Components.Widgets.SellerSyncStatusWidget />
+                    </div>
+                </div>
+            }
+            
+            <!-- Row 4: Online Users -->
+            @if (TenantProvider.IsGlobalAdmin)
+            {
+                <div class="row mb-4">
+                    <div class="col-12">
+                         <ecommerce.Admin.Components.Widgets.OnlineUsersWidget />
+                    </div>
+                </div>
+            }
+
+            <!-- Charts and Graphs -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mb-4 mb-lg-0">
+                    <RadzenCard Class="rz-p-4" style="border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <RadzenText TextStyle="TextStyle.H6" style="font-weight: 700; margin-bottom: 0;">Sipariş Trendi (30 Gün)</RadzenText>
+                            <div class="d-flex align-items-center">
+                                <span class="rounded-circle me-2" style="width: 10px; height: 10px; background-color: var(--rz-primary);"></span>
+                                <RadzenText TextStyle="TextStyle.Caption" Class="mb-0">Günlük Gelir</RadzenText>
+                            </div>
+                        </div>
+                        <RadzenChart style="height: 320px;">
+                            <RadzenAreaSeries Data="@OrderStatsOverTime" CategoryProperty="Date" Title="Gelir" ValueProperty="TotalRevenue" RenderingOrder="1" Stroke="var(--rz-primary)" Fill="rgba(67, 94, 190, 0.1)">
+                                <RadzenSeriesDataLabels Visible="false" />
+                            </RadzenAreaSeries>
+                            <RadzenCategoryAxis Padding="20">
+                                <RadzenGridLines Visible="true" />
+                            </RadzenCategoryAxis>
+                            <RadzenValueAxis Formatter="@(value => ((double)value).ToString("C0"))">
+                                <RadzenGridLines Visible="true" />
+                            </RadzenValueAxis>
+                            <RadzenLegend Visible="false" />
+                        </RadzenChart>
+                    </RadzenCard>
+                </div>
+                <div class="col-lg-4">
+                    <RadzenCard Class="rz-p-4" style="border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); height: 100%;">
+                        <RadzenText TextStyle="TextStyle.H6" style="font-weight: 700;" Class="mb-4">Sipariş Durumları</RadzenText>
+                        <RadzenChart style="height: 320px;">
+                            <RadzenPieSeries Data="@Metrics" Title="Durum" CategoryProperty="Key" ValueProperty="Value">
+                                <RadzenSeriesDataLabels Visible="true" />
+                            </RadzenPieSeries>
+                            <RadzenLegend Position="LegendPosition.Bottom" />
+                        </RadzenChart>
+                    </RadzenCard>
+                </div>
+            </div>
+
+            <!-- Detailed Tabular Data -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <RadzenCard Class="rz-p-0" style="border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden;">
+                        <div class="rz-p-4 border-bottom">
+                            <RadzenText TextStyle="TextStyle.H6" style="font-weight: 600; margin-bottom: 0;">En Çok Satan Ürünler</RadzenText>
+                        </div>
+                        <AdminDataGrid Data="@BestSellingProducts" TItem="DashboardBestSellingProductDto" AllowPaging="false" AllowSorting="false" GridLines="DataGridGridLines.None" Class="custom-grid">
+                            <Columns>
+                                <RadzenDataGridColumn TItem="DashboardBestSellingProductDto" Title="ID" Property="ProductId" Width="60px" />
+                                <RadzenDataGridColumn TItem="DashboardBestSellingProductDto" Title="Ürün" Width="250px">
+                                    <Template Context="data">
+                                        <div class="d-flex align-items-center">
+                                            <RadzenImage Path="@data.ProductImage" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;" Class="me-2" />
+                                            <RadzenText TextStyle="TextStyle.Body2" style="font-weight: 500;">@data.ProductName</RadzenText>
+                                        </div>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="DashboardBestSellingProductDto" Property="TotalQuantitySold" Title="Adet" Width="80px" />
+                                <RadzenDataGridColumn TItem="DashboardBestSellingProductDto" Property="TotalRevenue" Title="Toplam Gelir" FormatString="{0:C2}" />
+                            </Columns>
+                        </AdminDataGrid>
+                    </RadzenCard>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <RadzenCard Class="rz-p-0" style="border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden;">
+                        <div class="rz-p-4 border-bottom">
+                            <RadzenText TextStyle="TextStyle.H6" style="font-weight: 600; margin-bottom: 0;">Satıcı Bazlı Satışlar</RadzenText>
+                        </div>
+                        <AdminDataGrid Data="@TopSellers" TItem="DashboardSellerSalesDto" AllowPaging="false" AllowSorting="false" GridLines="DataGridGridLines.None" Class="custom-grid">
+                            <Columns>
+                                <RadzenDataGridColumn TItem="DashboardSellerSalesDto" Title="Satıcı">
+                                    <Template Context="data">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle rz-background-color-base-200 d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: 600; font-size: 0.8rem;">
+                                                @data.SellerName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <RadzenText TextStyle="TextStyle.Body2" style="font-weight: 500;">@data.SellerName</RadzenText>
+                                        </div>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="DashboardSellerSalesDto" Property="OrderCount" Title="Sipariş" Width="100px" />
+                                <RadzenDataGridColumn TItem="DashboardSellerSalesDto" Property="TotalSalesAmount" Title="Toplam Tutar" FormatString="{0:C2}" />
+                            </Columns>
+                        </AdminDataGrid>
+                    </RadzenCard>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row pt-4 px-4">
+        <div class="col-12">
+            <RadzenCard Class="rz-p-5 text-center" style="border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                <RadzenIcon Icon="account_circle" style="font-size: 4rem; color: var(--rz-primary);" Class="mb-4" />
+                <RadzenText TextStyle="TextStyle.H4" style="font-weight: 700;">Hoş Geldiniz, @Security.User?.FullName</RadzenText>
+                @if (Security.User?.CustomerId.HasValue == true)
+                {
+                    <RadzenText TextStyle="TextStyle.Body1" Class="mt-3">Müşteri paneline hoş geldiniz. Lütfen menüden işlem yapmak istediğiniz alanı seçiniz.</RadzenText>
+                }
+            </RadzenCard>
+        </div>
+    </div>
+}
+
+<style>
+    .dashboard-stats-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .dashboard-stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+    .stats-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .custom-grid.rz-datagrid {
+        border: none;
+    }
+    .custom-grid .rz-cell-data {
+        color: var(--rz-text-color);
+    }
+    .custom-grid .rz-column-title {
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: var(--rz-text-disabled-color);
+    }
+</style>

@@ -1,0 +1,13 @@
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/bin/Debug/net9.0/ecommerce.Iyzico.Payment.deps.json
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/bin/Debug/net9.0/ecommerce.Iyzico.Payment.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/bin/Debug/net9.0/ecommerce.Iyzico.Payment.pdb
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.csproj.AssemblyReference.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.GeneratedMSBuildEditorConfig.editorconfig
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.AssemblyInfoInputs.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.AssemblyInfo.cs
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.csproj.CoreCompileInputs.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.sourcelink.json
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/refint/ecommerce.Iyzico.Payment.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ecommerce.Iyzico.Payment.pdb
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ecommerce.Iyzico.Payment/obj/Debug/net9.0/ref/ecommerce.Iyzico.Payment.dll

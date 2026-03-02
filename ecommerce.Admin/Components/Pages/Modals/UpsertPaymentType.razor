@@ -1,0 +1,58 @@
+@using ecommerce.Admin.Domain.Dtos.PaymentTypeDto
+@using Radzen
+@using Radzen.Blazor
+
+@if (Model == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <RadzenTemplateForm Data="@Model" Submit="@(async (PaymentTypeUpsertDto args) => { await FormSubmit(args); })">
+        <div class="modal-wrapper">
+            <div class="modal-header-modern">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="header-title">
+                        <h5>@(Model.Id == 0 ? "Yeni Ödeme Tipi" : "Ödeme Tipi Düzenle")</h5>
+                        <p>Ödeme tipi bilgilerini yönetin</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="btn-close-modern" @onclick="@(() => DialogService.Close(false))">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-content-body">
+                <div class="tab-content-wrapper">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <RadzenLabel Text="Ödeme Tipi Adı" Component="Name" />
+                            <RadzenTextBox Name="Name" @bind-Value="@Model.Name" class="w-100 form-control-modern" Placeholder="Örn: Nakit, Kredi Kartı..." />
+                            <RadzenRequiredValidator Component="Name" Text="Ad alanı zorunludur" Popup="true" Style="position: absolute" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="d-flex align-items-center">
+                                <RadzenCheckBox @bind-Value="@Model.IsActive" Name="IsActive" TValue="bool" />
+                                <RadzenLabel Text="Aktif" Component="IsActive" class="ms-2" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-sticky-footer d-flex justify-content-end gap-2">
+                <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}

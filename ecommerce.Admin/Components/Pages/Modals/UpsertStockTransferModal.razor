@@ -1,0 +1,460 @@
+@using ecommerce.Admin.Domain.Dtos.ProductStockDto
+@using ecommerce.Admin.Domain.Dtos.WarehouseShelfDto
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+@using ecommerce.Admin.Domain.Dtos.WarehouseDto
+@using ecommerce.Admin.Domain.Interfaces
+@using ecommerce.Core.Helpers
+@using ecommerce.Core.Utils
+@using ecommerce.Core.Utils.ResultSet
+@using Microsoft.AspNetCore.Authorization
+@using ecommerce.Admin.Services
+@using ecommerce.Core.Models
+
+@inject IWarehouseService WarehouseService
+@inject IProductService ProductService
+@inject IWarehouseShelfService ShelfService
+@inject IProductStockService StockService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject AuthenticationService Security
+
+<div class="row">
+    <!-- HEADER: WAREHOUSE SELECTIONS -->
+    <div class="col-md-12 mb-4">
+        <RadzenCard class="rz-p-4" style="background-color: var(--rz-base-200); border-bottom: 2px solid var(--rz-primary);">
+             <div class="row align-items-end">
+                 <!-- Source Warehouse -->
+                 <div class="col-md-5">
+                      <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-1 font-weight-bold" style="color: var(--rz-primary);">
+                          <RadzenIcon Icon="outbox" class="me-1" /> Kaynak Depo (Çıkış)
+                      </RadzenText>
+                      <RadzenDropDown Data="@warehouses" TextProperty="Name" ValueProperty="Id" @bind-Value="@sourceWarehouseId" Change="@OnSourceWarehouseChange" Placeholder="Kaynak Depo Seçiniz" class="w-100" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true" Disabled="@(transferItems.Any())" />
+                 </div>
+                 
+                 <div class="col-md-2 text-center">
+                     <RadzenIcon Icon="arrow_forward" Style="font-size: 2rem; color: var(--rz-text-disabled-color);" />
+                 </div>
+
+                 <!-- Target Warehouse -->
+                 <div class="col-md-5">
+                      <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-1 font-weight-bold" style="color: var(--rz-success);">
+                           <RadzenIcon Icon="move_to_inbox" class="me-1" /> Hedef Depo (Giriş)
+                      </RadzenText>
+                      <RadzenDropDown Data="@warehouses" TextProperty="Name" ValueProperty="Id" @bind-Value="@targetWarehouseId" Change="@OnTargetWarehouseChange" Placeholder="Hedef Depo Seçiniz" class="w-100" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true" Disabled="@(transferItems.Any())" />
+                 </div>
+             </div>
+        </RadzenCard>
+    </div>
+
+    <!-- ITEM ENTRY SECTION -->
+    <div class="col-md-12 mb-3">
+        <RadzenCard class="rz-p-3" style="border: 1px dashed var(--rz-border-color);">
+             <RadzenText TextStyle="TextStyle.H6" class="mb-3">Ürün Ekle</RadzenText>
+             <div class="row align-items-end justify-content-start">
+                 <!-- Product Search -->
+                 <div class="col-md-4">
+                     <RadzenText TextStyle="TextStyle.Caption" class="mb-1 d-block">Ürün</RadzenText>
+                     <RadzenDropDownDataGrid TValue="int" Data="@products" TextProperty="Name" ValueProperty="Id" @bind-Value="@tempSelectedProductId" Change="@OnProductChange" 
+                                            Placeholder="Ürün Ara..." class="w-100" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowClear="true" Count="@productCount" LoadData="@LoadProducts" PageSize="10" Disabled="@(sourceWarehouseId == 0 || targetWarehouseId == 0)">
+                        <Columns>
+                            <RadzenDropDownDataGridColumn Property="Id" Title="ID" Width="60px" />
+                            <RadzenDropDownDataGridColumn Property="Name" Title="Ürün Adı" />
+                        </Columns>
+                    </RadzenDropDownDataGrid>
+                 </div>
+
+                 <!-- Source Shelf -->
+                 <div class="col-md-3">
+                     <RadzenText TextStyle="TextStyle.Caption" class="mb-1 d-block">Kaynak Raf (Stok)</RadzenText>
+                      <RadzenDropDown Data="@tempSourceShelves" TextProperty="Display" ValueProperty="Value" @bind-Value="@tempSelectedSourceShelfId" Change="@OnSourceShelfChange" Placeholder="Seçiniz" class="w-100" Disabled="@(tempSelectedProductId == 0)" EmptyText="Stok yok" 
+                                       AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                      @if(tempSelectedSourceStockQuantity > 0)
+                      {
+                          <div class="text-end text-primary small mt-1">Mevcut: @tempSelectedSourceStockQuantity</div>
+                      }
+                 </div>
+
+                 <!-- Target Shelf -->
+                 <div class="col-md-3">
+                      <RadzenText TextStyle="TextStyle.Caption" class="mb-1 d-block">Hedef Raf</RadzenText>
+                      <RadzenDropDown Data="@targetShelves" TextProperty="Display" ValueProperty="Value" @bind-Value="@tempSelectedTargetShelfId" Placeholder="Seçiniz" class="w-100" Disabled="@(targetWarehouseId == 0)" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true" />
+                 </div>
+
+                 <!-- Quantity -->
+                 <div class="col-md-2">
+                      <RadzenText TextStyle="TextStyle.Caption" class="mb-1 d-block">Miktar</RadzenText>
+                      <div class="d-flex gap-2">
+                           <RadzenNumeric TValue="decimal" @bind-Value="@tempTransferQuantity" Min="1" Max="@tempSelectedSourceStockQuantity" class="w-100" Disabled="@(tempSelectedSourceStockQuantity == 0)" />
+                           <RadzenButton Icon="add" ButtonStyle="ButtonStyle.Secondary" Click="@AddItemToTransferList" Disabled="@(!CanAddItem)" @onclick:stopPropagation="true" />
+                      </div>
+                 </div>
+             </div>
+        </RadzenCard>
+    </div>
+
+    <!-- TRANSFER LIST (GRID) -->
+    <div class="col-md-12" @key="@transferItems.Count">
+        <RadzenDataGrid @ref="transferGrid" Data="@transferItems" TItem="TransferItemDto" AllowPaging="false" AllowSorting="false" EmptyText="Henüz sevk edilecek ürün eklenmedi." ShowPagingSummary="false">
+            <Columns>
+                <RadzenDataGridColumn TItem="TransferItemDto" Property="ProductName" Title="Ürün" />
+                <RadzenDataGridColumn TItem="TransferItemDto" Property="SourceShelfName" Title="Kaynak Raf" />
+                <RadzenDataGridColumn TItem="TransferItemDto" Property="TargetShelfName" Title="Hedef Raf" />
+                <RadzenDataGridColumn TItem="TransferItemDto" Title="Miktar" Width="180px" TextAlign="TextAlign.Center">
+                    <Template Context="item">
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <RadzenNumeric TValue="decimal" @bind-Value="@item.Quantity" Min="0.01m" ShowUpDown="false" Style="width: 100px;" />
+                            @if (isEditMode)
+                            {
+                                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" 
+                                              Click="@(() => UpdateItemQuantity(item))" title="Kaydet" />
+                            }
+                        </div>
+                    </Template>
+                    <FooterTemplate>
+                        Toplam: <b>@transferItems.Sum(x => x.Quantity)</b>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="TransferItemDto" Title="İşlem" Width="80px" TextAlign="TextAlign.Center">
+                    <Template Context="item">
+                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Click="@(() => RemoveItem(item))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="col-md-12 mt-4 d-flex justify-content-end gap-2">
+        <RadzenButton Text="Vazgeç" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Click="@(() => DialogService.Close(false))" />
+        @if (!isEditMode)
+        {
+            <RadzenButton Text="Tümünü Transfer Et" Icon="done_all" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Click="@ExecuteTransfer" Disabled="@(!transferItems.Any())" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid? BatchId { get; set; }
+    
+    // ---- Main Data ----
+    IEnumerable<WarehouseListDto> warehouses;
+    IEnumerable<ProductListDto> products;
+    int productCount;
+    RadzenDataGrid<TransferItemDto> transferGrid;
+    Guid batchId = Guid.NewGuid(); // Unique ID for this transfer batch
+    bool isEditMode => BatchId.HasValue;
+    
+    // ---- User Selections ----
+    int sourceWarehouseId;
+    int targetWarehouseId;
+
+    // ---- Temp Item Entry Variables ----
+    int tempSelectedProductId;
+    string tempSelectedProductName; // Store name to display in grid without lookup
+    int tempSelectedSourceShelfId;
+    string tempSelectedSourceShelfName;
+    int tempSelectedTargetShelfId;
+    string tempSelectedTargetShelfName;
+    int tempSelectedSourceStockQuantity;
+    decimal tempTransferQuantity = 1;
+
+    // ---- Lists ----
+    class DropdownItem { public int Value { get; set; } public string Display { get; set; } }
+    List<DropdownItem> tempSourceShelves = new(); // Re-loaded when product changes
+    List<DropdownItem> targetShelves = new(); // Re-loaded when target warehouse changes
+
+    // ---- Transfer List ----
+    class TransferItemDto 
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public int LogId { get; set; } // ID from StockTransferLog table
+        public int ProductId { get; set; }
+        public string ProductName { get; set; }
+        public int SourceShelfId { get; set; }
+        public string SourceShelfName { get; set; }
+        public int TargetShelfId { get; set; }
+        public string TargetShelfName { get; set; }
+        public decimal Quantity { get; set; }
+    }
+    List<TransferItemDto> transferItems = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWarehouses();
+        
+        if (isEditMode && BatchId.HasValue)
+        {
+            // Load existing batch data
+            batchId = BatchId.Value;
+            Console.WriteLine($"Edit mode: Loading batch {batchId}");
+            
+            var result = await StockService.GetTransferLogsByBatchId(batchId);
+            
+            Console.WriteLine($"Result OK: {result.Ok}, Count: {result.Result?.Count ?? 0}");
+            
+            if (result.Ok && result.Result != null && result.Result.Any())
+            {
+                Console.WriteLine($"Loading {result.Result.Count} items");
+                
+                // Get warehouse IDs from first item
+                var firstItem = result.Result.First();
+                sourceWarehouseId = firstItem.SourceWarehouseId;
+                targetWarehouseId = firstItem.TargetWarehouseId;
+                
+                Console.WriteLine($"Source warehouse ID: {sourceWarehouseId}");
+                Console.WriteLine($"Target warehouse ID: {targetWarehouseId}");
+                
+                // Populate transferItems from existing logs
+                foreach (var log in result.Result)
+                {
+                    Console.WriteLine($"Adding item: {log.ProductName}, Qty: {log.Quantity}");
+                    
+                    transferItems.Add(new TransferItemDto
+                    {
+                        LogId = log.Id,
+                        ProductId = log.ProductId, 
+                        ProductName = log.ProductName,
+                        SourceShelfId = log.SourceShelfId, 
+                        SourceShelfName = log.SourceShelfCode,
+                        TargetShelfId = log.TargetShelfId, 
+                        TargetShelfName = log.TargetShelfCode,
+                        Quantity = log.Quantity
+                    });
+                }
+                
+                Console.WriteLine($"Total items in list: {transferItems.Count}");
+                
+                // In edit mode, warehouses are already set from the batch
+                // User can only modify quantities, not source/target
+            }
+            else
+            {
+                Console.WriteLine("No items found or result not OK");
+                if (!result.Ok)
+                {
+                    Console.WriteLine($"Service returned not OK");
+                }
+            }
+        }
+    }
+
+    async Task LoadWarehouses()
+    {
+        var result = await WarehouseService.GetAllWarehouses();
+        if (result.Ok)
+        {
+            warehouses = result.Result;
+        }
+    }
+
+    async Task LoadProducts(LoadDataArgs args)
+    {
+        var filter = !string.IsNullOrEmpty(args.Filter) ? $"Name.Contains(\"{args.Filter}\")" : "";
+        var pager = new PageSetting(filter, args.OrderBy, args.Skip, args.Top);
+        var result = await ProductService.GetProducts(pager);
+        if (result.Ok)
+        {
+            products = result.Result.Data;
+            productCount = result.Result.DataCount;
+        }
+    }
+
+    async Task OnSourceWarehouseChange()
+    {
+       
+        ResetTempFields();
+    }
+
+    async Task OnTargetWarehouseChange()
+    {
+        targetShelves.Clear();
+        if(targetWarehouseId != 0)
+        {
+             var result = await ShelfService.GetShelvesByWarehouse(targetWarehouseId);
+             if(result.Ok)
+             {
+                 targetShelves = result.Result
+                    .Select(x => new DropdownItem 
+                    { 
+                        Value = x.Id, 
+                        Display = string.IsNullOrEmpty(x.Description) ? x.Code : $"{x.Code} - {x.Description}"
+                    })
+                    .ToList();
+             }
+        }
+    }
+
+    async Task OnProductChange()
+    {
+        tempSourceShelves.Clear();
+        tempSelectedSourceShelfId = 0;
+        tempSelectedSourceStockQuantity = 0;
+        tempTransferQuantity = 1;
+
+        if (tempSelectedProductId != 0 && sourceWarehouseId != 0)
+        {
+             var product = products.FirstOrDefault(x => x.Id == tempSelectedProductId);
+             if(product != null) tempSelectedProductName = product.Name;
+
+             var result = await StockService.GetStocksByProduct(tempSelectedProductId);
+             if (result.Ok)
+             {
+                tempSourceShelves = result.Result
+                    .Where(x => x.ShelfWarehouseId == sourceWarehouseId && x.Quantity > 0)
+                    .Select(x => new DropdownItem 
+                    { 
+                        Value = x.WarehouseShelfId, 
+                        Display = $"{x.ShelfCode} (Adet: {x.Quantity})" 
+                    })
+                    .ToList();
+             }
+        }
+    }
+
+    async Task OnSourceShelfChange()
+    {
+        if(tempSelectedSourceShelfId != 0 && tempSelectedProductId != 0)
+        {
+             var result = await StockService.GetStocksByProduct(tempSelectedProductId);
+             if(result.Ok)
+             {
+                 var stock = result.Result.FirstOrDefault(x => x.WarehouseShelfId == tempSelectedSourceShelfId);
+                 if(stock != null)
+                 {
+                     tempSelectedSourceStockQuantity = stock.Quantity;
+                     tempSelectedSourceShelfName = stock.ShelfCode;
+                     tempTransferQuantity = 1;
+                 }
+             }
+        }
+    }
+
+    bool CanAddItem => tempSelectedProductId != 0 && tempSelectedSourceShelfId != 0 
+                     && tempSelectedTargetShelfId != 0 && tempTransferQuantity > 0 
+                     && tempTransferQuantity <= tempSelectedSourceStockQuantity
+                     && tempSelectedSourceShelfId != tempSelectedTargetShelfId;
+
+    async Task AddItemToTransferList()
+    {
+        if(!CanAddItem)
+        {
+            var message = "Eksik bilgi: Ürün=" + tempSelectedProductId + ", Kaynak Raf=" + tempSelectedSourceShelfId + ", Hedef Raf=" + tempSelectedTargetShelfId + ", Miktar=" + tempTransferQuantity + "/" + tempSelectedSourceStockQuantity;
+            NotificationService.Notify(NotificationSeverity.Warning, "Uyarı", message);
+            return;
+        }
+
+        // Get target shelf name
+        var targetShelf = targetShelves.FirstOrDefault(x => x.Value == tempSelectedTargetShelfId);
+        tempSelectedTargetShelfName = targetShelf?.Display ?? "-";
+
+        var newItem = new TransferItemDto
+        {
+            ProductId = tempSelectedProductId,
+            ProductName = tempSelectedProductName ?? "Bilinmeyen Ürün",
+            SourceShelfId = tempSelectedSourceShelfId,
+            SourceShelfName = tempSelectedSourceShelfName ?? "Bilinmeyen Raf",
+            TargetShelfId = tempSelectedTargetShelfId,
+            TargetShelfName = tempSelectedTargetShelfName,
+            Quantity = tempTransferQuantity
+        };
+        
+        transferItems.Add(newItem);
+        
+        var successMessage = newItem.ProductName + " listeye eklendi. Toplam: " + transferItems.Count;
+        NotificationService.Notify(NotificationSeverity.Success, "Eklendi", successMessage);
+
+        // Reset Entry fields only
+        tempSelectedProductId = 0;
+        tempSelectedSourceShelfId = 0;
+        tempSelectedTargetShelfId = 0;
+        tempSelectedSourceStockQuantity = 0;
+        tempTransferQuantity = 1;
+        tempSourceShelves.Clear();
+        
+        StateHasChanged(); // Force UI update
+        await InvokeAsync(StateHasChanged);
+        if(transferGrid != null) await transferGrid.Reload();
+    }
+
+    void RemoveItem(TransferItemDto item)
+    {
+        transferItems.Remove(item);
+        StateHasChanged();
+    }
+
+    void ResetTempFields()
+    {
+        tempSelectedProductId = 0;
+        tempSelectedSourceShelfId = 0;
+        tempSelectedTargetShelfId = 0;
+        tempSelectedSourceStockQuantity = 0;
+        tempTransferQuantity = 1;
+        tempSourceShelves.Clear();
+    }
+
+    async Task ExecuteTransfer()
+    {
+        if (!transferItems.Any()) return;
+
+        // Process each item
+        // Ideally we should have a BatchTransfer endpoint, but for now we loop.
+        int successCount = 0;
+        int failCount = 0;
+
+        foreach(var item in transferItems)
+        {
+             var model = new AuditWrapDto<ProductStockTransferDto>
+             {
+                 UserId = Security.User?.Id ?? 0, 
+                 Dto = new ProductStockTransferDto
+                 {
+                     ProductId = item.ProductId,
+                     SourceShelfId = item.SourceShelfId,
+                     TargetShelfId = item.TargetShelfId,
+                     Quantity = item.Quantity,
+                     BatchId = batchId
+                 }
+             };
+
+             var result = await StockService.TransferStock(model);
+             if(result.Ok) successCount++;
+             else failCount++;
+        }
+
+        if(failCount == 0)
+        {
+            var message = successCount + " kalem ürün transfer edildi.";
+            NotificationService.Notify(NotificationSeverity.Success, "Başarılı", message);
+            DialogService.Close(true);
+        }
+        else
+        {
+            var message = successCount + " başarılı, " + failCount + " başarısız işlem.";
+            NotificationService.Notify(NotificationSeverity.Warning, "Kısmi Başarı", message);
+            DialogService.Close(true); // Close anyway for now
+        }
+    }
+
+    async Task UpdateItemQuantity(TransferItemDto item)
+    {
+        if (item.LogId == 0) 
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Hata", "Log ID bulunamadı.");
+            return;
+        }
+
+        var userId = Security.User?.Id ?? 0;
+        var result = await StockService.UpdateTransferLogQuantity(item.LogId, item.Quantity, userId);
+
+        if (result.Ok)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Güncellendi", "Miktar başarıyla güncellendi.");
+        }
+        else
+        {
+             NotificationService.Notify(NotificationSeverity.Error, "Hata", result.Metadata?.Message ?? "İşlem başarısız.");
+        }
+    }
+}

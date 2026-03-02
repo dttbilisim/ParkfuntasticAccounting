@@ -1,0 +1,35 @@
+﻿@page "/upsert-tier"
+@using ecommerce.Admin.Domain.Dtos.TierDto;
+@attribute [Authorize]
+
+<PageTitle>Ürün Grubu</PageTitle>
+<div class="col-md-12">
+    <RadzenTemplateForm TItem="TierUpsertDto" Data="@tier" Visible="@(tier != null)" Submit="@FormSubmit">
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Ürün Grup Adı" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@tier.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="Ürün Grup Adı Girmelisiniz" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+

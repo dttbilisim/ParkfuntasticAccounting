@@ -1,0 +1,184 @@
+@page "/register"
+@using ecommerce.Core.Utils
+
+
+<section class="breadcrumb-section pt-0">
+    <div class="container-fluid-lg">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-contain">
+                    <h2>@lang["Register"]</h2>
+                    <nav>
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href=" /">
+                                    <i class="fa-solid fa-house"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@lang["Register"]</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="log-in-section section-b-space">
+    <div class="container-fluid-lg w-100">
+        <div class="row">
+            <div class="col-xxl-6 col-xl-5 col-lg-6 d-lg-block d-none ms-auto">
+                <div class="image-contain">
+                    <img src="../assets/images/inner-page/sign-up.png" class="img-fluid" alt="">
+                </div>
+            </div>
+
+            <div class="col-xxl-4 col-xl-5 col-lg-6 col-sm-8 mx-auto">
+                <div class="log-in-box">
+                    <div class="col-12 mb-4">
+                        <ul class="nav nav-pills nav-fill" id="registerTab">
+                            <li class="nav-item">
+                                <a class="nav-link @(SelectedType == WebUserType.B2C ? "active bg-success text-white" : "text-dark")"
+                                   href="javascript:void(0);"
+                                   @onclick="() => SelectUserType(WebUserType.B2C)">
+                                 @lang["RegisterB2C"]
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(SelectedType == WebUserType.B2B ? "active bg-success text-white" : "text-dark")"
+                                   href="javascript:void(0);"
+                                   @onclick="() => SelectUserType(WebUserType.B2B)">
+                                    @lang["RegisterB2B"]
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="log-in-title">
+                        <h3>@lang["RegisterContent"]</h3>
+                        <h4>@lang["RegisterSubtitle"]</h4>
+                    </div>
+
+                    <div class="input-box">
+                        <EditForm class="row g-4" Model="@_user" OnValidSubmit="@RegisterUser">
+                        
+                            <FluentValidationValidator/>
+                        
+
+                            <div class="col-12">
+                                <div class="form-floating theme-form-floating">
+                                    <InputText type="text" class="form-control" id="firstname" @bind-Value="_user.FirstName" placeholder="İsim"/>
+                                    <label for="firstname">@lang["RegisterFirstName"]</label>
+                                </div>
+                                <ValidationMessage For="@(() => _user.FirstName)" class="text-danger small mt-1"/>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating theme-form-floating">
+                                    <InputText type="text" class="form-control" id="lastname" @bind-Value="_user.LastName" placeholder="Soyisim"/>
+                                    <label for="lastname">@lang["RegisterLastName"]</label>
+                                </div>
+                                <ValidationMessage For="@(() => _user.LastName)" class="text-danger small mt-1"/>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating theme-form-floating">
+                                    <InputText type="email" class="form-control" id="email" @bind-Value="_user.Email" placeholder="E-posta Adresi"/>
+                                    <label for="email">@lang["RegisterMail"]</label>
+                                </div>
+                                <ValidationMessage For="@(() => _user.Email)" class="text-danger small mt-1"/>
+                            </div>
+
+                            <div class="col-12 position-relative">
+                                <div class="form-floating theme-form-floating">
+                                    <InputText type="@(showPassword ? "text" : "password")"
+                                               class="form-control pe-5"
+                                               id="password"
+                                               @bind-Value="_user.PasswordHash"
+                                               placeholder="Şifre"/>
+                                    <label for="password">@lang["RegisterPassword"]</label>
+                                </div>
+                                <button type="button"
+                                        class="btn btn-sm btn-light position-absolute end-0 top-50 translate-middle-y me-2"
+                                        @onclick="() => showPassword = !showPassword"
+                                        style="z-index: 2;">
+                                    <i class="fa-solid @(showPassword ? "fa-eye-slash" : "fa-eye")"></i>
+                                </button>
+                                <ValidationMessage For="@(() => _user.PasswordHash)" class="text-danger small mt-1"/>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating theme-form-floating log-in-form">
+                                    <InputText type="tel" class="form-control" id="phone" @bind-Value="_user.PhoneNumber" placeholder="Telefon Numarası" />
+                                    <label for="phone">@lang["PhoneNumber"]</label>
+                                    <ValidationMessage For="@(() => _user.PhoneNumber)" />
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating theme-form-floating log-in-form">
+                                    <RadzenDatePicker @bind-Value="_user.BirthDate" 
+                                                      DateFormat="d" 
+                                                      Placeholder="@lang["BirthDate"]" 
+                                                      Class="w-100" 
+                                                      Name="BirthDate" />
+                                    <label for="birthdate" class="d-none">@lang["BirthDate"]</label>
+                                    <ValidationMessage For="@(() => _user.BirthDate)" />
+                                </div>
+                            </div>
+
+
+                            @if (_user.WebUserType == WebUserType.B2B)
+                            {
+                                <div class="col-12">
+                                    <div class="form-floating theme-form-floating">
+                                        <InputText class="form-control" id="companyName" @bind-Value="_user.CompanyName" placeholder="Firma Adı"/>
+                                        <label for="companyName">@lang["RegisterCompanyName"]</label>
+                                    </div>
+                                    <ValidationMessage For="@(() => _user.CompanyName)" class="text-danger small mt-1"/>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-floating theme-form-floating">
+                                        <InputText class="form-control" id="taxOffice" @bind-Value="_user.VatOffice" placeholder="Vergi Dairesi"/>
+                                        <label for="taxOffice">@lang["VatOffice"]</label>
+                                    </div>
+                                    <ValidationMessage For="@(() => _user.VatOffice)" class="text-danger small mt-1"/>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-floating theme-form-floating">
+                                        <InputText class="form-control" id="taxNumber" @bind-Value="_user.VatNumber" placeholder="Vergi Numarası"/>
+                                        <label for="taxNumber">@lang["VatNumber"]</label>
+                                    </div>
+                                    <ValidationMessage For="@(() => _user.VatNumber)" class="text-danger small mt-1"/>
+                                </div>
+                            }
+
+                            @* <div class="col-12"> *@
+                            @*     <div class="forgot-box"> *@
+                            @*         <div class="form-check ps-0 m-0 remember-box"> *@
+                            @*             <InputCheckbox class="checkbox_animated check-box" @bind-Value="_user.AcceptTerms" id="flexCheckDefault" /> *@
+                            @*             <label class="form-check-label" for="flexCheckDefault">Kullanım Koşulları ve Gizlilik Politikası'nı kabul ediyorum</label> *@
+                            @*         </div> *@
+                            @*     </div> *@
+                            @* </div> *@
+
+                            <div class="col-12">
+                                <button class="btn btn-animation w-100" type="submit">@lang["Register"]</button>
+                            </div>
+                        </EditForm>
+                    </div>
+
+
+                    <div class="sign-up-box">
+                        <h4>@lang["RegisterLogin"]</h4>
+                        <a href="/login">@lang["RegisterLogin2"]</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xxl-7 col-xl-6 col-lg-6"></div>
+        </div>
+    </div>
+</section>
+

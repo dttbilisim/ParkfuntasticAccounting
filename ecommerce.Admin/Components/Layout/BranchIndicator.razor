@@ -1,0 +1,43 @@
+@using ecommerce.Admin.Services.Concreate
+@implements IDisposable
+
+@if (isMultiTenant && currentBranch != null)
+{
+    <div class="branch-indicator-container">
+        <button type="button" 
+                class="branch-indicator-btn @(isDropdownOpen ? "active" : "")" 
+                @onclick="ToggleDropdown"
+                title="Şube Seç">
+            <i class="fa-solid fa-building"></i>
+            <span class="branch-name">@currentBranch.Value.Name</span>
+            <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+        </button>
+
+        @if (isDropdownOpen && userBranches.Any())
+        {
+            <div class="branch-dropdown">
+                <div class="branch-dropdown-header">
+                    <i class="fa-solid fa-building"></i>
+                    <span>Şube Seçimi</span>
+                </div>
+                <div class="branch-list">
+                    @foreach (var branch in userBranches)
+                    {
+                        <button type="button" 
+                                class="branch-item @(branch.Id == currentBranch.Value.Id ? "active" : "")"
+                                @onclick="() => SwitchBranch(branch.Id)"
+                                disabled="@(branch.Id == currentBranch.Value.Id)">
+                            <i class="fa-solid @(branch.Id == currentBranch.Value.Id ? "fa-check-circle" : "fa-circle")"></i>
+                            <span>@branch.Name</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (isDropdownOpen)
+    {
+        <div class="branch-dropdown-backdrop" @onclick="CloseDropdown"></div>
+    }
+}

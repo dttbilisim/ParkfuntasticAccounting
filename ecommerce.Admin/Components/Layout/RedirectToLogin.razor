@@ -1,0 +1,27 @@
+@inject NavigationManager NavigationManager
+
+@code {
+    [Parameter]
+    public bool IsAuthenticated { get; set; }
+ 
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!IsAuthenticated)
+        {
+            var redirectUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            if (!string.IsNullOrEmpty(redirectUrl))
+            {
+                NavigationManager.NavigateTo($"Login?redirectUrl={Uri.EscapeDataString(redirectUrl)}", false);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("Login", false);
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/error-403", true);
+        }
+    }
+}

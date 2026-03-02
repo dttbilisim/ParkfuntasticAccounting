@@ -1,0 +1,38 @@
+@using ecommerce.Admin.Components.Layout
+@layout MainLayout
+
+<RadzenTemplateForm TItem="ecommerce.Domain.Shared.Dtos.Bank.BankDto.BankUpsertDto" Data="model" Submit="Save">
+    <RadzenFieldset Text="Banka Bilgileri">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <RadzenTextBox @bind-Value="model.Name" Name="Name" Placeholder="Banka Adı" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox @bind-Value="model.SystemName" Name="SystemName" Placeholder="Sistem Adı" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenNumeric @bind-Value="model.BankCode" Name="BankCode" Placeholder="Banka Kodu" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox @bind-Value="model.LogoPath" Name="LogoPath" Placeholder="Logo Yolu" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.UseCommonPaymentPage" TValue="bool" />
+                <label class="ms-2">Ortak Ödeme Sayfası Kullan</label>
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.DefaultBank" TValue="bool" />
+                <label class="ms-2">Varsayılan Banka</label>
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.Active" TValue="bool" />
+                <label class="ms-2">Aktif</label>
+            </div>
+        </div>
+    </RadzenFieldset>
+
+    <div class="d-flex justify-content-end mt-3">
+        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Kapat" Click="Close" Style="margin-right:8px" />
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" Icon="save" />
+    </div>
+</RadzenTemplateForm>

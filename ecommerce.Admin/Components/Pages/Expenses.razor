@@ -1,0 +1,104 @@
+@page "/expenses"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.ExpenseDto
+@using ecommerce.Core.Extensions
+@using ecommerce.Core.Utils
+@using Radzen
+@using Radzen.Blazor
+@attribute [Authorize]
+
+<PageTitle>Gider Tanımları</PageTitle>
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+            <RadzenText Text="Gider Tanımları" TextStyle="TextStyle.H5" style="color:#598087" class="mt-2" />
+        </div>
+    </div>
+</RadzenCard>
+
+<div class="row mb-3">
+    <div class="col-md-12 d-flex justify-content-between">
+        <div></div>
+        <div class="d-flex gap-2">
+            <RadzenButton Icon="add_circle_outline"
+                          Text="Yeni Ana Gider Tanımı"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Click="@AddMainClick" />
+            <RadzenButton Icon="add_circle_outline"
+                          Text="Seçili Ana İşleme Alt Gider Ekle"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Click="@AddSubClick"
+                          Disabled="@(SelectedMainIdForGrid == null)" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <RadzenCard>
+            <RadzenHeading Size="H6" Text="Ana İşlemler" />
+            <RadzenDataGrid TItem="ExpenseDefinitionListDto"
+                            Data="@MainExpenses"
+                            RowSelect="@OnMainRowSelect"
+                            AllowPaging="true"
+                            PageSize="20"
+                            AllowSorting="true"
+                            Density="Density.Compact">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Property="Id" Title="ID" Width="70px" />
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Property="OperationType" Title="İşlem Tipi" Width="160px">
+                        <Template Context="item">
+                            @item.OperationType.GetDisplayName()
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Property="Name" Title="Ana İşlem Adı" />
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Title="İşlemler" Width="140px" Filterable="false" Sortable="false">
+                        <Template Context="item">
+                            <RadzenButton Icon="edit"
+                                          ButtonStyle="ButtonStyle.Light"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Click="@((args) => EditMainAsync(item))" style="margin-right:4px" />
+                            <RadzenButton Icon="delete"
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Click="@((args) => DeleteExpenseAsync(item.Id))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenCard>
+    </div>
+    <div class="col-md-6">
+        <RadzenCard>
+            <RadzenHeading Size="H6" Text="Alt İşlemler" />
+            <RadzenDataGrid TItem="ExpenseDefinitionListDto"
+                            Data="@SubExpenses"
+                            RowSelect="@OnSubRowSelect"
+                            AllowPaging="true"
+                            PageSize="20"
+                            AllowSorting="true"
+                            Density="Density.Compact">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Property="Id" Title="ID" Width="70px" />
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Property="ParentName" Title="Ana İşlem" Width="200px" />
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Property="Name" Title="Alt İşlem Adı" />
+                    <RadzenDataGridColumn TItem="ExpenseDefinitionListDto" Title="İşlemler" Width="140px" Filterable="false" Sortable="false">
+                        <Template Context="item">
+                            <RadzenButton Icon="edit"
+                                          ButtonStyle="ButtonStyle.Light"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Click="@((args) => EditSubAsync(item))" style="margin-right:4px" />
+                            <RadzenButton Icon="delete"
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Click="@((args) => DeleteExpenseAsync(item.Id))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenCard>
+    </div>
+</div>
+
+

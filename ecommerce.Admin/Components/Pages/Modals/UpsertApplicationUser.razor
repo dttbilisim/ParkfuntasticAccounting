@@ -1,0 +1,177 @@
+﻿@using ecommerce.Admin.Domain.Dtos.Identity
+
+<PageTitle>Kullanıcı Ekle/Düzenle</PageTitle>
+
+<RadzenTabs>
+    <Tabs>
+        <!-- Tab 1: User Information -->
+        <RadzenTabsItem Text="Kullanıcı Bilgileri">
+            <RadzenTemplateForm TItem="IdentityUserUpsertDto" Data="@EditingEntity" Visible="@(Id == EditingEntity.Id)" Submit="@FormSubmit" InvalidSubmit="@ShowErrors">
+                <RadzenFluentValidator @ref="IdentityUserValidatorRef" Validator="@IdentityUserValidator"/>
+
+                <RadzenStack>
+                    <RadzenFormField Text="Kullanıcı Adı" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@EditingEntity.UserName" ReadOnly="@(EditingEntity.UserName == Domain.Concreate.IdentityUserService.DefaultAdminUserName)" class="w-100" AutoComplete="false"/>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.UserName)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Email" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@EditingEntity.Email" class="w-100"/>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.Email)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Ad" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@EditingEntity.FirstName" class="w-100"/>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.FirstName)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Soyad" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@EditingEntity.LastName" class="w-100"/>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.LastName)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Telefon" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@EditingEntity.PhoneNumber" class="w-100"/>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.PhoneNumber)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Şifre" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenPassword @bind-Value="@EditingEntity.Password" Name="Password" class="w-100" AutoComplete="false"/>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.Password)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Şifre Tekrar" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenPassword @bind-Value="@EditingEntity.PasswordConfirm" Name="ConfirmPassword" class="w-100" AutoComplete="false"/>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.PasswordConfirm)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Roller" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenDropDown @bind-Value="@EditingEntity.Roles" Data="@Roles" Multiple="true" TextProperty="@nameof(IdentityRoleListDto.Name)" ValueProperty="@nameof(IdentityRoleListDto.Id)" class="w-100" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => EditingEntity.Roles)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Plasiyer" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenDropDown @bind-Value="@EditingEntity.SalesPersonId" Data="@SalesPersons" ValueProperty="Id" AllowClear="true" Placeholder="Plasiyer Seçiniz..." class="w-100" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                                <Template Context="salesPerson">
+                                    @($"{salesPerson.FirstName} {salesPerson.LastName}".Trim())
+                                </Template>
+                            </RadzenDropDown>
+                        </ChildContent>
+                    </RadzenFormField>
+                </RadzenStack>
+
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" BusyText="Kaydediliyor..." IsBusy="Saving" Variant="Variant.Flat" class="rz-mr-1"/>
+                </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenTabsItem>
+
+
+
+        <!-- Tab 3: Branch Assignments -->
+        <RadzenTabsItem Text="Şube Atamaları">
+            <RadzenStack Gap="1rem" class="rz-p-4">
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-2">Kullanıcının erişebileceği şubeleri seçin</RadzenText>
+                
+                <!-- Add Branch Section -->
+                <RadzenCard>
+                    <RadzenStack Gap="1rem">
+                        <RadzenRow AlignItems="AlignItems.End">
+                            <RadzenColumn Size="12" SizeMD="5">
+                                <RadzenLabel Text="Şirket" />
+                                <RadzenDropDown @bind-Value="@SelectedCorporationId" Data="@Corporations" TextProperty="Name" ValueProperty="Id"
+                                                Placeholder="Şirket Seçiniz" Style="width: 100%" AllowClear="true" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="5">
+                                <RadzenLabel Text="Şube" />
+                                <RadzenDropDown @bind-Value="@SelectedBranchId" Data="@FilteredBranches" TextProperty="Name" ValueProperty="Id"
+                                                Placeholder="Şube Seçiniz" Style="width: 100%" 
+                                                Disabled="@(!SelectedCorporationId.HasValue)" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="2">
+                                <RadzenButton Text="Ekle" Icon="add" ButtonStyle="ButtonStyle.Success" Click="@AddBranch" 
+                                              Style="width: 100%" Disabled="@(!SelectedBranchId.HasValue)" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+                </RadzenCard>
+
+                <!-- Assigned Branches List -->
+                @if (EditingEntity.Branches.Count > 0)
+                {
+                    <RadzenCard>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-3">Atanmış Şubeler</RadzenText>
+                        <RadzenDataGrid Data="@EditingEntity.Branches" TItem="ecommerce.Admin.Domain.Dtos.HierarchicalDto.UserBranchUpsertDto" 
+                                        AllowPaging="false" AllowSorting="false">
+                            <Columns>
+                                <RadzenDataGridColumn TItem="ecommerce.Admin.Domain.Dtos.HierarchicalDto.UserBranchUpsertDto" Title="Şube" Width="400px">
+                                    <Template Context="branch">
+                                        @GetBranchDisplayName(branch.BranchId)
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="ecommerce.Admin.Domain.Dtos.HierarchicalDto.UserBranchUpsertDto" Title="Varsayılan" Width="120px" TextAlign="TextAlign.Center">
+                                    <Template Context="branch">
+                                        <RadzenRadioButtonList @bind-Value="@branch.IsDefault" TValue="bool" 
+                                                               Change="@(() => SetDefaultBranch(branch.BranchId))">
+                                            <Items>
+                                                <RadzenRadioButtonListItem Text="" TValue="bool" Value="true" Disabled="@branch.IsDefault" />
+                                            </Items>
+                                        </RadzenRadioButtonList>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="ecommerce.Admin.Domain.Dtos.HierarchicalDto.UserBranchUpsertDto" Title="İşlem" Width="100px" TextAlign="TextAlign.Center">
+                                    <Template Context="branch">
+                                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" 
+                                                      Click="@(() => RemoveBranch(branch.BranchId))" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenCard>
+                }
+                else
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter">
+                        Henüz şube ataması yapılmamış. Yukarıdaki formu kullanarak şube ekleyebilirsiniz.
+                    </RadzenAlert>
+                }
+
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="save" Text="Şube Atamalarını Kaydet" 
+                                  Click="@SaveBranchAssignments" BusyText="Kaydediliyor..." IsBusy="SavingBranches" Variant="Variant.Flat"/>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>

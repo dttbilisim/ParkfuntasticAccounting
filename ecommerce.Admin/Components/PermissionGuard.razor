@@ -1,0 +1,72 @@
+@using System.Security.Claims
+@using ecommerce.Admin.Services.Interfaces
+@inject IPermissionService PermissionService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+
+@if (IsAuthorized)
+{
+    @ChildContent
+}
+else if (IsLoading)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger m-4">
+        <h4>Erişim Reddedildi</h4>
+        <p>Bu sayfayı görüntülemek için yetkiniz bulunmamaktadır.</p>
+    </div>
+}
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RouteData RouteData { get; set; }
+
+    private bool IsAuthorized { get; set; } = false;
+    private bool IsLoading { get; set; } = true;
+    
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+        IsAuthorized = false;
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user == null || !user.Identity.IsAuthenticated)
+            {
+                // If not authenticated, let the parent AuthorizeRouteView handle it (likely redirecting to login)
+                // OR if the page is truly public, allow it.
+                // Assuming this component is INSIDE <Authorized>, user should be authenticated.
+                // But if used globally, we might be here even if anonymous (if page has no [Authorize]).
+                IsAuthorized = true; 
+            }
+            else
+            {
+                 // User is authenticated, check Database permissions
+                 var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+                 IsAuthorized = await PermissionService.HasPermission(relativePath, user);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Permission Check Error: {ex.Message}");
+            IsAuthorized = false; // Fail safe
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}

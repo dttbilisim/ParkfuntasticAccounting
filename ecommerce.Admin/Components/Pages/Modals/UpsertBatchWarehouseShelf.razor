@@ -1,0 +1,102 @@
+@page "/upsert-batch-shelf"
+@using ecommerce.Admin.Domain.Dtos.WarehouseShelfDto
+@attribute [Authorize]
+
+<PageTitle>Toplu Raf Oluştur</PageTitle>
+
+<RadzenStack Gap="1.5rem" Class="rz-p-4">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">
+        Raflar Oluşturulamadı!
+    </RadzenAlert>
+
+    <RadzenText TextStyle="TextStyle.Body1" class="mb-4">
+        Belirtilen aralıkta otomatik olarak raf kodları oluşturulacaktır.<br />
+        Örnek: Ön Ek: A-, Başlangıç: 1, Bitiş: 10 => A-1, A-2 ... A-10
+    </RadzenText>
+
+    <RadzenTemplateForm TItem="WarehouseShelfBatchCreateDto" Data="@dto" Visible="@(dto != null)" Submit="@FormSubmit">
+        <RadzenStack Gap="1rem">
+            @* Ön Ek *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Ön Ek" Component="Prefix" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Name="Prefix" @bind-Value="@dto.Prefix" Style="width: 100%" Placeholder="Örn: A-" Change="@((string args) => OnChange(args))" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Başlangıç *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Başlangıç No" Component="StartNumber" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenNumeric Name="StartNumber" @bind-Value="@dto.StartNumber" Style="width: 100%" Min="1" Change="@((int args) => OnChange(args))" />
+                    <RadzenRequiredValidator Component="StartNumber" Text="Başlangıç gereklidir" Style="display: block; font-size: 0.8rem;" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Bitiş *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Bitiş No" Component="EndNumber" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenNumeric Name="EndNumber" @bind-Value="@dto.EndNumber" Style="width: 100%" Min="@dto.StartNumber" Change="@((int args) => OnChange(args))" />
+                    <RadzenRequiredValidator Component="EndNumber" Text="Bitiş gereklidir" Style="display: block; font-size: 0.8rem;" />
+                    <RadzenCompareValidator Visible="@(dto.EndNumber > 0)" Value="@dto.StartNumber" Component="EndNumber" Operator="CompareOperator.GreaterThanEqual" Text="Bitiş >= Başlangıç olmalı" Style="display: block; font-size: 0.8rem;" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Son Ek *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Son Ek" Component="Suffix" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Name="Suffix" @bind-Value="@dto.Suffix" Style="width: 100%" Placeholder="Örn: -Zemin" Change="@((string args) => OnChange(args))" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Açıklama *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Açıklama" Component="Description" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Name="Description" @bind-Value="@dto.Description" Style="width: 100%" Placeholder="Örn: Yağlar" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Önizleme *@
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenCard Variant="Variant.Flat" Style="background-color: var(--rz-base-background-color); border: 1px dashed var(--rz-base-300);">
+                        <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-mb-1">Önizleme:</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" Style="font-weight: bold; color: var(--rz-primary);">@PreviewText</RadzenText>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Durum *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Durum" Component="Status" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox Name="Status" @bind-Value="@Status" />
+                        <RadzenLabel Text="Aktif" Component="Status" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Buttons *@
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="1rem" Class="rz-mt-4">
+                <RadzenButton Text="Vazgeç" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Click="@CancelButtonClick" />
+                <RadzenButton Text="Oluştur" ButtonType="ButtonType.Submit" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>

@@ -1,0 +1,62 @@
+    <div class="modal-blur-backdrop"></div>
+    <div class="modal fade theme-modal view-modal show" id="view" tabindex="-1" aria-modal="true" role="dialog" style="display: block; padding-left: 0px;">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header p-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" @onclick="CloseModal">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-sm-4 g-2">
+                        <div class="col-lg-6">
+                            <div class="slider-image">
+                                <img src="@(
+                                    EditableProduct?.Images?.FirstOrDefault()?.FileGuid != null ? $"{CdnConfig.BaseUrl}/ProductImages/{EditableProduct.Images.First().FileGuid}" :
+                                    EditableProduct?.Images?.FirstOrDefault()?.FileName != null ? $"{CdnConfig.BaseUrl}/ProductImages/{EditableProduct.Images.First().FileName}" : 
+                                    "assets/images/product/category/4.jpg")" 
+                                    class="img-fluid blur-up lazyload" alt="@EditableProduct.ProductName">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 h-100">
+                            <div class="right-sidebar-modal d-flex flex-column h-100">
+                                <h4 class="title-name">@EditableProduct.ProductName</h4>
+                                <h4 class="price">@EditableProduct?.SalePrice.ToString("C")</h4>
+                                <div class="product-rating">
+                                  
+                                </div>
+
+                                <div class="product-detail">
+                                    <h4>@lang["ProductDetails"]</h4>
+                                    <p>@EditableProduct?.ProductDescription</p>
+                                </div>
+
+                                <ul class="brand-list">
+                                    <li>
+                                        <div class="brand-box">
+                                            <h5>@lang["BrandName"]</h5>
+                                            <h6>@EditableProduct?.Brand?.Name</h6>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="brand-box">
+                                            <h5>@lang["ProductCode"]</h5>
+                                            <h6>@EditableProduct?.PartNumber</h6>
+                                            </div>
+                                    </li>
+                                </ul>
+                                <div class="modal-button">
+                                    <button @onclick="HandleAddToCart" class="btn btn-md add-cart-button icon">@lang["AddToCart"]</button>
+                                    <a class="btn theme-bg-color view-button icon text-white fw-bold btn-md"
+                                       href="/product-detail?productId=@EditableProduct?.SellerItemId&brandId=@EditableProduct?.Brand?.Id">
+                                        @lang["ViewMoreDetails"]
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

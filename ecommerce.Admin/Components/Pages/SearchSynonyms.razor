@@ -1,0 +1,107 @@
+@page "/search-synonyms"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.SearchSynonymDto
+@using ecommerce.Admin.Resources
+@using ecommerce.Core.Utils
+@using ecommerce.Core.Helpers
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Arama Eş Anlamlıları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Arama Eş Anlamlıları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click="@EditBoostSettingsClick" Text="Arama Ağırlıklarını Düzenle" Icon="settings" ButtonStyle="ButtonStyle.Secondary" class="me-2" />
+            <RadzenButton Click="@AddButtonClick" Text="Yeni Eş Anlamlı Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+    
+    <!-- General Settings Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Genel Arama Ayarları</h6>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <label class="font-weight-bold mr-2">OEM Gruplama (Benzer Ürünleri Gizle):</label>
+                    <RadzenSwitch @bind-Value=@shouldGroupOems Change=@OnGroupOemsChange />
+                    <span class="ml-2 text-muted small">
+                        @(shouldGroupOems ? "Açık (Aynı parça numaralı ürünler tek satırda gösterilir)" : "Kapalı (Tüm satıcıların ürünleri ayrı ayrı listelenir)")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="15"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="SearchSynonymListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@synonyms"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="SearchSynonymListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="SearchSynonymListDto" Property="Keyword" Title="Anahtar Kelime" />
+                    <RadzenDataGridColumn TItem="SearchSynonymListDto" Property="Synonyms" Title="Eş Anlamlılar" />
+                    <RadzenDataGridColumn TItem="SearchSynonymListDto" Property="Category" Title="Kategori" Width="150px">
+                        <Template Context="synonym">
+                            @synonym.Category.GetEnumDisplayName()
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="SearchSynonymListDto" Property="IsBidirectional" Title="Çift Yönlü" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="synonym">
+                            @if (synonym.IsBidirectional)
+                            {
+                                <RadzenIcon Icon="check_circle" Style="color: green" />
+                            }
+                            else
+                            {
+                                <RadzenIcon Icon="cancel" Style="color: red" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="SearchSynonymListDto" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="synonym">
+                            @if (synonym.Status == 1)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="Pasif" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="SearchSynonymListDto" Title="İşlem" Filterable="false" Sortable="false" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="synonym">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@((args) => EditRow(synonym))" @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click=@(args => GridDeleteButtonClick(args, synonym)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+</div>
+
+

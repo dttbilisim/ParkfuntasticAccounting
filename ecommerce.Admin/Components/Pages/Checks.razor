@@ -1,0 +1,125 @@
+@page "/checks"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.CheckDto
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+
+<PageTitle>Çek Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0 text-gray-800">Çek Yönetimi</h1>
+        </div>
+        <div class="col text-end">
+            <RadzenButton Icon="add" Text="Yeni Çek" Click="@AddClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 shadow-sm">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            <RadzenDropDown @bind-Value="FilterBankId"
+                            Data="BankList"
+                            TextProperty="Name"
+                            ValueProperty="Id"
+                            Placeholder="Tüm Bankalar"
+                            AllowClear="true"
+                            AllowFiltering="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="min-width: 200px;"
+                            Loading="@BanksLoading"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDropDown @bind-Value="FilterCustomerId"
+                            Data="CustomerList"
+                            TextProperty="DisplayName"
+                            ValueProperty="Id"
+                            Placeholder="Tüm Cariler"
+                            AllowClear="true"
+                            AllowFiltering="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="min-width: 260px;"
+                            Loading="@CustomersLoading"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDropDown @bind-Value="FilterCheckStatus"
+                            Data="CheckStatusOptions"
+                            TextProperty="Text"
+                            ValueProperty="Value"
+                            Placeholder="Tüm Durumlar"
+                            AllowClear="true"
+                            Style="min-width: 160px;"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDatePicker @bind-Value="FilterDueDateStart"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Vade başlangıç"
+                              Style="min-width: 150px;" />
+            <RadzenDatePicker @bind-Value="FilterDueDateEnd"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Vade bitiş"
+                              Style="min-width: 150px;" />
+            <RadzenButton Text="Filtrele" ButtonStyle="ButtonStyle.Primary" Icon="filter" Click="ApplyFilter" />
+            @if (FilterBankId.HasValue || FilterCustomerId.HasValue || FilterCheckStatus.HasValue || FilterDueDateStart.HasValue || FilterDueDateEnd.HasValue)
+            {
+                <RadzenButton Text="Temizle" ButtonStyle="ButtonStyle.Light" Icon="close" Click="ClearFilter" />
+            }
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="Grid"
+                           TItem="CheckListDto"
+                           Data="@Items"
+                           Count="@Count"
+                           LoadData="@LoadData"
+                           AllowPaging="true"
+                           PageSize="25"
+                           AllowSorting="true"
+                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                           PagerHorizontalAlign="HorizontalAlign.Left"
+                           ShowPagingSummary="true"
+                           RowSelect="@OnRowSelect"
+                           SelectionMode="DataGridSelectionMode.Single"
+                           EmptyText="Çek kaydı bulunamadı.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CheckListDto" Property="Id" Title="Id" Width="70px" />
+                    <RadzenDataGridColumn TItem="CheckListDto" Property="CheckNumber" Title="Çek No" Width="120px" />
+                    <RadzenDataGridColumn TItem="CheckListDto" Property="CustomerName" Title="Cari" Width="200px" />
+                    <RadzenDataGridColumn TItem="CheckListDto" Property="BankName" Title="Banka" Width="140px" />
+                    <RadzenDataGridColumn TItem="CheckListDto" Title="Şube / İl" Width="180px">
+                        <Template Context="ctx">
+                            @(ctx.BankBranchName ?? "-")
+                            @if (!string.IsNullOrEmpty(ctx.CityName))
+                            {
+                                <span class="text-muted small"> / @ctx.CityName</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CheckListDto" Title="Tutar" Width="130px" TextAlign="TextAlign.Right">
+                        <Template Context="ctx">
+                            @ctx.Amount.ToString("N2") @ctx.CurrencyCode
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CheckListDto" Property="DueDate" Title="Vade" Width="110px" FormatString="{0:dd.MM.yyyy}" />
+                    <RadzenDataGridColumn TItem="CheckListDto" Title="Durum" Width="120px">
+                        <Template Context="ctx">
+                            <span class="badge @GetCheckStatusBadgeClass(ctx.CheckStatus)">
+                                @ctx.CheckStatusName
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CheckListDto" Property="Description" Title="Açıklama" Width="180px">
+                        <Template Context="ctx">
+                            <span class="text-truncate d-inline-block" style="max-width: 180px;" title="@(ctx.Description ?? "")">@(ctx.Description ?? "-")</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CheckListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="ctx">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" Click="@(() => EditRow(ctx))" @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(() => DeleteRow(ctx))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

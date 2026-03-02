@@ -1,0 +1,24 @@
+﻿@if (contentLoaded)
+{
+    @ChildContent
+}
+else
+{
+    <div style="position:absolute; top:30vh; width:100%; text-align:center">
+        <h3>ECommerce Admin Panel</h3>
+        <p>Sayfa yükleniyor..</p>
+    </div>
+}
+
+@code {
+
+    bool contentLoaded;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        await Task.Delay(1000);
+        contentLoaded = true;
+    }
+}

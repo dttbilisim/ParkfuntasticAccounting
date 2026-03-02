@@ -1,0 +1,119 @@
+@using ecommerce.Admin.EFCore.UnitOfWork
+@using ecommerce.Core.Entities
+@using ecommerce.EFCore.Context
+@inject IServiceScopeFactory ScopeFactory
+@rendermode InteractiveServer
+
+<RadzenCard Class="rz-p-0 mb-4" style="border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden;">
+    <div class="rz-p-4 border-bottom d-flex justify-content-between align-items-center">
+        <RadzenText TextStyle="TextStyle.H6" style="font-weight: 600; margin-bottom: 0;">
+            Satıcı Senkronizasyon Durumu
+        </RadzenText>
+        <RadzenButton Icon="refresh" Click="LoadSellers" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" class="rounded-circle" />
+    </div>
+    <div class="rz-p-3">
+        <RadzenDataGrid Data="@_sellers" TItem="Seller" AllowPaging="false" AllowSorting="false" GridLines="DataGridGridLines.None" Class="custom-grid">
+            <Columns>
+                <RadzenDataGridColumn TItem="Seller" Property="Name" Title="Satıcı" Width="200px">
+                    <Template Context="seller">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle rz-background-color-primary-lighter d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+                                <RadzenIcon Icon="store" style="font-size: 1.1rem; color: var(--rz-primary);" />
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">@seller.Name</div>
+                            </div>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Seller" Property="SyncDate" Title="Son Senkronizasyon" Width="180px">
+                    <Template Context="seller">
+                        @if (seller.SyncDate.HasValue)
+                        {
+                            <div style="font-size: 0.85rem;">
+                                <div style="font-weight: 500;">@seller.SyncDate.Value.ToString("dd.MM.yyyy HH:mm")</div>
+                                <div style="color: var(--rz-text-disabled-color); font-size: 0.75rem;">@GetTimeAgo(seller.SyncDate.Value)</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <span style="color: var(--rz-text-disabled-color); font-size: 0.85rem;">Henüz yapılmadı</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Seller" Property="SyncMessage" Title="Durum">
+                    <Template Context="seller">
+                        @if (!string.IsNullOrEmpty(seller.SyncMessage))
+                        {
+                            @if (seller.SyncMessage.StartsWith("✅"))
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@seller.SyncMessage" style="max-width: 100%; white-space: normal; height: auto; padding: 0.4rem 0.6rem;" />
+                            }
+                            else if (seller.SyncMessage.StartsWith("❌"))
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="@seller.SyncMessage" style="max-width: 100%; white-space: normal; height: auto; padding: 0.4rem 0.6rem;" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@seller.SyncMessage" style="max-width: 100%; white-space: normal; height: auto; padding: 0.4rem 0.6rem;" />
+                            }
+                        }
+                        else
+                        {
+                            <span style="color: var(--rz-text-disabled-color); font-size: 0.85rem;">-</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</RadzenCard>
+
+@code {
+    private List<Seller> _sellers = new();
+    private System.Threading.Timer _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSellers();
+        // Auto refresh every 30 seconds
+        _timer = new System.Threading.Timer(async _ => 
+        { 
+            try
+            {
+                await InvokeAsync(async () => 
+                { 
+                     await LoadSellers(); 
+                     StateHasChanged(); 
+                });
+            }
+            catch {}
+        }, null, 30000, 30000);
+    }
+
+    private async Task LoadSellers()
+    {
+        // Get sellers with IDs: 1 (OtoIsmail), 2 (BasbugOto), 3 (Dega), 5 (Remar)
+        var sellerIds = new[] { 1, 2, 3, 5 };
+        using var scope = ScopeFactory.CreateScope();
+        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork<ApplicationDbContext>>();
+        var result = await uow.GetRepository<Seller>()
+            .GetAllAsync(predicate: s => sellerIds.Contains(s.Id), orderBy: q => q.OrderBy(s => s.Id));
+        _sellers = result.ToList();
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
+    private string GetTimeAgo(DateTime dt)
+    {
+        var span = DateTime.Now - dt;
+        if (span.TotalSeconds < 60) return $"{span.Seconds}sn önce";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}dk önce";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours}sa önce";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays}gün önce";
+        return dt.ToString("dd.MM.yyyy");
+    }
+}

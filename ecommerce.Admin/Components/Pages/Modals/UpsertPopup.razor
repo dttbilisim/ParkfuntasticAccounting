@@ -1,0 +1,198 @@
+@using ecommerce.Admin.Domain.Dtos.PopupDto
+@using ecommerce.Core.Utils
+@using ecommerce.Domain.Shared.Rules.Providers
+@using ecommerce.Admin.Components.Pages.Modals.Rules
+@using ecommerce.Admin.Components.Layout
+
+
+<PageTitle>Popup Ekle/Düzenle</PageTitle>
+
+<RadzenTemplateForm TItem="PopupUpsertDto" Data="@Popup" Visible="@(!Id.HasValue || Popup.Id > 0)" Submit="@FormSubmit" OnInvalidSubmit="ShowErrors">
+    <RadzenFluentValidator @ref="PopupFluentValidator" Validator="@PopupValidator"/>
+
+    <RadzenTabs RenderMode="TabRenderMode.Client">
+        <Tabs>
+            <RadzenTabsItem Text="POPUP BİLGİLERİ">
+                <RadzenStack>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Popup Adı" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="@Popup.Name"/>
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.Name)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Başlık" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="@Popup.Title"/>
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.Title)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenFormField Text="İçerik" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenHtmlEditor @bind-Value="@Popup.Body" style="height: 400px; width: 100%">
+                                <RadzenHtmlEditorUndo/>
+                                <RadzenHtmlEditorRedo/>
+                                <RadzenHtmlEditorSeparator/>
+                                <RadzenHtmlEditorBold/>
+                                <RadzenHtmlEditorItalic/>
+                                <RadzenHtmlEditorUnderline/>
+                                <RadzenHtmlEditorStrikeThrough/>
+                                <RadzenHtmlEditorSeparator/>
+                                <RadzenHtmlEditorAlignLeft/>
+                                <RadzenHtmlEditorAlignCenter/>
+                                <RadzenHtmlEditorAlignRight/>
+                                <RadzenHtmlEditorJustify/>
+                                <RadzenHtmlEditorSeparator/>
+                                <RadzenHtmlEditorIndent/>
+                                <RadzenHtmlEditorOutdent/>
+                                <RadzenHtmlEditorUnorderedList/>
+                                <RadzenHtmlEditorOrderedList/>
+                                <RadzenHtmlEditorSeparator/>
+                                <RadzenHtmlEditorColor/>
+                                <RadzenHtmlEditorBackground/>
+                                <RadzenHtmlEditorRemoveFormat/>
+                                <RadzenHtmlEditorSeparator/>
+                                <RadzenHtmlEditorSubscript/>
+                                <RadzenHtmlEditorSuperscript/>
+                                <RadzenHtmlEditorSeparator/>
+                                <RadzenHtmlEditorLink/>
+                                <RadzenHtmlEditorUnlink/>
+                                <RadzenHtmlEditorImage/>
+                                <RadzenHtmlEditorFontName/>
+                                <RadzenHtmlEditorFontSize/>
+                                <RadzenHtmlEditorFormatBlock/>
+                                <RadzenHtmlEditorSeparator/>
+                                <RadzenHtmlEditorSource/>
+                            </RadzenHtmlEditor>
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => Popup.Body)" class="rz-message rz-messages-error"/>
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Başlangıç Zamanı" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenDatePicker @bind-Value="@Popup.StartDate" ShowTime="true" DateFormat="g" AllowClear="true"/>
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.StartDate)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Bitiş Zamanı" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenDatePicker @bind-Value="@Popup.EndDate" ShowTime="true" DateFormat="g" AllowClear="true"/>
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.EndDate)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Tetikleme" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenDropDown Data="@(Enum.GetValues<PopupTrigger>())" @bind-Value="@Popup.Trigger" Change="@PopupTriggerChanged" class="w-100" 
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.Trigger)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenFormField Text="Gösterim Zaman Aşımı" Variant="Variant.Outlined" Visible="@(Popup.Trigger == PopupTrigger.Auto)" class="w-100">
+                                <ChildContent>
+                                    <RadzenNumeric @bind-Value="@Popup.TimeExpire"/>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText TextStyle="TextStyle.Caption" Text="Popup gösterim zaman aşımı dakika cinsinden belirlenmelidir. 0 değeri ile popup bir kez gösterilir."/>
+                                    <ValidationMessage For="@(() => Popup.TimeExpire)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                            <RadzenFormField Text="Tetikleme Referansı" Variant="Variant.Outlined" Visible="@(Popup.Trigger == PopupTrigger.Click)" class="w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="@Popup.TriggerReference"/>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText TextStyle="TextStyle.Caption" Text="Belirtilen referansa sahip elemente tıklandığında popup gösterilir."/>
+                                    <ValidationMessage For="@(() => Popup.TriggerReference)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="4">
+                            <RadzenFormField Text="Genişlik" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="@Popup.Width"/>
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.Width)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="4">
+                            <RadzenFormField Text="Yükseklik" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="@Popup.Height"/>
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.Height)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="4">
+                            <RadzenFormField Text="Sıra" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenNumeric @bind-Value="@Popup.Order"/>
+                                </ChildContent>
+                                <Helper>
+                                    <ValidationMessage For="@(() => Popup.Order)" class="rz-message rz-messages-error"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenStack>
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                                    <RadzenCheckBox TValue="bool" Name="Status" Value="@(Popup.Status == (int) EntityStatus.Active)" ValueChanged="@((v) => Popup.Status = v ? (int) EntityStatus.Active : (int) EntityStatus.Passive)"/>
+                                    <RadzenLabel Text="Aktif" Component="Status"/>
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="6">
+                            <RadzenStack>
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                                    <RadzenCheckBox @bind-Value="@Popup.IsOnlyImage" Name="IsOnlyImage"/>
+                                    <RadzenLabel Text="Sadece Resim" Component="IsOnlyImage"/>
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="POPUP KURALLARI">
+                <RuleBuilder @bind-MainRule="@Popup.Rule" Scope="@PopupFieldDefinitions.Scope"/>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" BusyText="Kaydediliyor..." IsBusy="Saving" Variant="Variant.Flat" class="rz-mr-1"/>
+    </RadzenStack>
+</RadzenTemplateForm>

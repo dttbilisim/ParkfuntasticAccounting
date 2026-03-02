@@ -1,0 +1,49 @@
+@page "/education-contents"
+@using ecommerce.Admin.Domain.Dtos.EducationDto
+@using ecommerce.Core.Utils
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Eğitim Tanımları</PageTitle>
+
+
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Eğitim Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Eğitim Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="EducationListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@data" CellRender="@RowRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="Id" Title="Id" Width="50px"/>
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="Order" Title="Sırası" Width="50px"/>
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="EducationCategoryType" Title="Eğitim Tipi" />
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="Name" Title="Adı"/>
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="SubText" Title="Kısa Açıklama"/>
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="PubliserName" Title="Yayınlayan"/>           
+                                             
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="CreatedDate" FormatString="{0:dd/MM/yyyy HH:mm}" Width="100px" Title="Oluşturulma Tarihi">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="EducationListDto" Property="StatusStr" Title="Durum" Width="70px" Filterable="false"  Sortable="false">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="EducationListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="Banner">
+                            @if (Banner.Status != EntityStatus.Deleted.GetHashCode())
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, Banner)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+

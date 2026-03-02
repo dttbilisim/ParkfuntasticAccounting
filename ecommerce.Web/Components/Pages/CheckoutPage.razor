@@ -1,0 +1,390 @@
+@page "/checkout"
+@* <BreadcrumbComponent BreadcrumbText="@lang["Checkout.Breadcrumb"]"/> *@
+<section class="breadcrumb-section pt-0">
+    <div class="container-fluid-lg">
+        <div class="row">
+            <div class="col-12">
+                @* <div class="breadcrumb-contain"> *@
+                @*     <h2>@lang["Checkout.Breadcrumb"]</h2> *@
+                @*     <nav> *@
+                @*         <ol class="breadcrumb mb-0"> *@
+                @*             <li class="breadcrumb-item"> *@
+                @*                 <a href="/"> *@
+                @*                     <i class="fa-solid fa-house"></i> *@
+                @*                 </a> *@
+                @*             </li> *@
+                @*             <li class="breadcrumb-item active">@lang["Checkout.Breadcrumb"]</li> *@
+                @*         </ol> *@
+                @*     </nav> *@
+                @* </div> *@
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Checkout section Start -->
+@if (IsThreeDModalOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="height: 600px;">
+                <div class="modal-header">
+                    <h5 class="modal-title">3D Güvenli Ödeme</h5>
+                    <!-- Reload Button Removed by User Request -->
+                    <button type="button" class="btn-close" @onclick="Close3DModal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <iframe name="threeDIframe" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div id="payment-form-container" style="display:none;">
+    @((MarkupString)PaymentHtmlContent)
+</div>
+
+<section class="checkout-section-2 section-b-space">
+<div class="container-fluid-lg">
+<div class="row g-sm-4 g-3">
+<div class="col-lg-8">
+<div class="left-sidebar-checkout">
+
+<div class="checkout-detail-box">
+<ul>
+<li>
+    <div class="checkout-icon">
+        <lord-icon target=".nav-item" src="https://cdn.lordicon.com/ggihhudh.json"
+                   trigger="loop-on-hover"
+                   colors="primary:#121331,secondary:#646e78,tertiary:#0baf9a"
+                   class="lord-icon">
+        </lord-icon>
+    </div>
+    <div class="checkout-box position-relative">
+        <div class="position-absolute top-0 end-0 mt-2 me-2">
+            <button type="button" class="btn btn-outline-primary btn-sm" title="@lang["Checkout.AddNewAddress"]" @onclick="OpenNewAddressModal">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+
+        <div class="checkout-title"><h4>@lang["Checkout.DeliveryAddress"]</h4></div>
+
+        <div class="checkout-detail">
+            <div class="row g-4">
+                @if(UserAddresses != null && UserAddresses.Any()){
+                    @foreach (var addr in UserAddresses){
+                        <div class="col-xxl-6 col-lg-12 col-12">
+                            <div class="delivery-address-box">
+                                <div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="selectedAddress"
+                                               id="addr_@addr.Id" value="@addr.Id" checked="@(SelectedAddressId == addr.Id)"
+                                               @onchange="() => SelectedAddressId = addr.Id">
+                                    </div>
+
+                                    <div class="label">
+                                        <label>@(string.IsNullOrWhiteSpace(addr.AddressName) ? lang["Checkout.AddressTitle"] : addr.AddressName)</label>
+                                    </div>
+
+                                    <ul class="delivery-address-detail">
+                                        <li>
+                                            <h4 class="fw-500">@addr.FullName</h4>
+                                        </li>
+
+                                        <li>
+                                            <p class="text-content">
+                                                <span class="text-title">@lang["Checkout.Address"]</span>
+                                                @addr.Address
+                                            </p>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="text-content">
+                                                <span class="text-title">@lang["Checkout.Phone"]</span>
+                                                @addr.PhoneNumber
+                                            </h6>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                } else {
+                    <div class="col-12">
+                        <div class="alert alert-warning">@lang["Checkout.NoAddress"]</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</li>
+
+
+
+<li>
+<div class="checkout-icon">
+    <lord-icon target=".nav-item" src="https://cdn.lordicon.com/qmcsqnle.json"
+               trigger="loop-on-hover" colors="primary:#0baf9a,secondary:#0baf9a"
+               class="lord-icon">
+    </lord-icon>
+</div>
+<div class="checkout-box">
+<div class="checkout-title">
+    <h4>@lang["Checkout.PaymentOption"]</h4>
+</div>
+
+<div class="checkout-detail">
+<div class="accordion accordion-flush custom-accordion"
+     id="accordionFlushExample">
+<div class="accordion-item">
+    <div class="accordion-header" id="flush-headingOne">
+        <div class="accordion-button"
+             data-bs-toggle="collapse"
+             data-bs-target="#flush-collapseOne">
+            <div class="custom-form-check form-check mb-0">
+                <label class="form-check-label" for="credit">
+                    <input
+                        class="form-check-input mt-0" type="radio"
+                        name="flexRadioDefault" id="credit" checked>
+                    @lang["Checkout.CreditCard"]
+                </label>
+            </div>
+        </div>
+    </div>
+    <div id="flush-collapseOne" class="accordion-collapse collapse show"
+         data-bs-parent="#accordionFlushExample">
+        <div class="accordion-body">
+            <!-- Bank Selection -->
+            <div class="row g-2">
+                 <div class="col-12">
+                    <div class="form-floating theme-form-floating">
+                        <select class="form-select" value="@PaymentModel.BankId" @onchange="OnBankChanged">
+                            <option value="">@lang["Checkout.SelectBank"]</option>
+                            @foreach (var bank in Banks)
+                            {
+                                <option value="@bank.Id">@bank.Name</option>
+                            }
+                        </select>
+                        <label>@lang["Checkout.Bank"]</label>
+                    </div>
+                </div>
+
+                <!-- Bank Card Selection (Radio Style) -->
+                @if (BankCards != null && BankCards.Any())
+                {
+                    <div class="col-12 mt-3">
+                        <label class="payment-section-title">@lang["Checkout.CardType"]</label>
+                        <div class="card-type-grid">
+                            @foreach (var card in BankCards)
+                            {
+                                var isSelected = PaymentModel.BankCardId == card.Id;
+                                <div class="payment-radio-option @(isSelected ? "selected" : "")" @onclick="() => SelectBankCard(card.Id)">
+                                    <input class="custom-radio-input" type="radio" name="bankCardSelection" 
+                                           checked="@isSelected" 
+                                           readonly /> 
+                                    <span class="fw-600 text-dark">@card.Name</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Installment Selection (Modern List) -->
+                @if (Installments != null && Installments.Any())
+                {
+                    <div class="col-12 mt-3">
+                        <label class="payment-section-title">@lang["Checkout.InstallmentOptions"]</label>
+                        <div class="installment-list">
+                            <!-- Single Installment Option (Default) -->
+                            @{
+                                var isSingleSelected = !PaymentModel.InstallmentId.HasValue || PaymentModel.InstallmentId == 0; 
+                                // Note: Logic might need to handle explicit single installment selection if API returns one.
+                                // Assuming API returns installments including single or we add one manually if needed.
+                                // Based on previous code: <option value="">Single Installment</option> implies it's an option.
+                                // I will add a manual option for "Tek Çekim" (Single) if it's not in the list, or just rely on list.
+                                // Previous loop: <option value="">Single</option> + foreach.
+                                // So I should add a "Tek Çekim" option manually at the top.
+                            }
+                            <div class="installment-item @(PaymentModel.InstallmentId == null ? "selected" : "")" 
+                                 @onclick="() => SelectInstallment(0)">
+                                <div class="installment-left">
+                                    <input class="custom-radio-input" type="radio" name="installmentSelection" 
+                                           checked="@(PaymentModel.InstallmentId == null)" readonly />
+                                    <div class="installment-info">
+                                        <span class="installment-text">@lang["Checkout.SingleInstallment"]</span>
+                                        <span class="installment-rate-badge">Komisyonsuz</span>
+                                    </div>
+                                </div>
+                                <div class="installment-price">@CartResult.OrderTotal.ToString("C")</div>
+                            </div>
+                            
+                            @foreach (var inst in Installments)
+                            {
+                                var isInstSelected = PaymentModel.InstallmentId == inst.Id;
+                                var totalInstPrice = CartResult.OrderTotal * (1 + (inst.InstallmentRate / 100));
+                                var monthlyPrice = totalInstPrice / inst.Installment;
+                                
+                                <div class="installment-item @(isInstSelected ? "selected" : "")" 
+                                     @onclick="() => SelectInstallment(inst.Id)">
+                                    <div class="installment-left">
+                                        <input class="custom-radio-input" type="radio" name="installmentSelection" 
+                                               checked="@isInstSelected" readonly />
+                                        <div class="installment-info">
+                                            <span class="installment-text">@inst.Installment @lang["Product.Installment"] x @monthlyPrice.ToString("C")</span>
+                                            <span class="installment-rate-badge">Vade Farkı: %@inst.InstallmentRate</span>
+                                        </div>
+                                    </div>
+                                    <div class="installment-price">@totalInstPrice.ToString("C")</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Hidden Card Inputs for 3D Hosting Mode (User Request) -->
+                <div style="display:none">
+                <div class="col-12">
+                     <div class="form-floating theme-form-floating">
+                        <input type="text" class="form-control" placeholder="Ad Soyad" @bind-value="PaymentModel.CardHolderName">
+                        <label>Ad Soyad</label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                     <div class="form-floating theme-form-floating">
+                        <input type="text" class="form-control" id="credit2" placeholder="@lang["Checkout.EnterCardNumber"]" @bind-value="PaymentModel.CardNumber">
+                        <label for="credit2">@lang["Checkout.EnterCardNumber"]</label>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="form-floating theme-form-floating">
+                        <input type="text" class="form-control" maxlength="2" placeholder="@lang["Checkout.Month"]" id="expMonth" @bind-value="PaymentModel.ExpMonth">
+                        <label for="expMonth">@lang["Checkout.Month"]</label>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="form-floating theme-form-floating">
+                        <input type="text" class="form-control" maxlength="4" placeholder="@lang["Checkout.Year"]" id="expYear" @bind-value="PaymentModel.ExpYear">
+                        <label for="expYear">@lang["Checkout.Year"]</label>
+                    </div>
+                </div>
+                
+                <div class="col-12 col-md-6">
+                    <div class="form-floating theme-form-floating">
+                        <input type="text" class="form-control" id="cvv" placeholder="@lang["Checkout.CVVNumber"]" @bind-value="PaymentModel.Cvv">
+                        <label for="cvv">@lang["Checkout.CVVNumber"]</label>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="col-lg-4">
+    <div class="checkout-summary card-modern">
+        <div class="summary-head">
+            <h3>@lang["Cart.OrderSummary"]</h3>
+            <span class="badge-soft">@CartResult?.TotalItems @lang["Checkout.Items"]</span>
+        </div>
+
+        <div class="summary-items">
+            @if(CartResult?.Sellers != null && CartResult.Sellers.Any()){
+                @foreach (var seller in CartResult.Sellers)
+                {
+                    <!-- Satıcı Başlığı -->
+                    <div class="checkout-seller-header">
+                        <div class="seller-info">
+                            <i class="fa-solid fa-store me-2"></i>
+                            <span class="seller-name">@seller.SellerName</span>
+                        </div>
+                        <div class="seller-total">
+                            @seller.OrderTotal.ToString("C")
+                        </div>
+                    </div>
+                    
+                    <!-- Satıcının Ürünleri -->
+                    @foreach(var item in seller.Items){
+                            <a class="summary-item" @key="@($"{item.Id}-{item.ProductSellerItemId}")" href="/product-detail?productId=@item.ProductSellerItemId">
+                                <div class="itm-thumb">
+                                    <img src="@_appStateManager.ResolveImageUrl(item.PictureUrl)" alt="@item.ProductName"
+                                         onerror="this.onerror=null; this.src='/assets/images/no-product-image.png';"/>
+                                </div>
+                                <div class="itm-info">
+                                    <div class="itm-title">@item.ProductName</div>
+                                    <div class="itm-meta">@item.Quantity x @item.UnitPrice.ToString("C")</div>
+                                    @if(item.IsPerfectCompatibility)
+                                    {
+                                        <div class="cart-compatibility-badge checkout">
+                                            <i class="fas fa-check-circle"></i>
+                                            @lang["Product.PerfectCompatibilityBadge"]
+                                        </div>
+                                    }
+                                </div>
+                                <div class="itm-price">@item.Total.ToString("C")</div>
+                                <button class="itm-remove" title="@lang["Checkout.Delete"]" @onclick="()=>RemoveItem(item.Id)" aria-label="@lang["Checkout.Delete"]">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </a>
+                    }
+                }
+            } else{
+                <div class="summary-empty">@lang["Checkout.EmptyCart"]</div>
+            }
+        </div>
+
+       
+        <div class="summary-totals">
+            <div class="row-line">
+                <span class="label">@lang["Cart.Subtotal"]</span>
+                <span class="value">@CartResult?.SubTotal.ToString("C")</span>
+            </div>
+
+            <div class="row-line">
+                <span class="label">@lang["Cart.CargoPriceLabel"]</span>
+                <span class="value">@(((CartResult?.CargoPrice ?? 0m) - (CartResult?.CargoDiscount ?? 0m)).ToString("C"))</span>
+            </div>
+
+
+            <div class="row-line discount">
+                <span class="label">@lang["Cart.DiscountTotal"]</span>
+                <span class="value">@CartResult?.OrderTotalDiscount.ToString("C")</span>
+            </div>
+            
+            @if(CalculatedGrandTotal > (CartResult?.OrderTotal ?? 0))
+            {
+                 <div class="row-line">
+                    <span class="label">@lang["Checkout.MaturityDifference"]</span>
+                    <span class="value">@((CalculatedGrandTotal - (CartResult?.OrderTotal ?? 0)).ToString("C"))</span>
+                </div>
+            }
+
+
+          
+            <div class="row-line total">
+                <span class="label">@lang["Cart.Total"]</span>
+                <span class="value">@CalculatedGrandTotal.ToString("C")</span>
+            </div>
+        </div>
+
+        <div class="summary-actions">
+            <button class="btn btn-outline w-100" @onclick="ClearCart">@lang["Cart.Clear"]</button>
+            <a @onclick="Checkout" class="btn btn-primary w-100" href="/checkout">@lang["Checkout.CompleteOrder"]</a>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</section>
+}

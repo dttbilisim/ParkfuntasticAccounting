@@ -1,0 +1,126 @@
+@page "/discounts"
+@using ecommerce.Web.Domain.Dtos
+@using ecommerce.Web.Utility
+
+<section class="breadcrumb-section pt-0">
+    <div class="container-fluid-lg">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-contain">
+                    <h2>@lang["Discounts.Title"]</h2>
+                    <nav>
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="/">
+                                    <i class="fa-solid fa-house"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@lang["Discounts.Title"]</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-b-space discount-section">
+    <div class="container-fluid-lg">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="modern-spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
+            </div>
+        }
+        else if (!discounts.Any())
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fa-solid fa-tag"></i>
+                        </div>
+                        <h3>@lang["Discounts.NoDiscounts"]</h3>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var discount in discounts)
+                {
+                    <div class="col-xxl-3 col-lg-4 col-md-6">
+                        <div class="modern-discount-card">
+                            <div class="card-glow"></div>
+                            
+                            @if (!string.IsNullOrEmpty(discount.ImagePath))
+                            {
+                                <div class="discount-image-wrapper">
+                                    <div class="image-overlay"></div>
+                                    <img src="@_appStateManager.ResolveImageUrl(discount.ImagePath)" alt="@discount.Name" class="discount-image" />
+                                    @if (discount.UsePercentage && discount.DiscountPercentage.HasValue)
+                                    {
+                                        <div class="discount-badge-modern">
+                                            <div class="badge-shine"></div>
+                                            <span class="badge-text">%@discount.DiscountPercentage.Value.ToString("0")</span>
+                                            <div class="badge-subtitle">İNDİRİM</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            
+                            <div class="discount-content">
+                                <h5 class="discount-title-modern">@discount.Name</h5>
+                                
+                                @if (!string.IsNullOrEmpty(discount.Description))
+                                {
+                                    <p class="discount-description-modern">@discount.Description</p>
+                                }
+
+                                @if (discount.RequiresCouponCode && !string.IsNullOrEmpty(discount.CouponCode))
+                                {
+                                    <div class="coupon-box-modern">
+                                        <div class="coupon-header">
+                                            <i class="fa-solid fa-ticket"></i>
+                                            <span>@lang["Discounts.CouponCode"]</span>
+                                        </div>
+                                        <div class="coupon-code-modern">
+                                            <code class="code-display">@discount.CouponCode</code>
+                                            <button type="button" class="btn-copy-modern" @onclick="() => CopyCouponCode(discount.CouponCode)" title="@lang["Discounts.CopyCode"]">
+                                                <i class="fa-solid fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(discount.CouponDescription))
+                                        {
+                                            <small class="coupon-desc">@discount.CouponDescription</small>
+                                        }
+                                    </div>
+                                }
+
+                                @if (discount.EndDate.HasValue)
+                                {
+                                    <div class="validity-badge">
+                                        <i class="fa-solid fa-clock"></i>
+                                        <span>@discount.EndDate.Value.ToString("dd MMM yyyy")</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="discount-footer-modern">
+                                <a href="@(!string.IsNullOrEmpty(discount.CampaignLink) ? discount.CampaignLink : "/product-search")" class="btn-shop-modern">
+                                    <span>@lang["Discounts.ShopNow"]</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,26 @@
+@inherits LayoutComponentBase
+
+
+<LayoutView>
+    <HeaderMenu />
+    <div class="main-content">
+        @Body
+    </div>
+
+    <FooterComponent />
+    
+</LayoutView>
+
+<!-- Global Loading Overlay -->
+<GlobalLoadingComponent />
+
+<div class="fullpage-loader fullpage-loader--invisible">
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+</div>
+
+<!-- Radzen Components -->
+<RadzenDialog />
+<RadzenTooltip/>
+<RadzenContextMenu/>
+<RadzenNotification Style="z-index: 2147483647 !important;" />

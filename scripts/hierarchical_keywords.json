@@ -1,0 +1,264 @@
+{
+    "Fren Sistemi": {
+        "Disk Fren Aksamı": {
+            "Fren Balatası": [
+                "fren balata",
+                "on balata",
+                "arka balata",
+                "disk balata"
+            ],
+            "Fren Diski": [
+                "fren disk",
+                "on disk",
+                "arka disk",
+                "hava sogutmali disk"
+            ],
+            "Fren Kaliperi": [
+                "fren kaliper",
+                "kaliper tamir",
+                "kaliper piston"
+            ]
+        },
+        "Kampana Fren Aksamı": {
+            "Fren Kampanası": [
+                "fren kampana",
+                "arka kampana"
+            ],
+            "Fren Balata Pabucu": [
+                "pabuc",
+                "kampana balata"
+            ],
+            "Fren Silindiri": [
+                "teker silindiri",
+                "fren silindir"
+            ]
+        },
+        "Hidrolik Aksam": {
+            "Fren Ana Merkezi": [
+                "fren ana merkez",
+                "master silindir"
+            ],
+            "Fren Hortumları": [
+                "fren hortum"
+            ],
+            "Westinghouse": [
+                "westinghouse",
+                "servo fren"
+            ]
+        }
+    },
+    "Filtre Sistemi": {
+        "Sıvı Filtreleri": {
+            "Yağ Filtresi": [
+                "yag filtresi",
+                "yag suzgeci"
+            ],
+            "Yakıt Filtresi": [
+                "yakit filtresi",
+                "benzin filtresi",
+                "mazot filtresi"
+            ]
+        },
+        "Hava Filtreleri": {
+            "Hava Filtresi": [
+                "hava filtresi",
+                "hava filtre"
+            ],
+            "Polen Filtresi": [
+                "polen filtresi",
+                "kabin filtresi"
+            ]
+        }
+    },
+    "Motor ve Aksamı": {
+        "Motor Mekanik": {
+            "Piston ve Segman": [
+                "piston",
+                "segman",
+                "gomlek"
+            ],
+            "Subap Mekanizması": [
+                "subap",
+                "subap gayd",
+                "subap lastik",
+                "piyano"
+            ],
+            "Krank ve Biyel": [
+                "krank mili",
+                "biyel kolu",
+                "ana yatak",
+                "kol yatak"
+            ],
+            "Eksantrik": [
+                "eksantrik mili",
+                "kam mili"
+            ]
+        },
+        "Motor Contaları": {
+            "Silindir Kapak Contası": [
+                "silindir kapak conta",
+                "ust kapak conta"
+            ],
+            "Karter Contası": [
+                "karter conta"
+            ],
+            "Manifold Contası": [
+                "manifold conta",
+                "emme conta",
+                "egzoz conta"
+            ],
+            "Keçeler": [
+                "kecesi",
+                "krank kece",
+                "eksantrik kece"
+            ]
+        },
+        "Kayış ve Zincir": {
+            "Triger Seti": [
+                "triger set",
+                "eksantrik set"
+            ],
+            "V Kayışları": [
+                "v kayis",
+                "alternator kayis",
+                "klima kayis"
+            ],
+            "Gergi Rulmanları": [
+                "gergi rulman",
+                "kayis gergi"
+            ]
+        }
+    },
+    "Debriyaj ve Şanzıman": {
+        "Debriyaj Seti": {
+            "Debriyaj Baskı Balata": [
+                "baski balata",
+                "debriyaj set",
+                "debriyaj kit"
+            ],
+            "Debriyaj Rulmanı": [
+                "debriyaj rulman",
+                "debriyaj bilya"
+            ],
+            "Volan": [
+                "volan",
+                "volant"
+            ]
+        },
+        "Aktarma Organları": {
+            "Aks ve Parçaları": [
+                "aks",
+                "aks kafasi",
+                "aks korugu",
+                "aks mili"
+            ],
+            "Şaft ve Mafsal": [
+                "saft",
+                "stavroz",
+                "kardan",
+                "mafsal"
+            ]
+        }
+    },
+    "Süspansiyon ve Direksiyon": {
+        "Süspansiyon": {
+            "Amortisör": [
+                "amortisor",
+                "on amortisor",
+                "arka amortisor"
+            ],
+            "Helezon Yay": [
+                "helezon",
+                "yay"
+            ],
+            "Salıncak ve Rotil": [
+                "salincak",
+                "rotil",
+                "salincak burc"
+            ]
+        },
+        "Direksiyon": {
+            "Direksiyon Kutusu": [
+                "direksiyon kutu",
+                "direksiyon disli"
+            ],
+            "Rot ve Rot Başı": [
+                "rot basi",
+                "rot mili",
+                "z rot",
+                "viraj demir"
+            ],
+            "Direksiyon Pompası": [
+                "direksiyon pompa"
+            ]
+        }
+    },
+    "Elektrik Sistemi": {
+        "Aydınlatma": {
+            "Far ve Sinyal": [
+                "far",
+                "sinyal",
+                "stop lamba",
+                "sis far"
+            ],
+            "Ampuller": [
+                "ampul",
+                "h7",
+                "h4",
+                "xenon"
+            ]
+        },
+        "Ateşleme": {
+            "Buji": [
+                "buji",
+                "kizdirma buji"
+            ],
+            "Ateşleme Bobini": [
+                "bobin",
+                "atesleme bobin"
+            ],
+            "Buji Kablosu": [
+                "buji kablo"
+            ]
+        },
+        "Marş ve Şarj": {
+            "Marş Motoru": [
+                "mars motor",
+                "mars dinamo"
+            ],
+            "Şarj Dinamosu": [
+                "sarj dinamo",
+                "alternator"
+            ],
+            "Konjektör": [
+                "konjektor"
+            ]
+        }
+    },
+    "Soğutma Sistemi": {
+        "Radyatör Grubu": {
+            "Su Radyatörü": [
+                "su radyator",
+                "motor radyator"
+            ],
+            "Klima Radyatörü": [
+                "klima radyator",
+                "kondenser"
+            ],
+            "Kalorifer Radyatörü": [
+                "kalorifer radyator",
+                "isil isil"
+            ]
+        },
+        "Devirdaim ve Termostat": {
+            "Devirdaim": [
+                "devirdaim",
+                "su pompasi"
+            ],
+            "Termostat": [
+                "termostat",
+                "hararet musur"
+            ]
+        }
+    }
+}

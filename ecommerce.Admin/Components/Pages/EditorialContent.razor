@@ -1,0 +1,50 @@
+@page "/editorial-contents"
+@using ecommerce.Admin.Domain.Dtos.EditorialContentDto
+@using ecommerce.Core.Extensions
+@using ecommerce.Core.Utils
+@layout MainLayout
+
+<PageTitle>Editoryal İçerikler</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Editoryal İçerikler</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="İçerik Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="DataGrid" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PageSize="25" AllowFilterDateInput="true" TItem="EditorialContentListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@EditorialContents.DataCount" Data="@EditorialContents.Data" Render="@OnRadzenGridRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Property="Id" Filterable="false" Visible="false" SortOrder="SortOrder.Descending"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Property="Type" Title="İçerik Tipi" Width="150px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Property="Title" Title="Başlık" MinWidth="200px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Property="Slug" Title="Url" Width="150px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Property="Order" Title="Sıra" Width="100px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Property="IsDefault" Title="Default" Width="50px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Title="Yayın Tarihi" Property="PublishDate" FormatString="{0:g}" Width="165px"/>
+                      <RadzenDataGridColumn TItem="EditorialContentListDto" Title="Bitiş Tarihi" Property="EndDate" FormatString="{0:g}" Width="165px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Title="Durum" Property="Status" Type="@typeof(EntityStatus)" Width="150px">
+                        <Template Context="editorialContent">
+                            <RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">@(((EntityStatus) editorialContent.Status).GetDisplayName())</RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Title="Oluşturulma Tarihi" Property="CreatedDate" FormatString="{0:g}" Width="165px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Title="Güncellenme Tarihi" Property="ModifiedDate" FormatString="{0:g}" Width="165px"/>
+                    <RadzenDataGridColumn TItem="EditorialContentListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="editorialContent">
+                            @if (editorialContent.Status != (int) EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Click="@(() => DeleteRow(editorialContent))" @onclick:stopPropagation="true"/>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

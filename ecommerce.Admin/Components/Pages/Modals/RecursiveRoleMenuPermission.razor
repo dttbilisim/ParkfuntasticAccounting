@@ -1,0 +1,349 @@
+@using ecommerce.Admin.Domain.Dtos.RoleMenuDto
+@using ecommerce.Core.Entities.Admin
+@using Radzen
+@using Radzen.Blazor
+@using ecommerce.Admin.Services.Interfaces
+@inject IMenuService MenuService
+@inject NotificationService NotificationService
+
+@{
+    var hasChildren = Menu.InverseParent != null && Menu.InverseParent.Any();
+    var isDragOverItem = DragState.IsDragOverItem(Menu.Id);
+    var isDragOverTop = DragState.IsDragOverZone(Menu.Id, "top");
+    var isDragOverBottom = DragState.IsDragOverZone(Menu.Id, "bottom");
+}
+
+<style>
+    .menu-item-container {
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    .drop-zone {
+        height: 2px;
+        margin: 0;
+        z-index: 10;
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    .drop-zone.active {
+        height: 24px;
+        background: rgba(var(--rz-primary-rgb), 0.1);
+        border: 2px dashed var(--rz-primary);
+        border-radius: 4px;
+        margin: 4px 0;
+    }
+
+    .menu-row {
+        padding: 4px 8px;
+        border: 1px solid var(--rz-border-color);
+        border-radius: 6px;
+        background: var(--rz-base-background-color);
+        margin-bottom: 1px;
+        transition: all 0.2s;
+    }
+
+    .menu-row:hover {
+        border-color: var(--rz-primary-light);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .menu-row.drag-over {
+        background-color: var(--rz-secondary-lighter);
+        border: 2px solid var(--rz-primary) !important;
+        transform: scale(1.02);
+    }
+    
+    .menu-row[draggable="true"] {
+        cursor: grab;
+    }
+    .menu-row[draggable="true"]:active {
+        cursor: grabbing;
+    }
+
+    .text-permission-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--rz-text-tertiary-color);
+    }
+</style>
+
+@if (IsVisible)
+{
+    <!-- Top Drop Zone (for reordering before) -->
+    <div class="drop-zone @(isDragOverTop ? "active" : "")"
+         @ondragenter="@(args => HandleDragEnterZone(args, "top"))"
+         @ondragleave="@(args => HandleDragLeaveZone(args, "top"))"
+         @ondragover="HandleDragOverZone"
+         @ondragover:preventDefault="true"
+         @ondrop="@(args => HandleDropZone(args, "top"))">
+    </div>
+
+    <div class="menu-item-container @(isDragOverItem ? "drag-over" : "")">
+        <div class="menu-row @(isDragOverItem ? "drag-over" : "")"
+             draggable="true"
+             @ondragstart="@(args => HandleDragStart(args))"
+             @ondragover="@(args => HandleDragOverItem(args))"
+             @ondragover:preventDefault="true"
+             @ondragleave="@HandleDragLeaveItem"
+             @ondrop="@HandleDropOnItem">
+             
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center" style="flex: 1; padding-left: @((Level * 20) + "px")">
+                    <RadzenIcon Icon="@Menu.Icon" class="me-2" style="font-size: 1.1rem; color: var(--rz-primary);" />
+                    <div class="d-flex flex-column">
+                        <span style="@(hasChildren ? "font-weight: 700; color: var(--rz-text-title-color); font-size: 0.85rem;" : "font-weight: 500; color: var(--rz-text-body-color); font-size: 0.8rem;")">
+                            @Menu.Name
+                        </span>
+                        @if(Menu.ParentId == null) {
+                             <span style="font-size: 0.65rem; color: var(--rz-text-disabled-color);">Ana Menü</span>
+                        }
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Master Toggle -->
+                    <div class="d-flex align-items-center gap-2 border-end pe-3 border-secondary-lighter" title="Hepsini Seç">
+                        <RadzenCheckBox TValue="bool" Value="@AreAllSelected()" Change="@(args => ToggleAll(args))" @onclick:stopPropagation="true" class="rz-mb-0" />
+                        <span class="text-permission-label fw-bold text-primary">Tümü</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                         <div class="d-flex flex-column align-items-center">
+                            <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanView)" Change="@(args => UpdatePermission(p => p.CanView = args))" @onclick:stopPropagation="true" />
+                            <span class="text-permission-label mt-1">Gör</span>
+                         </div>
+                         <div class="d-flex flex-column align-items-center ms-2">
+                             <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanCreate)" Change="@(args => UpdatePermission(p => p.CanCreate = args))" @onclick:stopPropagation="true" />
+                            <span class="text-permission-label mt-1">Ekle</span>
+                         </div>
+                         <div class="d-flex flex-column align-items-center ms-2">
+                             <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanEdit)" Change="@(args => UpdatePermission(p => p.CanEdit = args))" @onclick:stopPropagation="true" />
+                            <span class="text-permission-label mt-1">Düz</span>
+                         </div>
+                         <div class="d-flex flex-column align-items-center ms-2">
+                             <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanDelete)" Change="@(args => UpdatePermission(p => p.CanDelete = args))" @onclick:stopPropagation="true" />
+                            <span class="text-permission-label mt-1">Sil</span>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Drop Zone (for reordering after) -->
+    <div class="drop-zone @(isDragOverBottom ? "active" : "")"
+         @ondragenter="@(args => HandleDragEnterZone(args, "bottom"))"
+         @ondragleave="@(args => HandleDragLeaveZone(args, "bottom"))"
+         @ondragover="HandleDragOverZone"
+         @ondragover:preventDefault="true"
+         @ondrop="@(args => HandleDropZone(args, "bottom"))">
+    </div>
+
+    @if (hasChildren)
+    {
+        var sortedChildren = Menu.InverseParent.OrderBy(x => x.Order).ThenBy(x => x.Id).ToList();
+        @for(int i=0; i < sortedChildren.Count; i++)
+        {
+            var child = sortedChildren[i];
+            <RecursiveRoleMenuPermission Menu="@child" Level="@(Level + 1)" Index="@i" RolePermissions="@RolePermissions" SearchTerm="@SearchTerm" OnPermissionChanged="@OnPermissionChanged" OnMenuStructureChanged="@OnMenuStructureChanged" />
+        }
+    }
+}
+
+@code {
+    [Parameter] public Menu Menu { get; set; } = default!;
+    [Parameter] public int Level { get; set; } = 0;
+    [Parameter] public int Index { get; set; } = 0;
+    [Parameter] public List<RoleMenuUpsertDto> RolePermissions { get; set; } = new();
+    [Parameter] public string SearchTerm { get; set; }
+    [Parameter] public EventCallback OnPermissionChanged { get; set; }
+    [Parameter] public EventCallback OnMenuStructureChanged { get; set; }
+
+    private bool IsVisible 
+    {
+        get 
+        {
+            if (string.IsNullOrWhiteSpace(SearchTerm)) return true;
+            
+            // Match self
+            if (Menu.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)) return true;
+            
+            // Match descendants
+            return CheckDescendants(Menu.InverseParent);
+        }
+    }
+
+    private bool CheckDescendants(ICollection<Menu> children)
+    {
+        if (children == null || !children.Any()) return false;
+        foreach(var child in children)
+        {
+            if (child.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)) return true;
+            if (CheckDescendants(child.InverseParent)) return true;
+        }
+        return false;
+    }
+
+    // Static State helper
+    public static class DragState 
+    {
+        public static int? DraggedMenuId { get; set; }
+        public static int? OverItemId { get; set; }
+        public static string? OverZone { get; set; } // "top" or "bottom" from View Perspective
+        public static int? OverZoneMenuId { get; set; }
+
+        public static bool IsDragOverItem(int menuId) => OverItemId == menuId;
+        public static bool IsDragOverZone(int menuId, string zone) => OverZoneMenuId == menuId && OverZone == zone;
+    }
+
+    private void HandleDragStart(DragEventArgs args)
+    {
+        DragState.DraggedMenuId = Menu.Id;
+        args.DataTransfer.EffectAllowed = "move";
+    }
+
+    // --- Drop on Item (Nesting) ---
+    private void HandleDragOverItem(DragEventArgs args)
+    {
+        if (DragState.DraggedMenuId == null || DragState.DraggedMenuId == Menu.Id) return;
+        
+        DragState.OverItemId = Menu.Id;
+        DragState.OverZone = null;
+        DragState.OverZoneMenuId = null;
+        
+        args.DataTransfer.DropEffect = "move";
+    }
+
+    private void HandleDragLeaveItem()
+    {
+        if (DragState.OverItemId == Menu.Id)
+            DragState.OverItemId = null;
+    }
+
+    private async Task HandleDropOnItem()
+    {
+        DragState.OverItemId = null;
+        if (DragState.DraggedMenuId == null || DragState.DraggedMenuId == Menu.Id) return;
+
+        // Nest dragged item under this menu
+        await UpdateLocation(DragState.DraggedMenuId.Value, Menu.Id, 999); // Append to end
+    }
+
+    // --- Drop on Zone (Reordering) ---
+    private void HandleDragEnterZone(DragEventArgs args, string zone)
+    {
+        if (DragState.DraggedMenuId == null || DragState.DraggedMenuId == Menu.Id) return;
+        
+        DragState.OverZone = zone;
+        DragState.OverZoneMenuId = Menu.Id;
+        DragState.OverItemId = null;
+    }
+    
+    private void HandleDragOverZone(DragEventArgs args)
+    {
+        if (DragState.DraggedMenuId == null || DragState.DraggedMenuId == Menu.Id) return;
+        args.DataTransfer.DropEffect = "move";
+    }
+
+    private void HandleDragLeaveZone(DragEventArgs args, string zone)
+    {
+        if (DragState.OverZoneMenuId == Menu.Id && DragState.OverZone == zone)
+        {
+             DragState.OverZone = null;
+             DragState.OverZoneMenuId = null;
+        }
+    }
+
+    private async Task HandleDropZone(DragEventArgs args, string zone)
+    {
+        DragState.OverZone = null;
+        DragState.OverZoneMenuId = null;
+        
+        if (DragState.DraggedMenuId == null || DragState.DraggedMenuId == Menu.Id) return;
+
+        var draggedId = DragState.DraggedMenuId.Value;
+        
+        // Use Index instead of Menu.Order
+        int targetIndex = Index;
+        if (zone == "bottom") targetIndex++; 
+
+        await UpdateLocation(draggedId, Menu.ParentId, targetIndex);
+    }
+    
+    private async Task UpdateLocation(int id, int? parentId, int order)
+    {
+         var result = await MenuService.UpdateMenuLocation(id, parentId, order);
+        
+        if (result.Ok)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Menü güncellendi");
+            DragState.DraggedMenuId = null;
+            await OnMenuStructureChanged.InvokeAsync();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Hata", result.Metadata?.Message ?? "İşlem başarısız");
+            DragState.DraggedMenuId = null;
+        }
+    }
+
+    // --- Checkbox Helpers (Keep existing) ---
+    private RoleMenuUpsertDto? CurrentPermission => RolePermissions.FirstOrDefault(x => x.MenuId == Menu.Id);
+
+    private bool GetPermission(Func<RoleMenuUpsertDto, bool> selector)
+    {
+        var perm = CurrentPermission;
+        return perm != null && selector(perm);
+    }
+
+    private bool AreAllSelected()
+    {
+        var perm = CurrentPermission;
+        return perm != null && perm.CanView && perm.CanCreate && perm.CanEdit && perm.CanDelete;
+    }
+
+    private async Task ToggleAll(bool value)
+    {
+        await UpdatePermission(perm => 
+        {
+            perm.CanView = value;
+            perm.CanCreate = value;
+            perm.CanEdit = value;
+            perm.CanDelete = value;
+        });
+    }
+
+    private async Task UpdatePermission(Action<RoleMenuUpsertDto> maxAction)
+    {
+        var perm = CurrentPermission;
+        if (perm == null)
+        {
+            perm = new RoleMenuUpsertDto { MenuId = Menu.Id };
+            RolePermissions.Add(perm);
+        }
+
+        maxAction(perm);
+        
+        if (perm.CanCreate || perm.CanEdit || perm.CanDelete)
+        {
+            perm.CanView = true;
+        }
+
+        if (!perm.CanView)
+        {
+            perm.CanCreate = false;
+            perm.CanEdit = false;
+            perm.CanDelete = false;
+            
+            if (!perm.CanCreate && !perm.CanEdit && !perm.CanDelete)
+            {
+                 RolePermissions.Remove(perm);
+            }
+        }
+        
+        await OnPermissionChanged.InvokeAsync();
+    }
+}

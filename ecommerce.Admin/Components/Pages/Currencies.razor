@@ -1,0 +1,79 @@
+@page "/currencies"
+@using ecommerce.Admin.Domain.Dtos.CurrencyDto
+@using ecommerce.Core.Utils
+@layout MainLayout
+
+<PageTitle>Kur Tanımları</PageTitle>
+
+<PageTitle>Kur Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Kur Tanımları</h1>
+        </div>
+        <div class="col-6 text-end d-flex justify-content-end gap-2">
+            <RadzenButton Icon="sync" Text="Güncel Kurları Çek" Click="@RefreshCurrenciesClick" ButtonStyle="ButtonStyle.Info" />
+            <RadzenButton Click="@AddButtonClick" Text="Yeni Kur Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="CurrencyListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@currencies"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Property="CurrencyCode" Title="Kod" Width="100px" />
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Property="CurrencyName" Title="Ad" />
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Property="ForexBuying" Title="Döviz Alış" Width="140px" FormatString="{0:N4}" />
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Property="ForexSelling" Title="Döviz Satış" Width="140px" FormatString="{0:N4}" />
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Property="CreatedDate" Title="Tarih" Width="160px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="c">
+                            @if (c.Status == EntityStatus.Active)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else if (c.Status == EntityStatus.Passive)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="Pasif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Silinmiş" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CurrencyListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="c">
+                            @if (c.Status != EntityStatus.Deleted)
+                            {
+                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@((args) => EditRow(c))" @onclick:stopPropagation="true" />
+                                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@((args) => GridDeleteButtonClick(args, c))" @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+

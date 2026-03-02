@@ -1,0 +1,10 @@
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Components/Pages/Modals/UnfacturedOrdersModal.razor(101,1): error RZ9981: Unexpected closing tag 'div' with no matching start tag. [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Components/Pages/Modals/UpsertInvoice.razor.cs(1082,83): error CS0234: The type or namespace name 'OrderItemListDto' does not exist in the namespace 'ecommerce.Admin.Domain.Dtos.OrderDto' (are you missing an assembly reference?) [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Components/Pages/Modals/UpsertInvoice.razor.cs(1246,48): error CS1503: Argument 1: cannot convert from 'System.Collections.Generic.List<ecommerce.Core.Entities.OrderItems>' to 'System.Collections.Generic.IEnumerable<ecommerce.Admin.Domain.Dtos.OrderDto.OrderItemListDto>' [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Components/Pages/Modals/UpsertInvoice.razor.cs(1260,84): error CS0234: The type or namespace name 'OrderItemListDto' does not exist in the namespace 'ecommerce.Admin.Domain.Dtos.OrderDto' (are you missing an assembly reference?) [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+
+Build FAILED.
+    1800 Warning(s)
+    4 Error(s)
+
+Time Elapsed 00:00:06.47

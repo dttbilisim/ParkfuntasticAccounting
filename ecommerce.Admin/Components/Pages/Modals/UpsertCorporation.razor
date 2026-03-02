@@ -1,0 +1,80 @@
+@using ecommerce.Admin.Domain.Dtos.HierarchicalDto
+@using ecommerce.Admin.Services.Interfaces
+@inject ICorporationService CorporationService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenTemplateForm TItem="CorporationUpsertDto" Data="@model" Submit="@HandleSubmit">
+    <RadzenStack Gap="1rem" class="rz-p-2 rz-p-md-4">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Şirket Adı" Component="CorpName" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenTextBox @bind-Value="model.Name" Style="width:100%" Name="CorpName" />
+                <RadzenRequiredValidator Component="CorpName" Text="Şirket adı zorunludur" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Vergi No" Component="TaxNumber" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenTextBox @bind-Value="model.TaxNumber" Style="width:100%" Name="TaxNumber" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Vergi Dairesi" Component="TaxOffice" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenTextBox @bind-Value="model.TaxOffice" Style="width:100%" Name="TaxOffice" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="E-Posta" Component="CorpEmail" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenTextBox @bind-Value="model.Email" Style="width:100%" Name="CorpEmail" />
+                <RadzenEmailValidator Component="CorpEmail" Text="Geçerli bir e-posta adresi giriniz" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Telefon" Component="PhoneNumber" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenTextBox @bind-Value="model.PhoneNumber" Style="width:100%" Name="PhoneNumber" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow AlignItems="AlignItems.Start">
+            <RadzenColumn Size="12" SizeMD="4" class="rz-pt-2">
+                <RadzenLabel Text="Adres" Component="Address" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenTextArea @bind-Value="model.Address" Style="width:100%" Rows="3" Name="Address" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Aktif" Component="IsActive" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenCheckBox @bind-Value="model.IsActive" TValue="bool" Name="IsActive" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-4">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" />
+            <RadzenButton Click="@((args) => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" Text="İptal" Icon="cancel" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
+

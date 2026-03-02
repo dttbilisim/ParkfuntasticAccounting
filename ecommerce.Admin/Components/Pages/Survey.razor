@@ -1,0 +1,47 @@
+@page "/surveys"
+@using ecommerce.Admin.Domain.Dtos.SurveyDto
+@using ecommerce.Core.Extensions
+@using ecommerce.Core.Utils
+@layout MainLayout
+
+<PageTitle>Anketler</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Anketler</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="Anket Ekle" Click="@AddButtonClick" Variant="Variant.Flat"/>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="DataGrid" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PageSize="25" AllowFilterDateInput="true" TItem="SurveyListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@Surveys.DataCount" Data="@Surveys.Data" Render="@OnRadzenGridRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Property="Id" Filterable="false" Visible="false" SortOrder="SortOrder.Descending"/>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Property="Title" Title="Anket" MinWidth="300px"/>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Property="Order" Title="Sıra" Width="150px"/>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Property="SurveyAnswersCount" Title="Yanıt Sayısı" Width="150px"/>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Title="Durum" Property="Status" Type="@typeof(EntityStatus)" Width="150px">
+                        <Template Context="survey">
+                            <RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">@(((EntityStatus) survey.Status).GetDisplayName())</RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Title="Oluşturulma Tarihi" Property="CreatedDate" FormatString="{0:g}" Width="165px"/>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Title="Güncellenme Tarihi" Property="ModifiedDate" FormatString="{0:g}" Width="165px"/>
+                    <RadzenDataGridColumn TItem="SurveyListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="survey">
+                            <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="info" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" class="rz-ml-1" Click="@(() => NavigationManager.NavigateTo($"/survey-result/{survey.Id}"))" title="Anket Sonucu" @onclick:stopPropagation="true"/>
+                            @if (survey.Status != (int) EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Click="@(() => DeleteRow(survey))" @onclick:stopPropagation="true"/>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

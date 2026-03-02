@@ -1,0 +1,241 @@
+@page "/invoices"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.InvoiceDto
+@using Radzen
+@using Radzen.Blazor
+@attribute [Authorize]
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Fatura Listesi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Fatura Listesi</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click="@AddButtonClick" Text="Yeni Fatura Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" class="me-2" />
+            <RadzenButton Click="@AddOrderLinkedInvoiceClick" Text="Sipariş Bağlı Fatura" Icon="shopping_cart" ButtonStyle="ButtonStyle.Success" />
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 shadow-sm">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            <RadzenDropDown @bind-Value="FilterInvoiceTypeId"
+                            Data="InvoiceTypes"
+                            TextProperty="Name"
+                            ValueProperty="Id"
+                            TValue="int?"
+                            Placeholder="Tüm Fatura Tipleri"
+                            AllowClear="true"
+                            AllowFiltering="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="min-width: 220px;"
+                            Loading="@_invoiceTypesLoading"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenButton Text="Filtrele" ButtonStyle="ButtonStyle.Primary" Icon="filter_list" Click="ApplyFilter" />
+            @if (FilterInvoiceTypeId.HasValue)
+            {
+                <RadzenButton Text="Temizle" ButtonStyle="ButtonStyle.Light" Icon="close" Click="ClearFilter" />
+            }
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            Density="Density.Compact"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="InvoiceListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@invoices"
+                            RowRender="@RowRender"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single"
+                            EqualsText="@Loc.GetString("EqualsText")"
+                            NotEqualsText="@Loc.GetString("NotEqualsText")"
+                            LessThanText="@Loc.GetString("LessThanText")"
+                            LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                            GreaterThanText="@Loc.GetString("GreaterThanText")"
+                            IsNullText="@Loc.GetString("IsNullText")"
+                            IsNotNullText="@Loc.GetString("IsNotNullText")">
+                <Columns>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="InvoiceNo" Title="Fatura No" Width="140px" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="InvoiceSerialNo" Title="Seri No" Width="100px" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="InvoiceDate" Title="Tarih" Width="120px" FormatString="{0:dd.MM.yyyy}" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="CustomerName" Title="Müşteri" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="InvoiceTypeName" Title="Fatura Tipi" Width="150px" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="CurrencyCode" Title="Döviz" Width="80px" TextAlign="TextAlign.Center" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="GeneralTotalCurrency" Title="Döviz Tutarı" Width="120px" FormatString="{0:N2}" TextAlign="TextAlign.Right" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="TotalAmount" Title="Tutar" Width="120px" FormatString="{0:N2} ₺" TextAlign="TextAlign.Right" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="VatTotal" Title="KDV" Width="100px" FormatString="{0:N2} ₺" TextAlign="TextAlign.Right" />
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="GeneralTotal" Title="Genel Toplam" Width="140px" FormatString="{0:N2} ₺" TextAlign="TextAlign.Right">
+                        <Template Context="invoice">
+                            <strong style="color: #598087">@invoice.GeneralTotal.ToString("N2") ₺</strong>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Title="e-Fatura" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="invoice">
+                            <RadzenBadge BadgeStyle="@(invoice.IsEInvoice ? BadgeStyle.Success : BadgeStyle.Light)" Text="@(invoice.IsEInvoice ? "Evet" : "Hayır")" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Title="e-Arşiv" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="invoice">
+                            <RadzenBadge BadgeStyle="@(invoice.IsEArchive ? BadgeStyle.Info : BadgeStyle.Light)" Text="@(invoice.IsEArchive ? "Evet" : "Hayır")" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="Ettn" Title="ETTN" Width="160px">
+                        <Template Context="invoice">
+                            @if (!string.IsNullOrEmpty(invoice.Ettn))
+                            {
+                                <code style="font-size: 0.7rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; user-select: all;">@invoice.Ettn[..Math.Min(12, invoice.Ettn.Length)]...</code>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Property="EInvoiceStatus" Title="e-Fatura Durum" Width="130px" TextAlign="TextAlign.Center">
+                        <Template Context="invoice">
+                            @if (!string.IsNullOrEmpty(invoice.EInvoiceStatus))
+                            {
+                                <RadzenBadge BadgeStyle="@GetEInvoiceStatusBadgeStyle(invoice.EInvoiceStatus)" Text="@invoice.EInvoiceStatus" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="Gönderilmedi" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" Title="İşlem" Filterable="false" Sortable="false" Width="200px" TextAlign="TextAlign.Center">
+                        <Template Context="invoice">
+                            @if (!string.IsNullOrEmpty(invoice.Ettn))
+                            {
+                                <RadzenButton Icon="download" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" 
+                                              Click="@(args => DownloadEInvoiceClick(invoice))" 
+                                              @onclick:stopPropagation="true"
+                                              Disabled="@(_downloadingInvoiceId != null)"
+                                              title="e-Fatura İndir" class="me-1" />
+                            }
+                            @if (string.IsNullOrEmpty(invoice.Ettn) || invoice.EInvoiceStatus?.ToUpperInvariant() == "IPTAL")
+                            {
+                                <RadzenButton Icon="send" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small" 
+                                              Click="@(args => SendEInvoiceClick(invoice))" 
+                                              @onclick:stopPropagation="true"
+                                              Disabled="@(_sendingInvoiceId != null)"
+                                              title="e-Fatura Gönder" class="me-1" />
+                            }
+                            else
+                            {
+                                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" 
+                                              Click="@(args => CancelEInvoiceClick(invoice))" 
+                                              @onclick:stopPropagation="true"
+                                              Disabled="@(_cancellingInvoiceId != null)"
+                                              title="e-Fatura İptal Et" class="me-1" />
+                            }
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@((args) => EditRow(invoice))" @onclick:stopPropagation="true" />
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => GridDeleteButtonClick(args, invoice))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+
+    @* e-Fatura Gönderim Modal Overlay *@
+    @if (_showSendProgress)
+    {
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: #fff; border-radius: 12px; width: 480px; max-width: 90vw; box-shadow: 0 8px 32px rgba(0,0,0,0.25); overflow: hidden;">
+                @* Başlık *@
+                <div style="background: linear-gradient(135deg, #598087 0%, #3d5a5e 100%); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="color: #fff; font-weight: 600; font-size: 15px;">
+                        <RadzenIcon Icon="receipt_long" Style="font-size: 18px; vertical-align: middle; margin-right: 6px;" />
+                        e-Fatura Gönderim Durumu
+                    </span>
+                    @if (_sendingInvoiceId == null)
+                    {
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.ExtraSmall"
+                                      Click="@(() => CloseSendProgress())" title="Kapat" />
+                    }
+                </div>
+
+                @* Adımlar *@
+                <div style="padding: 20px;">
+                    @foreach (var step in _sendSteps)
+                    {
+                        var bgColor = step.Status switch
+                        {
+                            EInvoiceStepStatus.Success => "#d4edda",
+                            EInvoiceStepStatus.Error => "#f8d7da",
+                            EInvoiceStepStatus.InProgress => "#fff3cd",
+                            _ => "#f8f9fa"
+                        };
+                        var iconColor = step.Status switch
+                        {
+                            EInvoiceStepStatus.Success => "color: #28a745;",
+                            EInvoiceStepStatus.Error => "color: #dc3545;",
+                            EInvoiceStepStatus.InProgress => "color: #856404;",
+                            _ => "color: #adb5bd;"
+                        };
+                        var iconName = step.Status switch
+                        {
+                            EInvoiceStepStatus.Success => "check_circle",
+                            EInvoiceStepStatus.Error => "error",
+                            EInvoiceStepStatus.InProgress => "sync",
+                            _ => "hourglass_empty"
+                        };
+
+                        <div style="background: @bgColor; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;">
+                            @if (step.Status == EInvoiceStepStatus.InProgress)
+                            {
+                                <div class="spinner-border spinner-border-sm" style="color: #856404; flex-shrink: 0;" role="status"></div>
+                            }
+                            else
+                            {
+                                <RadzenIcon Icon="@iconName" Style="@($"font-size: 22px; flex-shrink: 0; {iconColor}")" />
+                            }
+                            <div style="flex: 1; min-width: 0;">
+                                <span style="font-weight: 500; font-size: 14px;">@step.Name</span>
+                                @if (!string.IsNullOrEmpty(step.ErrorMessage))
+                                {
+                                    <div style="color: #dc3545; font-size: 12px; margin-top: 4px;">
+                                        <RadzenIcon Icon="warning" Style="font-size: 13px; vertical-align: middle; margin-right: 2px;" />
+                                        @step.ErrorMessage
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @* Başarılı sonuç - ETTN göster *@
+                    @if (!string.IsNullOrEmpty(_sendResultEttn))
+                    {
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 12px 14px; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                            <RadzenIcon Icon="verified" Style="font-size: 20px; color: #28a745; flex-shrink: 0;" />
+                            <span style="font-size: 13px;"><strong>ETTN:</strong> @_sendResultEttn</span>
+                        </div>
+                    }
+                </div>
+
+                @* Alt buton - işlem bittiyse kapat *@
+                @if (_sendingInvoiceId == null)
+                {
+                    <div style="padding: 0 20px 16px; text-align: right;">
+                        <RadzenButton Text="Kapat" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small"
+                                      Click="@(() => CloseSendProgress())" />
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

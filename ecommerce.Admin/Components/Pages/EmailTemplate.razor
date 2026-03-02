@@ -1,0 +1,56 @@
+@page "/email-templates"
+@using ecommerce.Admin.Domain.Dtos.EmailDto
+@using ecommerce.Admin.Domain.Dtos.StaticPageDto;
+@using ecommerce.Core.Utils;
+@layout MainLayout
+
+<PageTitle>Email Template Tanımları</PageTitle>
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+            <RadzenText Text="Email Template Tanımları" TextStyle="TextStyle.H5" style="color:#598087" class="mt-2" />
+        </div>
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Sayfa Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+</RadzenCard>
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenDataGrid
+            @ref="radzenDataGrid"
+            ColumnWidth="200px"
+            AllowFiltering="true"
+            FilterMode="FilterMode.Simple"
+            AllowPaging="true"
+            AllowSorting="true"
+            PagerAlwaysVisible=true
+            PageSize=25
+            AllowFilterDateInput=true
+            TItem="EmailTemplatesDto"
+            RowSelect="@EditRow"
+            LoadData="@LoadData"
+            Count="@count"
+            Data="@emailTemplateList"
+            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+            <Columns>
+                <RadzenDataGridColumn TItem="EmailTemplatesDto" Property="Id" Title="Id" Width="50px" Filterable="false"></RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="EmailTemplatesDto" Property="Name" Title="Adı" Width="200px"></RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="EmailTemplatesDto" Property="EmailTemplateType" Title="Şablon Tipi" Width="200px" />
+                <RadzenDataGridColumn TItem="EmailTemplatesDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="data">
+                        @if (data.Status != (int) EntityStatus.Deleted)
+                        {
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                      Shade="Shade.Dark" Variant="Variant.Flat"
+                                      Click=@(args => GridDeleteButtonClick(args, data)) @onclick:stopPropagation="true" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>

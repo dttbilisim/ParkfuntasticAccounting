@@ -1,0 +1,99 @@
+@page "/UpsertEmailTemplate"
+
+@using ecommerce.Admin.Domain.Dtos.EmailDto
+@using ecommerce.Admin.Domain.Dtos.StaticPageDto;
+@using ecommerce.Core.Helpers
+@attribute [Authorize]
+
+<PageTitle>Email Template Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kayıt Edilemedi!</RadzenAlert>
+
+    <RadzenTemplateForm TItem="EmailTemplatesDto" Data="@emailTemplates" Visible="@(emailTemplates != null)" Submit="@FormSubmit" ValidateOnSubmit="true">
+
+        <div style="margin-bottom: 1rem" class="row">
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Email Şablonu" Component="EmailTemplateType" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDown Data="@emailTemplateTypes" style="display: block; width: 100%" @bind-Value="@emailTemplates.EmailTemplateType" Name="EmailTemplateType" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    <RadzenRequiredValidator DefaultValue="0" Component="EmailTemplateType" Text="Lütfen bir şablon tipi seçiniz." Style="position: absolute" />
+                </div>
+            </div>
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Adı" Component="Name" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@emailTemplates.Name" Name="Name" />
+                    <RadzenRequiredValidator Component="Name" Text="Ad alanı boş geçilemez." Style="position: absolute" />
+                </div>
+            </div>
+         
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="İçerik" Component="Content" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenHtmlEditor @bind-Value="@emailTemplates.Description" Name="Description" style="height: 400px; width: 100%">
+                        <RadzenHtmlEditorUndo/>
+                        <RadzenHtmlEditorRedo/>
+                        <RadzenHtmlEditorSeparator/>
+                        <RadzenHtmlEditorBold/>
+                        <RadzenHtmlEditorItalic/>
+                        <RadzenHtmlEditorUnderline/>
+                        <RadzenHtmlEditorStrikeThrough/>
+                        <RadzenHtmlEditorSeparator/>
+                        <RadzenHtmlEditorAlignLeft/>
+                        <RadzenHtmlEditorAlignCenter/>
+                        <RadzenHtmlEditorAlignRight/>
+                        <RadzenHtmlEditorJustify/>
+                        <RadzenHtmlEditorSeparator/>
+                        <RadzenHtmlEditorIndent/>
+                        <RadzenHtmlEditorOutdent/>
+                        <RadzenHtmlEditorUnorderedList/>
+                        <RadzenHtmlEditorOrderedList/>
+                        <RadzenHtmlEditorSeparator/>
+                        <RadzenHtmlEditorColor/>
+                        <RadzenHtmlEditorBackground/>
+                        <RadzenHtmlEditorRemoveFormat/>
+                        <RadzenHtmlEditorSeparator/>
+                        <RadzenHtmlEditorSubscript/>
+                        <RadzenHtmlEditorSuperscript/>
+                        <RadzenHtmlEditorSeparator/>
+                        <RadzenHtmlEditorLink/>
+                        <RadzenHtmlEditorUnlink/>
+                        <RadzenHtmlEditorImage/>
+                        <RadzenHtmlEditorFontName/>
+                        <RadzenHtmlEditorFontSize/>
+                        <RadzenHtmlEditorFormatBlock/>
+                        <RadzenHtmlEditorSeparator/>
+                        <RadzenHtmlEditorSource/>
+                    </RadzenHtmlEditor>
+                    <RadzenRequiredValidator Component="Description" Text="İçerik boş olamaz." Style="position: absolute" />
+                </div>
+            </div>
+           
+
+
+            <div style="margin-top:1rem; margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Durum" Component="Length" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenCheckBox @bind-Value="@emailTemplates.StatusBool" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

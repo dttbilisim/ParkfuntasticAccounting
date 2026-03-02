@@ -1,0 +1,94 @@
+﻿@page "/upsert-brand"
+@using ecommerce.Admin.Domain.Dtos.BrandDto;
+@attribute [Authorize]
+
+
+<PageTitle>Ürün Tipi Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Marka Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="BrandUpsertDto" Data="@brand" Visible="@(brand != null)" Submit="@FormSubmit">
+        @if (IsGlobalAdmin)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Şirket" Component="CorporationId" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDown @bind-Value="@SelectedCorporationId" Data="@corporations" TextProperty="Name" ValueProperty="Id"
+                                    Placeholder="Şirket Seçiniz" style="width: 100%" Name="CorporationId"
+                                    Change="@OnCorporationChange" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Şube" Component="BranchId" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDown @bind-Value="@brand.BranchId" Data="@branches" TextProperty="Name" ValueProperty="Id"
+                                    Placeholder="Şube Seçiniz" style="width: 100%" Name="BranchId"
+                                    Disabled="@(!SelectedCorporationId.HasValue)" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    <RadzenRequiredValidator Component="BranchId" Text="Şube seçimi zorunludur" DefaultValue="0" Style="display: block; font-size: 0.8rem;" />
+                </div>
+            </div>
+        }
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Marka" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@brand.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="Marka Adı Girmelisiniz" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Açıklama" Component="Description" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextArea style="display: block; width: 100%" @bind-Value="@brand.Description" Name="Description" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Dosya" Component="File" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <InputFile OnChange="(args) => LoadFiles(args)" class="mb-2" accept="image/webp,image/png,image/gif,image/jpeg"/>
+            </div>
+        </div>
+
+        @if(brand.ImageUrl != null){
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Yüklenen Görsel" Component="File" style="width: 100%"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenImage Path="@($"{CdnConfig.BaseUrl}/BrandImages/{brand.ImageUrl}")" Style="width: 400px;" />
+                </div>
+            </div>
+        }
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Length" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenCheckBox @bind-Value="@Status" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+

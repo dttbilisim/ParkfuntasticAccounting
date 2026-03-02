@@ -1,0 +1,62 @@
+@page "/banners"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.BannerDto;
+@using ecommerce.Admin.Resources
+@using ecommerce.Core.Utils;
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Banner Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Banner Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Banner Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="grid0" 
+                            LoadData="@LoadData" 
+                            Data="@categories" 
+                            Count="@count" 
+                            TItem="BannerListDto" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            AllowFilterDateInput="true" 
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+                            RowSelect="@EditRow"
+                            CellRender="@RowRender"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="BannerListDto" Property="Id" Title="Id" Width="50px"/>
+                    <RadzenDataGridColumn TItem="BannerListDto" Property="Order" Title="Sırası" Width="70px"/>
+                    <RadzenDataGridColumn TItem="BannerListDto" Property="Name" Title="Banner Adı" />
+                    <RadzenDataGridColumn TItem="BannerListDto" Property="CreatedDate" FormatString="{0:dd/MM/yyyy HH:mm}" Width="150px" Title="Oluşturulma Tarihi" />                
+                    <RadzenDataGridColumn TItem="BannerListDto" Property="StatusStr" Title="Durum" Width="100px" />
+                    <RadzenDataGridColumn TItem="BannerListDto" Title="Aksiyon" Width="100px" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+                        <Template Context="Banner">
+                            @if (Banner.Status != EntityStatus.Deleted.GetHashCode())
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, Banner)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

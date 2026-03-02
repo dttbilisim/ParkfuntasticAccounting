@@ -1,0 +1,37 @@
+﻿@page "/upsert-producttype"
+@using ecommerce.Admin.Domain.Dtos.ProductTypeDto;
+@attribute [Authorize]
+
+
+<PageTitle>Ürün Tipi Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Ürün Tipi Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="ProductTypeUpsertDto" Data="@productType" Visible="@(productType != null)" Submit="@FormSubmit">
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Ürün Tipi Adı" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@productType.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="Ürün Tipi Adı Girmelisiniz" />
+            </div>
+            <div style="margin-top:1rem; margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Durum" Component="Length" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenCheckBox @bind-Value="@Status" />
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+

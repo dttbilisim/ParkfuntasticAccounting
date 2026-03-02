@@ -1,0 +1,626 @@
+@using ecommerce.Core.Entities
+@using ecommerce.Web.Domain.Services.Abstract
+@using I18NPortable
+
+@if (IsModalVisible)
+{
+    <div class="modal-backdrop-custom" @onclick="@(() => { if (!IsEditMode) CloseModal(); })"></div>
+    <div class="modal-custom">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <h5 class="modal-title-custom">
+                    <i class="fa-solid fa-car me-2"></i>
+                    @if (IsEditMode)
+                    {
+                        @lang["EditCar"]
+                    }
+                    else
+                    {
+                        @lang["AddNewCar"]
+                    }
+                </h5>
+                
+                    <button type="button" class="btn-close-custom" @onclick="CloseModal">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                
+            </div>
+
+            <div class="modal-body-custom p-0">
+                <div class="row g-0 h-100">
+                    <!-- Sol Panel - Adım Listesi -->
+                    <div class="col-md-4 car-selection-steps">
+                        <div class="steps-container">
+                            <h6 class="steps-title">@lang["Car.VehicleSelection"]</h6>
+                            <div class="steps-list">
+                                <div class="step-item @(currentStep >= 1 ? "completed" : "") @(currentStep == 1 ? "active" : "")" @onclick="() => GoToStep(1)">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.VehicleType"]</div>
+                                        <div class="step-subtitle">@(selectedVehicleType?.Name ?? @lang["Car.NotSelected"])</div>
+                                    </div>
+                                    @if(currentStep > 1 && selectedVehicleType != null)
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                                </div>
+
+                                <div class="step-item @(currentStep >= 2 ? "completed" : "") @(currentStep == 2 ? "active" : "") @(!CanGoToStep(2) ? "disabled" : "")" @onclick="OnBrandStepClicked">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.Brand"]</div>
+                                        <div class="step-subtitle">@(selectedManufacturer?.Name ?? @lang["Car.NotSelected"])</div>
+                                    </div>
+                                    @if(currentStep > 2 && selectedManufacturer != null)
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                                </div>
+
+                                <div class="step-item @(currentStep >= 3 ? "completed" : "") @(currentStep == 3 ? "active" : "") @(!CanGoToStep(3) ? "disabled" : "")" @onclick="() => GoToStepIfValid(3)">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.Series"]</div>
+                                        <div class="step-subtitle">@(selectedBaseModel?.Name ?? @lang["Car.NotSelected"])</div>
+                </div>
+                                    @if(currentStep > 3 && selectedBaseModel != null)
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                        </div>
+
+                                <div class="step-item @(currentStep >= 4 ? "completed" : "") @(currentStep == 4 ? "active" : "") @(!CanGoToStep(4) ? "disabled" : "")" @onclick="() => GoToStepIfValid(4)">
+                                    <div class="step-number">4</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.Model"]</div>
+                                        <div class="step-subtitle">@(selectedSubModel?.Name ?? @lang["Car.NotSelected"])</div>
+                                    </div>
+                                    @if(currentStep > 4 && selectedSubModel != null)
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                        </div>
+
+                                <div class="step-item @(currentStep >= 5 ? "completed" : "") @(currentStep == 5 ? "active" : "") @(!CanGoToStep(5) ? "disabled" : "")" @onclick="() => GoToStepIfValid(5)">
+                                    <div class="step-number">5</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.BodyType"]</div>
+                                        <div class="step-subtitle">@(selectedCarBody?.Name ?? @lang["Car.NotSelected"])</div>
+                                    </div>
+                                    @if(currentStep > 5 && selectedCarBody != null)
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                        </div>
+
+                                <div class="step-item @(currentStep >= 6 ? "completed" : "") @(currentStep == 6 ? "active" : "") @(!CanGoToStep(6) ? "disabled" : "")" @onclick="() => GoToStepIfValid(6)">
+                                    <div class="step-number">6</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.Engine"]</div>
+                                        <div class="step-subtitle">@(selectedEngine?.Name ?? @lang["Car.NotSelected"])</div>
+                                    </div>
+                                    @if(currentStep > 6 && selectedEngine != null)
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                        </div>
+
+                                <div class="step-item @(currentStep >= 7 ? "completed" : "") @(currentStep == 7 ? "active" : "") @(!CanGoToStep(7) ? "disabled" : "")" @onclick="() => GoToStepIfValid(7)">
+                                    <div class="step-number">7</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.AdditionalFeatures"]</div>
+                                        <div class="step-subtitle">@(selectedOptions?.Count ?? 0) seçenek</div>
+                                    </div>
+                                    @if(currentStep > 7 && selectedOptions?.Any() == true)
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                        </div>
+
+                                <!-- Yeni Adım: Plaka Numarası ve Fotoğraflar -->
+                                <div class="step-item @(currentStep >= 8 ? "completed" : "") @(currentStep == 8 ? "active" : "") @(!CanGoToStep(8) ? "disabled" : "")" @onclick="() => GoToStepIfValid(8)">
+                                    <div class="step-number">8</div>
+                                    <div class="step-content">
+                                        <div class="step-title">@lang["Car.PlateAndPhotos"]</div>
+                                        <div class="step-subtitle">
+                                            @if (!string.IsNullOrEmpty(PlateNumber))
+                                            {
+                                                <span>@PlateNumber</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@lang["Car.NotSelected"]</span>
+                                            }
+                                            @if (vehicleImages?.Any() == true)
+                                            {
+                                                <span class="ms-2">• @vehicleImages.Count foto</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    @if(currentStep > 8 && !string.IsNullOrEmpty(PlateNumber))
+                                    {
+                                        <i class="fa-solid fa-check step-check"></i>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Panel - Seçim İçeriği -->
+                    <div class="col-md-8 car-selection-content">
+                        <div class="selection-container">
+                            @if (currentStep == 1)
+                            {
+                                <!-- Araç Tipi Seçimi -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-car-side me-2"></i>
+                                        @lang["Car.SelectVehicleType"]
+                                    </h4>
+                                    @if (isLoadingVehicleTypes)
+                                    {
+                                        <div class="loading-state">
+                                            <p>@lang["Car.LoadingVehicleTypes"]</p>
+                                        </div>
+                                    }
+                                    else if (filteredVehicleTypes?.Any() == true)
+                                    {
+                                        <div class="selection-grid">
+                                            @foreach (var vehicleType in filteredVehicleTypes)
+                                            {
+                                                <div class="selection-card @(selectedVehicleType?.Id == vehicleType.Id ? "selected" : "")"
+                                                     @onclick="() => SelectVehicleType(vehicleType)">
+                                                    <div class="card-icon">
+                                                        <i class="@GetVehicleTypeIcon(vehicleType.Name)"></i>
+                                                    </div>
+                                                    <div class="card-title">@vehicleType.Name</div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-search"></i>
+                                            <p>@lang["Car.NoVehicleTypeFound"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (currentStep == 2)
+                            {
+                                <!-- Marka Seçimi -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-industry me-2"></i>
+                                        @lang["Car.SelectBrand"]
+                                    </h4>
+                                    <div class="search-filter-container mb-3">
+                                        <input type="text" class="form-control search-input" placeholder="@lang["Car.SearchBrand"]" @bind-value="manufacturerSearch" @bind-value:event="oninput" />
+                                        @if (!string.IsNullOrEmpty(manufacturerSearch))
+                                        {
+                                            <button type="button" class="clear-search" onclick="carBrandLogos.clearSearchViaInterop('manufacturer')">
+                                                <i class="fa-solid fa-circle-xmark"></i>
+                                            </button>
+                                        }
+                                    </div>
+
+                                    @if (isLoadingManufacturers)
+                                    {
+                                        <div class="loading-state">
+                                            <p>@lang["Car.LoadingBrands"]</p>
+                                        </div>
+                                    }
+                                    else if (manufacturers != null)
+                                    {
+                                        @if (GetBrandListForRender()?.Any() == true)
+                                        {
+                                            <div class="selection-grid">
+                                                @foreach (var manufacturer in GetBrandListForRender())
+                                                {
+                                                    <div class="selection-card @(selectedManufacturer?.Id == manufacturer.Id ? "selected" : "")"
+                                                         @onclick="() => SelectManufacturer(manufacturer)">
+                                                        <div class="card-icon">
+                                                            @if (!string.IsNullOrEmpty(manufacturer.LogoUrl))
+                                                            {
+                                                                <img src="@manufacturer.LogoUrl" alt="@manufacturer.Name" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <i class="fa-solid fa-car-side"></i>
+                                                            }
+                                                        </div>
+                                                        <div class="card-title">@manufacturer.Name</div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="empty-state">
+                                                <i class="fa-solid fa-search"></i>
+                                                <p>@lang["Car.NoBrandFound"]</p>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-search"></i>
+                                            <p>@lang["Car.NoBrandFound"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (currentStep == 3)
+                            {
+                                <!-- Seri Seçimi -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-layer-group me-2"></i>
+                                        @lang["Car.SelectSeries"]
+                                    </h4>
+                                    <div class="search-filter-container mb-3">
+                                        <input type="text" class="form-control search-input" placeholder="@lang["Car.SearchSeries"]" @bind-value="baseModelSearch" @bind-value:event="oninput" />
+                                        @if (!string.IsNullOrEmpty(baseModelSearch))
+                                        {
+                                            <button type="button" class="clear-search" onclick="carBrandLogos.clearSearchViaInterop('baseModel')">
+                                                <i class="fa-solid fa-circle-xmark"></i>
+                                            </button>
+                                        }
+                                    </div>
+
+                                    @if (isLoadingBaseModels)
+                                    {
+                                        <div class="loading-state">
+                                            <p>@lang["Car.LoadingVehicleTypes"]</p>
+                                        </div>
+                                    }
+                                    else if (filteredBaseModels?.Any() == true)
+                                    {
+                                        <div class="selection-list">
+                                            @foreach (var baseModel in filteredBaseModels)
+                                            {
+                                                <div class="selection-item @(selectedBaseModel?.Id == baseModel.Id ? "selected" : "")"
+                                                     @onclick="() => SelectBaseModel(baseModel)">
+                                                    <div class="item-content">
+                                                        <div class="item-title">@baseModel.Name</div>
+                                                        <div class="item-subtitle">@baseModel.ManufacturerKey</div>
+                                                    </div>
+                                                    <i class="fa-solid fa-chevron-right"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-layer-group"></i>
+                                            <p>@lang["Car.NoSeriesFound"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (currentStep == 4)
+                            {
+                                <!-- Model Seçimi -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-layer-group me-2"></i>
+                                        @lang["Car.SelectModel"]
+                                    </h4>
+                                    <div class="search-filter-container mb-3">
+                                        <input type="text" class="form-control search-input" placeholder="@lang["Car.SearchModel"]" @bind-value="subModelSearch" @bind-value:event="oninput" />
+                                        @if (!string.IsNullOrEmpty(subModelSearch))
+                                        {
+                                            <button type="button" class="clear-search" onclick="carBrandLogos.clearSearchViaInterop('subModel')">
+                                                <i class="fa-solid fa-circle-xmark"></i>
+                                            </button>
+                                        }
+                                    </div>
+
+                                    @if (isLoadingSubModels || isLoadingModelThumbs || isTransitioningToModelStep)
+                                    {
+                                        <div class="loading-state">
+                                            <p>@lang["Car.LoadingModels"]</p>
+                                        </div>
+                                    }
+                                    else if (filteredSubModels?.Any() == true)
+                                    {
+                                        <div class="selection-list">
+                                            @foreach (var subModel in filteredSubModels)
+                                            {
+                                                <div class="selection-item @(selectedSubModel?.Id == subModel.Id ? "selected" : "")"
+                                                     @onclick="() => SelectSubModel(subModel)">
+                                                    <div class="item-content" style="display:flex; align-items:center; gap:12px;">
+                                                        @{
+                                                            string thumbUrl = null;
+                                                            if (selectedSubModel?.Id == subModel.Id && vehicleImages?.Any() == true)
+                                                            {
+                                                                // SADECE URL kullan - base64 yavaşlatıyor
+                                                                thumbUrl = vehicleImages[0].Url;
+                                                            }
+                                                            else if (subModelThumbnails != null && subModelThumbnails.ContainsKey(subModel.Id))
+                                                            {
+                                                                thumbUrl = subModelThumbnails[subModel.Id];
+                                                            }
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(thumbUrl) && thumbUrl.StartsWith("http"))
+                                                        {
+                                                            <img src="@thumbUrl" alt="@lang["Car.VehicleImage"]" style="width:72px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;" @onclick="() => ViewFullImage(thumbUrl)" />
+                                                        }
+                                                        <div>
+                                                            <div class="item-title">@subModel.Name</div>
+                                                            <div class="item-subtitle">@subModel.BaseModelKey</div>
+                                                        </div>
+                                                    </div>
+                                                    <i class="fa-solid fa-chevron-right"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-car-side"></i>
+                                            <p>@lang["Car.NoModelFound"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (currentStep == 5)
+                            {
+                                <!-- Kasa Tipi Seçimi -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-shapes me-2"></i>
+                                        @lang["Car.SelectBodyType"]
+                                    </h4>
+
+                                    @if (isLoadingCarBodyOptions)
+                                    {
+                                        <div class="loading-state">
+                                            <p>@lang["Car.LoadingVehicleTypes"]</p>
+                                        </div>
+                                    }
+                                    else if (carBodyOptions?.Any() == true)
+                                    {
+                                        <div class="selection-grid">
+                                            @foreach (var carBody in carBodyOptions)
+                                            {
+                                                <div class="selection-card @(selectedCarBody?.Id == carBody.Id ? "selected" : "")"
+                                                     @onclick="() => SelectCarBody(carBody)">
+                                                    <div class="card-icon">
+                                                        <i class="fa-solid fa-car"></i>
+                                                    </div>
+                                                    <div class="card-title">@carBody.Name</div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-shapes"></i>
+                                            <p>@lang["Car.NoBodyTypeFound"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (currentStep == 6)
+                            {
+                                <!-- Motor Seçimi -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-cogs me-2"></i>
+                                        @lang["Car.SelectEngine"]
+                                    </h4>
+
+                                    @if (isLoadingEngineOptions)
+                                    {
+                                        <div class="loading-state">
+                                            <p>@lang["Car.LoadingEngines"]</p>
+                                        </div>
+                                    }
+                                    else if (engineOptions?.Any() == true)
+                                    {
+                                        <div class="selection-list">
+                                            @foreach (var engine in engineOptions)
+                                            {
+                                                <div class="selection-item @(selectedEngine?.Id == engine.Id ? "selected" : "")"
+                                                     @onclick="() => SelectEngine(engine)">
+                                                    <div class="item-content">
+                                                        <div class="item-title">@engine.Name</div>
+                                                        <div class="item-subtitle">@lang["Car.EngineOption"]</div>
+                                                    </div>
+                                                    <i class="fa-solid fa-chevron-right"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-cogs"></i>
+                                            <p>@lang["Car.NoEngineFound"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (currentStep == 7)
+                            {
+                                <!-- Ek Özellikler Seçimi -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-plus-circle me-2"></i>
+                                        @lang["Car.SelectAdditionalFeatures"]
+                                    </h4>
+                                    <p class="step-description">İsteğe bağlı özellikler</p>
+
+                                    @if (isLoadingOptions)
+                                    {
+                                        <div class="loading-state">
+                                            <p>@lang["Car.LoadingVehicleTypes"]</p>
+                                        </div>
+                                    }
+                                    else if (options?.Any() == true)
+                                    {
+                                        <div class="options-list">
+                                            @foreach (var option in options)
+                                            {
+                                                <div class="option-item @(selectedOptions?.Any(o => o.Id == option.Id) == true ? "selected" : "")"
+                                                     @onclick="() => ToggleOption(option)">
+                                                    <div class="option-content">
+                                                        <div class="option-title">@option.Name</div>
+                                                        <div class="option-subtitle">Sınıflandırma: @option.Classification</div>
+                                                    </div>
+                                                    <div class="option-checkbox">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-plus-circle"></i>
+                                            <p>@lang["Car.NoAdditionalFeaturesFound"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (currentStep == 8)
+                            {
+                                <!-- Plaka Numarası ve Araç Görselleri -->
+                                <div class="step-content-wrapper">
+                                    <h4 class="step-header">
+                                        <i class="fa-solid fa-id-card me-2"></i>
+                                        @lang["Car.EnterPlateNumber"]
+                                    </h4>
+                                    <div class="form-group mt-3">
+                                        <label for="plateNumberInput" class="form-label">@lang["Car.PlateNumberLabel"] <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control @(string.IsNullOrEmpty(PlateNumber) && currentStep == 8 ? "is-invalid" : "")" id="plateNumberInput" @bind="PlateNumber" placeholder="Örn: 34 ABC 123" maxlength="9" />
+                                        @if (string.IsNullOrEmpty(PlateNumber) && currentStep == 8)
+                                        {
+                                            <div class="invalid-feedback">
+                                                @lang["Car.PlateNumberRequired"]
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Araç Görselleri Bölümü -->
+                                    @if (selectedSubModel != null)
+                                    {
+                                        <div class="mt-5">
+                                            <h5 class="mb-3">
+                                                <i class="fa-solid fa-images me-2"></i>
+                                                @lang["Car.VehicleImages"]
+                                                @if (vehicleImages?.Any() == true)
+                                                {
+                                                    <span class="badge bg-primary ms-2">@vehicleImages.Count fotoğraf</span>
+                                                }
+                                            </h5>
+                                            
+                                            @if (vehicleImages != null && vehicleImages.Any())
+                                            {
+                                                <div class="vehicle-images-gallery">
+                                                    <div class="row g-3">
+                                                        @foreach (var image in vehicleImages)
+                                                        {
+                                                            // SADECE URL kullan - base64 yavaşlatıyor
+                                                            if (!string.IsNullOrEmpty(image.Url) && image.Url.StartsWith("http"))
+                                                            {
+                                                                <div class="col-md-4 col-sm-6">
+                                                                    <div class="vehicle-image-card" @onclick="() => ViewFullImage(image.Url)">
+                                                                        <img src="@image.Url" alt="@lang["Car.VehicleImage"]" class="vehicle-image" />
+                                                                        <div class="image-overlay">
+                                                                            <div class="btn btn-sm btn-light">
+                                                                                <i class="fa-solid fa-expand"></i> Büyüt
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="empty-state-small">
+                                                    <i class="fa-solid fa-image text-muted"></i>
+                                                    <p class="text-muted mb-0">@lang["Car.NoImageFound"]</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Navigation Buttons -->
+                            <div class="step-navigation">
+                                @if (currentStep > 1)
+                                {
+                                    <button type="button" class="btn btn-outline-secondary" @onclick="() => GoToStep(currentStep - 1)"
+                                            disabled="@(
+                                                (currentStep == 2 && isLoadingManufacturers) ||
+                                                (currentStep == 3 && isLoadingBaseModels) ||
+                                                (currentStep == 4 && (isLoadingSubModels || isLoadingModelThumbs || isTransitioningToModelStep)) ||
+                                                (currentStep == 5 && isLoadingCarBodyOptions) ||
+                                                (currentStep == 6 && isLoadingEngineOptions) ||
+                                                (currentStep == 7 && isLoadingOptions)
+                                            )">
+                                        <i class="fa-solid fa-arrow-left me-2"></i>
+                                        Geri
+                                    </button>
+                                }
+
+                                @if (currentStep < 8)
+                                {
+                                    <button type="button" class="btn btn-primary" @onclick="() => GoToStep(currentStep + 1)"
+                                            disabled="@(
+                                                !CanProceedToNextStep() ||
+                                                (currentStep == 1 && isLoadingVehicleTypes) ||
+                                                (currentStep == 2 && isLoadingManufacturers) ||
+                                                (currentStep == 3 && isLoadingBaseModels) ||
+                                                (currentStep == 4 && (isLoadingSubModels || isLoadingModelThumbs || isTransitioningToModelStep)) ||
+                                                (currentStep == 5 && isLoadingCarBodyOptions) ||
+                                                (currentStep == 6 && isLoadingEngineOptions) ||
+                                                (currentStep == 7 && isLoadingOptions)
+                                            )">
+                                        İleri
+                                        <i class="fa-solid fa-arrow-right ms-2"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-success" @onclick="SaveCar" disabled="@(!CanSaveCar())">
+                                        <i class="fa-solid fa-check me-2"></i>
+                                        @lang["Car.SaveCar"]
+                                    </button>
+                                    @if (!CanSaveCar())
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                @if (string.IsNullOrEmpty(PlateNumber))
+                                                {
+                                                    <span class="text-danger">@lang["Car.PlateNumberMustBeEntered"]</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@lang["RequiredField"]</span>
+                                                }
+                                            </small>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

@@ -1,0 +1,68 @@
+@page "/customers"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.Customer
+@using ecommerce.Core.Entities.Accounting
+@using Radzen
+@using Radzen.Blazor
+
+<div class="container-fluid">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <h3 class="page-header-title">Cari Yönetimi</h3>
+             <div class="page-header-subtitle">Sistemdeki cari kartları tanımlayın ve yönetin.</div>
+        </div>
+        <div class="col-md-6 text-end">
+            <RadzenButton Text="Yeni Cari Ekle" Icon="add_circle" ButtonStyle="ButtonStyle.Primary" Click="@(() => OpenUpsertModal())" Size="ButtonSize.Medium" Class="btn-primary-shadow" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+             <AdminDataGrid @ref="grid" Data="@CustomersList" Count="@Count" LoadData="@LoadData" TItem="CustomerListDto" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="10" 
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" RowSelect="@(args => OpenUpsertModal(args.Id))"
+                            Density="Density.Compact" GridLines="DataGridGridLines.Horizontal">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CustomerListDto" Property="Code" Title="Cari Kodu" Width="120px" />
+
+                    <RadzenDataGridColumn TItem="CustomerListDto" Property="Name" Title="Cari Adı" Width="250px" />
+                    <RadzenDataGridColumn TItem="CustomerListDto" Property="Type" Title="Tip" Width="100px">
+                        <Template Context="c">
+                            @GetTypeName(c.Type)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerListDto" Property="Phone" Title="Telefon" Width="120px" />
+                     <RadzenDataGridColumn TItem="CustomerListDto" Property="Email" Title="Email" Width="180px" />
+                     <RadzenDataGridColumn TItem="CustomerListDto" Property="CityName" Title="İl" Width="120px" />
+                     <RadzenDataGridColumn TItem="CustomerListDto" Property="RegionName" Title="Bölge" Width="150px" />
+                     <RadzenDataGridColumn TItem="CustomerListDto" Property="RiskLimit" Title="Risk Limiti" Width="120px" FormatString="{0:C2}" TextAlign="TextAlign.Right" />
+                     <RadzenDataGridColumn TItem="CustomerListDto" Property="IsActive" Title="Durum" Width="80px" TextAlign="TextAlign.Center">
+                        <Template Context="c">
+                            <RadzenBadge BadgeStyle="@(c.IsActive ? BadgeStyle.Success : BadgeStyle.Light)" Text="@(c.IsActive ? "Aktif" : "Pasif")" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CustomerListDto" Title="İşlemler" TextAlign="TextAlign.Center" Width="100px" Filterable="false" Sortable="false">
+                        <Template Context="c">
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Small" Class="m-1" Click="@(args => DeleteCustomer(c))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+@code {
+    string GetTypeName(CustomerType type)
+    {
+        return type switch
+        {
+            CustomerType.Buyer => "Alıcı",
+            CustomerType.Seller => "Satıcı",
+            CustomerType.BuyerSeller => "Alıcı+Satıcı",
+            CustomerType.Employee => "Personel",
+            CustomerType.Other => "Diğer",
+            _ => type.ToString()
+        };
+    }
+}

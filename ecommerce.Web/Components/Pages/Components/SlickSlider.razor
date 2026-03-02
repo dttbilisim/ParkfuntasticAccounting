@@ -1,0 +1,61 @@
+<div class="@($"{SliderName} slick-container-initializing")" id="@SliderId" @ref="sliderDiv">
+    @ChildContent
+</div>
+
+@code {
+    private ElementReference sliderDiv;
+
+    [Parameter] public string SliderId{get;set;} 
+    [Parameter] public string SliderName{get;set;}
+    [Parameter] public RenderFragment ? ChildContent{get;set;}
+    [Parameter] public object ? Config{get;set;}
+    [Parameter] public bool InitializeImmediately { get; set; } = false;
+
+    [Inject] public IJSRuntime JSRuntime{get;set;} = default!;
+
+    private bool _hasInitialized = false;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+        try {
+            if(firstRender){
+                // Optimize: Banner slider hemen yükle, diğerleri lazy load
+                var isPrioritySlider = SliderId == "slider-animate"; // Banner slider
+                
+                if(isPrioritySlider) {
+                    // Banner slider: HEMEN initialize (no delay, no observer)
+                    await JSRuntime.InvokeVoidAsync("eval", 
+                        $"if(typeof $.fn.slick !== 'undefined'){{ $('#{SliderId}').slick({System.Text.Json.JsonSerializer.Serialize(Config)}); }}");
+                } else {
+                    // Diğer slider'lar: Minimal delay ile lazy load
+                    await Task.Delay(20);
+                    var options = new { immediate = InitializeImmediately };
+                    await JSRuntime.InvokeVoidAsync("observeAndInitSlick", $"#{SliderId}", Config, options);
+                }
+                _hasInitialized = true;
+            }
+            else if(_hasInitialized) {
+                // Navigation sonrası: DESTROY ve REINITIALIZE (optimized)
+                await Task.Delay(30);
+                
+                // Destroy existing slider
+                try {
+                    await JSRuntime.InvokeVoidAsync("eval", 
+                        $"if($('#{SliderId}').hasClass('slick-initialized')){{ $('#{SliderId}').slick('unslick'); }}");
+                } catch { /* Ignore if already destroyed */ }
+                
+                // Minimal wait
+                await Task.Delay(30);
+                
+                // Reinitialize
+                var options = new { immediate = InitializeImmediately };
+                await JSRuntime.InvokeVoidAsync("observeAndInitSlick", $"#{SliderId}", Config, options);
+                
+                // Reset flag
+                _hasInitialized = false;
+            }
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"⚠️ Slider {SliderId} init: {ex.Message}");
+        }
+    }
+}

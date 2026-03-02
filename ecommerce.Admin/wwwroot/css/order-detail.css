@@ -1,0 +1,488 @@
+/* Order Detail Specific Styles */
+
+.stock-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.stock-row {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    margin: 2px;
+}
+
+.stock-row:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.wh-name-v2 {
+    font-size: 9px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    margin-right: 6px;
+}
+
+.wh-count-v2 {
+    font-size: 10px;
+    font-weight: 800;
+    color: #059669;
+    background: #ecfdf5;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.stock-item-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 2px;
+}
+
+.wh-info-btn {
+    padding: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #6366f1 !important;
+    /* Indigo 500 */
+}
+
+.wh-info-btn:hover {
+    color: #4f46e5 !important;
+    background: #eef2ff !important;
+}
+
+.stock-status-empty {
+    display: flex;
+    align-items: center;
+    color: #e11d48;
+    background: #fff1f2;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid #fecdd3;
+    margin: 2px;
+}
+
+.status-dot {
+    height: 6px;
+    width: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.bg-danger-dot {
+    background-color: #e11d48;
+    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.1);
+}
+
+
+.status-placeholder {
+    color: #94a3b8;
+    font-size: 11px;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.stock-info-text {
+    font-size: 10px;
+    color: #0284c7;
+    /* Sky 600 */
+    background: #f0f9ff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #bae6fd;
+    line-height: 1.3;
+    display: flex;
+    align-items: flex-start;
+    max-width: 250px;
+}
+
+.fieldset-header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 650px;
+    /* Fixed width to push button to the right in RadzenFieldset */
+    padding: 0;
+}
+
+.fieldset-header-title {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.fieldset-header-icon {
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+.product-img,
+.product-video {
+    width: 80px;
+    border-radius: 4px;
+}
+
+.rz-form-row {
+    margin-bottom: 0.75rem;
+}
+
+.rz-full-width {
+    display: block;
+    width: 100%;
+}
+
+.mt-btn-custom {
+    margin-top: 1rem;
+}
+
+.mr-btn-custom {
+    margin-right: 0.5rem;
+}
+
+.btn-stock-update-small {
+    font-size: 10px !important;
+    height: 24px !important;
+    padding: 0 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
+
+/* Cargo Grouping Icons */
+.cargo-group-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 8px;
+}
+
+.cargo-badge-geliver {
+    width: 28px;
+    height: 28px;
+    background: #10b981;
+    /* Green Theme */
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 900;
+    font-size: 16px;
+    font-family: 'Arial Black', sans-serif;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+    cursor: default;
+}
+
+.cargo-badge-geliver::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 10px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 2px;
+}
+
+/* Cargo Group Header Styles */
+.cargo-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f1f5f9;
+    border-left: 3px solid #10b981;
+    margin: 0;
+}
+
+.cargo-group-title {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 600;
+    text-transform: capitalize;
+    /* Sadece baş harfleri büyük */
+}
+
+.cargo-group-count {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: normal;
+}
+
+.cargo-badge-geliver {
+    width: 24px;
+    height: 24px;
+    background: #10b981;
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    font-family: 'Arial Black', sans-serif;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.cargo-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.btn-create-cargo {
+    margin-left: auto;
+    padding: 6px 14px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.btn-create-cargo:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+.btn-create-cargo:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.btn-create-cargo:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.btn-create-cargo i {
+    font-size: 14px;
+}
+
+/* Premium Order Summary Footer (Static/Sticky) */
+.order-summary-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 25px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    z-index: 10;
+    margin-top: auto;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.tab-flex-container {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    /* Fixed height to force overflow on grid, not modal */
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.grid-wrapper {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-info-card {
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-content {
+    width: 350px;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.summary-line .sum-label {
+    font-weight: 600;
+}
+
+.summary-line.discount {
+    color: #dc2626;
+}
+
+.summary-line.grand-total {
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 2px solid #f1f5f9;
+    color: #0f172a;
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+.summary-line .price-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+}
+
+.summary-line.grand-total .price-val {
+    color: #10b981;
+}
+
+/* Price Styling for Columns */
+.price-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+/* Scoped to Order Detail only to avoid leaking into other pages like Invoices.razor */
+.order-detail-scope .rz-grid-table td .rz-cell-data {
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.4 !important;
+    padding: 4px 0 !important;
+}
+
+/* Header tightening only for Order Detail */
+.order-detail-scope .rz-grid-table th .rz-column-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
+
+.cargo-group-header.loading {
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+/* Cargo Status Icons in Product Grid */
+.cargo-status-shipped,
+.cargo-status-pending {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+}
+
+.cargo-status-shipped i {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Cargo Shipped Badge */
+.cargo-status-badge {
+    margin-left: auto;
+    padding: 6px 14px;
+    background: #e2e8f0;
+    color: #475569;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: default;
+    border: 1px solid #cbd5e1;
+}
+
+.cargo-status-badge i {
+    color: #10b981;
+    /* Green checkmark */
+    font-size: 14px;
+}
+
+/* Cancel Cargo Button - Red for cancellation */
+.btn-cancel-cargo {
+    padding: 4px 10px;
+    background: #ef4444;
+    color: white;
+    border: 1px solid #dc2626;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-cancel-cargo:hover:not(:disabled) {
+    background: #dc2626;
+    border-color: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.btn-cancel-cargo:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.btn-cancel-cargo:disabled {
+    background: #fca5a5;
+    border-color: #fca5a5;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-cancel-cargo i {
+    font-size: 11px;
+}

@@ -1,0 +1,1208 @@
+:root {
+    /* ==========================================================================
+       MODERN ACCOUNTING THEME - PROFESSIONAL & COMPACT
+       ========================================================================== */
+
+    /* Primary Brand Colors (Professional Green - Unified #0e947a) */
+    --rz-primary: #0e947a;
+    /* Emerald 700 - Main Action */
+    --rz-primary-light: #34d399;
+    /* Emerald 400 - Hover/Active (Keep for contrast or adjust) */
+    --rz-primary-dark: #047857;
+    /* Emerald 800 - Deep Interaction */
+
+    /* Neutral / UI Colors (Slate - Richer than pure gray) */
+    --rz-secondary: #0f172a;
+    /* Slate 900 - Sidebar/Dark backgrounds */
+    --rz-secondary-light: #334155;
+    /* Slate 700 - Sub-elements */
+    --rz-secondary-dark: #020617;
+    /* Slate 950 - Deepest black */
+
+    /* Functional Colors */
+    --rz-success: #0e947a;
+    --rz-info: #0ea5e9;
+    /* Sky 500 */
+    --rz-warning: #f59e0b;
+    --rz-danger: #ef4444;
+
+    /* Backgrounds */
+    --rz-body-background-color: #f1f5f9;
+    /* Slate 100 - Cool light gray */
+    --rz-base-background-color: #ffffff;
+    --rz-header-background-color: rgba(255, 255, 255, 0.95);
+    --rz-sidebar-background-color: #020617;
+    /* Match secondary */
+
+    /* Text Typography (High Contrast) */
+    --rz-text-color: #1e293b;
+    /* Slate 800 - Primary Text */
+    --rz-text-secondary-color: #64748b;
+    /* Slate 500 - Secondary Text */
+    --rz-text-disabled-color: #94a3b8;
+    /* Slate 400 */
+
+    /* Borders & Radius (Sharper for Professional feel) */
+    --rz-border-color: #e2e8f0;
+    /* Slate 200 */
+    --rz-border-radius: 6px;
+    /* Tighter radius */
+    --rz-input-border-radius: 6px;
+    /* Uniform input radius */
+    --rz-button-border-radius: 6px;
+    --rz-card-border-radius: 8px;
+
+    /* Shadows (Subtle, crisp) */
+    --rz-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --rz-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --rz-shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+
+    /* Metrics */
+    --rz-text-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --rz-root-font-size: 13.5px;
+    /* Slightly smaller base for density */
+
+    /* UNIFIED Z-INDEX HIERARCHY - CLEANED UP */
+    --z-index-sticky: 1000;
+}
+
+/* Global Resets & Improvements */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+    /* Tighter, modern tracking */
+}
+
+
+
+/* DataGrid inside Dropdown */
+.rz-lookup-panel .rz-grid-table,
+.rz-dropdown-panel .rz-grid-table {
+    border: none;
+}
+
+.rz-lookup-panel .rz-grid-table thead th,
+.rz-dropdown-panel .rz-grid-table thead th {
+    background-color: #f9fafb;
+    border-bottom: 1px solid var(--rz-border-color);
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--rz-text-secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.rz-lookup-panel .rz-grid-table td,
+.rz-dropdown-panel .rz-grid-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9rem;
+}
+
+/* Cards - Flat & Clean (No Drift) */
+.rz-card {
+    border: 1px solid #e2e8f0;
+    /* Slate 200 */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+    background: #ffffff;
+    border-radius: var(--rz-card-border-radius);
+    transition: none;
+    /* No movement */
+}
+
+.rz-card:hover {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+    transform: none;
+}
+
+/* ============================================
+   DATAGRID - SPREADSHEET LOOK
+   ============================================ */
+.rz-grid-table {
+    border-collapse: collapse;
+    /* Cleaner borders */
+    border-spacing: 0;
+}
+
+.rz-grid-table thead th {
+    background-color: #f8fafc;
+    /* Slate 50 */
+    color: #475569;
+    /* Slate 600 */
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #e2e8f0;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.75rem 0.5rem;
+    /* Compact header */
+    white-space: nowrap;
+}
+
+.rz-grid-table thead {
+    overflow: visible !important;
+    /* Allow filter popups to escape */
+}
+
+.rz-grid-table td {
+    border-bottom: 1px solid #f1f5f9;
+    /* Subtle divider */
+    padding: 0.5rem 0.6rem;
+    /* Dense cells */
+    color: var(--rz-text-color);
+    vertical-align: middle;
+    font-size: 0.85rem;
+    height: 34px;
+    /* Fixed row height target */
+}
+
+/* Zebra Striping */
+.rz-grid-table tr:nth-child(even) td {
+    background-color: #fafbfc;
+    /* Very subtle stripe */
+}
+
+.rz-grid-table tr:hover td,
+.rz-datagrid-data tr:hover td {
+    background-color: #f0f9ff !important;
+    /* Light Sky Blue hover */
+    color: #0f172a !important;
+}
+
+.rz-grid-table tr:hover td *,
+.rz-datagrid-data tr:hover td * {
+    color: #0f172a !important;
+}
+
+/* Selected Row */
+.rz-state-highlight td,
+.rz-grid-table tr.rz-state-highlight td,
+.rz-datagrid-data tr.rz-state-highlight td {
+    background-color: #d1fae5 !important;
+    /* Emerald 100 - Slightly deeper for better definition */
+    color: #064e3b !important;
+    /* Emerald 900 - Very dark green for high contrast */
+    border-bottom-color: #a7f3d0 !important;
+}
+
+.rz-state-highlight td *,
+.rz-grid-table tr.rz-state-highlight td *,
+.rz-datagrid-data tr.rz-state-highlight td * {
+    color: #064e3b !important;
+}
+
+/* Left Accent for Selection */
+.rz-state-highlight>td:first-child {
+    box-shadow: inset 3px 0 0 var(--rz-primary);
+}
+
+/* Filter Row Inputs - ULTRA COMPACT */
+.rz-grid-table thead .rz-cell-filter {
+    background-color: #ffffff;
+    padding: 0.25rem !important;
+    overflow: visible !important;
+    /* Allow popups to escape */
+}
+
+/* Compact filter inputs */
+.rz-grid-table thead .rz-cell-filter .rz-numeric,
+.rz-grid-table thead .rz-cell-filter .rz-textbox,
+.rz-grid-table thead .rz-cell-filter .rz-dropdown {
+    height: 28px !important;
+    min-height: 28px !important;
+    font-size: 0.8rem !important;
+    padding: 0 0.5rem !important;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    box-shadow: none;
+}
+
+
+
+.rz-grid-table thead .rz-cell-filter .rz-dropdown-label {
+    line-height: 26px !important;
+    font-size: 0.8rem !important;
+}
+
+/* Spinner adjustment for compact filters */
+.rz-grid-table thead .rz-cell-filter .rz-numeric .rz-spinner-button {
+    width: 16px !important;
+}
+
+/* Pager Styling */
+.rz-paginator {
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.5rem;
+}
+
+.rz-paginator-element {
+    border-radius: 4px;
+    font-size: 0.85rem;
+    min-width: 2rem;
+    height: 2rem;
+    margin: 0 2px;
+}
+
+.rz-paginator-element.rz-state-active {
+    background-color: var(--rz-primary);
+    color: white;
+    border-color: var(--rz-primary);
+}
+
+
+
+/* Specific fix for Grid Filter Inputs to ensure they stay small */
+.rz-grid-table thead .rz-cell-filter .rz-numeric,
+.rz-grid-table thead .rz-cell-filter .rz-textbox,
+.rz-grid-table thead .rz-cell-filter .rz-dropdown {
+    height: 28px !important;
+    /* Reduced from 36px */
+    min-height: 28px !important;
+    padding: 0 !important;
+    padding-right: 2rem !important;
+    font-size: 0.85rem !important;
+    /* Slightly smaller text */
+    line-height: 28px !important;
+}
+
+.rz-grid-table thead .rz-cell-filter .rz-numeric .rz-inputtext {
+    padding-right: 2rem !important;
+    height: 100% !important;
+    /* Fill the container */
+    min-height: 0 !important;
+    line-height: inherit !important;
+    margin: 0 !important;
+    font-size: inherit !important;
+}
+
+/* Force the input inside numeric filter to be compact */
+.rz-grid-table thead .rz-cell-filter .rz-numeric input,
+.rz-grid-table thead .rz-cell-filter .rz-spinner input {
+    height: 100% !important;
+    padding: 0 0.5rem !important;
+    padding-right: 1.5rem !important;
+    /* Smaller space for smaller spinner */
+    font-size: 0.85rem !important;
+    margin: 0 !important;
+}
+
+/* Override wrapper height explicitly for all filter inputs */
+.rz-grid-table thead .rz-cell-filter .rz-numeric,
+.rz-grid-table thead .rz-cell-filter .rz-spinner,
+.rz-grid-table thead .rz-cell-filter .rz-textbox,
+.rz-grid-table thead .rz-cell-filter .rz-dropdown {
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 !important;
+}
+
+/* Adjust spinner for smaller height */
+.rz-grid-table thead .rz-cell-filter .rz-numeric .rz-spinner-button {
+    width: 18px !important;
+}
+
+.rz-grid-table thead .rz-cell-filter .rz-numeric .rz-spinner-button .rzi {
+    font-size: 0.6rem !important;
+}
+
+
+
+/* Sidebar - Deep Dark */
+.rz-sidebar {
+    background-color: #020617 !important;
+    background: #020617 !important;
+    box-shadow: var(--rz-shadow);
+    border-right: 1px solid #1f2937;
+}
+
+.rz-panel-menu-item-text {
+    color: #e2e8f0 !important;
+    /* Slate 200 - Much brighter for dark background */
+    font-weight: 500;
+    font-size: 0.95rem;
+    opacity: 1 !important;
+    /* Remove any opacity */
+}
+
+.rz-navigation-item-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.rz-navigation-item-link:hover .rz-navigation-item-text,
+.rz-navigation-item-link:hover .rz-navigation-item-icon {
+    color: var(--rz-primary);
+}
+
+.rz-navigation-item-wrapper-active {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+    border-left: 3px solid var(--rz-primary);
+}
+
+.rz-navigation-item-wrapper-active .rz-navigation-item-text {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Header - Glassy */
+.rz-header {
+    background-color: var(--rz-header-background-color);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rz-border-color);
+    box-shadow: var(--rz-shadow-sm);
+    color: var(--rz-text-color);
+    position: sticky;
+    top: 0;
+    z-index: 2000 !important;
+    /* Extremely high to beat any local stickies */
+}
+
+
+
+/* Fieldset */
+.rz-fieldset {
+    border: 1px solid var(--rz-border-color);
+    border-radius: var(--rz-card-border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    background: #ffffff;
+    box-shadow: var(--rz-shadow-sm);
+}
+
+.rz-fieldset-legend {
+    font-weight: 700;
+    color: var(--rz-primary-dark);
+    background: #ffffff;
+    padding: 0 0.75rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Tabs */
+.rz-tabview-nav {
+    border-bottom: 1px solid var(--rz-border-color);
+    background: transparent;
+    margin-bottom: 2rem;
+    gap: 0.5rem;
+}
+
+.rz-tabview-nav li .rz-tabview-nav-link {
+    border: none;
+    background: transparent;
+    color: var(--rz-text-secondary-color);
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    transition: all 0.2s;
+    border-radius: 0.5rem;
+}
+
+.rz-tabview-nav li.rz-tabview-selected .rz-tabview-nav-link {
+    background: #ecfdf5;
+    color: var(--rz-primary-dark);
+}
+
+.rz-tabview-nav li:not(.rz-tabview-selected) .rz-tabview-nav-link:hover {
+    color: var(--rz-primary);
+    background: #f9fafb;
+}
+
+/* Alerts */
+.rz-alert {
+    border-radius: var(--rz-border-radius);
+    border: none;
+    box-shadow: var(--rz-shadow-sm);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* ============================================
+   ULTRA COMPACT PROFESSIONAL MENU STYLES
+   ============================================ */
+
+/* Container */
+.rz-sidebar .rz-panel-menu {
+    padding: 0 !important;
+    /* FIXED: Remove top spacing */
+    margin: 0 !important;
+}
+
+/* Base Item */
+.rz-panel-menu-item {
+    margin: 0;
+    border: none !important;
+    border-radius: 0;
+}
+
+/* Textured Background for Sidebar */
+.rz-sidebar {
+    background: linear-gradient(180deg, #111827 0%, #030712 100%) !important;
+    border-right: 1px solid #1f2937;
+}
+
+/* Base Wrapper - Thicker & More Distinct */
+.rz-navigation-item-wrapper {
+    min-height: 44px;
+    /* Taller touch targets */
+    display: flex;
+    align-items: center;
+    position: relative;
+    line-height: 1.2;
+    transition: all 0.2s ease;
+}
+
+/* Text - Bold & Readable */
+.rz-panel-menu-item-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+    /* Larger text */
+    letter-spacing: 0.02em;
+    color: #cbd5e1 !important;
+    /* Slate 300 - Brighter */
+    margin-top: 1px;
+    opacity: 1 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    /* Better contrast */
+    padding-left: 4px;
+    /* Slight spacing from icon */
+}
+
+/* Icons - Larger & Brighter */
+.rz-navigation-item-icon {
+    font-size: 1.1rem;
+    /* Larger icons */
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    opacity: 1 !important;
+    color: #94a3b8 !important;
+    /* Slate 400 */
+    transition: color 0.2s ease;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* LEVEL 0 (Root Items) - Prominent */
+.menu-level-0>.rz-navigation-item-wrapper {
+    padding: 12px 16px;
+    /* Increased padding */
+    min-height: 48px;
+    /* Taller rows */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* Stronger separator */
+    background: rgba(255, 255, 255, 0.02);
+    /* Slight tint */
+    margin-bottom: 2px;
+    /* Gap between items */
+}
+
+.menu-level-0 .rz-panel-menu-item-text {
+    font-size: 0.95rem;
+    /* Even larger for root */
+    font-weight: 700;
+    /* Bolder */
+    color: #f1f5f9;
+    /* Slate 100 - Nearly white */
+    text-transform: uppercase;
+    /* Optional: adds authority, remove if distinct enough with weight */
+    letter-spacing: 0.03em;
+}
+
+/* Hover Root - Glow Effect */
+.menu-level-0>.rz-navigation-item-wrapper:hover {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    box-shadow: inset 3px 0 0 0 rgba(255, 255, 255, 0.2);
+    transform: translateX(2px);
+    /* Subtle shift */
+}
+
+.menu-level-0>.rz-navigation-item-wrapper:hover .rz-panel-menu-item-text {
+    color: white !important;
+}
+
+.menu-level-0>.rz-navigation-item-wrapper:hover .rz-navigation-item-icon {
+    color: white !important;
+    transform: scale(1.1);
+}
+
+/* Active Root */
+.menu-level-0.rz-state-active>.rz-navigation-item-wrapper,
+.menu-level-0 .rz-state-active
+
+/* Catch generic active state */
+    {
+    background-color: var(--rz-primary) !important;
+    color: white !important;
+}
+
+.menu-level-0.rz-state-active .rz-navigation-item-icon,
+.menu-level-0.rz-state-active .rz-panel-menu-item-text,
+.menu-level-0 .rz-state-active .rz-navigation-item-icon,
+.menu-level-0 .rz-state-active .rz-panel-menu-item-text {
+    color: white !important;
+    opacity: 1;
+}
+
+/* LEVEL 1 (Submenu) */
+.menu-level-1>.rz-navigation-item-wrapper {
+    padding: 6px 12px 6px 36px;
+    background-color: #0b1120;
+}
+
+/* ============================================
+   ROLE MANAGEMENT & PAGE HEADERS
+   ============================================ */
+
+.page-header-title {
+    font-weight: 700;
+    color: #343a40;
+    letter-spacing: -0.5px;
+    margin-bottom: 0;
+}
+
+.page-header-subtitle {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.btn-primary-shadow {
+    font-weight: 500;
+    padding: 8px 20px !important;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.card-modern {
+    padding: 0 !important;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+}
+
+
+/* LEVEL 2 (Deep) */
+.menu-level-2>.rz-navigation-item-wrapper {
+    padding: 5px 12px 5px 50px;
+    background-color: #020617;
+    /* Deepest black */
+}
+
+/* LEVEL 3 (Deep) */
+.menu-level-3>.rz-navigation-item-wrapper {
+    padding: 4px 12px 4px 62px;
+    background-color: #020617;
+}
+
+/* LEVEL 4+ */
+.menu-level-4>.rz-navigation-item-wrapper,
+.menu-level-5>.rz-navigation-item-wrapper {
+    padding: 4px 12px 4px 74px;
+    background-color: #020617;
+}
+
+/* Active State for Submenus (Green Accent) */
+.menu-level-1.rz-state-active>.rz-navigation-item-wrapper,
+.menu-level-2.rz-state-active>.rz-navigation-item-wrapper,
+.menu-level-3.rz-state-active>.rz-navigation-item-wrapper,
+.rz-panel-menu-item.rz-state-active>.rz-navigation-item-wrapper
+
+/* Fallback */
+    {
+    box-shadow: inset 3px 0 0 0 var(--rz-primary-light);
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    color: white !important;
+}
+
+.menu-level-1.rz-state-active .rz-panel-menu-item-text,
+.menu-level-2.rz-state-active .rz-panel-menu-item-text {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Hover Submenus */
+.menu-level-1:not(.rz-state-active)>.rz-navigation-item-wrapper:hover,
+.menu-level-2:not(.rz-state-active)>.rz-navigation-item-wrapper:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+/* Vertical Hierarchy Lines */
+.menu-level-1::before,
+.menu-level-2::before,
+.menu-level-3::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+    /* Brighter line */
+    pointer-events: none;
+    z-index: 10;
+}
+
+.menu-level-1::before {
+    left: 21px;
+}
+
+.menu-level-2::before {
+    left: 33px;
+}
+
+.menu-level-3::before {
+    left: 45px;
+}
+
+/* Expand Arrow */
+.rz-navigation-item-icon-children {
+    font-size: 0.65em;
+    opacity: 0.4;
+    margin-left: auto;
+    width: auto;
+    height: auto;
+}
+
+.rz-state-expanded>.rz-navigation-item-wrapper>.rz-navigation-item-icon-children {
+    transform: rotate(90deg);
+    opacity: 0.7;
+    color: white;
+}
+
+/* Reset Radzen */
+.rz-panel-menu .rz-navigation-item-wrapper-active,
+.rz-panel-menu-item-active {
+    background-color: transparent !important;
+}
+
+/* ============================================
+   MENU SPACING & VISIBILITY FIXES
+   ============================================ */
+
+/* 1. Remove ALL spacing from the main sidebar container */
+.rz-sidebar {
+    padding: 0 !important;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll gaps */
+}
+
+/* 2. Ensure Menu fills the width */
+.rz-sidebar .rz-panel-menu {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 3. FIX HOVER TEXT VISIBILITY - TARGET EVERYTHING */
+.rz-panel-menu .rz-navigation-item-wrapper:hover .rz-panel-menu-item-text,
+.rz-panel-menu .rz-navigation-item-link:hover .rz-panel-menu-item-text,
+.rz-panel-menu .rz-state-active .rz-panel-menu-item-text,
+.rz-panel-menu .rz-state-highlight .rz-panel-menu-item-text,
+.rz-panel-menu .rz-navigation-item-wrapper:hover .rz-navigation-item-text,
+.rz-panel-menu .rz-navigation-item-link:hover .rz-navigation-item-text,
+.rz-panel-menu .rz-state-active .rz-navigation-item-text,
+.rz-panel-menu .rz-state-highlight .rz-navigation-item-text,
+.rz-panel-menu .rz-navigation-item-wrapper:hover span,
+/* Nuclear Fallback */
+.rz-panel-menu .rz-navigation-item-link:hover span {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.rz-panel-menu .rz-navigation-item-wrapper:hover .rz-navigation-item-icon,
+.rz-panel-menu .rz-navigation-item-link:hover .rz-navigation-item-icon,
+.rz-panel-menu .rz-state-active .rz-navigation-item-icon,
+.rz-panel-menu .rz-state-highlight .rz-navigation-item-icon,
+.rz-panel-menu .rz-navigation-item-wrapper:hover .rzi,
+/* Radzen Icon class */
+.rz-panel-menu .rz-navigation-item-link:hover .rzi {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* 4. Background overrides for hover/active */
+.rz-panel-menu .rz-navigation-item-wrapper:hover,
+.rz-panel-menu .rz-navigation-item-link:hover {
+    background-color: var(--rz-primary) !important;
+    color: #ffffff !important;
+}
+
+/* ============================================
+   UNIFORM BLACK SIDEBAR
+   ============================================ */
+
+/* 1. Main Sidebar Background -> Pure Deep Black */
+.rz-sidebar {
+    background-color: #020617 !important;
+    /* Slate 950 - Infinite depth */
+    border-right: 1px solid #1e293b;
+    /* Subtle separator */
+}
+
+/* 2. Remove Sub-menu distinctive backgrounds (No more grey blocks) */
+.menu-level-1>.rz-navigation-item-wrapper,
+.menu-level-2>.rz-navigation-item-wrapper,
+.menu-level-3>.rz-navigation-item-wrapper {
+    background-color: transparent !important;
+}
+
+/* 3. Refine Root Level Separators */
+.menu-level-0>.rz-navigation-item-wrapper {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* 4. Active States - Modern Gradient */
+/* 4. Active States - Modern Gradient & Glow */
+.menu-level-0.rz-state-active>.rz-navigation-item-wrapper {
+    background: linear-gradient(90deg, var(--rz-primary) 0%, var(--rz-primary-dark) 100%) !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    /* Glow */
+    border-right: none;
+}
+
+/* Add a subtle shine effect overlay */
+.menu-level-0.rz-state-active>.rz-navigation-item-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+.menu-level-1.rz-state-active>.rz-navigation-item-wrapper,
+.menu-level-2.rz-state-active>.rz-navigation-item-wrapper {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.02) 100%) !important;
+    border-right: 3px solid var(--rz-primary);
+    color: var(--rz-primary) !important;
+}
+
+/* 5. Override specific text colors on active sub-items to Green */
+.menu-level-1.rz-state-active .rz-panel-menu-item-text,
+.menu-level-2.rz-state-active .rz-panel-menu-item-text {
+    color: var(--rz-primary) !important;
+    font-weight: 700;
+}
+
+/* 6. Ensure hover text is white (kept from previous fix) */
+.rz-panel-menu .rz-navigation-item-wrapper:hover .rz-panel-menu-item-text {
+    color: #ffffff !important;
+}
+
+/* 7. CRITICAL FIX: Make the sub-menu container itself transparent to reveal the sidebar */
+.rz-panel-menu .rz-navigation-menu,
+.rz-panel-menu .rz-navigation-menu ul,
+.rz-panel-menu .rz-navigation-menu li,
+ul.rz-panel-menu {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* 8. Just to be absolutely sure - remove any default Radzen panel gradients/backgrounds */
+.rz-panel-menu .rz-panel-menu-item-content {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Modal specific compact numeric inputs */
+.compact-numeric.rz-numeric,
+.compact-numeric.rz-spinner {
+    padding: 0 !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    background-color: #ffffff !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.compact-numeric .rz-numeric-input,
+.compact-numeric .rz-inputtext,
+.compact-numeric input {
+    border: none !important;
+    padding: 0 4px !important;
+    text-align: right !important;
+    /* Numbers look better right-aligned */
+    font-size: 0.85rem !important;
+    height: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    outline: none !important;
+}
+
+.compact-numeric.rz-state-disabled {
+    background-color: #f8fafc !important;
+    opacity: 1;
+}
+
+.compact-numeric.rz-state-disabled input {
+    color: #475569 !important;
+}
+
+.rz-grid-table {
+    width: 100% !important;
+}
+
+/* ============================================
+   AUTOCOMPLETE SEARCH RESULTS - ULTRA HIGH CONTRAST
+   ============================================ */
+
+/* 1. Force background to primary green for all possible item/panel states */
+.rz-autocomplete-panel .rz-autocomplete-item:hover,
+.rz-autocomplete-panel .rz-autocomplete-item.rz-state-highlight,
+.rz-autocomplete-panel li.rz-autocomplete-item:hover,
+.rz-autocomplete-panel li.rz-autocomplete-item.rz-state-highlight,
+.rz-autocomplete-item:hover,
+.rz-autocomplete-item.rz-state-highlight {
+    background-color: var(--rz-primary) !important;
+    background: var(--rz-primary) !important;
+    border-color: var(--rz-primary-dark) !important;
+}
+
+/* 2. FORCE ALL CHILD ELEMENTS TO WHITE - Maximum Specificity */
+.rz-autocomplete-panel .rz-autocomplete-item:hover *,
+.rz-autocomplete-panel .rz-autocomplete-item.rz-state-highlight *,
+.rz-autocomplete-item:hover *,
+.rz-autocomplete-item.rz-state-highlight * {
+    color: #ffffff !important;
+}
+
+/* 3. Specific adjustments for custom classes within the template */
+.product-search-item {
+    transition: background 0.1s;
+}
+
+/* Ensure secondary text is slightly transparent white for hierarchy when active */
+.rz-autocomplete-item:hover .product-barcode-text,
+.rz-autocomplete-item.rz-state-highlight .product-barcode-text,
+.rz-autocomplete-panel .rz-autocomplete-item:hover .product-barcode-text {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Ensure badges look clean on green background */
+.rz-autocomplete-item:hover .product-brand-badge,
+.rz-autocomplete-item.rz-state-highlight .product-brand-badge,
+.rz-autocomplete-panel .rz-autocomplete-item:hover .product-brand-badge {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ensure the product name is definitely white */
+.rz-autocomplete-item:hover .product-name,
+.rz-autocomplete-item.rz-state-highlight .product-name {
+    color: #ffffff !important;
+}
+
+/* Cleanup for the dropdown panel */
+.rz-autocomplete-panel {
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid var(--rz-border-color) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+.rz-autocomplete-items {
+    padding: 0 !important;
+}
+
+/* ============================================
+   INVOICE SUMMARY CARDS (Refactored from inline)
+   ============================================ */
+.invoice-summary-card {
+    border-radius: 12px !important;
+    padding: 1.25rem !important;
+    box-shadow: var(--rz-shadow) !important;
+}
+
+.invoice-summary-card-currency {
+    background-color: #f8fafc !important;
+    /* Slate 50 */
+    border: none !important;
+    border-left: 4px solid var(--rz-info) !important;
+}
+
+.invoice-summary-card-try {
+    background-color: #ffffff !important;
+    border: 1px solid var(--rz-border-color) !important;
+    border-top: 4px solid var(--rz-primary) !important;
+}
+
+/* ============================================
+   PROFESSIONAL PAGE TRANSITION LOADER
+   ============================================ */
+.top-loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 10001;
+    pointer-events: none;
+    background: transparent;
+}
+
+.top-loader-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rz-primary) 0%, var(--rz-primary-light) 50%, var(--rz-primary) 100%);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    transition: width 0.4s cubic-bezier(0.1, 0.05, 0.1, 1), opacity 0.5s ease-in-out;
+}
+
+/* ============================================
+   PROFESSIONAL CENTRAL LOADER (Navigation)
+   ============================================ */
+.central-loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    display: none;
+    /* Hide by default */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000000;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.central-loader-overlay.active {
+    display: flex;
+    pointer-events: auto;
+}
+
+.premium-spinner {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.spinner-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid transparent;
+    border-top-color: var(--rz-primary);
+    border-radius: 50%;
+    animation: spinner-spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.spinner-ring:nth-child(2) {
+    width: 70%;
+    height: 70%;
+    top: 15%;
+    left: 15%;
+    border-top-color: var(--rz-primary-light);
+    animation-duration: 0.8s;
+    animation-direction: reverse;
+}
+
+@keyframes spinner-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-text {
+    font-weight: 600;
+    color: var(--rz-secondary);
+    letter-spacing: 0.05em;
+    font-size: 0.9rem;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* INITIAL LOAD SKELETON (Applied in App.razor) */
+.initial-skeleton-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+}
+
+.skeleton-sidebar {
+    width: 250px;
+    height: 100%;
+    background: #0f172a;
+    position: fixed;
+}
+
+.skeleton-header {
+    height: 56px;
+    background: #ffffff;
+    width: 100%;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.skeleton-body {
+    margin-left: 250px;
+    padding: 2rem;
+    flex-grow: 1;
+}
+
+.skeleton-item {
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite linear;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-title {
+    height: 32px;
+    width: 300px;
+    margin-bottom: 2rem;
+}
+
+.skeleton-card {
+    height: 200px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.skeleton-row {
+    height: 40px;
+    width: 100%;
+}
+
+.loading-dots:after {
+    content: " .";
+    animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+
+    0%,
+    20% {
+        content: " .";
+    }
+
+    40% {
+        content: " . .";
+    }
+
+    60% {
+        content: " . . .";
+    }
+
+    80%,
+    100% {
+        content: "";
+    }
+}
+
+/* Adjust Filter Title Size - AGGRESSIVE OVERRIDE */
+.product-search-root .filter-section-title,
+.filter-section-title {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    color: #475569 !important;
+}
+
+/* Radzen Switch Green Theme */
+.rz-switch.rz-switch-checked .rz-switch-circle {
+    background-color: var(--rz-primary) !important;
+    border-color: var(--rz-primary) !important;
+}
+
+.rz-switch.rz-switch-checked {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Transparent Dialog for Image Zoom */
+.transparent-dialog,
+.transparent-dialog .rz-dialog-content {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Limit RadzenAutoComplete dropdown height to force scroll */
+.rz-autocomplete-panel .rz-autocomplete-items {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+}
+
+/* Highlight newly added invoice items */
+.new-item-highlight td {
+    background-color: #d1fae5 !important;
+    /* Light green */
+    font-weight: 500;
+}
+
+/* Highlight invoice items with errors */
+.error-item-highlight td {
+    background-color: #fee2e2 !important;
+    /* Light red */
+    font-weight: 500;
+}

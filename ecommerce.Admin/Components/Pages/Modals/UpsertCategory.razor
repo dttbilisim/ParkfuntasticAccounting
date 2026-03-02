@@ -1,0 +1,126 @@
+@page "/upsert-category"
+@using ecommerce.Admin.Domain.Dtos.CategoryDto;
+@attribute [Authorize]
+
+<PageTitle>Kategori Ekle/Düzenle</PageTitle>
+
+<RadzenStack Gap="1.5rem" Class="rz-p-4">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">
+        Kategori Kayıt Edilemedi!
+    </RadzenAlert>
+
+    <RadzenTemplateForm TItem="CategoryUpsertDto" Data="@category" Visible="@(category != null)" Submit="@FormSubmit">
+        <RadzenStack Gap="1rem">
+            @* Kategori Adı *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Kategori Adı" Component="CatName" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Name="CatName" @bind-Value="@category.Name" Style="width: 100%" />
+                    <RadzenRequiredValidator Component="CatName" Text="Kategori adı gereklidir" Style="display: block; font-size: 0.8rem;" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Üst Kategori *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Üst Kategori" Component="ParentId" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenDropDownDataGrid Data="@categories" TextProperty="Name" ValueProperty="Id" Placeholder="Ana Kategori"
+                                            Style="width: 100%" @bind-Value="@category.ParentId" Name="ParentId"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowVirtualization="true" AllowClear="true" AllowFiltering="true">
+                        <Template Context="data">
+                            <span>@data.Name</span>
+                        </Template>
+                    </RadzenDropDownDataGrid>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Kategori Sırası *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Sıra" Component="Order" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenNumeric Name="Order" @bind-Value="@category.Order" Style="width: 100%" />
+                    <RadzenRequiredValidator Component="Order" Text="Sıra gereklidir" Style="display: block; font-size: 0.8rem;" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @if (category.ParentId == null)
+            {
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="4">
+                        <RadzenLabel Text="Kategori Görseli" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                        <InputFile OnChange="(args) => LoadFiles(args, false)" class="form-control mb-2" accept="image/webp,image/png,image/gif,image/jpeg,video/mp4" />
+                        @if (category.ImageUrl != null)
+                        {
+                            <div class="mt-2">
+                                <RadzenImage Path="@($"{CdnConfig.BaseUrl}/CategoryImages/{category.ImageUrl}")" Style="max-width: 200px; border-radius: 8px; border: 1px solid #ddd;" />
+                            </div>
+                        }
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                        <RadzenLabel Text="Sütun Sayısı" Component="SubCategoryCount" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                        <RadzenNumeric Name="SubCategoryCount" @bind-Value="@category.SubCategoryCount" Style="width: 100%" />
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                        <RadzenLabel Text="Menü Yüksekliği" Component="Height" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                        <RadzenNumeric Name="Height" @bind-Value="@category.Height" Style="width: 100%" />
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                        <RadzenLabel Text="Ana Sayfa Görünümü" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                        <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenCheckBox Name="IsMainPage" @bind-Value="@category.IsMainPage" />
+                                <RadzenLabel Text="Ana sayfada görünsün" Component="IsMainPage" />
+                            </RadzenStack>
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenCheckBox Name="IsMainSlider" @bind-Value="@category.IsMainSlider" />
+                                <RadzenLabel Text="Çok satanlarda görünsün" Component="IsMainSlider" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+            }
+
+            @* Durum *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Durum" Component="Status" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox Name="Status" @bind-Value="@Status" />
+                        <RadzenLabel Text="Aktif" Component="Status" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Buttons *@
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="1rem" Class="rz-mt-4">
+                <RadzenButton Text="Vazgeç" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Click="@CancelButtonClick" />
+                <RadzenButton Text="Kaydet" ButtonType="ButtonType.Submit" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>

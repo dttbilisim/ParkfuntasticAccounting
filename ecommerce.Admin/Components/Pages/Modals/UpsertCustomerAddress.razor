@@ -1,0 +1,122 @@
+@using ecommerce.Admin.Domain.Dtos.UserAddressDto
+@using ecommerce.Admin.Domain.Dtos.Customer
+@using ecommerce.Admin.Domain.Dtos.MembershipDto
+@using ecommerce.Admin.Domain.Interfaces
+@using Radzen
+@using Radzen.Blazor
+
+@if (Address == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <div class="address-modal-content">
+        <RadzenTemplateForm Data="@Address" Submit="@(async (UserAddressUpsertDto args) => await OnFormSubmit(args))">
+            <div class="row mb-3">
+            <div class="col-md-12">
+                <RadzenLabel Text="Adres Adı" Component="AddressName" />
+                <RadzenTextBox Name="AddressName" @bind-Value="@Address.AddressName" class="w-100 form-control-modern" Placeholder="Örn: Ana Adres, Şube Adresi" />
+                <RadzenRequiredValidator Component="AddressName" Text="Adres adı zorunludur" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <RadzenLabel Text="Ad Soyad" Component="FullName" />
+                <RadzenTextBox Name="FullName" @bind-Value="@Address.FullName" class="w-100 form-control-modern" />
+                <RadzenRequiredValidator Component="FullName" Text="Ad soyad zorunludur" />
+            </div>
+            <div class="col-md-6">
+                <RadzenLabel Text="Telefon" Component="PhoneNumber" />
+                <RadzenTextBox Name="PhoneNumber" @bind-Value="@Address.PhoneNumber" class="w-100 form-control-modern" />
+                <RadzenRequiredValidator Component="PhoneNumber" Text="Telefon zorunludur" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <RadzenLabel Text="Email" Component="Email" />
+                <RadzenTextBox Name="Email" @bind-Value="@Address.Email" class="w-100 form-control-modern" />
+                <RadzenRequiredValidator Component="Email" Text="Email zorunludur" />
+                <RadzenEmailValidator Component="Email" Text="Geçerli bir email adresi giriniz" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <RadzenLabel Text="İl" Component="CityId" />
+                <RadzenDropDown Name="CityId" @bind-Value="@Address.CityId" Data="@Cities" TextProperty="Name" ValueProperty="Id" Change="@OnCityChange" class="w-100 form-control-modern" AllowClear="true" Placeholder="Seçiniz..." 
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                <RadzenRequiredValidator Component="CityId" Text="İl seçimi zorunludur" />
+            </div>
+            <div class="col-md-6">
+                <RadzenLabel Text="İlçe" Component="TownId" />
+                <RadzenDropDown Name="TownId" @bind-Value="@Address.TownId" Data="@AvailableTowns" TextProperty="Name" ValueProperty="Id" class="w-100 form-control-modern" AllowClear="true" Placeholder="Seçiniz..." Disabled="@(Address.CityId == null || Address.CityId == 0)" 
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                <RadzenRequiredValidator Component="TownId" Text="İlçe seçimi zorunludur" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <RadzenLabel Text="Adres" Component="Address" />
+                <RadzenTextArea Name="Address" @bind-Value="@Address.Address" class="w-100 form-control-modern" Rows="3" />
+                <RadzenRequiredValidator Component="Address" Text="Adres zorunludur" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <RadzenCheckBox @bind-Value="@Address.IsDefault" Name="IsDefault" TValue="bool" />
+                <RadzenLabel Text="Varsayılan Adres" Component="IsDefault" class="ms-2" />
+            </div>
+        </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+                <RadzenButton Text="Kaydet" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Icon="save" />
+            </div>
+        </RadzenTemplateForm>
+    </div>
+}
+
+@code {
+    [Parameter] public UserAddressUpsertDto Address { get; set; } = null!;
+    [Parameter] public IEnumerable<CityListDto> Cities { get; set; } = new List<CityListDto>();
+    [Parameter] public IEnumerable<TownListDto> Towns { get; set; } = new List<TownListDto>();
+    [Parameter] public EventCallback<UserAddressUpsertDto> OnSave { get; set; }
+    [Inject] DialogService DialogService { get; set; } = null!;
+    [Inject] ITownService TownService { get; set; } = null!;
+
+    private IEnumerable<TownListDto> AvailableTowns { get; set; } = new List<TownListDto>();
+
+    protected override void OnInitialized()
+    {
+        AvailableTowns = Towns;
+    }
+
+    private async Task OnCityChange(object value)
+    {
+        Address.TownId = null;
+        if (value is int cityId)
+        {
+            var result = await TownService.GetTownsByCityId(cityId);
+            if (result.Ok)
+            {
+                AvailableTowns = result.Result!;
+            }
+            else
+            {
+                AvailableTowns = new List<TownListDto>();
+            }
+        }
+        else
+        {
+            AvailableTowns = new List<TownListDto>();
+        }
+    }
+
+    private async Task OnFormSubmit(UserAddressUpsertDto args)
+    {
+        _ = OnSave.InvokeAsync(args);
+        DialogService.Close(args);
+    }
+}

@@ -1,0 +1,21 @@
+@page "/not-found"
+@page "/error-404"
+@attribute [AllowAnonymous]
+@using ecommerce.Admin.Components.Layout
+@layout MainLayout
+
+<PageTitle>Sayfa Bulunamadı</PageTitle>
+
+<div class="row d-flex justify-content-center align-items-center" style="height: 60vh;">
+    <div class="col-md-6 text-center">
+        <RadzenIcon Icon="search_off" style="font-size: 6rem; color: var(--rz-secondary);" Class="mb-4" />
+        <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H1" Class="mb-3" style="font-weight: 700;">Sayfa Bulunamadı (404)</RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" Class="mb-4" style="color: var(--rz-text-secondary);">
+            Aradığınız sayfa mevcut değil veya taşınmış olabilir.
+        </RadzenText>
+        
+        <RadzenButton Text="Ana Sayfaya Dön" Icon="home" ButtonStyle="ButtonStyle.Primary" Click="@(() => NavigationManager.NavigateTo("/"))" />
+    </div>
+</div>
+
+@inject NavigationManager NavigationManager

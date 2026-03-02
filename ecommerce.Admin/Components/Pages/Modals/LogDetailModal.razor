@@ -1,0 +1,81 @@
+@using ecommerce.Admin.Services.Dtos.LogDto
+@inject Radzen.DialogService dialogService
+
+<div style="width: 100%;">
+    <div class="row mb-2">
+        <div class="col-md-3 fw-bold">Tarih:</div>
+        <div class="col-md-9">@Log.Timestamp</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-3 fw-bold">Seviye:</div>
+        <div class="col-md-9"><RadzenBadge BadgeStyle="@GetBadgeStyle(Log.Level)" Text="@Log.Level" /></div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-3 fw-bold">Kullanıcı:</div>
+        <div class="col-md-9">@Log.Username (@Log.UserId)</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-3 fw-bold">IP:</div>
+        <div class="col-md-9">@Log.ClientIp</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-3 fw-bold">Source:</div>
+        <div class="col-md-9">@Log.SourceContext</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-3 fw-bold">Action:</div>
+        <div class="col-md-9">@Log.ActionName</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-3 fw-bold">Request:</div>
+        <div class="col-md-9">@Log.RequestPath</div>
+    </div>
+    @if (!string.IsNullOrEmpty(Log.PageUrl))
+    {
+        <div class="row mb-2">
+            <div class="col-md-3 fw-bold">Sayfa (Url):</div>
+            <div class="col-md-9 text-break">@Log.PageUrl</div>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Log.MethodName))
+    {
+        <div class="row mb-2">
+            <div class="col-md-3 fw-bold">Method:</div>
+            <div class="col-md-9 text-break">@Log.MethodName</div>
+        </div>
+    }
+    <hr />
+    <div class="row mb-2">
+        <div class="col-md-12 fw-bold">Mesaj:</div>
+        <div class="col-md-12 text-break">@Log.Message</div>
+    </div>
+    @if (!string.IsNullOrEmpty(Log.Exception))
+    {
+        <div class="row mb-2">
+            <div class="col-md-12 fw-bold text-danger">Exception:</div>
+            <div class="col-md-12"><pre style="max-height: 300px; overflow: auto; background: #f8f9fa; padding: 10px;">@Log.Exception</pre></div>
+        </div>
+    }
+    <div class="row mt-4">
+        <div class="col-md-12 text-end">
+             <RadzenButton Text="Kapat" Click="() => dialogService.Close()" ButtonStyle="ButtonStyle.Secondary" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public LogDto Log { get; set; }
+
+    BadgeStyle GetBadgeStyle(string level)
+    {
+        return level switch
+        {
+            "Error" => BadgeStyle.Danger,
+            "Fatal" => BadgeStyle.Danger,
+            "Warning" => BadgeStyle.Warning,
+            "Information" => BadgeStyle.Info,
+            "Debug" => BadgeStyle.Secondary,
+            _ => BadgeStyle.Light
+        };
+    }
+}

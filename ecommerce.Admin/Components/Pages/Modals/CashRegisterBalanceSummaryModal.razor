@@ -1,0 +1,93 @@
+@namespace ecommerce.Admin.Components.Pages.Modals
+@using ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
+@using Radzen
+@using Radzen.Blazor
+
+<div class="cash-balance-modal">
+    @if (BalanceSummaries != null && BalanceSummaries.Any())
+    {
+        @if (StartDate.HasValue || EndDate.HasValue)
+        {
+            <p class="text-muted small mb-3">
+                Bakiye özeti: @(StartDate.HasValue ? StartDate.Value.ToString("dd.MM.yyyy") : "başlangıç") — @(EndDate.HasValue ? EndDate.Value.ToString("dd.MM.yyyy") : "bugün")
+            </p>
+        }
+        <div class="row g-3 cash-balance-modal__grid">
+            @foreach (var s in BalanceSummaries)
+            {
+                <div class="col-12 col-sm-6">
+                    <div class="cash-balance-card">
+                        <div class="cash-balance-card__header">
+                            <span class="cash-balance-card__name">@s.CashRegisterName</span>
+                            <span class="cash-balance-card__currency">@s.CurrencyCode</span>
+                        </div>
+                        <div class="cash-balance-card__row">
+                            <span class="cash-balance-card__label">Açılış</span>
+                            <span class="cash-balance-card__value">@s.OpeningBalance.ToString("N2")</span>
+                        </div>
+                        <div class="cash-balance-card__row cash-balance-card__row--in">
+                            <span class="cash-balance-card__label">Toplam Giriş</span>
+                            <span class="cash-balance-card__value">+ @s.TotalIn.ToString("N2")</span>
+                        </div>
+                        <div class="cash-balance-card__row cash-balance-card__row--out">
+                            <span class="cash-balance-card__label">Toplam Çıkış</span>
+                            <span class="cash-balance-card__value">- @s.TotalOut.ToString("N2")</span>
+                        </div>
+                        <div class="cash-balance-card__footer">
+                            <span class="cash-balance-card__label">Güncel Bakiye</span>
+                            <span class="cash-balance-card__balance @(s.CurrentBalance >= 0 ? "cash-balance-card__balance--positive" : "cash-balance-card__balance--negative")">
+                                @s.CurrentBalance.ToString("N2") @s.CurrencyCode
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mb-0">Kasa bakiye özeti bulunamadı. Filtreleri uygulayıp tekrar deneyin.</p>
+    }
+</div>
+
+<style>
+    .cash-balance-modal { max-height: 70vh; overflow-y: auto; }
+    .cash-balance-modal__grid { max-width: 100%; }
+    .cash-balance-card {
+        background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .cash-balance-card__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .cash-balance-card__name { font-weight: 600; color: #1e293b; }
+    .cash-balance-card__currency { font-size: 0.8rem; color: #64748b; }
+    .cash-balance-card__row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.35rem 0;
+        font-size: 0.9rem;
+    }
+    .cash-balance-card__row--in .cash-balance-card__value { color: #059669; }
+    .cash-balance-card__row--out .cash-balance-card__value { color: #dc2626; }
+    .cash-balance-card__label { color: #64748b; }
+    .cash-balance-card__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 2px solid #e2e8f0;
+        font-weight: 600;
+    }
+    .cash-balance-card__balance--positive { color: #059669; font-size: 1.1rem; }
+    .cash-balance-card__balance--negative { color: #dc2626; font-size: 1.1rem; }
+</style>

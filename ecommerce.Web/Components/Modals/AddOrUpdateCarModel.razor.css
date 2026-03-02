@@ -1,0 +1,34 @@
+
+/* Scoped styles for AddOrUpdateCarModel steps */
+.step-item.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.step-item.disabled .step-number { background-color: #6c757d; color: white; }
+.step-item.disabled .step-content { color: #6c757d; }
+.form-control.is-invalid { border-color: #dc3545; box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.25); }
+.invalid-feedback { display: block; width: 100%; margin-top: 0.25rem; font-size: 0.875em; color: #dc3545; }
+.step-navigation .btn { min-width: 120px; }
+.step-item:not(.disabled):hover { background-color: rgba(0,123,255,0.1); border-radius: 8px; transition: background-color 0.2s ease; }
+.step-item.active { background-color: rgba(0,123,255,0.15); border-radius: 8px; border-left: 4px solid #007bff; }
+.step-item.completed { background-color: rgba(40,167,69,0.1); border-radius: 8px; border-left: 4px solid #28a745; }
+#plateNumberInput:focus { border-color: #007bff; box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25); }
+.step-content-wrapper { min-height: 400px; }
+.step-header { color: #343a40; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e9ecef; }
+.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; color: #6c757d; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; color: #6c757d; }
+.empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+.empty-state-small { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; background-color: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6; }
+.empty-state-small i { font-size: 2rem; margin-bottom: 0.5rem; }
+.vehicle-images-gallery { margin-top: 1rem; }
+.vehicle-image-card { position: relative; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s ease; }
+.vehicle-image-card:hover { transform: scale(1.05); }
+.vehicle-image { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
+.image-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease; }
+.vehicle-image-card:hover .image-overlay { opacity: 1; }
+@media (max-width: 768px) { 
+    .car-selection-steps { border-right: none; border-bottom: 1px solid #dee2e6; }
+    .step-item { padding: 0.75rem; }
+    .step-number { width: 30px; height: 30px; font-size: 0.875rem; }
+    .step-title { font-size: 0.875rem; }
+    .step-subtitle { font-size: 0.75rem; }
+}
+
+

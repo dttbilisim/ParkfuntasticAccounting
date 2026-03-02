@@ -1,0 +1,124 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using ecommerce.Admin.Services.Interfaces
+@using Serilog.Context
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+<RadzenDialog/>
+<RadzenNotification Style="z-index: 10002 !important;" />
+<RadzenTooltip/>
+<RadzenContextMenu/>
+<PageLoader />
+
+
+<RadzenLayout style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body';">
+    <div style="background: linear-gradient(90deg, var(--purple-500) 0%, var(--pink-500) 100%); height: 4px; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000;"></div>
+    <RadzenHeader>
+        <div class="container-fluid">
+            <div class="row justify-content-start align-items-center">
+                <div class="col-6 d-flex align-items-center ps-0 pl-0">
+                    <RadzenSidebarToggle Click="@SidebarToggleClick"></RadzenSidebarToggle>
+                </div>
+                <div class="col-6 d-flex align-items-center justify-content-end ps-0 pe-3 gap-3">
+                    @if (isCartVisible)
+                    {
+                        <button type="button" class="btn position-relative rounded-circle d-flex align-items-center justify-content-center" title="Seperim" @onclick="OpenCartDrawer" style="width: 44px; height: 44px; border: 1px solid #e2e8f0; background: white; transition: all 0.2s;">
+                            @if (isCartLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm text-muted" role="status" style="font-size: 1.2rem;"></span>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-cart-shopping" style="font-size: 1.2rem; color: #0e947a;"></i>
+                            }
+                            @if (cartCount > 0 && !isCartLoading)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success text-white border border-light" style="font-size: 0.9rem; padding: 5px 8px; font-weight: 600; transform: translate(-50%, -10%) !important;">
+                                    @cartCount
+                                    <span class="visually-hidden">sepet ürünleri</span>
+                                </span>
+                            }
+                        </button>
+                    }
+                    
+                    @* Branch Indicator & Switcher *@
+                    <BranchIndicator />
+                    
+                    @if (Security.IsAuthenticated())
+                    {
+                        <RadzenProfileMenu Click="@ProfileMenuClick" Class="rz-profile-menu custom-profile-menu">
+                            <ChildContent>
+                                <RadzenProfileMenuItem Text="Şifre Değiştir" Value="Password" Icon="vpn_key"/>
+                                <RadzenProfileMenuItem Text="Çıkış" Value="Logout" Icon="logout"/>
+                            </ChildContent>
+                            <Template>
+                                <div class="d-flex align-items-center gap-2 px-2 py-1 rounded-pill" style="border: 1px solid #e2e8f0; background: white; cursor: pointer; transition: all 0.2s;">
+                                    <div class="bg-light text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="fa-solid fa-user-circle" style="font-size: 1.1rem;"></i>
+                                    </div>
+                                    <span class="d-none d-lg-inline fw-semibold text-dark me-1" style="font-size: 0.85rem;">
+                                        @(Security.User?.FullName ?? Security.User?.UserName)
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down text-muted" style="font-size: 0.7rem;"></i>
+                                </div>
+                            </Template>
+                        </RadzenProfileMenu>
+                    }
+                </div>
+            </div>
+        </div>
+    </RadzenHeader>
+    <RadzenBody Expanded="@sidebarExpanded">
+        <div class="container-fluid pt-0 pb-2 pb-lg-5" style="padding-top: 0 !important; @(isFooterVisible ? "padding-bottom: 80px !important;" : "")">
+            <div class="row">
+                <div class="col">
+                    @Body
+                </div>
+            </div>
+        </div>
+    </RadzenBody>
+    <RadzenSidebar Expanded="@sidebarExpanded" style="z-index: 2">
+        <RadzenPanelMenu>
+            <RadzenPanelMenuItem Text="Ana Sayfa" Path="/" Icon="home"/>
+            <!-- <RadzenPanelMenuItem Text="İlanlar" Path="/advertisements" Icon="campaign"/> -->
+          
+            @foreach (var menu in menus)
+            {
+                <RecursiveMenuItem Menu="@menu" Level="0" />
+            }
+
+            <!-- <RadzenPanelMenuItem Text="Push Bildirimler" Path="/push-notifications" Icon="notifications_active"/> -->
+         
+        </RadzenPanelMenu>
+        <div class="p-2 text-center" style="font-size: 0.75rem; color: var(--rz-text-disabled-color); opacity: 0.5;">
+            <p class="m-0">B2B v1.0.0</p>
+            <p class="m-0">Copyright Ⓒ @DateTime.Now.Year</p>
+        </div>
+    </RadzenSidebar>
+</RadzenLayout>
+
+<CartDrawer @bind-IsOpen="isCartDrawerOpen" />
+
+@* Global Payment Modal - To bypass fixed positioning issues in Radzen layout *@
+<div class="modern-checkout-modal-overlay @(PaymentModalService.IsOpen ? "open" : "")">
+    <div class="modern-checkout-modal-content">
+        <div class="modern-checkout-modal-header">
+            <h4>3D Secure Ödeme</h4>
+            <button type="button" class="btn-close-modal" @onclick="PaymentModalService.Close" title="Kapat">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modern-checkout-modal-body">
+            <iframe name="threeDIframe" id="threeDIframe" class="three-d-iframe"></iframe>
+        </div>
+    </div>
+</div>
+
+<div id="payment-form-container" style="display:none;">
+    @((MarkupString)(PaymentModalService.PaymentHtmlContent ?? ""))
+</div>
+
+@if (isFooterVisible)
+{
+    <Footer />
+}

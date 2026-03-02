@@ -1,0 +1,87 @@
+@typeparam TItem
+
+@code {
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+
+    private int internalPage;
+
+    protected override void OnParametersSet()
+    {
+        internalPage = CurrentPage;
+    }
+
+    private async Task SelectPage(int page)
+    {
+        if (page >= 1 && page <= TotalPages && page != internalPage)
+        {
+            await OnPageChanged.InvokeAsync(page);
+            internalPage = page;
+        }
+    }
+}
+
+@if (TotalPages > 1)
+{
+    <nav class="custom-pagination mt-4">
+        <ul class="pagination justify-content-center mb-0">
+
+            <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="javascript:void(0)" @onclick="() => SelectPage(1)">
+                    <i class="fa-solid fa-angles-left"></i>
+                </a>
+            </li>
+
+            <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="javascript:void(0)" @onclick="() => SelectPage(CurrentPage - 1)">
+                    <i class="fa-solid fa-angle-left"></i>
+                </a>
+            </li>
+
+            @for (int i = 3; i >= 1; i--)
+            {
+                var val = CurrentPage - i;
+                if (val > 0)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0)" @onclick="() => SelectPage(val)">
+                            @val
+                        </a>
+                    </li>
+                }
+            }
+
+            <li class="page-item active">
+                <a class="page-link" href="javascript:void(0)">
+                    @CurrentPage
+                </a>
+            </li>
+
+            @for (int i = 1; i <= 3; i++)
+            {
+                var val = CurrentPage + i;
+                if (val <= TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0)" @onclick="() => SelectPage(val)">
+                            @val
+                        </a>
+                    </li>
+                }
+            }
+
+            <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                <a class="page-link" href="javascript:void(0)" @onclick="() => SelectPage(CurrentPage + 1)">
+                    <i class="fa-solid fa-angle-right"></i>
+                </a>
+            </li>
+
+            <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                <a class="page-link" href="javascript:void(0)" @onclick="() => SelectPage(TotalPages)">
+                    <i class="fa-solid fa-angles-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}

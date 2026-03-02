@@ -1,0 +1,13 @@
+﻿@typeparam TItem
+@using Radzen
+@inherits Radzen.Blazor.RadzenDataFilterProperty<TItem>
+
+@code {
+    public override IEnumerable<FilterOperator> GetFilterOperators()
+    {
+        var operators = base.GetFilterOperators();        
+        operators = operators.Where(o => o == FilterOperator.Equals || o == FilterOperator.Contains);
+        return operators;
+    }
+    
+}

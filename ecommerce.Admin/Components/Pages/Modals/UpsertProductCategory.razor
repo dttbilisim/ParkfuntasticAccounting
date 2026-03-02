@@ -1,0 +1,43 @@
+﻿@page "/upsert-productcategory"
+@using ecommerce.Admin.Domain.Dtos.ProductCategory;
+@attribute [Authorize]
+
+
+<PageTitle>Kategori Ekle/Düzenle</PageTitle>
+<RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kategori Kayıt Edilemedi!</RadzenAlert>
+<RadzenTemplateForm TItem="ProductCategoryUpsertDto" Data="@productCategory" Visible="@(productCategory != null)" Submit="@FormSubmit">
+
+
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-1">
+            <RadzenLabel Text="Kategori" Component="Brand" style="width: 100%" />
+        </div>
+        <div class="col-md-12">
+            <RadzenDropDownDataGrid Data="@Categories"
+                                    TextProperty="Name"
+                                    ValueProperty="Id"
+                                    Placeholder="Seçiniz"
+                                    style="display: block; width: 100%;"
+                                    @bind-Value="@productCategory.CategoryId"
+                                    Name="ParentId"
+                                    AllowVirtualization="true"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    AllowFiltering="true">
+            
+                                    <Template Context="data">
+                                        <p style="white-space:pre-wrap">@data.Name</p>
+                                    </Template>
+            </RadzenDropDownDataGrid>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+        </div>
+    </div>
+</RadzenTemplateForm>

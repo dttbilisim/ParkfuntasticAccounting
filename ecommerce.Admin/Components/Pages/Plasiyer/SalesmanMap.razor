@@ -1,0 +1,100 @@
+@page "/plasiyer/map"
+@using ecommerce.Domain.Shared.Dtos
+@namespace ecommerce.Admin.Components.Pages.Plasiyer
+@layout MainLayout
+
+<PageTitle>Plasiyer Konum Takibi</PageTitle>
+
+<RadzenStack Orientation="Orientation.Vertical" Gap="1rem">
+    <RadzenCard Variant="Variant.Flat">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.Wrap" Gap="0.5rem">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <i class="fa-solid fa-map-location-dot" style="font-size: 1.5rem; color: #0e947a;"></i>
+                <RadzenText TextStyle="TextStyle.H5" class="m-0">Plasiyer Konum Takibi</RadzenText>
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenBadge BadgeStyle="BadgeStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" class="rz-p-2">
+                    <RadzenIcon Icon="people" class="rz-me-1" />
+                    @salesmen.Count aktif plasiyer
+                </RadzenBadge>
+                <RadzenButton Icon="refresh" Text="Yenile" Click="@RefreshMap" 
+                              ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small"
+                              IsBusy="@isLoading" BusyText="Yükleniyor..." />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
+
+    @if (isLoading && !salesmen.Any())
+    {
+        <RadzenCard Variant="Variant.Flat" class="text-center p-5">
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large" />
+            <RadzenText TextStyle="TextStyle.Body1" class="mt-3 text-muted">Plasiyer konumları yükleniyor...</RadzenText>
+        </RadzenCard>
+    }
+    else if (!salesmen.Any() && !isLoading)
+    {
+        <RadzenCard Variant="Variant.Flat" class="text-center p-5">
+            <i class="fa-solid fa-map-pin" style="font-size: 3rem; color: #ccc;"></i>
+            <RadzenText TextStyle="TextStyle.H6" class="mt-3 text-muted">Aktif plasiyer bulunamadı</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2" class="text-muted">Şu anda konum bilgisi olan online plasiyer yok.</RadzenText>
+        </RadzenCard>
+    }
+    else
+    {
+        <RadzenRow Gap="1rem">
+            @* Sol taraf — Plasiyer listesi *@
+            <RadzenColumn Size="12" SizeLG="3">
+                <RadzenCard Variant="Variant.Flat" Style="height: calc(100vh - 200px); overflow-y: auto;">
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="mb-2">
+                        <i class="fa-solid fa-list me-1"></i> Plasiyer Listesi
+                    </RadzenText>
+                    @foreach (var user in salesmen)
+                    {
+                        var diff = DateTime.UtcNow - user.LastActiveTime;
+                        var timeText = diff.TotalMinutes < 1 ? "Az önce" :
+                                       diff.TotalMinutes < 60 ? $"{(int)diff.TotalMinutes} dk önce" :
+                                       $"{(int)diff.TotalHours} saat önce";
+                        var badgeStyle = diff.TotalMinutes < 10 ? BadgeStyle.Success :
+                                         diff.TotalMinutes < 30 ? BadgeStyle.Warning : BadgeStyle.Danger;
+
+                        <div class="salesman-list-item" style="padding: 10px 8px; border-bottom: 1px solid #eee;">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenStack Gap="2px">
+                                    <RadzenText TextStyle="TextStyle.Body1" class="m-0" Style="font-weight: 600;">
+                                        @(user.FullName ?? user.Username)
+                                    </RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Caption" class="m-0 text-muted">
+                                        <i class="fa-solid fa-at me-1"></i>@user.Username
+                                    </RadzenText>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                        <RadzenBadge BadgeStyle="@badgeStyle" Variant="Variant.Flat" Shade="Shade.Lighter" Text="@timeText" Style="font-size: 0.7rem;" />
+                                        <span style="font-size: 0.75rem; color: #999;">@user.Application</span>
+                                    </RadzenStack>
+                                </RadzenStack>
+                                <RadzenStack Orientation="Orientation.Horizontal" Gap="2px">
+                                    <RadzenButton Icon="my_location" Size="ButtonSize.ExtraSmall"
+                                                  ButtonStyle="ButtonStyle.Info" Variant="Variant.Text"
+                                                  Click="@(() => FocusOnSalesman(user))"
+                                                  MouseEnter="@(args => TooltipService.Open(args, "Haritada Göster"))"
+                                                  MouseLeave="@(_ => TooltipService.Close())" />
+                                    <RadzenButton Icon="route" Size="ButtonSize.ExtraSmall"
+                                                  ButtonStyle="ButtonStyle.Warning" Variant="Variant.Text"
+                                                  Click="@(() => ShowLocationHistory(user))"
+                                                  MouseEnter="@(args => TooltipService.Open(args, "Günlük Rota"))"
+                                                  MouseLeave="@(_ => TooltipService.Close())" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        </div>
+                    }
+                </RadzenCard>
+            </RadzenColumn>
+
+            @* Sağ taraf — Harita *@
+            <RadzenColumn Size="12" SizeLG="9">
+                <RadzenCard Variant="Variant.Flat" Style="padding: 0; overflow: hidden; border-radius: 8px;">
+                    <div id="salesman-map" style="height: calc(100vh - 200px); width: 100%;"></div>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+    }
+</RadzenStack>

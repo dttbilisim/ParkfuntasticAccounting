@@ -1,0 +1,123 @@
+@using ecommerce.Admin.Domain.Dtos.OrderDto
+@using ecommerce.Admin.Domain.Interfaces
+@using ecommerce.Core.Utils
+@using Radzen
+@using Radzen.Blazor
+@inject IOrderService OrderService
+@inject DialogService DialogService
+
+<div class="p-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fa-solid fa-clock-rotate-left text-success me-2"></i>Geçmiş Alışverişler: @ProductName
+            </h5>
+            <RadzenButton Icon="close" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Light" Click="Close" />
+        </div>
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+                <p class="text-muted mt-2 mb-0">Yükleniyor...</p>
+            </div>
+        }
+        else if (history == null || !history.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fa-solid fa-clock-rotate-left fa-2x mb-2 opacity-50"></i>
+                <p class="mb-0">Bu ürün için geçmiş alışveriş kaydı yok.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sipariş No</th>
+                            <th>Tarih</th>
+                            <th>Satıcı</th>
+                            <th>Durum</th>
+                            <th class="text-end">Adet</th>
+                            <th class="text-end">Birim Fiyat</th>
+                            <th class="text-end">Toplam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in history!)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.OrderNumber</td>
+                                <td>@item.OrderCreatedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>@item.SellerName</td>
+                                <td><span class="badge" style="background-color: @GetStatusColor(item.OrderStatusType)">@GetStatusLabel(item.OrderStatusType)</span></td>
+                                <td class="text-end">@item.Quantity</td>
+                                <td class="text-end">@item.UnitPrice.ToString("N2")</td>
+                                <td class="text-end fw-bold text-success">@item.TotalPrice.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+@code {
+    [Parameter] public int ProductId { get; set; }
+    [Parameter] public string ProductName { get; set; } = "";
+    [Parameter] public int CustomerId { get; set; }
+
+    private List<ProductPurchaseHistoryItemDto>? history;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CustomerId > 0 && ProductId > 0)
+        {
+            try
+            {
+                history = await OrderService.GetProductPurchaseHistoryByCustomer(CustomerId, ProductId);
+            }
+            catch
+            {
+                history = new List<ProductPurchaseHistoryItemDto>();
+            }
+        }
+        else
+            history = new List<ProductPurchaseHistoryItemDto>();
+        isLoading = false;
+    }
+
+    private void Close() => DialogService.Close();
+
+    private static string GetStatusLabel(OrderStatusType status)
+    {
+        return status switch
+        {
+            OrderStatusType.OrderNew => "Yeni Sipariş",
+            OrderStatusType.OrderPrepare => "Hazırlanıyor",
+            OrderStatusType.OrderProblem => "Sorunlu",
+            OrderStatusType.OrderWaitingApproval => "Onay Bekliyor",
+            OrderStatusType.OrderWaitingPayment => "Ödeme Bekliyor",
+            OrderStatusType.OrderinCargo => "Kargoda",
+            OrderStatusType.OrderCanceled => "İptal Edildi",
+            OrderStatusType.OrderSuccess => "Tamamlandı",
+            OrderStatusType.PaymentSuccess => "Ödeme Alındı",
+            _ => status.ToString()
+        };
+    }
+
+    private static string GetStatusColor(OrderStatusType status)
+    {
+        return status switch
+        {
+            OrderStatusType.OrderNew => "#9E9E9E",
+            OrderStatusType.OrderPrepare => "#007AFF",
+            OrderStatusType.OrderProblem => "#FF3B30",
+            OrderStatusType.OrderSuccess => "#34C759",
+            OrderStatusType.OrderCanceled => "#FF3B30",
+            OrderStatusType.OrderinCargo => "#5856D6",
+            OrderStatusType.PaymentSuccess => "#34C759",
+            _ => "#6c757d"
+        };
+    }
+}

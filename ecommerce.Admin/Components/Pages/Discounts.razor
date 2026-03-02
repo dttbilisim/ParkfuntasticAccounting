@@ -1,0 +1,70 @@
+﻿@page "/discounts"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.DiscountDto
+@using ecommerce.Core.Extensions
+@using ecommerce.Core.Utils
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+
+<PageTitle>İndirim/Kupon Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">İndirim/Kupon Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni İndirim Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="DataGrid" 
+                            LoadData="@LoadData" 
+                            Data="@DiscountData.Data" 
+                            Count="@DiscountData.DataCount" 
+                            TItem="DiscountListDto" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            AllowFilterDateInput="true" 
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+                            RowSelect="@EditRow"
+                            Render="@OnRadzenGridRender"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Property="Id" Title="Id" Width="100px" SortOrder="SortOrder.Descending"/>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Property="Name" Title="İndirim Adı" MinWidth="200px"/>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Property="DiscountPercentage" Title="İndirim Oranı" Width="110px" Filterable="false"/>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Property="DiscountAmount" Title="İndirim Tutarı" Width="110px" Filterable="false"/>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Title="Başlangıç Zamanı" Property="StartDate" FormatString="{0:g}" Width="150px" Filterable="false"/>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Title="Bitiş Zamanı" Property="EndDate" FormatString="{0:g}" Width="150px" Filterable="false"/>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Property="RequiresCouponCode" Title="Kupon" Width="75px" Filterable="false" TextAlign="TextAlign.Center">
+                        <Template Context="discount">
+                            <RadzenCheckBox @bind-Value="discount.RequiresCouponCode" ReadOnly="true"/>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Title="Durum" Property="Status" Type="@typeof(EntityStatus)" Width="100px">
+                        <Template Context="discount">
+                            <RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">@(((EntityStatus) discount.Status).GetDisplayName())</RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Title="Oluşturulma Tarihi" Property="CreatedDate" FormatString="{0:g}" Width="150px" Filterable="false"/>
+                    <RadzenDataGridColumn TItem="DiscountListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="Discount">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => GridDeleteButtonClick(Discount))" @onclick:stopPropagation="true"/>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1080 @@
+{
+  "carBrandLogos": {
+    "Abarth": {
+      "name": "Abarth",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Aiways": {
+      "name": "Aiways",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Alfa Romeo": {
+      "name": "Alfa Romeo",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/alfaromeo.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Alpina": {
+      "name": "Alpina",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Aston Martin": {
+      "name": "Aston Martin",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/astonmartin.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Audi": {
+      "name": "Audi",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/audi.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Bentley": {
+      "name": "Bentley",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/bentley.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "BMW": {
+      "name": "BMW",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/bmw.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Brilliance": {
+      "name": "Brilliance",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Cadillac": {
+      "name": "Cadillac",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/cadillac.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Caterham": {
+      "name": "Caterham",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Chevrolet": {
+      "name": "Chevrolet",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/chevrolet.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Chrysler": {
+      "name": "Chrysler",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/chrysler.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Citroen": {
+      "name": "Citroen",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/citroen.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Dacia": {
+      "name": "Dacia",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/dacia.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Daihatsu": {
+      "name": "Daihatsu",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/daihatsu.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Dodge": {
+      "name": "Dodge",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/dodge.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Ferrari": {
+      "name": "Ferrari",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/ferrari.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Fiat": {
+      "name": "Fiat",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/fiat.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Ford": {
+      "name": "Ford",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/ford.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Honda": {
+      "name": "Honda",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/honda.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Hyundai": {
+      "name": "Hyundai",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/hyundai.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Infiniti": {
+      "name": "Infiniti",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/infiniti.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Isuzu": {
+      "name": "Isuzu",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/isuzu.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Iveco": {
+      "name": "Iveco",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/iveco.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Jaguar": {
+      "name": "Jaguar",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/jaguar.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Jeep": {
+      "name": "Jeep",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/jeep.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Kia": {
+      "name": "Kia",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/kia.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Lada": {
+      "name": "Lada",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/lada.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Lamborghini": {
+      "name": "Lamborghini",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/lamborghini.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Lancia": {
+      "name": "Lancia",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/lancia.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Land Rover": {
+      "name": "Land Rover",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Lexus": {
+      "name": "Lexus",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/lexus.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Lotus": {
+      "name": "Lotus",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/lotus.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Maserati": {
+      "name": "Maserati",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/maserati.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Mazda": {
+      "name": "Mazda",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/mazda.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Mercedes-Benz": {
+      "name": "Mercedes-Benz",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/mercedes.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "MG Rover": {
+      "name": "MG Rover",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "MINI": {
+      "name": "MINI",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/minicooper.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Mitsubishi": {
+      "name": "Mitsubishi",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/mitsubishi.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Nissan": {
+      "name": "Nissan",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/nissan.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Opel": {
+      "name": "Opel",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/opel.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Peugeot": {
+      "name": "Peugeot",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/peugeot.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Porsche": {
+      "name": "Porsche",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/porsche.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Renault": {
+      "name": "Renault",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/renault.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Rolls Royce": {
+      "name": "Rolls Royce",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Saab": {
+      "name": "Saab",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/saab.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Seat": {
+      "name": "Seat",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/seat.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Skoda": {
+      "name": "Skoda",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/skoda.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Smart": {
+      "name": "Smart",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/smart.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Ssangyong": {
+      "name": "Ssangyong",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/ssangyong.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Subaru": {
+      "name": "Subaru",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/subaru.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Suzuki": {
+      "name": "Suzuki",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/suzuki.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Tata": {
+      "name": "Tata",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tata.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Tesla": {
+      "name": "Tesla",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tesla.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Toyota": {
+      "name": "Toyota",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/toyota.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Volkswagen": {
+      "name": "Volkswagen",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/volkswagen.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Volvo": {
+      "name": "Volvo",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/volvo.svg",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Aprilia": {
+      "name": "Aprilia",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/aprilia.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Benelli": {
+      "name": "Benelli",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Bova": {
+      "name": "Bova",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/setra.svg",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Buell": {
+      "name": "Buell",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Cagiva": {
+      "name": "Cagiva",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "DAF": {
+      "name": "DAF",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/daf.svg",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Daelim": {
+      "name": "Daelim",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Daewoo": {
+      "name": "Daewoo",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "car"
+    },
+    "Ducati": {
+      "name": "Ducati",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/ducati.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Gilera": {
+      "name": "Gilera",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Harley-Davidson": {
+      "name": "Harley-Davidson",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/harleydavidson.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Hyosung": {
+      "name": "Hyosung",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "KTM": {
+      "name": "KTM",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/ktm.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Kawasaki": {
+      "name": "Kawasaki",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/kawasaki.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Kymco": {
+      "name": "Kymco",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Kässbohrer/Setra": {
+      "name": "Kässbohrer/Setra",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "MAN": {
+      "name": "MAN",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/man.svg",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "MBK": {
+      "name": "MBK",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "MV Agusta": {
+      "name": "MV Agusta",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/mvagusta.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "MZ": {
+      "name": "MZ",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Malaguti": {
+      "name": "Malaguti",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Moto-Guzzi": {
+      "name": "Moto-Guzzi",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/motoguzzi.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Neoplan": {
+      "name": "Neoplan",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/setra.svg",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Piaggio (Vespa)": {
+      "name": "Piaggio (Vespa)",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/piaggio.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "SYM": {
+      "name": "SYM",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Sachs Bikes": {
+      "name": "Sachs Bikes",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Scania": {
+      "name": "Scania",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/scania.svg",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Tornax": {
+      "name": "Tornax",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Triumph": {
+      "name": "Triumph",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/triumph.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Westfield": {
+      "name": "Westfield",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Yamaha": {
+      "name": "Yamaha",
+      "logoUrl": "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/yamaha.svg",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    }
+  },
+  "motorcycleBrandLogos": {
+    "Aprilia": {
+      "name": "Aprilia",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Benelli": {
+      "name": "Benelli",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "BMW": {
+      "name": "BMW",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Buell": {
+      "name": "Buell",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Cagiva": {
+      "name": "Cagiva",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Daelim": {
+      "name": "Daelim",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Ducati": {
+      "name": "Ducati",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Gilera": {
+      "name": "Gilera",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Honda": {
+      "name": "Honda",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Hyosung": {
+      "name": "Hyosung",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Kawasaki": {
+      "name": "Kawasaki",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "KTM": {
+      "name": "KTM",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Kymco": {
+      "name": "Kymco",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Malaguti": {
+      "name": "Malaguti",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "MBK": {
+      "name": "MBK",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Moto-Guzzi": {
+      "name": "Moto-Guzzi",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "MZ": {
+      "name": "MZ",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Peugeot": {
+      "name": "Peugeot",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Piaggio (Vespa)": {
+      "name": "Piaggio (Vespa)",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Sachs Bikes": {
+      "name": "Sachs Bikes",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Suzuki": {
+      "name": "Suzuki",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Triumph": {
+      "name": "Triumph",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    },
+    "Yamaha": {
+      "name": "Yamaha",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "motorcycle"
+    }
+  },
+  "truckBrandLogos": {
+    "DAF": {
+      "name": "DAF",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Isuzu": {
+      "name": "Isuzu",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Iveco": {
+      "name": "Iveco",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "MAN": {
+      "name": "MAN",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Mitsubishi": {
+      "name": "Mitsubishi",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Nissan": {
+      "name": "Nissan",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Renault": {
+      "name": "Renault",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Scania": {
+      "name": "Scania",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    },
+    "Volvo": {
+      "name": "Volvo",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-truck",
+      "category": "truck"
+    }
+  },
+  "busBrandLogos": {
+    "Bova": {
+      "name": "Bova",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Iveco": {
+      "name": "Iveco",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Kässbohrer/Setra": {
+      "name": "Kässbohrer/Setra",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "MAN": {
+      "name": "MAN",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Mercedes-Benz": {
+      "name": "Mercedes-Benz",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Neoplan": {
+      "name": "Neoplan",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Renault": {
+      "name": "Renault",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Scania": {
+      "name": "Scania",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Volvo": {
+      "name": "Volvo",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    }
+  },
+  "specialtyBrandLogos": {
+    "Bentley": {
+      "name": "Bentley",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Brilliance": {
+      "name": "Brilliance",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Caterham": {
+      "name": "Caterham",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Daewoo": {
+      "name": "Daewoo",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Iveco": {
+      "name": "Iveco",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Harley-Davidson": {
+      "name": "Harley-Davidson",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "specialty"
+    },
+    "Hyundai": {
+      "name": "Hyundai",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "MV Agusta": {
+      "name": "MV Agusta",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "specialty"
+    },
+    "SYM": {
+      "name": "SYM",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "specialty"
+    },
+    "Tornax": {
+      "name": "Tornax",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-motorcycle",
+      "category": "specialty"
+    },
+    "Mercedes-Benz": {
+      "name": "Mercedes-Benz",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Ferrari": {
+      "name": "Ferrari",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Kia": {
+      "name": "Kia",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Lada": {
+      "name": "Lada",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Lamborghini": {
+      "name": "Lamborghini",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Lancia": {
+      "name": "Lancia",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Land Rover": {
+      "name": "Land Rover",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Lexus": {
+      "name": "Lexus",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Lotus": {
+      "name": "Lotus",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Maserati": {
+      "name": "Maserati",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Mazda": {
+      "name": "Mazda",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "MG Rover": {
+      "name": "MG Rover",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "MINI": {
+      "name": "MINI",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Mitsubishi": {
+      "name": "Mitsubishi",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Nissan": {
+      "name": "Nissan",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Opel": {
+      "name": "Opel",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Peugeot": {
+      "name": "Peugeot",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Porsche": {
+      "name": "Porsche",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Renault": {
+      "name": "Renault",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Rolls Royce": {
+      "name": "Rolls Royce",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Saab": {
+      "name": "Saab",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Seat": {
+      "name": "Seat",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Skoda": {
+      "name": "Skoda",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Smart": {
+      "name": "Smart",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Ssangyong": {
+      "name": "Ssangyong",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Subaru": {
+      "name": "Subaru",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Suzuki": {
+      "name": "Suzuki",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Tata": {
+      "name": "Tata",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Tesla": {
+      "name": "Tesla",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Toyota": {
+      "name": "Toyota",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Volkswagen": {
+      "name": "Volkswagen",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Volvo": {
+      "name": "Volvo",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Abarth": {
+      "name": "Abarth",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Aiways": {
+      "name": "Aiways",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Alpina": {
+      "name": "Alpina",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Westfield": {
+      "name": "Westfield",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-car",
+      "category": "specialty"
+    },
+    "Kässbohrer": {
+      "name": "Kässbohrer",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    },
+    "Setra": {
+      "name": "Setra",
+      "logoUrl": "",
+      "fallbackIcon": "fas fa-bus",
+      "category": "bus"
+    }
+  }
+}

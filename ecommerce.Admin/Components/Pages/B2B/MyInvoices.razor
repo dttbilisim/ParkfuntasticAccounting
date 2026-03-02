@@ -1,0 +1,219 @@
+@page "/b2b/my-invoices"
+@attribute [Authorize]
+@layout MainLayout
+@using ecommerce.Admin.Components.Shared
+@using ecommerce.Admin.Domain.Dtos.InvoiceDto
+@using Radzen
+@using Radzen.Blazor
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Faturalarım</PageTitle>
+
+<div class="b2b-invoices-page">
+    <RadzenCard class="invoices-card">
+        <div class="invoices-header">
+            <div class="header-title">
+                <i class="fas fa-file-invoice"></i>
+                <h2>Faturalarım</h2>
+            </div>
+            
+            <!-- Compact Invoice Search -->
+            <div class="search-group">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           class="search-input" 
+                           placeholder="Fatura No Ara..." 
+                           @bind="searchInvoiceNumber"
+                           @bind:event="oninput"
+                           @onkeypress="HandleSearchKeyPress"
+                           />
+                    @if (!string.IsNullOrEmpty(searchInvoiceNumber))
+                    {
+                        <button type="button" class="search-clear" @onclick="ClearSearch" title="Temizle">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    }
+                </div>
+                <RadzenButton Text="Ara" 
+                              ButtonStyle="ButtonStyle.Primary" 
+                              Icon="search"
+                              Size="ButtonSize.Small"
+                              Click="ApplySearch" />
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <p>Yükleniyor...</p>
+            </div>
+        }
+        else if (invoices != null && invoices.Any())
+        {
+            <AdminDataGrid @ref="invoicesGrid" 
+                            Data="@invoices" 
+                            TItem="InvoiceListDto"
+                            AllowPaging="true" 
+                            PageSize="15"
+                            AllowSorting="true"
+                            class="compact-invoices-grid">
+                <Columns>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="InvoiceNo" 
+                                          Title="Fatura No" 
+                                          Width="140px">
+                        <Template>
+                            <a href="#" 
+                               class="invoice-link"
+                               @onclick="@(() => ViewInvoice(context.Id))"
+                               @onclick:preventDefault>
+                                <i class="fas fa-file-invoice"></i> @context.InvoiceNo
+                            </a>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="InvoiceDate" 
+                                          Title="Tarih" 
+                                          Width="100px">
+                        <Template>
+                            <div class="compact-date">
+                                <div class="date-main">@($"{context.InvoiceDate:dd.MM.yyyy}")</div>
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="InvoiceTypeName" 
+                                          Title="Tip" 
+                                          Width="110px">
+                        <Template>
+                            <span class="invoice-type-badge">@context.InvoiceTypeName</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="OrderNumber" 
+                                          Title="Sipariş" 
+                                          Width="140px">
+                        <Template>
+                            @if (context.LinkedOrders != null && context.LinkedOrders.Any())
+                            {
+                                <div class="order-links">
+                                    @foreach (var order in context.LinkedOrders)
+                                    {
+                                        <a href="/b2b/my-orders?search=@order.OrderNumber" 
+                                           class="link-compact" style="display:block;">
+                                            @order.OrderNumber
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(context.OrderNumber))
+                            {
+                                <a href="/b2b/my-orders?search=@context.OrderNumber" 
+                                   class="link-compact">
+                                    @context.OrderNumber
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="TotalAmount" 
+                                          Title="Ara Toplam" 
+                                          Width="110px">
+                        <Template>
+                            <span class="amount-text">₺@($"{context.TotalAmount:N2}")</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="VatTotal" 
+                                          Title="KDV" 
+                                          Width="100px">
+                        <Template>
+                            <span class="amount-text">₺@($"{context.VatTotal:N2}")</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="GeneralTotal" 
+                                          Title="Toplam" 
+                                          Width="120px">
+                        <Template>
+                            <span class="total-amount">₺@($"{context.GeneralTotal:N2}")</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="CurrencyCode" 
+                                          Title="Para" 
+                                          Width="70px">
+                        <Template>
+                            <span class="currency-badge">@context.CurrencyCode</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Property="IsEInvoice" 
+                                          Title="e-Fatura" 
+                                          Width="90px">
+                        <Template>
+                            @if (context.IsEInvoice)
+                            {
+                                <span class="einvoice-badge einvoice-yes">
+                                    <i class="fas fa-check-circle"></i> Evet
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="einvoice-badge einvoice-no">Hayır</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="InvoiceListDto" 
+                                          Title="İşlemler" 
+                                          Width="120px" 
+                                          Sortable="false" 
+                                          Filterable="false">
+                        <Template>
+                            <div class="action-buttons">
+                                <RadzenButton Icon="visibility" 
+                                              ButtonStyle="ButtonStyle.Primary" 
+                                              Size="ButtonSize.ExtraSmall"
+                                              Title="Detay"
+                                              Click="@(() => ViewInvoice(context.Id))" />
+                                @if (!string.IsNullOrEmpty(context.Ettn))
+                                {
+                                    <RadzenButton Icon="download" 
+                                                  ButtonStyle="ButtonStyle.Light" 
+                                                  Size="ButtonSize.ExtraSmall"
+                                                  Title="İndir"
+                                                  Disabled="@(_downloadingInvoiceId != null)"
+                                                  Click="@(() => DownloadInvoice(context))" />
+                                }
+                                @if (context.IsEInvoice)
+                                {
+                                    <RadzenButton Icon="file-pdf" 
+                                                  ButtonStyle="ButtonStyle.Info" 
+                                                  Size="ButtonSize.ExtraSmall"
+                                                  Title="e-Fatura"
+                                                  Click="@(() => ViewEInvoice(context.Id))" />
+                                }
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-file-invoice"></i>
+                <p>Henüz fatura bulunmamaktadır.</p>
+            </div>
+        }
+    </RadzenCard>
+</div>
+
+@* Invoice Detail Modal *@
+

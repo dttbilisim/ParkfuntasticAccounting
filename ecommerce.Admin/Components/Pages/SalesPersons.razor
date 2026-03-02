@@ -1,0 +1,60 @@
+@page "/salespersons"
+@using ecommerce.Admin.Domain.Dtos.SalesPersonDto
+@using ecommerce.Core.Utils;
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Plasiyer Tanımları</PageTitle>
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+            <RadzenText Text="Plasiyer Tanımları" TextStyle="TextStyle.H5" style="color:#598087" class="mt-2" />
+        </div>
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Plasiyer Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+</RadzenCard>
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenDataGrid @ref="radzenDataGrid" ColumnWidth="180px" AllowFiltering="true" FilterMode="FilterMode.Simple"
+                        AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true
+                        TItem="SalesPersonListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@salesPersons"
+                        CellRender="@RowRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        EqualsText="@Loc.GetString("EqualsText")"
+                        NotEqualsText="@Loc.GetString("NotEqualsText")"
+                        LessThanText="@Loc.GetString("LessThanText")"
+                        LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                        GreaterThanText="@Loc.GetString("GreaterThanText")"
+                        IsNullText="@Loc.GetString("IsNullText")"
+                        IsNotNullText="@Loc.GetString("IsNotNullText")">
+
+            <Columns>
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="Id" Title="ID" Width="60px" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="FirstName" Title="Ad" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="LastName" Title="Soyad" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="Phone" Title="Telefon" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="MobilePhone" Title="Cep Telefonu" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="Email" Title="Email" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="CityName" Title="İl" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="TownName" Title="İlçe" />
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Property="SmsPermission" Title="Sms İzni" Width="100px" TextAlign="TextAlign.Center">
+                    <Template Context="row">
+                        <RadzenBadge BadgeStyle="@(row.SmsPermission ? BadgeStyle.Success : BadgeStyle.Light)" Text="@(row.SmsPermission ? "Evet" : "Hayır")" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SalesPersonListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="row">
+                        @if (row.Status != EntityStatus.Deleted)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat"
+                                          Click=@(args => GridDeleteButtonClick(args, row)) @onclick:stopPropagation="true" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>

@@ -1,0 +1,22 @@
+﻿@using Radzen
+@using Radzen.Blazor
+<RadzenDataGrid PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true" Data="@Errors" TItem="Dictionary<string, string>" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+    <Columns>
+        <RadzenDataGridColumn TItem="Dictionary<string, string>" Title="Alan" Frozen="true" Sortable="false" Filterable="false" Width="80px" TextAlign="TextAlign.Left">
+            <Template Context="data">
+                <RadzenText Text="@data.FirstOrDefault().Key" TextStyle="TextStyle.Subtitle1"/>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Dictionary<string, string>" Title="Uyari Mesaji" Frozen="true" Sortable="false" Filterable="false" Width="80px" TextAlign="TextAlign.Left">
+            <Template Context="data">
+                <RadzenText Text="@data.FirstOrDefault().Value" class="rz-text-wrap"/>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    [Parameter] public List<Dictionary<string, string>> Errors { get; set; }
+
+}

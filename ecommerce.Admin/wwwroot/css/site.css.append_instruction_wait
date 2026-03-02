@@ -1,0 +1,26 @@
+
+/* Custom Green Scrollbar for Sidebar */
+.rz-sidebar::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+}
+
+.rz-sidebar::-webkit-scrollbar-thumb {
+    background-color: #0e947a; /* Green */
+    border-radius: 4px;
+}
+
+.rz-sidebar::-webkit-scrollbar-track {
+    background-color: transparent; /* Or a light gray if preferred, but user said 'yesil olsun' implying visibility against background */
+}
+
+/* Also for panel menu if it scrolls independently */
+.rz-panel-menu::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+}
+
+.rz-panel-menu::-webkit-scrollbar-thumb {
+    background-color: #0e947a;
+    border-radius: 4px;
+}

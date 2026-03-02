@@ -1,0 +1,161 @@
+@page "/banks"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Domain.Shared.Dtos.Bank.BankDto
+@layout MainLayout
+
+<div class="content-header">
+    <div class="content-title">Banka Yönetimi</div>
+    <div class="clearfix"></div>
+</div>
+
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="Bankalar">
+            <div class="content-header">
+                <div class="content-actions">
+                    <RadzenButton Icon="add_circle_outline" Text="Yeni Banka" Click="AddBankButtonClick" Style="margin-bottom:10px" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <AdminDataGrid @ref="bankDataGrid" Data="banks" Count="bankCount" TItem="BankListDto" LoadData="LoadBankData" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="20" RowSelect="@EditBank">
+                <Columns>
+                    <RadzenDataGridColumn TItem="BankListDto" Property="Id" Title="#" Width="70px" />
+                    <RadzenDataGridColumn TItem="BankListDto" Property="Name" Title="Banka Adı" />
+                    <RadzenDataGridColumn TItem="BankListDto" Property="SystemName" Title="Sistem Adı" />
+                    <RadzenDataGridColumn TItem="BankListDto" Property="BankCode" Title="Banka Kodu" />
+                    <RadzenDataGridColumn TItem="BankListDto" Property="Active" Title="Aktif">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.Active" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="BankListDto" Property="DefaultBank" Title="Varsayılan">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.DefaultBank" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="BankListDto" Title="İşlemler" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteBank(args, data))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Banka Parametreleri">
+            <div class="content-header">
+                <div class="content-actions">
+                    <RadzenButton Icon="add_circle_outline" Text="Yeni Parametre" Click="AddBankParameterButtonClick" Style="margin-bottom:10px" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <AdminDataGrid @ref="bankParameterDataGrid" Data="bankParameters" Count="bankParameterCount" TItem="ecommerce.Domain.Shared.Dtos.Bank.BankParameterDto.BankParameterListDto" LoadData="LoadBankParameterData" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="20" RowSelect="@EditBankParameter">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankParameterDto.BankParameterListDto" Property="Id" Title="#" Width="70px" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankParameterDto.BankParameterListDto" Property="BankName" Title="Banka" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankParameterDto.BankParameterListDto" Property="Key" Title="Anahtar" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankParameterDto.BankParameterListDto" Property="Value" Title="Değer" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankParameterDto.BankParameterListDto" Title="İşlemler" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteBankParameter(args, data))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Banka Kartları">
+            <div class="content-header">
+                <div class="content-actions">
+                    <RadzenButton Icon="add_circle_outline" Text="Yeni Kart" Click="AddBankCardButtonClick" Style="margin-bottom:10px" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <AdminDataGrid @ref="bankCardDataGrid" Data="bankCards" Count="bankCardCount" TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" LoadData="LoadBankCardData" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="20" RowSelect="@EditBankCard">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" Property="Id" Title="#" Width="70px" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" Property="BankName" Title="Banka" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" Property="Name" Title="Kart Adı" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" Property="Active" Title="Aktif">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.Active" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" Property="ManufacturerCard" Title="Üretici Kartı">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.ManufacturerCard" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" Property="CampaignCard" Title="Kampanya Kartı">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.CampaignCard" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardListDto" Title="İşlemler" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteBankCard(args, data))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Taksit Oranları">
+            <div class="content-header">
+                <div class="content-actions">
+                    <RadzenButton Icon="add_circle_outline" Text="Yeni Taksit" Click="AddBankCreditCardInstallmentButtonClick" Style="margin-bottom:10px" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <AdminDataGrid @ref="bankCreditCardInstallmentDataGrid" Data="bankCreditCardInstallments" Count="bankCreditCardInstallmentCount" TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardInstallmentDto.BankCreditCardInstallmentListDto" LoadData="LoadBankCreditCardInstallmentData" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="20" RowSelect="@EditBankCreditCardInstallment">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardInstallmentDto.BankCreditCardInstallmentListDto" Property="Id" Title="#" Width="70px" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardInstallmentDto.BankCreditCardInstallmentListDto" Property="CreditCardName" Title="Kart" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardInstallmentDto.BankCreditCardInstallmentListDto" Property="Installment" Title="Taksit Sayısı" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardInstallmentDto.BankCreditCardInstallmentListDto" Property="InstallmentRate" Title="Oran" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardInstallmentDto.BankCreditCardInstallmentListDto" Property="Active" Title="Aktif">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.Active" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardInstallmentDto.BankCreditCardInstallmentListDto" Title="İşlemler" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteBankCreditCardInstallment(args, data))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Kart Prefix'leri">
+            <div class="content-header">
+                <div class="content-actions">
+                    <RadzenButton Icon="add_circle_outline" Text="Yeni Prefix" Click="AddBankCreditCardPrefixButtonClick" Style="margin-bottom:10px" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <AdminDataGrid @ref="bankCreditCardPrefixDataGrid" Data="bankCreditCardPrefixes" Count="bankCreditCardPrefixCount" TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardPrefixDto.BankCreditCardPrefixListDto" LoadData="LoadBankCreditCardPrefixData" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="20" RowSelect="@EditBankCreditCardPrefix">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardPrefixDto.BankCreditCardPrefixListDto" Property="Id" Title="#" Width="70px" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardPrefixDto.BankCreditCardPrefixListDto" Property="CreditCardName" Title="Kart" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardPrefixDto.BankCreditCardPrefixListDto" Property="Prefix" Title="Prefix" />
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardPrefixDto.BankCreditCardPrefixListDto" Property="Active" Title="Aktif">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.Active" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCreditCardPrefixDto.BankCreditCardPrefixListDto" Title="İşlemler" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="data">
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteBankCreditCardPrefix(args, data))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>

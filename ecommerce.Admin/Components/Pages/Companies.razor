@@ -1,0 +1,83 @@
+﻿@page "/companies"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.CompanyDto;
+@using ecommerce.Admin.Resources
+@using ecommerce.Core.Utils
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Kullanıcılar</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Kullanıcı Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Ekle"  Click="@(args => AddRow(new CompanyListDto()))" download Variant="Variant.Flat" class="mt-2" Style="background-color:green" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid"
+                            ColumnWidth="200px"
+                            AllowFiltering="true"
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            PagerAlwaysVisible=true
+                            PageSize=25
+                            AllowFilterDateInput=true
+                            TItem="CompanyListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@companies"
+                            CellRender="@RowRender"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            FilterMode="FilterMode.Simple">
+                <Columns>
+                
+
+
+
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="CompanyWorkingType" Title="Çalışma Tipi" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="UserType" Title="Kullanıcı Tipi" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="FirstName" Title="Adı" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="LastName" Title="Soyadı" Width="50px"></RadzenDataGridColumn>
+                
+                    
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="EmailAddress" Title="Email" Width="50px"></RadzenDataGridColumn>
+                
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="Status" Title="Durum" Width="50px"></RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="Id" Title="Id" Width="40px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="City.Name" Title="Şehir" Width="50px">
+                        <Template Context="company">
+                            <RadzenText TextStyle="TextStyle.Body2">@company.City.Name</RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CompanyListDto" Property="Town.Name" Title="İlçe" Width="50px">
+                        <Template Context="company">
+                            <RadzenText TextStyle="TextStyle.Body2">@company.Town.Name</RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CompanyListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="product">
+                            @if (product.Status != EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                            Shade="Shade.Dark" Variant="Variant.Flat"
+                                            Click=@(args => GridDeleteButtonClick(args, product)) @onclick:stopPropagation="true" />
+                            }
+                    
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

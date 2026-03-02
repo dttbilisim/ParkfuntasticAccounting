@@ -1,0 +1,400 @@
+/* Customer Account Report - Modern & Compact Design */
+
+.b2b-account-report-page {
+    padding: 16px;
+}
+
+.report-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+/* Header Section */
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-title i {
+    font-size: 1.5rem;
+    color: #495057;
+}
+
+.header-title h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+.filter-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+
+
+/* Loading */
+.loading-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading-container p {
+    margin-top: 12px;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Balance Summary - Compact Cards */
+.balance-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.balance-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.balance-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.balance-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1.2rem;
+}
+
+.balance-debit .balance-icon {
+    background: #fee;
+    color: #dc3545;
+}
+
+.balance-credit .balance-icon {
+    background: #efe;
+    color: #28a745;
+}
+
+.balance-total .balance-icon {
+    background: #e3f2fd;
+    color: #2196f3;
+}
+
+.balance-info {
+    flex: 1;
+}
+
+.balance-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.balance-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #212529;
+    line-height: 1.2;
+}
+
+.balance-debit .balance-value {
+    color: #dc3545;
+}
+
+.balance-credit .balance-value {
+    color: #28a745;
+}
+
+.balance-status {
+    margin-top: 6px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.status-debit {
+    background: #fee;
+    color: #dc3545;
+}
+
+.status-badge.status-credit {
+    background: #efe;
+    color: #28a745;
+}
+
+.status-badge.status-neutral {
+    background: #f0f0f0;
+    color: #6c757d;
+}
+
+.balance-positive {
+    border-left: 3px solid #dc3545;
+}
+
+.balance-negative {
+    border-left: 3px solid #28a745;
+}
+
+/* Customer Info */
+.customer-info {
+    margin-bottom: 16px;
+    padding: 10px 0;
+}
+
+.customer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.customer-badge i {
+    color: #6c757d;
+}
+
+.customer-badge strong {
+    color: #212529;
+    font-weight: 600;
+}
+
+.customer-code {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+/* Transactions Section */
+.transactions-section {
+    margin-top: 20px;
+}
+
+.section-header {
+    margin-bottom: 12px;
+}
+
+.section-header h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-header i {
+    color: #6c757d;
+}
+
+/* Compact DataGrid */
+.compact-transactions-grid {
+    font-size: 0.875rem;
+}
+
+.compact-transactions-grid .rz-datatable {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.compact-transactions-grid .rz-datatable-thead th {
+    background: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #495057;
+    padding: 10px 8px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.compact-transactions-grid .rz-datatable-tbody td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.compact-transactions-grid .rz-datatable-tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* Compact Date */
+.compact-date {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.date-main {
+    font-weight: 600;
+    color: #212529;
+    font-size: 0.85rem;
+}
+
+.date-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Type Badge */
+.type-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.type-badge.type-debit {
+    background: #fee;
+    color: #dc3545;
+}
+
+.type-badge.type-credit {
+    background: #efe;
+    color: #28a745;
+}
+
+/* Amount Styles */
+.amount-incoming {
+    color: #28a745;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+
+.amount-incoming i {
+    font-size: 0.7rem;
+}
+
+.amount-outgoing {
+    color: #dc3545;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+
+.amount-outgoing i {
+    font-size: 0.7rem;
+}
+
+/* Description */
+.description-text {
+    font-size: 0.85rem;
+    color: #495057;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Links */
+.link-compact {
+    color: #0d6efd;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.link-compact:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* Payment Badge */
+.payment-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #e7f3ff;
+    color: #0d6efd;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Balance Amount */
+.balance-amount {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.balance-amount.balance-debt {
+    color: #dc3545;
+}
+
+.balance-amount.balance-credit {
+    color: #28a745;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .balance-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .report-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .filter-group {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .b2b-account-report-page {
+        padding: 12px;
+    }
+
+    .compact-transactions-grid {
+        font-size: 0.8rem;
+    }
+}

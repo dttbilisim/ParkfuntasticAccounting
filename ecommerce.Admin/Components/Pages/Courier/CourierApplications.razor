@@ -1,0 +1,83 @@
+@page "/courier-applications"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.CourierApplicationDto
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+
+<PageTitle>Kurye Başvuruları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0 text-gray-800">Kurye Başvuruları</h1>
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 shadow-sm">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            <RadzenDropDown @bind-Value="FilterStatus"
+                            Data="StatusOptions"
+                            TextProperty="Text"
+                            ValueProperty="Value"
+                            Placeholder="Tüm durumlar"
+                            AllowClear="true"
+                            Style="min-width: 180px;"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenButton Text="Filtrele" ButtonStyle="ButtonStyle.Primary" Icon="filter" Click="ApplyFilter" />
+            @if (FilterStatus.HasValue)
+            {
+                <RadzenButton Text="Temizle" ButtonStyle="ButtonStyle.Light" Icon="close" Click="ClearFilter" />
+            }
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="Grid"
+                           TItem="CourierApplicationListDto"
+                           Data="@Items"
+                           Count="@Count"
+                           LoadData="@LoadData"
+                           AllowPaging="true"
+                           PageSize="25"
+                           AllowSorting="true"
+                           PagerHorizontalAlign="HorizontalAlign.Left"
+                           ShowPagingSummary="true"
+                           SelectionMode="DataGridSelectionMode.Single"
+                           EmptyText="Başvuru bulunamadı.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Property="Id" Title="Id" Width="70px" />
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Property="UserName" Title="Başvuran" Width="160px" />
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Property="Email" Title="E-posta" Width="180px" />
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Property="Phone" Title="Telefon" Width="120px" />
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Property="AppliedAt" Title="Başvuru Tarihi" Width="140px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Title="Durum" Width="120px">
+                        <Template Context="ctx">
+                            <span class="badge @GetStatusBadgeClass(ctx.Status)">@ctx.StatusName</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Property="Note" Title="Not" Width="200px">
+                        <Template Context="ctx">
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@(ctx.Note ?? "")">@(ctx.Note ?? "-")</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CourierApplicationListDto" Title="İşlem" Filterable="false" Sortable="false" Width="180px" TextAlign="TextAlign.Center">
+                        <Template Context="ctx">
+                            <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" Click="@(() => ShowDetail(ctx))" @onclick:stopPropagation="true" class="me-1" title="Detay" />
+                            @if (ctx.Status == CourierApplicationStatus.Pending)
+                            {
+                                <RadzenButton Icon="check_circle" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Click="@(() => ReviewRow(ctx, true))" @onclick:stopPropagation="true" class="me-1" title="Onayla" />
+                                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(() => ReviewRow(ctx, false))" @onclick:stopPropagation="true" class="me-1" title="Reddet" />
+                            }
+                            else
+                            {
+                                <span class="text-muted small me-1">@(ctx.ReviewedAt?.ToString("dd.MM.yyyy") ?? "-")</span>
+                            }
+                            <RadzenButton Icon="delete_forever" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(() => DeleteRow(ctx))" @onclick:stopPropagation="true" title="Başvuruyu Sil" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

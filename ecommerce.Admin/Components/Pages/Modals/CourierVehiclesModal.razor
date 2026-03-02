@@ -1,0 +1,60 @@
+@using ecommerce.Admin.Domain.Dtos.CourierDto
+@using ecommerce.Core.Utils
+@using Radzen
+@using Radzen.Blazor
+
+<div class="modal-wrapper">
+    <div class="modal-header-modern">
+        <h5 class="modal-title-modern">@Title</h5>
+        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" Click="@(() => DialogService.Close(false))" Size="ButtonSize.Small" />
+    </div>
+    <div class="modal-content-body p-3">
+        @if (Loading)
+        {
+            <div class="d-flex justify-content-center p-4">
+                <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+            </div>
+        }
+        else
+        {
+            <p class="text-muted small mb-3">Kuryenin teslimat için kullandığı araçları ekleyin. Hizmet bölgesi eklerken araç seçilir.</p>
+            <div class="mb-3">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                    <RadzenDropDown @bind-Value="NewVehicleType"
+                                    Data="@VehicleTypes"
+                                    TextProperty="Label"
+                                    ValueProperty="Value"
+                                    Placeholder="Araç tipi"
+                                    Style="min-width: 140px;" />
+                    <RadzenTextBox @bind-Value="NewLicensePlate" Placeholder="Plaka (örn. 34 ABC 123)" Style="min-width: 160px;" MaxLength="15" />
+                    <RadzenTextBox @bind-Value="NewDriverName" Placeholder="Şoför adı soyadı" Style="min-width: 160px;" MaxLength="200" />
+                    <RadzenTextBox @bind-Value="NewDriverPhone" Placeholder="Cep telefonu" Style="min-width: 130px;" MaxLength="20" />
+                    <RadzenButton Icon="add" Text="Ekle" ButtonStyle="ButtonStyle.Primary" Click="@AddVehicle" Disabled="@(string.IsNullOrWhiteSpace(NewLicensePlate) || Saving)" />
+                </RadzenStack>
+            </div>
+            @if (Vehicles.Any())
+            {
+                <RadzenDataGrid TItem="CourierVehicleListDto" Data="@Vehicles" AllowPaging="false" AllowSorting="false" AllowFiltering="false" ShowColumnChooser="false" Density="Density.Compact">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="CourierVehicleListDto" Property="VehicleTypeName" Title="Tip" Width="120px" />
+                        <RadzenDataGridColumn TItem="CourierVehicleListDto" Property="LicensePlate" Title="Plaka" Width="140px" />
+                        <RadzenDataGridColumn TItem="CourierVehicleListDto" Property="DriverName" Title="Şoför adı" Width="160px" />
+                        <RadzenDataGridColumn TItem="CourierVehicleListDto" Property="DriverPhone" Title="Telefon" Width="120px" />
+                        <RadzenDataGridColumn TItem="CourierVehicleListDto" Title="" Width="80px" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+                            <Template Context="row">
+                                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Text" Size="ButtonSize.Small" Click="@(() => DeleteVehicle(row))" @onclick:stopPropagation="true" title="Sil" Disabled="@Saving" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            }
+            else
+            {
+                <p class="text-muted small">Henüz araç eklenmedi. Yukarıdan tip ve plaka girip "Ekle" ile ekleyin.</p>
+            }
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <RadzenButton ButtonType="ButtonType.Button" Text="Kapat" ButtonStyle="ButtonStyle.Primary" Click="@(() => DialogService.Close(true))" />
+            </div>
+        }
+    </div>
+</div>

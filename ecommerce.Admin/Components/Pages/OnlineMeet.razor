@@ -1,0 +1,83 @@
+@page "/online-meet"
+@using ecommerce.Admin.Domain.Dtos.CompanyDto
+@using ecommerce.Admin.Domain.Dtos.Scheduler
+
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>İkili Görüşme Sistemi</PageTitle>
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+            <RadzenText Text="İkili Görüşme Sistemi" TextStyle="TextStyle.H5" style="color:#598087" class="mt-2"/>
+        </div>
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Ekle"
+                          Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2"/>
+
+        </div>
+    </div>
+</RadzenCard>
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenDataGrid @ref="radzenDataGrid" ColumnWidth="200px" CellRender="RowRender" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="OnlineMeetDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@_onlineMeeeData" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        EqualsText="@Loc.GetString("EqualsText")"
+                        NotEqualsText="@Loc.GetString("NotEqualsText")"
+                        LessThanText="@Loc.GetString("LessThanText")"
+                        LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                        GreaterThanText="@Loc.GetString("GreaterThanText")"
+                        IsNullText="@Loc.GetString("IsNullText")"
+                        IsNotNullText="@Loc.GetString("IsNotNullText")">
+
+
+            <Columns>
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Property="Id" Title="Id" Width="100px"/>
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Property="MeetId" Title="Id" Width="60px"/>
+
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Width="200px" Property="Seller.AccountName" Title="Firma Adı"/>
+
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Title="Katılımcı Sayısı" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="context">
+
+                        <span>@context.OnlineMeetCalendarPharmacies.Count</span>
+
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Property="Duration" Title="Süresi (Dk)" Width="50px"/>
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Property="MeetDate" Title="Tarihi" FormatString="{0:g}"/>
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Width="60px" Property="Password" Title="Parola" MinWidth="100px"/>
+
+
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Title="Sil" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="context">
+
+                        <RadzenButton Visible="@(context.Status == 0 ? false : true)" ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, context)) @onclick:stopPropagation="true"/>
+
+
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Title="Incele" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="context">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="pageview" Size="ButtonSize.ExtraSmall" Shade="Shade.Light" Variant="Variant.Flat" Click=@(args => GridDetailButtonClick(args, context)) @onclick:stopPropagation="true"/>
+
+
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="OnlineMeetDto" Title="Iptal" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="context">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Light" Variant="Variant.Flat" Click=@(args => GridEndMeetingButtonClick(args, context)) @onclick:stopPropagation="true"/>
+
+
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>
+
+@code {
+}

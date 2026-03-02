@@ -1,0 +1,506 @@
+.filter-column {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.left-box {
+    position: sticky;
+    top: 96px;
+}
+
+.filter-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 24px 48px -24px rgba(55, 65, 81, 0.24);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 12px;
+}
+
+.filter-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: #1f2937;
+}
+
+.filter-panel-title i {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, #82d5b4 0%, #1abc9c 100%);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+.filter-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-filter-reset {
+    border: 0;
+    border-radius: 999px;
+    background: rgba(26, 188, 156, 0.12);
+    color: #0f766e;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 7px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-filter-reset:hover:enabled {
+    background: rgba(26, 188, 156, 0.2);
+}
+
+.btn-filter-reset:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.filter-close {
+    border: none;
+    background: rgba(15, 118, 110, 0.12);
+    color: #0f766e;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    transition: background 0.2s ease;
+}
+
+.filter-close:hover {
+    background: rgba(15, 118, 110, 0.24);
+}
+
+.filter-overlay {
+    display: none;
+}
+
+.filter-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-active-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 118, 110, 0.08);
+    color: #0f766e;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.filter-chip button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.filter-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-group {
+    border-radius: 16px;
+    background: #f8fafc;
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.filter-toggle {
+    background: transparent;
+    font-weight: 600;
+    color: #1e293b;
+    padding: 12px 16px;
+    font-size: 0.92rem;
+    box-shadow: none !important;
+}
+
+.filter-toggle:not(.collapsed) {
+    background: rgba(26, 188, 156, 0.08);
+    color: #0f766e;
+}
+
+.filter-toggle::after {
+    background-image: none;
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f107";
+    transform: scale(0.9);
+}
+
+.filter-toggle.collapsed::after {
+    transform: rotate(-90deg) scale(0.9);
+}
+
+.filter-group-body {
+    padding: 12px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-group-body .search-box {
+    margin-bottom: 2px;
+}
+
+.filter-search-input {
+    border-radius: 10px;
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    padding: 8px 12px;
+    font-size: 0.86rem;
+    background: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-search-input:focus {
+    border-color: #0f766e;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    outline: none;
+}
+
+.category-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.category-list li {
+    margin: 0;
+}
+
+.category-list-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.category-list-box:hover {
+    border-color: rgba(15, 118, 110, 0.25);
+    background: rgba(15, 118, 110, 0.05);
+}
+
+.category-list-box .name {
+    font-size: 0.86rem;
+    color: #1f2937;
+    font-weight: 500;
+    line-height: 1.2;
+    text-transform: none !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    letter-spacing: normal !important;
+}
+
+.category-list-box .form-check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0; /* allow text to wrap */
+}
+
+/* Force normal casing across any inherited utilities */
+.category-list-box,
+.category-list-box label,
+.category-list-box .form-check-label,
+.category-list-box .form-check-label .name {
+    text-transform: none !important;
+}
+
+/* Checkbox alignment fix for compact rows */
+.category-list-box .checkbox_animated {
+    margin-right: 10px;
+    margin-top: 0;
+}
+
+/* Dot part list: smaller, denser items */
+.dotpart-list .category-list-box {
+    gap: 8px;
+    padding: 6px 8px;
+}
+.dotpart-list .category-list-box .name {
+    font-size: 0.90rem !important;
+}
+
+.category-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.category-list::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.6);
+    border-radius: 999px;
+}
+
+.filter-open-btn {
+    border-radius: 999px;
+    background: rgba(26, 188, 156, 0.12);
+    color: #0f766e;
+    font-weight: 600;
+    padding: 10px 18px;
+    border: 0;
+}
+
+.filter-open-btn i {
+    font-size: 1rem;
+}
+
+.sort-pill .dropdown-toggle {
+    border-radius: 999px;
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    background: #ffffff;
+}
+
+.search-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.04);
+    padding: 6px 10px;
+}
+
+.search-pill .search-input {
+    border: 0;
+    background: transparent;
+    outline: none;
+    padding: 6px 4px;
+    min-width: 220px;
+    font-size: 0.9rem;
+}
+
+.search-pill .icon-btn {
+    background: transparent;
+    border: 0;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+.scroll-sentinel button {
+    transition: color 0.2s ease;
+}
+
+.scroll-sentinel button:hover {
+    color: #0f766e;
+}
+
+@media (max-width: 1199px) {
+    .left-box {
+        position: static;
+    }
+
+    .filter-card {
+        box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.35);
+    }
+}
+
+@media (max-width: 991px) {
+    .filter-column {
+        position: fixed;
+        inset: 0;
+        z-index: 1050;
+        background: rgba(15, 23, 42, 0.2);
+        backdrop-filter: blur(3px);
+        display: none;
+    }
+
+    .filter-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        background: rgba(15, 23, 42, 0.35);
+        backdrop-filter: blur(3px);
+    }
+
+    .filter-column .left-box {
+        position: fixed;
+        inset: 0;
+        background: #ffffff;
+        border-radius: 0;
+        padding: 24px 20px 32px;
+        overflow-y: auto;
+    }
+
+    .filter-column.is-open {
+        display: block;
+    }
+
+    .filter-card {
+        box-shadow: none;
+        border-radius: 0;
+        border: 0;
+        padding: 0;
+    }
+
+    .filter-accordion {
+        gap: 12px;
+    }
+}
+/* --- Overrides to fix label truncation and misalignment --- */
+.category-list-box { box-sizing: border-box; }
+.category-list-box .form-check-label {
+    flex: 1 1 auto;
+    white-space: normal !important;
+    overflow: visible !important;
+    word-break: break-word;
+}
+.category-list-box .name { word-break: break-word; }
+.category-list-box .checkbox_animated { flex: 0 0 auto; }
+
+/* Strongest specificity to defeat global utilities adding uppercase/ellipsis */
+.filter-card .category-list .category-list-box .form-check-label .name,
+.filter-card .category-list .category-list-box .form-check-label,
+.filter-card .category-list .category-list-box label,
+.filter-card .category-list .category-list-box span {
+    text-transform: none !important;
+    text-overflow: unset !important;
+    white-space: normal !important;
+    overflow: visible !important;
+}
+
+/* Remove global line-clamp and box model that truncates labels */
+.filter-card .category-list .category-list-box .form-check-label .name {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+    width: 100% !important;
+    overflow: visible !important;
+}
+
+/* Ensure label content starts at left and spans available width */
+.filter-card .category-list .category-list-box .form-check-label {
+    justify-content: flex-start !important;
+    gap: 8px !important;
+}
+
+/* Prevent any sideways scroll in lists; enforce vertical scrolling only */
+.filter-card .category-list {
+    overflow-x: hidden !important;
+}
+
+/* Force vertical stacking: remove flex row/wrap coming from globals */
+.filter-card .category-list {
+    display: block !important;
+}
+.filter-card .category-list li {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* --- Compact mode and horizontal scroll kill --- */
+.category-filter-layout .filter-column,
+.category-filter-layout .left-box,
+.category-filter-layout .filter-card {
+    overflow-x: hidden !important;
+}
+
+.category-filter-layout .filter-group-body .category-list,
+.category-filter-layout .custom-height {
+    overflow-x: hidden !important;
+    max-height: 240px;
+}
+
+/* Compact list items: smaller padding, gap and font size */
+.category-filter-layout .category-list-box {
+    gap: 5px;
+    padding: 5px 6px;
+    box-sizing: border-box;
+}
+
+.category-filter-layout .category-list-box .name {
+    font-size: 0.72rem !important;
+    line-height: 1.25;
+}
+
+.category-filter-layout .filter-search-input {
+    padding: 6px 8px;
+    font-size: 0.78rem;
+}
+
+.category-filter-layout .filter-panel-title span {
+    font-size: 0.86rem;
+}
+/* Scale down checkbox control for a gentler look */
+.category-filter-layout .form-check .checkbox_animated {
+    transform: scale(0.86);
+    transform-origin: left center;
+}
+/* Slightly smaller base font in filter card for compact feel */
+.category-filter-layout .filter-card {
+    font-size: 0.78rem !important;
+}
+.category-filter-layout .filter-group-body .category-list {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    overflow-x: hidden !important;
+}
+.category-filter-layout .filter-group-body .category-list li {
+    display: block !important;
+    width: 100% !important;
+}
+.category-filter-layout .category-list-box {
+    align-items: flex-start;
+}
+.category-filter-layout .category-list-box .form-check-label {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+

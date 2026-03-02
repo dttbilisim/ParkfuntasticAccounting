@@ -1,0 +1,26 @@
+@using ecommerce.Web.Utility
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavManager
+
+@code {
+private string _currentUri = "";
+
+protected override Task OnInitializedAsync()
+{
+_currentUri = NavManager.Uri;
+NavManager.LocationChanged += async (sender, args) => await OnLocationChanged(args.Location);
+return Task.CompletedTask;
+}
+
+private async Task OnLocationChanged(string newUri)
+{
+if (_currentUri != newUri)
+{
+_currentUri = newUri;
+await JSRuntime.ShowFullPageLoader();
+await Task.Delay(500);
+await JSRuntime.HideFullPageLoader();
+}
+}
+}

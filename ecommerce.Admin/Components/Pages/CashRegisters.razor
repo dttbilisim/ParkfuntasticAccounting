@@ -1,0 +1,81 @@
+@page "/cash-registers"
+@using ecommerce.Admin.Domain.Dtos.CashRegisterDto
+@using ecommerce.Core.Utils
+@layout MainLayout
+
+<PageTitle>Kasa Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Kasa Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click="@AddButtonClick" Text="Yeni Kasa Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="CashRegisterListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@cashRegisters"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Property="Code" Title="Kasa Kodu" Width="150px" />
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Property="Name" Title="Kasa Adı" />
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Property="CurrencyCode" Title="Döviz" Width="100px" />
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Property="OpeningBalance" Title="Açılış Bakiyesi" Width="150px">
+                        <Template Context="c">
+                            @c.OpeningBalance.ToString("N2") @c.CurrencyCode
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Property="IsDefault" Title="Varsayılan" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="c">
+                            <RadzenCheckBox @bind-Value="@c.IsDefault" Disabled="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="c">
+                            @if (c.Status == EntityStatus.Active)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else if (c.Status == EntityStatus.Passive)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="Pasif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Silinmiş" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="c">
+                            @if (c.Status != EntityStatus.Deleted)
+                            {
+                                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@((args) => GridDeleteButtonClick(args, c))" @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+</div>

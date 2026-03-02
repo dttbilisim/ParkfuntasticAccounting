@@ -1,0 +1,134 @@
+@namespace ecommerce.Admin.Components.Pages.Modals
+@using ecommerce.Admin.Domain.Dtos.CustomerAccountTransactionDto
+@using ecommerce.Core.Utils
+
+@if (Transaction != null)
+{
+    <div class="cari-detail-modal">
+        <div class="cari-detail-header">
+            <span class="cari-detail-id">#@Transaction.Id</span>
+            <span class="badge @(Transaction.TransactionType == CustomerAccountTransactionType.Debit ? "badge-debit" : "badge-credit")">
+                @(Transaction.TransactionType == CustomerAccountTransactionType.Debit ? "Borç" : "Alacak")
+            </span>
+        </div>
+        <div class="cari-detail-body">
+            <div class="cari-detail-grid">
+                <div class="cari-detail-item">
+                    <span class="label">Tarih</span>
+                    <span class="value">@Transaction.TransactionDate.ToString("dd.MM.yyyy HH:mm")</span>
+                </div>
+                <div class="cari-detail-item">
+                    <span class="label">Cari</span>
+                    <span class="value fw-semibold">@Transaction.CustomerName <span class="text-muted small">(Id: @Transaction.CustomerId)</span></span>
+                </div>
+                <div class="cari-detail-item">
+                    <span class="label">Tutar</span>
+                    <span class="value amount">₺@(Transaction.Amount.ToString("N2"))</span>
+                </div>
+                <div class="cari-detail-item">
+                    <span class="label">Bakiye (işlem sonrası)</span>
+                    <span class="value @(Transaction.BalanceAfterTransaction >= 0 ? "text-danger" : "text-success")">₺@(Transaction.BalanceAfterTransaction.ToString("N2"))</span>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Transaction.Description))
+                {
+                    <div class="cari-detail-item full-width">
+                        <span class="label">Açıklama</span>
+                        <span class="value">@Transaction.Description</span>
+                    </div>
+                }
+                @if (Transaction.OrderId.HasValue || !string.IsNullOrEmpty(Transaction.OrderNumber))
+                {
+                    <div class="cari-detail-item">
+                        <span class="label">Sipariş</span>
+                        <span class="value">
+                            @if (Transaction.LinkedOrders != null && Transaction.LinkedOrders.Any())
+                            {
+                                @foreach (var o in Transaction.LinkedOrders)
+                                {
+                                    <a href="/orders" class="link">@o.OrderNumber</a>
+                                }
+                            }
+                            else
+                            {
+                                @(Transaction.OrderNumber ?? Transaction.OrderId?.ToString())
+                            }
+                        </span>
+                    </div>
+                }
+                @if (Transaction.InvoiceId.HasValue || !string.IsNullOrEmpty(Transaction.InvoiceNo))
+                {
+                    <div class="cari-detail-item">
+                        <span class="label">Fatura</span>
+                        <span class="value">@(Transaction.InvoiceNo ?? Transaction.InvoiceId?.ToString())</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Transaction.PaymentTypeName))
+                {
+                    <div class="cari-detail-item">
+                        <span class="label">Ödeme</span>
+                        <span class="value">@Transaction.PaymentTypeName</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Transaction.CashRegisterName))
+                {
+                    <div class="cari-detail-item">
+                        <span class="label">Kasa</span>
+                        <span class="value">@Transaction.CashRegisterName</span>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Transaction.ReferenceNo))
+                {
+                    <div class="cari-detail-item">
+                        <span class="label">Referans</span>
+                        <span class="value">@Transaction.ReferenceNo</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Transaction.Ettn))
+                {
+                    <div class="cari-detail-item full-width">
+                        <span class="label">ETTN</span>
+                        <code class="value ettn">@Transaction.Ettn</code>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p class="text-muted mb-0 small">Detay bulunamadı.</p>
+}
+
+<style>
+    .cari-detail-modal { --rz-primary: #598087; --rz-primary-dark: #3d5a5e; }
+    .cari-detail-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-dark) 100%);
+        color: #fff;
+        border-radius: 8px 8px 0 0;
+        margin: -1rem -1rem 0 -1rem;
+    }
+    .cari-detail-id { font-weight: 600; font-size: 0.95rem; opacity: 0.95; }
+    .cari-detail-header .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+    .cari-detail-header .badge-debit { background: rgba(220, 53, 69, 0.9); color: #fff; }
+    .cari-detail-header .badge-credit { background: rgba(25, 135, 84, 0.9); color: #fff; }
+    .cari-detail-body { padding: 16px 0 0; }
+    .cari-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 24px;
+    }
+    .cari-detail-item { display: flex; flex-direction: column; gap: 2px; }
+    .cari-detail-item.full-width { grid-column: 1 / -1; }
+    .cari-detail-item .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--rz-text-secondary-color); }
+    .cari-detail-item .value { font-size: 0.875rem; }
+    .cari-detail-item .value.amount { font-weight: 700; font-size: 1rem; }
+    .cari-detail-item .value.ettn { font-size: 0.7rem; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; word-break: break-all; }
+    .cari-detail-item .value.link { color: var(--rz-primary); text-decoration: none; }
+    .cari-detail-item .value.link:hover { text-decoration: underline; }
+</style>

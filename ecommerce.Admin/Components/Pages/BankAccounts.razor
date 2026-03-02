@@ -1,0 +1,74 @@
+@page "/bank-accounts"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Domain.Shared.Dtos.Bank.BankAccountDto
+@using Radzen
+@using Radzen.Blazor
+@layout MainLayout
+
+<PageTitle>Banka Hesap Tanımları</PageTitle>
+
+<PageTitle>Banka Hesap Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Banka Hesap Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click="@AddBankAccountClick" Text="Yeni Hesap Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="bankAccountGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="BankAccountListDto"
+                            RowSelect="@EditBankAccount"
+                            LoadData="@LoadBankAccountData"
+                            Count="@bankAccountCount"
+                            Data="@bankAccounts"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Property="AccountCode" Title="Hesap Kodu" Width="120px" />
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Property="AccountName" Title="Hesap Adı" />
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Property="BankName" Title="Banka" Width="150px" />
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Property="CurrencyName" Title="Para Birimi" Width="120px" />
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Property="Iban" Title="IBAN" Width="200px" />
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Property="PaymentType" Title="Ödeme Tipi" Width="120px" />
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            @if (data.Active)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="Pasif" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="BankAccountListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@((args) => EditBankAccount(data))" @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => DeleteBankAccountAsync(args, data))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+</div>
+
+

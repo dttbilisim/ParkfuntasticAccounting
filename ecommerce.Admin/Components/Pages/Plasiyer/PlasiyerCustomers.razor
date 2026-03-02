@@ -1,0 +1,74 @@
+@page "/plasiyer/customers"
+@using ecommerce.Admin.Domain.Dtos.Customer
+@using ecommerce.Core.Utils
+@namespace ecommerce.Admin.Components.Pages.Plasiyer
+@layout MainLayout
+
+<PageTitle>Müşterilerim</PageTitle>
+
+<RadzenStack Orientation="Orientation.Vertical" Gap="1rem">
+    <RadzenCard Variant="Variant.Flat">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenText TextStyle="TextStyle.H5" class="m-0 plasiyer-title">Müşterilerim</RadzenText>
+            @if (Security.SelectedCustomerId.HasValue)
+            {
+                <RadzenBadge BadgeStyle="BadgeStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" class="rz-p-2">
+                    <RadzenIcon Icon="person" class="rz-me-1" />
+                    Şu anki Seçili Cari ID: @Security.SelectedCustomerId
+                </RadzenBadge>
+            }
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenDataGrid @ref="grid" Data="@customers" TItem="CustomerListDto" IsLoading="@isLoading"
+                    AllowFiltering="false" AllowPaging="true" PageSize="10"
+                    AllowSorting="true" ColumnWidth="150px" EmptyText="Müşteri bulunamadı." 
+                    RowRender="@OnRowRender">
+        <Columns>
+            <RadzenDataGridColumn TItem="CustomerListDto" Property="Code" Title="Cari Kodu" Width="120px" />
+            <RadzenDataGridColumn TItem="CustomerListDto" Property="Name" Title="Cari Ünvanı" Width="250px" />
+            <RadzenDataGridColumn TItem="CustomerListDto" Property="CustomerWorkingType" Title="Çalışma Tipi" Width="120px">
+                <Template Context="customer">
+                    @if (customer.CustomerWorkingType == CustomerWorkingTypeEnum.Pesin)
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Variant="Variant.Flat" Text="Peşin" />
+                    }
+                    else if (customer.CustomerWorkingType == CustomerWorkingTypeEnum.Vadeli)
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Warning" Variant="Variant.Flat" Text="Vadeli" />
+                    }
+                    else
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Info" Variant="Variant.Flat" Text="Peşin/Vadeli" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CustomerListDto" Property="PaymentDue" Title="Vade (Gün)" Width="100px" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="CustomerListDto" Property="RiskLimit" Title="Risk Limiti" Width="120px" FormatString="{0:C2}" TextAlign="TextAlign.Right" />
+            <RadzenDataGridColumn TItem="CustomerListDto" Property="CityName" Title="Şehir" Width="100px" />
+            <RadzenDataGridColumn TItem="CustomerListDto" Property="TownName" Title="İlçe" Width="120px" />
+            <RadzenDataGridColumn TItem="CustomerListDto" Title="İşlemler" TextAlign="TextAlign.Center" Width="280px" Filterable="false" Sortable="false">
+                <Template Context="customer">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" JustifyContent="JustifyContent.Center">
+                        <RadzenButton Icon="login" Text="Seç" Click="@(() => SelectCustomer(customer))" 
+                                      ButtonStyle="@(Security.SelectedCustomerId == customer.Id ? ButtonStyle.Success : ButtonStyle.Primary)"
+                                      Variant="Variant.Flat" Size="ButtonSize.Small" 
+                                      MouseEnter="@(args => ShowTooltip(args, "Cariyi Seç ve İşlem Yap"))" MouseLeave="@(_ => TooltipService.Close())" />
+                        
+                        <RadzenButton Icon="inventory_2" Click="@(() => ViewOrders(customer))" 
+                                      ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Size="ButtonSize.Small" 
+                                      MouseEnter="@(args => ShowTooltip(args, "Siparişler"))" MouseLeave="@(_ => TooltipService.Close())" />
+                        
+                        <RadzenButton Icon="description" Click="@(() => ViewInvoices(customer))" 
+                                      ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" Size="ButtonSize.Small" 
+                                      MouseEnter="@(args => ShowTooltip(args, "Faturalar"))" MouseLeave="@(_ => TooltipService.Close())" />
+                        
+                        <RadzenButton Icon="account_balance" Click="@(() => ViewBalance(customer))" 
+                                      ButtonStyle="ButtonStyle.Warning" Variant="Variant.Flat" Size="ButtonSize.Small" 
+                                      MouseEnter="@(args => ShowTooltip(args, "Bakiye/Ekstre"))" MouseLeave="@(_ => TooltipService.Close())" />
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>

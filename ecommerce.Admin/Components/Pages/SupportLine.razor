@@ -1,0 +1,41 @@
+@page "/supportline"
+@using ecommerce.Admin.Domain.Dtos.SupportLineDto
+@using ecommerce.Core.Utils
+@layout MainLayout
+
+<PageTitle>Müşteri Destek Bildirimleri</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Müşteri Destek Bildirimleri</h1>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="DataGrid" ColumnWidth="100px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PageSize="25" AllowFilterDateInput="true" TItem="SupportLineListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@SupportLines.DataCount" Data="@SupportLines.Data" Render="@OnRadzenGridRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="Id" Filterable="false" Visible="false" SortOrder="SortOrder.Descending"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="SupportLineType" Title="İletişim Tipi" Width="155px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="FrequentlyAskedQuestionName" Title="Konu" MinWidth="125px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="SupportLineReturnType" Title="İletişim Tercihi" Width="175px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="FirstName" Title="Ad" Width="100px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="LastName" Title="Soyad" Width="100px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="Email" Title="Email" MinWidth="225px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Property="PhoneNumber" Title="Telefon" Width="120px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Title="Oluşturulma Tarihi" Property="CreatedDate" FormatString="{0:g}" Width="150px"/>
+                    <RadzenDataGridColumn TItem="SupportLineListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="supportLine">
+                            @if (supportLine.Status != (int) EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                              Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => DeleteRow(supportLine))" @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

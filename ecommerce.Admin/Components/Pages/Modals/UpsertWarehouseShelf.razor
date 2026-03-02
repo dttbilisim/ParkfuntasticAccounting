@@ -1,0 +1,55 @@
+@page "/upsert-shelf"
+@using ecommerce.Admin.Domain.Dtos.WarehouseShelfDto
+@attribute [Authorize]
+
+<PageTitle>Raf Ekle/Düzenle</PageTitle>
+
+<RadzenStack Gap="1.5rem" Class="rz-p-4">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">
+        Raf Kayıt Edilemedi!
+    </RadzenAlert>
+
+    <RadzenTemplateForm TItem="WarehouseShelfUpsertDto" Data="@dto" Visible="@(dto != null)" Submit="@FormSubmit">
+        <RadzenStack Gap="1rem">
+            @* Raf Kodu *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Raf Kodu" Component="ShelfCode" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Name="ShelfCode" @bind-Value="@dto.Code" Style="width: 100%" />
+                    <RadzenRequiredValidator Component="ShelfCode" Text="Raf kodu gereklidir" Style="display: block; font-size: 0.8rem;" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Açıklama *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Açıklama" Component="Description" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextArea Name="Description" @bind-Value="@dto.Description" Style="width: 100%" Rows="2" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Durum *@
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Durum" Component="Status" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox Name="Status" @bind-Value="@Status" />
+                        <RadzenLabel Text="Aktif" Component="Status" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Buttons *@
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="1rem" Class="rz-mt-4">
+                <RadzenButton Text="Vazgeç" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Click="@CancelButtonClick" />
+                <RadzenButton Text="Kaydet" ButtonType="ButtonType.Submit" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>

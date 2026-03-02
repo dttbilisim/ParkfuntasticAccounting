@@ -1,0 +1,45 @@
+@attribute [Authorize]
+<PageTitle>Ürün Birleştirme</PageTitle>
+<div style="margin-bottom: 1rem" class="row">
+    <div class="col-md-3">
+        <RadzenLabel Text="Ürün Seçiniz" Component="Seller" style="width: 100%"/>
+    </div>
+    <div class="col-md-9">
+        <RadzenDropDown Data="@products"
+                        TextProperty="DisplayName"
+                        ValueProperty="Id"
+                        Placeholder="Kalacak ürünü seçiniz"
+                        @bind-Value="@_mergeProductUpsertDto.OldProductId"
+                        AllowFiltering="true"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        style="display: block; width: 100%"
+
+                        AllowClear="true">
+
+        </RadzenDropDown>
+
+    </div>
+    <div class="col-md-3">
+        <RadzenLabel Text="Ürün Seçiniz" Component="Seller" style="width: 100%"/>
+    </div>
+    <div class="col-md-9">
+        <RadzenDropDown Data="@products"
+                        TextProperty="DisplayName"
+                        ValueProperty="Id"
+                        Placeholder="Aktarılacak ürünü şeçiniz"
+                        @bind-Value="@_mergeProductUpsertDto.NewProductId"
+                        AllowFiltering="true"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        style="display: block; width: 100%"
+
+                        AllowClear="true">
+
+        </RadzenDropDown>
+
+    </div>
+    <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+        <RadzenButton Text="Barkodları Birleştir ve Ürün Güncelle"
+                      Click="@(async args => await MergeAndReplaceProductAsync())"
+                      Disabled="@(_mergeProductUpsertDto.OldProductId == 0 || _mergeProductUpsertDto.NewProductId == 0)" />
+    </div>
+</div>

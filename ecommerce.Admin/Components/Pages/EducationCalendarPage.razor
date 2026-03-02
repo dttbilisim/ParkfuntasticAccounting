@@ -1,0 +1,48 @@
+@page "/scheduler"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.Scheduler
+
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Takvim Toplantı Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Takvim Toplantı Yönetimi</h1>
+        </div>
+        <div class="col-6 text-end">
+             <RadzenButton Icon="add_circle_outline" Text="Yeni Ekle" 
+                    Click="@AddButtonClick"      Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="EducationCalendarListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@_educationCalendar" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+
+
+                <Columns>
+                    <RadzenDataGridColumn TItem="EducationCalendarListDto" Property="Id" Title="Id" Width="50px" />
+                    <RadzenDataGridColumn TItem="EducationCalendarListDto" Property="Name" Title="Adı" />
+                    <RadzenDataGridColumn TItem="EducationCalendarListDto" Property="StartDate" Title="Baş. Tarih" FormatString="{0:d}" />
+                    <RadzenDataGridColumn TItem="EducationCalendarListDto" Property="EndDate" Title="Bit. Tarih" FormatString="{0:d}" />
+                    <RadzenDataGridColumn TItem="EducationCalendarListDto" Property="StatusStr" Title="Durumu" />
+                    <RadzenDataGridColumn  TItem="EducationCalendarListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="context">
+
+                            <RadzenButton Visible="@(context.Status==0?false:true)" ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, context)) @onclick:stopPropagation="true" />
+
+
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+}

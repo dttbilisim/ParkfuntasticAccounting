@@ -1,0 +1,36 @@
+@using ecommerce.Admin.Components.Layout
+@layout MainLayout
+
+<RadzenTemplateForm TItem="ecommerce.Domain.Shared.Dtos.Bank.BankCardDto.BankCardUpsertDto" Data="model" Submit="Save">
+    <RadzenFieldset Text="Banka Kartı Bilgileri">
+        <div class="row g-3">
+            <div class="col-md-12">
+                <RadzenDropDown @bind-Value="model.BankId" Data="banks" TextProperty="Name" ValueProperty="Id" Name="BankId" Placeholder="Banka Seçiniz" Style="width:100%" />
+            </div>
+            <div class="col-md-12">
+                <RadzenTextBox @bind-Value="model.Name" Name="Name" Placeholder="Kart Adı" Style="width:100%" />
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.Active" TValue="bool" />
+                <label class="ms-2">Aktif</label>
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.ManufacturerCard" TValue="bool" />
+                <label class="ms-2">Üretici Kartı</label>
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.CampaignCard" TValue="bool" />
+                <label class="ms-2">Kampanya Kartı</label>
+            </div>
+            <div class="col-md-6">
+                <RadzenCheckBox @bind-Value="model.Deleted" TValue="bool" />
+                <label class="ms-2">Silinmiş</label>
+            </div>
+        </div>
+    </RadzenFieldset>
+
+    <div class="d-flex justify-content-end mt-3">
+        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Kapat" Click="Close" Style="margin-right:8px" />
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" Icon="save" />
+    </div>
+</RadzenTemplateForm>

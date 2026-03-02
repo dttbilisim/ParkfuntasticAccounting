@@ -1,0 +1,45 @@
+﻿@page "/product-types"
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+@using ecommerce.Admin.Domain.Dtos.ProductTypeDto;
+@using ecommerce.Core.Utils;
+ 
+<PageTitle>Ürün Tipi Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Ürün Tipi Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Ürün Tipi Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="ProductTypeListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@productTypes" CellRender="@RowRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ProductTypeListDto" Property="Id" Title="Id" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTypeListDto" Property="Name" Title="Ürün Tip Adı" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTypeListDto" Property="StatusStr" Title="Durum" Width="50px">
+                        <Template Context="productType">
+                            <RadzenText style="color:#598087;">@productType.StatusStr</RadzenText>
+
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductTypeListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="productType">
+                            @if (productType.Status != EntityStatus.Deleted.GetHashCode())
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                          Shade="Shade.Dark" Variant="Variant.Flat"
+                                          Click=@(args => GridDeleteButtonClick(args, productType)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

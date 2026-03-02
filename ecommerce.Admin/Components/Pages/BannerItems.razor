@@ -1,0 +1,72 @@
+@page "/banneritems"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.BannerItemDto;
+@using ecommerce.Admin.Resources
+@using ecommerce.Core.Utils;
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Banner Item Tanımları</PageTitle>
+
+
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+            <RadzenText Text="Banner Item Tanımları" TextStyle="TextStyle.H5" style="color:#598087" class="mt-2" />
+        </div>
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Banner Item Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+
+
+</RadzenCard> 
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="BannerItemListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@banneritems" CellRender="@RowRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" EqualsText="@Loc.GetString("EqualsText")"
+        NotEqualsText="@Loc.GetString("NotEqualsText")"
+        LessThanText="@Loc.GetString("LessThanText")"
+        LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+       GreaterThanText="@Loc.GetString("GreaterThanText")"
+       IsNullText="@Loc.GetString("IsNullText")"
+       IsNotNullText="@Loc.GetString("IsNotNullText")"
+                        ApplyFilterText="@Loc.GetString("ApplyFilterText")"
+                        ClearFilterText="@Loc.GetString("ClearFilterText")">
+
+
+            <Columns>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="Id" Title="Id" Width="50px"/>                
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="Title" Title="Banner Öğe Adı"/>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="BannerCount" Width="110px" Title="Tıklama Sayısı" />
+              
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="BannerName" Title="Banner" Filterable="true" Sortable="true">
+                    <Template Context="BannerItem">
+                        <p style="white-space:pre-wrap">@BannerItem.Banner?.Name</p>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="Order" Title="Sıra" Width="60px">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="CreatedDate" FormatString="{0:dd/MM/yyyy HH:mm}" Width="150px" Title="Oluşturulma Tarihi">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="StatusStr" Title="Durum" Width="70px">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="StartDate" FormatString="{0:dd/MM/yyyy HH:mm}" Width="150px" Title="Başlangıç Tarihi">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Property="EndDate" FormatString="{0:dd/MM/yyyy HH:mm}" Width="150px"  Title="Bitiş Tarihi">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="BannerItemListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="BannerItem">
+                        @if (BannerItem.Status != EntityStatus.Deleted.GetHashCode())
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, BannerItem)) @onclick:stopPropagation="true" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>

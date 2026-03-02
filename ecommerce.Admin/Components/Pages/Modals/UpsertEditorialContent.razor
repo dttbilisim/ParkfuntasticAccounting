@@ -1,0 +1,160 @@
+@using ecommerce.Admin.Domain.Dtos.EditorialContentDto
+@using ecommerce.Core.Utils
+@using ecommerce.Admin.Components.Layout
+
+<PageTitle>İçerik Ekle/Düzenle</PageTitle>
+
+<RadzenTemplateForm TItem="EditorialContentUpsertDto" Data="@EditorialContent" Visible="@(!Id.HasValue || EditorialContent.Id > 0)" Submit="@FormSubmit" InvalidSubmit="@ShowErrors">
+    <RadzenFluentValidator @ref="EditorialContentFluentValidator" Validator="@EditorialContentValidator"/>
+
+    <RadzenStack>
+        <RadzenFormField Text="İçerik Tipi" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenDropDown Data="@(Enum.GetValues<EditorialContentType>())" @bind-Value="@EditorialContent.Type" Change="ContentTypeChanged"/>
+            </ChildContent>
+            <Helper>
+                <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Title)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+            </Helper>
+        </RadzenFormField>
+        <RadzenFormField Visible="@(EditorialContent.Type == EditorialContentType.Article)" Text="Kategori" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenTextBox @bind-Value="@EditorialContent.Category"/>
+            </ChildContent>
+            <Helper>
+                <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Category)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+            </Helper>
+        </RadzenFormField>
+        <RadzenFormField Text="Başlık" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenTextBox @bind-Value="@EditorialContent.Title"/>
+            </ChildContent>
+            <Helper>
+                <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Title)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+            </Helper>
+        </RadzenFormField>
+        <RadzenFormField Text="İçerik" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenHtmlEditor @bind-Value="@EditorialContent.Content" Name="Content" style="height: 200px; width: 100%">
+                    <RadzenHtmlEditorUndo/>
+                    <RadzenHtmlEditorRedo/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorBold/>
+                    <RadzenHtmlEditorItalic/>
+                    <RadzenHtmlEditorUnderline/>
+                    <RadzenHtmlEditorStrikeThrough/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorAlignLeft/>
+                    <RadzenHtmlEditorAlignCenter/>
+                    <RadzenHtmlEditorAlignRight/>
+                    <RadzenHtmlEditorJustify/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorIndent/>
+                    <RadzenHtmlEditorOutdent/>
+                    <RadzenHtmlEditorUnorderedList/>
+                    <RadzenHtmlEditorOrderedList/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorColor/>
+                    <RadzenHtmlEditorBackground/>
+                    <RadzenHtmlEditorRemoveFormat/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorSubscript/>
+                    <RadzenHtmlEditorSuperscript/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorLink/>
+                    <RadzenHtmlEditorUnlink/>
+                    <RadzenHtmlEditorImage/>
+                    <RadzenHtmlEditorFontName/>
+                    <RadzenHtmlEditorFontSize/>
+                    <RadzenHtmlEditorFormatBlock/>
+                    <RadzenHtmlEditorSeparator/>
+                    <RadzenHtmlEditorSource/>
+                </RadzenHtmlEditor>
+            </ChildContent>
+            <Helper>
+                <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Content)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+            </Helper>
+        </RadzenFormField>
+        <RadzenFormField Text="Resim" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenRow class="rz-m-2">
+                    <RadzenColumn Size="12">
+                        <InputFile OnChange="@(args => SaveThumbnailFile(args.File))" accept="image/png, image/jpeg, image/gif" class="w-100 rz-shadow-1 rz-background-color-white rz-p-2 rz-border-radius-1"/>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12">
+                        <RadzenImage Style="width: 150px;height: 150px" Path="@FileHelper.GetFileUrl(EditorialContent.Thumbnail)" Visible="@(EditorialContent.Thumbnail != null)" class="img-fluid"/>
+                    </RadzenColumn>
+                </RadzenRow>
+            </ChildContent>
+            <Helper>
+                <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Thumbnail)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+            </Helper>
+        </RadzenFormField>
+        <RadzenFormField Text="Url" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenTextBox @bind-Value="@EditorialContent.Slug"/>
+            </ChildContent>
+            <Helper>
+                <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Slug)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+            </Helper>
+        </RadzenFormField>
+        <RadzenFormField Visible="@(EditorialContent.Type == EditorialContentType.Video)" Text="Video Url" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenTextBox @bind-Value="@EditorialContent.Video"/>
+            </ChildContent>
+            <Helper>
+                <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Video)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+            </Helper>
+        </RadzenFormField>
+        <RadzenRow>
+            <RadzenColumn SizeSM="6">
+                <RadzenFormField Text="Yayın Tarihi" Variant="Variant.Outlined" class="w-100">
+                    <ChildContent>
+                        <RadzenDatePicker TValue="DateTime?" @bind-Value="EditorialContent.PublishDate" DateFormat="g" class="w-100"/>
+                    </ChildContent>
+                    <Helper>
+                        <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.PublishDate)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+                    </Helper>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="6">
+                <RadzenFormField Text="Bitiş Tarihi" Variant="Variant.Outlined" class="w-100">
+                    <ChildContent>
+                        <RadzenDatePicker TValue="DateTime?" @bind-Value="EditorialContent.EndDate" DateFormat="g" class="w-100"/>
+                    </ChildContent>
+                    <Helper>
+                        <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.EndDate)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+                    </Helper>
+                </RadzenFormField>
+            </RadzenColumn>
+              <RadzenColumn SizeSM="12">
+                            <RadzenFormField Text="Sıra" Variant="Variant.Outlined" class="w-100">
+                                <ChildContent>
+                                    <RadzenNumeric @bind-Value="@EditorialContent.Order"/>
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText Text="@EditorialContentFluentValidator.GetValidationMessage(r => r.Order)" class="@EditorialContentFluentValidator.GetErrorCssClass()"/>
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn SizeSM="6">
+                <RadzenStack>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                        <RadzenCheckBox TValue="bool" Name="Status" Value="@(EditorialContent.Status == (int) EntityStatus.Active)" ValueChanged="@((v) => EditorialContent.Status = v ? (int) EntityStatus.Active : (int) EntityStatus.Passive)"/>
+                        <RadzenLabel Text="Aktif" Component="Status"/>
+                    </RadzenStack>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                        <RadzenCheckBox TValue="bool" Name="IsDefault"  @bind-Value="@EditorialContent.IsDefault" />
+                        <RadzenLabel Text="Default" Component="IsDefault"/>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" BusyText="Kaydediliyor..." IsBusy="Saving" Variant="Variant.Flat" class="rz-mr-1"/>
+    </RadzenStack>
+</RadzenTemplateForm>

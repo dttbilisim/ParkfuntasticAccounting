@@ -1,0 +1,105 @@
+@using ecommerce.Admin.Domain.Dtos.Role
+@using Radzen
+@using Radzen.Blazor
+
+<style>
+    .rz-dialog-content {
+        padding: 0 !important;
+    }
+    .modal-header {
+        position: sticky; 
+        top: 0; 
+        z-index: 100; 
+        background-color: var(--rz-base-background-color); 
+        padding: 24px 24px 0 24px;
+    }
+    .modal-body {
+        padding: 24px;
+        min-height: 200px;
+    }
+    .modal-footer {
+        position: sticky; 
+        bottom: 0; 
+        z-index: 100; 
+        background-color: var(--rz-base-background-color); 
+        padding: 16px 24px 24px 24px; 
+        border-top: 1px solid var(--rz-border-color);
+    }
+</style>
+
+@if (Role == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <RadzenTabs>
+        <Tabs>
+             <RadzenTabsItem Text="Rol Bilgileri">
+                <RadzenTemplateForm Data="@Role" Submit="@(async (RoleUpsertDto args) => { await FormSubmit(args); })">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                 <RadzenLabel Text="Rol Adı" Component="Name" style="color: var(--rz-text-secondary); font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;" />
+                                 <RadzenTextBox Name="Name" @bind-Value="@Role.Name" style="width: 100%" class="form-control-modern" Placeholder="Rol adını giriniz..." />
+                                 <RadzenRequiredValidator Component="Name" Text="Rol adı zorunludur" Popup="true" Style="position: absolute" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-end gap-2">
+                        <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+                        <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" />
+                    </div>
+                </RadzenTemplateForm>
+             </RadzenTabsItem>
+             
+             <RadzenTabsItem Text="Menü Yetkileri">
+                <RadzenStack Gap="1rem" class="rz-p-4">
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-0">Role özel menü yetkileri seçin</RadzenText>
+                    <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Size="AlertSize.Small" Icon="info" class="rz-mb-2">
+                         Menülerin sırasını değiştirmek için sürükleyip bırakabilirsiniz. Üst/Alt çizgiler sıralama, menü üzerine bırakmak ise alt menü yapar.
+                    </RadzenAlert>
+                    
+                    <RadzenTextBox Placeholder="Menü ara..." @bind-Value="@SearchTerm" Class="w-100 mb-2" />
+
+                    @if (AllMenus != null && AllMenus.Count > 0)
+                    {
+                        <div style="height: 400px; overflow-y: auto; padding: 1rem; border: 1px solid var(--rz-border-color); border-radius: var(--rz-border-radius);">
+                            <div class="d-flex align-items-center justify-content-between mb-2 text-muted text-uppercase" style="font-size: 0.75rem; font-weight: 700; border-bottom: 2px solid var(--rz-border-color); padding-bottom: 0.5rem;">
+                                <span>Menü Adı</span>
+                                <span style="padding-right: 1rem;">Yetkiler</span>
+                            </div>
+
+                            @for (int i = 0; i < AllMenus.Count; i++)
+                            {
+                                var menu = AllMenus[i];
+                                <RecursiveRoleMenuPermission Menu="@menu" 
+                                                       Level="0" 
+                                                       Index="@i"
+                                                       SearchTerm="@SearchTerm"
+                                                       RolePermissions="@RoleMenuPermissions" 
+                                                       OnPermissionChanged="@OnPermissionChanged"
+                                                       OnMenuStructureChanged="@ReloadMenus" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color">Yükleniyor...</RadzenText>
+                    }
+
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))"/>
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="save" Text="Menü Yetkileri Kaydet" Click="@SaveMenuPermissions" BusyText="Kaydediliyor..." IsBusy="SavingMenus" Variant="Variant.Flat"/>
+                    </RadzenStack>
+                </RadzenStack>
+             </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+}
+
+@code {
+    public string SearchTerm { get; set; } = "";
+}

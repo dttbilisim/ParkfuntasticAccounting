@@ -1,0 +1,66 @@
+@page "/upsert-search-synonym"
+@using ecommerce.Admin.Domain.Dtos.SearchSynonymDto
+@attribute [Authorize]
+
+<PageTitle>Eş Anlamlı Ekle/Düzenle</PageTitle>
+
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@errorMessage</RadzenAlert>
+    
+    <RadzenTemplateForm TItem="SearchSynonymUpsertDto" Data="@dto" Visible="@(dto != null)" Submit="@FormSubmit">
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-4">
+                <RadzenLabel Text="Anahtar Kelime" Component="Keyword" style="width: 100%" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@dto.Keyword" Name="Keyword" />
+                <RadzenRequiredValidator Component="Keyword" Text="Anahtar kelime girmelisiniz" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-4">
+                <RadzenLabel Text="Eş Anlamlılar (Virgülle ayırın)" Component="Synonyms" style="width: 100%" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextArea style="display: block; width: 100%" @bind-Value="@dto.Synonyms" Name="Synonyms" Rows="3" />
+                <RadzenRequiredValidator Component="Synonyms" Text="Eş anlamlıları girmelisiniz" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-4">
+                <RadzenLabel Text="Kategori" Component="Category" style="width: 100%" />
+            </div>
+            <div class="col-md-8">
+                <RadzenDropDown @bind-Value="@dto.Category" Data="@categories" TextProperty="Text" ValueProperty="Value" style="width: 100%" Name="Category" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-4">
+                <RadzenLabel Text="Çift Yönlü Eşleşme" Component="IsBidirectional" style="width: 100%" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="@dto.IsBidirectional" Name="IsBidirectional" />
+                <RadzenLabel Text="Aktifse A->B ve B->A eşleşir" Component="IsBidirectional" Style="margin-left: 8px; font-size: 0.8rem; color: #666" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-4">
+                <RadzenLabel Text="Durum (Aktif/Pasif)" Component="StatusBool" style="width: 100%" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="@dto.StatusBool" Name="StatusBool" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat"  />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

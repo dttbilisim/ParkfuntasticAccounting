@@ -1,0 +1,124 @@
+@using ecommerce.Admin.Domain.Dtos.UserMenuDto
+@using ecommerce.Core.Entities.Admin
+@using Radzen
+@using Radzen.Blazor
+
+@{
+    var hasChildren = Menu.InverseParent != null && Menu.InverseParent.Any();
+}
+
+<div class="menu-permission-row" style="border-bottom: 1px solid var(--rz-border-color); padding: 8px 0;">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center" style="flex: 1; padding-left: @((Level * 20) + "px")">
+            <RadzenIcon Icon="@Menu.Icon" class="me-2 text-secondary" style="font-size: 1.1rem" />
+            <span style="@(hasChildren ? "font-weight: 700; color: var(--rz-primary-dark);" : "font-weight: 500;")">
+                @Menu.Name
+            </span>
+        </div>
+        
+        @if (!hasChildren)
+        {
+            <div class="d-flex align-items-center gap-3">
+                <!-- Master Toggle (Select All) -->
+                <div class="d-flex align-items-center gap-1 border-end pe-3 me-2" title="Hepsini Seç">
+                    <RadzenCheckBox TValue="bool" Value="@AreAllSelected()" Change="@(args => ToggleAll(args))" />
+                    <span class="text-xs fw-bold text-primary">Tümü</span>
+                </div>
+
+                <div class="d-flex align-items-center gap-1" title="Görüntüleme">
+                    <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanView)" Change="@(args => UpdatePermission(p => p.CanView = args))" />
+                    <span class="text-xs text-muted">Gör</span>
+                </div>
+                <div class="d-flex align-items-center gap-1" title="Ekleme">
+                    <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanCreate)" Change="@(args => UpdatePermission(p => p.CanCreate = args))" />
+                    <span class="text-xs text-muted">Ekle</span>
+                </div>
+                <div class="d-flex align-items-center gap-1" title="Düzenleme">
+                    <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanEdit)" Change="@(args => UpdatePermission(p => p.CanEdit = args))" />
+                    <span class="text-xs text-muted">Düz</span>
+                </div>
+                <div class="d-flex align-items-center gap-1" title="Silme">
+                    <RadzenCheckBox TValue="bool" Value="@GetPermission(p => p.CanDelete)" Change="@(args => UpdatePermission(p => p.CanDelete = args))" />
+                    <span class="text-xs text-muted">Sil</span>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (hasChildren)
+{
+    @foreach (var child in Menu.InverseParent.OrderBy(x => x.Id))
+    {
+        <RecursiveMenuPermission Menu="@child" Level="@(Level + 1)" UserPermissions="@UserPermissions" OnPermissionChanged="@OnPermissionChanged" />
+    }
+}
+
+@code {
+    [Parameter] public Menu Menu { get; set; } = default!;
+    [Parameter] public int Level { get; set; } = 0;
+    [Parameter] public List<UserMenuUpsertDto> UserPermissions { get; set; } = new();
+    [Parameter] public EventCallback OnPermissionChanged { get; set; }
+
+    private UserMenuUpsertDto? CurrentPermission => UserPermissions.FirstOrDefault(x => x.MenuId == Menu.Id);
+
+    private bool GetPermission(Func<UserMenuUpsertDto, bool> selector)
+    {
+        var perm = CurrentPermission;
+        return perm != null && selector(perm);
+    }
+
+    private bool AreAllSelected()
+    {
+        var perm = CurrentPermission;
+        return perm != null && perm.CanView && perm.CanCreate && perm.CanEdit && perm.CanDelete;
+    }
+
+    private async Task ToggleAll(bool value)
+    {
+        await UpdatePermission(perm => 
+        {
+            perm.CanView = value;
+            perm.CanCreate = value;
+            perm.CanEdit = value;
+            perm.CanDelete = value;
+        });
+    }
+
+    private async Task UpdatePermission(Action<UserMenuUpsertDto> maxAction)
+    {
+        var perm = CurrentPermission;
+        if (perm == null)
+        {
+            // Create new permission entry if it doesn't exist
+            perm = new UserMenuUpsertDto { MenuId = Menu.Id };
+            UserPermissions.Add(perm);
+        }
+
+        maxAction(perm);
+        
+        // Auto-select 'View' if any other action is selected
+        if (perm.CanCreate || perm.CanEdit || perm.CanDelete)
+        {
+            perm.CanView = true;
+        }
+
+        // If View is unchecked, uncheck everything? (Optional logic, maybe keep it flexible)
+        if (!perm.CanView)
+        {
+            perm.CanCreate = false;
+            perm.CanEdit = false;
+            perm.CanDelete = false;
+            
+            // If all false, maybe remove from list? 
+            // For now, let's keep it in list but all false, 
+            // or we can filter it out during save.
+            if (!perm.CanCreate && !perm.CanEdit && !perm.CanDelete)
+            {
+                 UserPermissions.Remove(perm);
+            }
+        }
+        
+        await OnPermissionChanged.InvokeAsync();
+    }
+}

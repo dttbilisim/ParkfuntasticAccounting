@@ -1,0 +1,49 @@
+@page "/duplicate-product"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+
+
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Mükerrer Ürün Listesi ve İlan Sayısı</PageTitle>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Mükerrer Ürün Listesi</h1>
+        </div>
+        <div class="col-6 text-end">
+           <RadzenButton Icon="cloud_download" Text="Excel olarak indir"  Click="@(args => ExcelExportClick())" download Variant="Variant.Flat" class="mt-2" Style="background-color:green" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=300 AllowFilterDateInput=true TItem="DuplicateProductListDto"  LoadData="@LoadData" Count="@count" Data="@productData" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="DuplicateProductListDto" Property="Id" Title="Id" Width="50px">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="DuplicateProductListDto" Property="ProductName" Title="Ürün Adı">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="DuplicateProductListDto" Property="ProductCount" Title="Mükerrer Ürün Sayısı"/>
+                    <RadzenDataGridColumn TItem="DuplicateProductListDto" Property="Ilan" Title="Ilan Sayısı"/>
+                    <RadzenDataGridColumn TItem="DuplicateProductListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="product">
+                           @if(product.Ilan >= 1){
+                               <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                             Shade="Shade.Dark" Variant="Variant.Flat"
+                                             Click=@(args => GridDeleteButtonClick(args, product.ProductName)) @onclick:stopPropagation="true" />
+                           }
+                          
+                           
+
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+

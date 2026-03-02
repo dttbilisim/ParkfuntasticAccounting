@@ -1,0 +1,817 @@
+@using System.Linq
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using ecommerce.Web.Domain.Dtos
+@using ecommerce.Web.Domain.Services
+@using ecommerce.Web.Domain.Services.Abstract
+@using Core.Utils
+@using ecommerce.Web.Utility
+@using I18NPortable
+@using Microsoft.JSInterop
+@using Radzen
+@using ecommerce.Domain.Shared.Dtos.Filters
+@using SharedProduct = ecommerce.Domain.Shared.Dtos.Product
+@inject NavigationManager NavigationManager
+@inject II18N lang
+@inject IJSRuntime JsRuntime
+@inject IManufacturerCacheService ManufacturerCacheService
+@inject NotificationService NotificationService
+@inject ISellerProductService ProductService
+@implements IAsyncDisposable
+
+<div class="advanced-search-wrapper">
+    <div class="advanced-search-modal vehicle-match-modal">
+        <div class="modal-header">
+            <h5 class="modal-title "><i class="fa-solid fa-car-side me-2"></i>Araçtan Eşleşme</h5>
+             <div class="form-check form-switch custom-switch mb-0 ms-auto me-3">
+                <input class="form-check-input" type="checkbox" id="modalStockSwitch" 
+                       checked="@isModalOnlyInStock" 
+                       @onchange="OnStockSwitchChanged">
+                <label class="form-check-label small user-select-none" for="modalStockSwitch" style="cursor:pointer">Sadece Stoktakiler</label>
+            </div>
+            <button type="button" class="btn-close-custom" @onclick="CancelAsync">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body-columnar">
+            <!-- Column 1: Manufacturers -->
+            <div class="col-column">
+                <div class="column-header">MARKA SEÇİNİZ</div>
+                <div class="column-search-box">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="Marka ara..." @bind="modalManufacturerSearch" @bind:event="oninput" />
+                        @if (!string.IsNullOrWhiteSpace(modalManufacturerSearch))
+                        {
+                            <button type="button" @onclick="() => modalManufacturerSearch = string.Empty"><i class="fa-solid fa-xmark"></i></button>
+                        }
+                    </div>
+                </div>
+                <div class="scrollable-modal-list">
+                    @foreach(var manufacturerName in FilteredModalManufacturers) {
+                        <button class="modal-list-item @(modalSelectedManufacturer == manufacturerName ? "active" : "")" @onclick="() => OnModalManufacturerChanged(manufacturerName)">
+                            <span>@manufacturerName</span>
+                            @if(modalSelectedManufacturer == manufacturerName) {
+                                <i class="fa-solid fa-chevron-right"></i>
+                            }
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Column 2: Models -->
+            <div class="col-column">
+                <div class="column-header">MODEL SEÇİNİZ</div>
+                <div class="column-search-box">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="Model ara..." @bind="modalModelSearch" @bind:event="oninput" disabled="@(string.IsNullOrEmpty(modalSelectedManufacturer))" />
+                        @if (!string.IsNullOrWhiteSpace(modalModelSearch))
+                        {
+                            <button type="button" @onclick="() => modalModelSearch = string.Empty"><i class="fa-solid fa-xmark"></i></button>
+                        }
+                    </div>
+                </div>
+                <div class="scrollable-modal-list @(string.IsNullOrEmpty(modalSelectedManufacturer) ? "opacity-50" : "")">
+                    @if (isModelLoading)
+                    {
+                        <div class="loading-state">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach(var modelName in FilteredModalModels) {
+                            <button class="modal-list-item @(modalSelectedModel == modelName ? "active" : "")" @onclick="() => OnModalModelChanged(modelName)">
+                                <span>@modelName</span>
+                                @if(modalSelectedModel == modelName) {
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                }
+                            </button>
+                        }
+                        @if(!string.IsNullOrEmpty(modalSelectedManufacturer) && !FilteredModalModels.Any()) {
+                            <div class="empty-state">Model bulunamadı</div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Column 3: Sub-Models -->
+            <div class="col-column">
+                <div class="column-header">TİP SEÇİNİZ</div>
+                <div class="column-search-box">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="Tip ara..." @bind="modalSubModelSearch" @bind:event="oninput" disabled="@(string.IsNullOrEmpty(modalSelectedModel))" />
+                         @if (!string.IsNullOrWhiteSpace(modalSubModelSearch))
+                        {
+                             <button type="button" @onclick="() => modalSubModelSearch = string.Empty"><i class="fa-solid fa-xmark"></i></button>
+                        }
+                    </div>
+                </div>
+                <div class="scrollable-modal-list @(string.IsNullOrEmpty(modalSelectedModel) ? "opacity-50" : "")">
+                    @if (isSubModelLoading)
+                    {
+                        <div class="loading-state">
+                           <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach(var sm in FilteredModalSubModels) {
+                            <button class="modal-list-item @(modalSelectedSubModelKey == sm.Key ? "active" : "")" @onclick="() => OnModalSubModelChanged(sm.Key, sm.Name)">
+                                <span>@sm.Name</span>
+                                @if(modalSelectedSubModelKey == sm.Key) {
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                }
+                            </button>
+                        }
+                        @if(!string.IsNullOrEmpty(modalSelectedModel) && !FilteredModalSubModels.Any()) {
+                             <div class="empty-state">Tip bulunamadı</div>
+                        }
+                    }
+                </div>
+            </div>
+
+             <!-- Column 4: DotParts (Part Groups) -->
+            <div class="col-column">
+                <div class="column-header">PARÇA GRUBU</div>
+                 <div class="column-search-box">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="Parça ara..." @bind="modalDotPartSearch" @bind:event="oninput" disabled="@(string.IsNullOrEmpty(modalSelectedSubModelKey))" />
+                         @if (!string.IsNullOrWhiteSpace(modalDotPartSearch))
+                        {
+                             <button type="button" @onclick="() => modalDotPartSearch = string.Empty"><i class="fa-solid fa-xmark"></i></button>
+                        }
+                    </div>
+                </div>
+                 <div class="scrollable-modal-list @(string.IsNullOrEmpty(modalSelectedSubModelKey) ? "opacity-50" : "")">
+                    @if (isDotPartLoading)
+                    {
+                         <div class="loading-state">
+                           <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach(var dotPart in FilteredModalDotParts) {
+                            <button class="modal-list-item @(modalSelectedDotPart == dotPart.Name ? "active" : "")" @onclick="() => OnModalDotPartChanged(dotPart.Name, dotPart.ProcessNumber)">
+                                <span>@dotPart.Name.ToUpper()</span>
+                                @if(modalSelectedDotPart == dotPart.Name) {
+                                    <i class="fa-solid fa-check"></i>
+                                }
+                            </button>
+                        }
+                         @if(!string.IsNullOrEmpty(modalSelectedSubModelKey) && !FilteredModalDotParts.Any()) {
+                             <div class="empty-state">Parça bulunamadı</div>
+                        }
+                    }
+                </div>
+            </div>
+
+             <!-- Column 5: Summary -->
+            <div class="col-column summary-column">
+                <div class="column-header">SEÇİM ÖZETİ</div>
+                <div class="summary-content">
+                    @if(!string.IsNullOrEmpty(modalSelectedManufacturer)) {
+                        <div class="summary-card">
+                            <div class="summary-label">MARKA</div>
+                            <div class="summary-value">@modalSelectedManufacturer</div>
+                        </div>
+                    }
+                    @if(!string.IsNullOrEmpty(modalSelectedModel)) {
+                        <div class="summary-card">
+                            <div class="summary-label">MODEL</div>
+                            <div class="summary-value">@modalSelectedModel</div>
+                        </div>
+                    }
+                    @if(!string.IsNullOrEmpty(modalSelectedSubModelKey)) {
+                        <div class="summary-card">
+                            <div class="summary-label">TİP</div>
+                            <div class="summary-value">@modalSelectedSubModelName</div>
+                        </div>
+                    }
+                     @if(!string.IsNullOrEmpty(modalSelectedDotPart)) {
+                        <div class="summary-card">
+                            <div class="summary-label">PARÇA GRUBU</div>
+                            <div class="summary-value">@modalSelectedDotPart</div>
+                        </div>
+                    }
+                </div>
+                <div class="summary-footer">
+                     <button class="btn btn-search-action" @onclick="SubmitAsync" disabled="@(string.IsNullOrEmpty(modalSelectedManufacturer))">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i> ARA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .vehicle-match-modal {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 80vh; /* Fit simple screen */
+        height: 600px;
+        width: 100%;
+        max-width: 1400px; /* Wide, like Admin */
+    }
+    
+    .advanced-search-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .modal-header {
+        background: #20c997; /* Green Theme */
+        color: white;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #eef1f6;
+    }
+    .modal-title {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .btn-close-custom {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-close-custom:hover {
+        background: rgba(255,255,255,0.4);
+    }
+    
+    .modal-body-columnar {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .col-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #eef1f6;
+        min-width: 0;
+    }
+    .col-column:last-child {
+        border-right: none;
+        background: #f8f9fa;
+        flex: 0.8; 
+    }
+
+    .column-header {
+        padding: 12px 15px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eef1f6;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .column-search-box {
+        padding: 10px;
+        border-bottom: 1px solid #eef1f6;
+    }
+    .search-wrapper {
+        position: relative;
+    }
+    .search-wrapper i.fa-search {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+    .search-wrapper input {
+        width: 100%;
+        padding: 8px 12px 8px 32px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        outline: none;
+        background: #f8fafc;
+    }
+    .search-wrapper input:focus {
+        border-color: #20c997;
+        background: #fff;
+    }
+    .search-wrapper button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+    }
+
+    .scrollable-modal-list {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 20px;
+    }
+    
+    .modal-list-item {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 10px 15px;
+        border-bottom: 1px solid #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #334155;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+    .modal-list-item:hover {
+        background: #f0fdf4;
+        color: #166534;
+        padding-left: 20px;
+    }
+    .modal-list-item.active {
+        background: #dcfce7;
+        color: #15803d;
+        font-weight: 600;
+    }
+    .modal-list-item i {
+        font-size: 0.7rem;
+        opacity: 0.7;
+    }
+
+    .loading-state, .empty-state {
+        padding: 30px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    /* Summary */
+    .summary-column {
+        display: flex;
+        flex-direction: column;
+    }
+    .summary-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    .summary-card {
+        background: white;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+    }
+    .summary-label {
+        font-size: 0.7rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+    }
+    .summary-value {
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .summary-footer {
+        padding: 20px;
+        border-top: 1px solid #eef1f6;
+        background: #fff;
+    }
+    .btn-search-action {
+        width: 100%;
+        background: #20c997;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: 0.2s;
+    }
+    .btn-search-action:hover {
+        background: #14a44d;
+    }
+    .btn-search-action:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+    }
+</style>
+
+@code {
+    [CascadingParameter] public BlazoredModalInstance? ModalInstance { get; set; }
+    [Parameter] public IEnumerable<ManufacturerElasticDto> Manufacturers { get; set; } = Enumerable.Empty<ManufacturerElasticDto>();
+    [Parameter] public Dictionary<int, List<ecommerce.Web.Domain.Dtos.BaseModelDto>> ManufacturerModelCache { get; set; } = new();
+
+    // State
+    private string modalManufacturerSearch = "";
+    private string modalModelSearch = "";
+    private string modalSubModelSearch = "";
+    private string modalDotPartSearch = "";
+
+    private string? modalSelectedManufacturer;
+    private string? modalSelectedModel;
+    private string? modalSelectedSubModelKey;
+    private string? modalSelectedSubModelName;
+    private string? modalSelectedDotPart;
+    private List<string>? modalSelectedDatProcessNumber;
+    
+    private bool isModalOnlyInStock = false;
+
+    // Data lists
+    // Explicitly using SharedProduct namespace for SubModelDto to avoid conflict with Web.Domain.Dtos.SubModelDto
+    private List<string> modalBaseModels = new();
+    private List<SharedProduct.SubModelDto> modalSubModels = new();
+    private List<(string Name, List<string> ProcessNumber)> modalDotParts = new();
+
+    // Loading states
+    private bool isModelLoading = false;
+    private bool isSubModelLoading = false;
+    private bool isDotPartLoading = false;
+
+    private Dictionary<string, List<SharedProduct.SubModelDto>> modalModelSubModelsCache = new();
+    
+    // Real manufacturers from Elasticsearch (only those with products)
+    private List<string> realManufacturers = new();
+    private bool isLoadingManufacturers = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Load manufacturers when modal opens
+        if (!realManufacturers.Any() && !isLoadingManufacturers)
+        {
+            await LoadManufacturersFromElasticsearch();
+        }
+    }
+    
+    private async Task LoadManufacturersFromElasticsearch()
+    {
+        isLoadingManufacturers = true;
+        try
+        {
+            // Fetch a sample of products to extract manufacturers (reduced for speed)
+            var filter = new SearchFilterReguestDto 
+            { 
+                OnlyInStock = isModalOnlyInStock,
+                Page = 1, 
+                PageSize = 500  // Balanced: Fast loading while capturing most manufacturers
+            };
+            
+            var productResult = await ProductService.GetByFilterPagingAsync(filter);
+            
+            if (productResult.Ok && productResult.Result != null && productResult.Result.Data.Any())
+            {
+                realManufacturers = productResult.Result.Data
+                    .Select(p => p.ManufacturerName)
+                    .Where(name => !string.IsNullOrEmpty(name))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x)
+                    .ToList()!;
+                    
+                Console.WriteLine($"✅ Loaded {realManufacturers.Count} manufacturers from {productResult.Result.Data.Count} products");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = ex.Message });
+        }
+        finally
+        {
+            isLoadingManufacturers = false;
+        }
+    }
+
+    // Filter properties - Use real manufacturers from Elasticsearch
+    private IEnumerable<string> FilteredModalManufacturers => realManufacturers
+        .Where(m => string.IsNullOrEmpty(modalManufacturerSearch) || m.Contains(modalManufacturerSearch, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(x => x);
+
+    private IEnumerable<string> FilteredModalModels => modalBaseModels
+        .Where(m => string.IsNullOrEmpty(modalModelSearch) || 
+                    m.Contains(modalModelSearch, StringComparison.OrdinalIgnoreCase) ||
+                    (modalModelSubModelsCache.TryGetValue(m, out var subModels) && 
+                     subModels.Any(sm => sm.Name != null && sm.Name.Contains(modalModelSearch, StringComparison.OrdinalIgnoreCase))));
+
+    private IEnumerable<SharedProduct.SubModelDto> FilteredModalSubModels => modalSubModels
+        .Where(sm => !string.IsNullOrWhiteSpace(sm.Name))  // CRITICAL: Filter out null/empty names
+        .Where(sm => string.IsNullOrEmpty(modalSubModelSearch) || sm.Name.Contains(modalSubModelSearch, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<(string Name, List<string> ProcessNumber)> FilteredModalDotParts => modalDotParts
+        .Where(dp => string.IsNullOrEmpty(modalDotPartSearch) || dp.Name.Contains(modalDotPartSearch, StringComparison.OrdinalIgnoreCase));
+
+    private async Task OnStockSwitchChanged(ChangeEventArgs e)
+    {
+        var newValue = (bool)(e.Value ?? false);
+        Console.WriteLine($"🔄 Stock toggle changed: {isModalOnlyInStock} -> {newValue}");
+        
+        isModalOnlyInStock = newValue;
+        
+        // Clear all selections when stock filter changes
+        modalSelectedManufacturer = null;
+        modalSelectedModel = null;
+        modalSelectedSubModelKey = null;
+        modalSelectedSubModelName = null;
+        modalSelectedDotPart = null;
+        modalSelectedDatProcessNumber = null;
+        modalBaseModels.Clear();
+        modalSubModels.Clear();
+        modalDotParts.Clear();
+        
+        // Show loading state immediately
+        StateHasChanged();
+        
+        Console.WriteLine($"⏳ Reloading manufacturers with OnlyInStock={isModalOnlyInStock}...");
+        
+        // Reload manufacturers based on stock filter
+        await LoadManufacturersFromElasticsearch();
+        
+        Console.WriteLine($"✅ Stock toggle complete - {realManufacturers.Count} manufacturers loaded");
+        
+        // Final refresh after everything is loaded
+        StateHasChanged();
+    }
+
+    protected async Task OnModalManufacturerChanged(string manufacturer)
+    {
+        modalSelectedManufacturer = manufacturer;
+        modalSelectedModel = null;
+        modalSelectedSubModelKey = null;
+        modalSelectedSubModelName = null;
+        modalSelectedDotPart = null;
+        
+        modalBaseModels.Clear();
+        modalSubModels.Clear();
+        modalDotParts.Clear();
+        
+        modalModelSearch = "";
+        modalSubModelSearch = "";
+        modalDotPartSearch = "";
+        
+        isModelLoading = true;
+        
+        if (!string.IsNullOrEmpty(manufacturer))
+        {
+            try
+            {
+                Console.WriteLine($"🔍 Fetching models for {manufacturer}, OnlyInStock={isModalOnlyInStock}");
+                
+                var filter = new SearchFilterReguestDto 
+                { 
+                    ManufacturerNames = new List<string> { manufacturer },
+                    OnlyInStock = isModalOnlyInStock,
+                    Page = 1, 
+                    PageSize = 500 
+                };
+                
+                var productResult = await ProductService.GetByFilterPagingAsync(filter);
+                
+                Console.WriteLine($"✅ Got {productResult.Result?.Data?.Count ?? 0} products for manufacturer {manufacturer}");
+                
+                if (productResult.Ok && productResult.Result != null && productResult.Result.Data.Any())
+                {
+                    modalBaseModels = productResult.Result.Data
+                        .Select(p => p.BaseModelName)
+                        .Where(name => !string.IsNullOrEmpty(name))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                        .ToList()!;
+                    
+                    Console.WriteLine($"📊 Extracted {modalBaseModels.Count} unique models");
+                    
+                    // Populate cache
+                    modalModelSubModelsCache.Clear();
+                    foreach (var product in productResult.Result.Data.Where(p => p.SubModelsJson != null && p.SubModelsJson.Any()))
+                    {
+                        var modelName = product.BaseModelName;
+                        if (string.IsNullOrEmpty(modelName)) continue;
+
+                        if (!modalModelSubModelsCache.ContainsKey(modelName))
+                        {
+                            modalModelSubModelsCache[modelName] = new List<SharedProduct.SubModelDto>();
+                        }
+
+                        foreach (var sm in product.SubModelsJson)
+                        {
+                            if (sm != null && !string.IsNullOrEmpty(sm.Key) && !modalModelSubModelsCache[modelName].Any(x => x.Key == sm.Key))
+                            {
+                                modalModelSubModelsCache[modelName].Add(sm);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                 NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = ex.Message });
+            }
+        }
+        
+        isModelLoading = false;
+        StateHasChanged();
+    }
+
+    protected async Task OnModalModelChanged(string model)
+    {
+        Console.WriteLine($"🔄 OnModalModelChanged: {model}");
+        
+        modalSelectedModel = model;
+        modalSelectedSubModelKey = null;
+        modalSelectedSubModelName = null;
+        modalSelectedDotPart = null;
+        modalDotParts.Clear();
+        modalSubModelSearch = "";
+        modalDotPartSearch = "";
+        
+        isSubModelLoading = true;
+        StateHasChanged(); // Show loading state immediately
+        
+        // Cache Check
+        if (modalModelSubModelsCache.TryGetValue(model, out var cachedSubModels) && cachedSubModels.Any())
+        {
+             Console.WriteLine($"✅ Cache HIT for model '{model}': {cachedSubModels.Count} sub-models");
+             modalSubModels = cachedSubModels.OrderBy(x => x.Name).ToList();
+             isSubModelLoading = false;
+             StateHasChanged();
+             return;
+        }
+
+        Console.WriteLine($"❌ Cache MISS for model '{model}' - fetching from backend");
+        
+        // Cache miss or empty - clear and fetch fresh
+        modalSubModels.Clear();
+
+        if (!string.IsNullOrEmpty(modalSelectedManufacturer) && !string.IsNullOrEmpty(model))
+        {
+             try
+            {
+                var filter = new SearchFilterReguestDto 
+                { 
+                    ManufacturerNames = new List<string> { modalSelectedManufacturer },
+                    BaseModelNames = new List<string> { model },
+                    OnlyInStock = isModalOnlyInStock,
+                    Page = 1, 
+                    PageSize = 500 
+                };
+                var productResult = await ProductService.GetByFilterPagingAsync(filter);
+                
+                Console.WriteLine($"📦 Got {productResult.Result?.Data?.Count ?? 0} products for model '{model}'");
+                
+                 if (productResult.Ok && productResult.Result != null && productResult.Result.Data.Any())
+                {
+                     modalSubModels = productResult.Result.Data
+                        .Where(p => p.SubModelsJson != null && p.SubModelsJson.Any())
+                        .SelectMany(p => p.SubModelsJson!)
+                        .Where(sm => sm != null && !string.IsNullOrWhiteSpace(sm.Key) && !string.IsNullOrWhiteSpace(sm.Name))
+                        .DistinctBy(sm => sm.Key)
+                        .OrderBy(x => x.Name)
+                        .ToList();
+                        
+                     Console.WriteLine($"📊 Extracted {modalSubModels.Count} sub-models");
+                }
+            }
+             catch (Exception ex)
+            {
+                 NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = ex.Message });
+            }
+        }
+
+        isSubModelLoading = false;
+        StateHasChanged();
+    }
+
+    protected async Task OnModalSubModelChanged(string? subModelKey, string? subModelName)
+    {
+        modalSelectedSubModelKey = subModelKey;
+        modalSelectedSubModelName = subModelName;
+        modalSelectedDotPart = null;
+        modalDotParts.Clear();
+        modalDotPartSearch = "";
+
+        isDotPartLoading = true;
+
+        if (!string.IsNullOrEmpty(subModelKey))
+        {
+             try
+            {
+                 var filter = new SearchFilterReguestDto 
+                 { 
+                     ManufacturerNames = !string.IsNullOrEmpty(modalSelectedManufacturer) ? new List<string> { modalSelectedManufacturer } : null,
+                     BaseModelNames = !string.IsNullOrEmpty(modalSelectedModel) ? new List<string> { modalSelectedModel } : null,
+                     SubModelKeys = new List<string> { subModelKey },
+                     OnlyInStock = isModalOnlyInStock, 
+                     Page = 1, 
+                     PageSize = 500 
+                 };
+                  var productResult = await ProductService.GetByFilterPagingAsync(filter);
+                   if (productResult.Ok && productResult.Result != null && productResult.Result.Data.Any())
+                    {
+                         modalDotParts = productResult.Result.Data
+                            .Where(p => !string.IsNullOrEmpty(p.DotPartName) && p.DatProcessNumber?.Any() == true)
+                            .Select(p => (Name: p.DotPartName!, ProcessNumber: p.DatProcessNumber!))
+                            .DistinctBy(x => x.Name)
+                            .OrderBy(x => x.Name)
+                            .ToList();
+                    }
+            }
+             catch (Exception ex)
+            {
+                 NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = ex.Message });
+            }
+        }
+        
+        isDotPartLoading = false;
+        StateHasChanged();
+    }
+
+    protected void OnModalDotPartChanged(string dotPartName, List<string> datProcessNumbers)
+    {
+        modalSelectedDotPart = dotPartName;
+        modalSelectedDatProcessNumber = datProcessNumbers;
+        StateHasChanged();
+    }
+
+    private async Task SubmitAsync()
+    {
+         var parameters = new List<string>();
+
+         if (!string.IsNullOrEmpty(modalSelectedManufacturer))
+         {
+             // CRITICAL: Send ORIGINAL name, not friendly-titled (preserves case: BMW not bmw)
+             parameters.Add($"manufacturername={Uri.EscapeDataString(modalSelectedManufacturer)}");
+         }
+         
+         if (!string.IsNullOrEmpty(modalSelectedModel))
+         {
+             // CRITICAL: Send ORIGINAL name, not friendly-titled
+             parameters.Add($"modelname={Uri.EscapeDataString(modalSelectedModel)}");
+         }
+         
+         if (!string.IsNullOrEmpty(modalSelectedSubModelKey))
+         {
+             parameters.Add($"submodelkey={Uri.EscapeDataString(modalSelectedSubModelKey)}");
+              if (!string.IsNullOrEmpty(modalSelectedSubModelName))
+               {
+                   parameters.Add($"submodelname={Uri.EscapeDataString(modalSelectedSubModelName)}");
+               }
+         }
+         
+         // Logic for Part Group: Pass DatProcessNumber parameter (NOT dotpartname)
+         if (modalSelectedDatProcessNumber?.Any() == true)
+         {
+             parameters.Add($"datprocessnumber={Uri.EscapeDataString(string.Join(",", modalSelectedDatProcessNumber))}");
+         }
+
+         if (isModalOnlyInStock)
+         {
+             parameters.Add("onlyinstock=true");
+         }
+
+        var url = "/product-search";
+        if (parameters.Any())
+        {
+            url += "?" + string.Join("&", parameters);
+        }
+
+        NavigationManager.NavigateTo(url, forceLoad: false);
+        await CancelAsync();
+    }
+
+    private async Task CancelAsync()
+    {
+        if (ModalInstance != null)
+        {
+            await ModalInstance.CloseAsync();
+        }
+    }
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}

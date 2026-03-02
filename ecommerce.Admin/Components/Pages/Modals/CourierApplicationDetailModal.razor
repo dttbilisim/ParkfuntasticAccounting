@@ -1,0 +1,80 @@
+@using ecommerce.Admin.Domain.Dtos.CourierApplicationDto
+@using ecommerce.Core.Helpers
+@using Radzen
+@using Radzen.Blazor
+
+<div class="modal-wrapper">
+    <div class="modal-header-modern">
+        <h5 class="modal-title-modern">Başvuru Detayı — @UserName</h5>
+        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" Click="@(() => DialogService.Close())" Size="ButtonSize.Small" />
+    </div>
+    <div class="modal-content-body p-3">
+        <div class="row g-3">
+            <div class="col-md-6"><strong>E-posta:</strong> @Email</div>
+            <div class="col-md-6"><strong>Telefon:</strong> @Phone</div>
+            <div class="col-md-6"><strong>TC Kimlik No:</strong> @(IdentityNumber ?? "-")</div>
+            <div class="col-md-6"><strong>Vergi No:</strong> @(TaxNumber ?? "-")</div>
+            <div class="col-md-6"><strong>Vergi Dairesi:</strong> @(TaxOffice ?? "-")</div>
+            <div class="col-md-6"><strong>IBAN:</strong> @(IBAN ?? "-")</div>
+            @if (!string.IsNullOrEmpty(Note))
+            {
+                <div class="col-12"><strong>Not:</strong> @Note</div>
+            }
+        </div>
+        <hr />
+        <h6 class="mb-2">Belgeler</h6>
+        <div class="d-flex flex-wrap gap-2">
+            @if (!string.IsNullOrEmpty(TaxPlatePath))
+            {
+                <a href="@GetDocumentUrl("TaxPlate", TaxPlatePath)" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">Vergi Levhası</a>
+            }
+            @if (!string.IsNullOrEmpty(SignatureDeclarationPath))
+            {
+                <a href="@GetDocumentUrl("SignatureDeclaration", SignatureDeclarationPath)" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">İmza Beyannamesi</a>
+            }
+            @if (!string.IsNullOrEmpty(IdCopyPath))
+            {
+                <a href="@GetDocumentUrl("IdCopy", IdCopyPath)" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">Kimlik Fotokopisi</a>
+            }
+            @if (!string.IsNullOrEmpty(CriminalRecordPath))
+            {
+                <a href="@GetDocumentUrl("CriminalRecord", CriminalRecordPath)" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">Sabıka Kaydı</a>
+            }
+            @if (string.IsNullOrEmpty(TaxPlatePath) && string.IsNullOrEmpty(SignatureDeclarationPath) && string.IsNullOrEmpty(IdCopyPath) && string.IsNullOrEmpty(CriminalRecordPath))
+            {
+                <span class="text-muted small">Belge yüklenmemiş</span>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string UserName { get; set; } = "";
+    [Parameter] public string? Email { get; set; }
+    [Parameter] public string Phone { get; set; } = "";
+    [Parameter] public string? IdentityNumber { get; set; }
+    [Parameter] public string? Note { get; set; }
+    [Parameter] public string? TaxNumber { get; set; }
+    [Parameter] public string? TaxOffice { get; set; }
+    [Parameter] public string? IBAN { get; set; }
+    [Parameter] public string? TaxPlatePath { get; set; }
+    [Parameter] public string? SignatureDeclarationPath { get; set; }
+    [Parameter] public string? IdCopyPath { get; set; }
+    [Parameter] public string? CriminalRecordPath { get; set; }
+    [Parameter] public int ApplicationId { get; set; }
+    [Parameter] public string? DocumentApiBaseUrl { get; set; }
+    [Inject] protected DialogService DialogService { get; set; } = null!;
+    [Inject] protected FileHelper FileHelper { get; set; } = null!;
+
+    private string GetDocumentUrl(string documentType, string? path)
+    {
+        if (ApplicationId > 0 && !string.IsNullOrWhiteSpace(DocumentApiBaseUrl))
+        {
+            var baseUrl = DocumentApiBaseUrl.TrimEnd('/');
+            return $"{baseUrl}/api/CourierApplicationDocument/document/{ApplicationId}/{documentType}";
+        }
+
+        return FileHelper.GetFileUrl(path) ?? "#";
+    }
+
+}

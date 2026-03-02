@@ -1,0 +1,151 @@
+@page "/manage-search-boost-weights"
+@using ecommerce.Domain.Shared.Models
+@attribute [Authorize]
+
+<PageTitle>Arama Ayarlarını Düzenle</PageTitle>
+
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@errorMessage</RadzenAlert>
+
+    <RadzenTemplateForm TItem="SearchBoostSettings" Data="@settings" Visible="@(settings != null)" Submit="@FormSubmit">
+        <RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Client">
+            <Tabs>
+                <RadzenTabsItem Text="1. Birebir Eşleşme (En Önemli)">
+                    <div class="alert alert-light border p-2 mb-3">
+                        <small class="text-muted"><RadzenIcon Icon="check_circle" style="vertical-align: middle" /> <strong>Senaryo:</strong> Kullanıcı kelimeyi <strong>tam ve doğru</strong> yazdı.</small>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Grup Kodu (Tam)" Component="OemCodeTerm" class="fw-bold text-primary" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.OemCodeTerm" Name="OemCodeTerm" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: '12345' arandı, kod '12345'.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Parça No (Tam)" Component="PartNumberTerm" class="fw-bold text-primary" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.PartNumberTerm" Name="PartNumberTerm" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: 'AB-99' arandı, parça no 'AB-99'.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Ürün Adı (Tam Kelime)" Component="ProductNameKeyword" class="fw-bold text-success" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.ProductNameKeyword" Name="ProductNameKeyword" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: 'Balata' kelimesi ürün adında var.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Marka (Tam Kelime)" Component="ManufacturerKeyword" class="fw-bold text-success" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.ManufacturerKeyword" Name="ManufacturerKeyword" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: Marka tam olarak 'Bosch'.</small>
+                            </RadzenCard>
+                        </div>
+                         <div class="col-md-12">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Araç Modeli (Tam Kelime)" Component="BaseModelKeyword" class="fw-bold text-success" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.BaseModelKeyword" Name="BaseModelKeyword" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: Model tam olarak 'Megane'.</small>
+                            </RadzenCard>
+                        </div>
+                    </div>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="2. İçinde Geçen (Kısmi)">
+                     <div class="alert alert-light border p-2 mb-3">
+                        <small class="text-muted"><RadzenIcon Icon="search" style="vertical-align: middle" /> <strong>Senaryo:</strong> Aranan kelime bir şeyin <strong>parçası</strong>.</small>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Ürün Adı (İçinde)" Component="ProductNameMatch" class="fw-bold" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.ProductNameMatch" Name="ProductNameMatch" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: 'Filtre' arandı, kayıt 'MazotFiltresi'.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Grup Kodu (Kısmi)" Component="OemCodeMatch" class="fw-bold" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.OemCodeMatch" Name="OemCodeMatch" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: '123' arandı, kod '123456'.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Parça No (Kısmi)" Component="PartNumberMatch" class="fw-bold" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.PartNumberMatch" Name="PartNumberMatch" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Örn: 'ABC' arandı, parça no 'ABC-123'.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Noktalı Parça No" Component="DotPartNameMatch" class="fw-bold" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.DotPartNameMatch" Name="DotPartNameMatch" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Özel formatlı numaralar.</small>
+                            </RadzenCard>
+                        </div>
+                    </div>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="3. Hatalı Yazım (Fuzzy)">
+                     <div class="alert alert-light border p-2 mb-3">
+                        <small class="text-muted"><RadzenIcon Icon="help_outline" style="vertical-align: middle" /> <strong>Senaryo:</strong> Kullanıcı <strong>yanlış veya eksik</strong> yazdı.</small>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Ürün Adı (Hatalı)" Component="ProductNameFuzzy" class="fw-bold text-warning" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.ProductNameFuzzy" Name="ProductNameFuzzy" ShowArrows="true" TValue="double" Step="0.1" />
+                                <small class="text-muted d-block mt-2">Örn: 'Filte' yazdı (r eksik).</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Grup Kodu (Hatalı)" Component="OemCodeWildcard" class="fw-bold text-warning" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.OemCodeWildcard" Name="OemCodeWildcard" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Grup kodunda yazım hatası.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Parça No (Hatalı)" Component="PartNumberWildcard" class="fw-bold text-warning" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.PartNumberWildcard" Name="PartNumberWildcard" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Parça nosunda yazım hatası.</small>
+                            </RadzenCard>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Marka Adı (Hatalı)" Component="ManufacturerFuzzy" class="fw-bold text-warning" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.ManufacturerFuzzy" Name="ManufacturerFuzzy" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Marka isminde yazım hatası.</small>
+                            </RadzenCard>
+                        </div>
+                         <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Araç Modeli (Hatalı)" Component="BaseModelFuzzy" class="fw-bold text-warning" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.BaseModelFuzzy" Name="BaseModelFuzzy" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Model isminde yazım hatası.</small>
+                            </RadzenCard>
+                        </div>
+                         <div class="col-md-6">
+                            <RadzenCard Class="h-100 shadow-sm border-0 bg-light">
+                                <RadzenLabel Text="Alt Detay (Hatalı)" Component="NestedSubModel" class="fw-bold text-warning" />
+                                <RadzenNumeric style="width: 100%" @bind-Value="@settings.NestedSubModel" Name="NestedSubModel" ShowArrows="true" />
+                                <small class="text-muted d-block mt-2">Teknik detay hatası.</small>
+                            </RadzenCard>
+                        </div>
+                    </div>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat"  />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

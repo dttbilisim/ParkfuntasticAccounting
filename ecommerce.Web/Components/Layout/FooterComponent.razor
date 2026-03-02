@@ -1,0 +1,160 @@
+    @using ecommerce.Web.Utility
+<footer class="section-t-space footer-section-2 footer-color-2 d-none d-md-block">
+        <div class="container-fluid-lg">
+            <div class="main-footer">
+                <div class="row g-md-4 gy-sm-5">
+                    <div class="col-xxl-3 col-xl-4 col-sm-6">
+                        @* <a href="/" class="foot-logo theme-logo">
+                            <img src="../assets/images/logo/4.png" class="img-fluid blur-up lazyload" alt="">
+                        </a> *@
+                        <p class="information-text information-text-2">@lang["Footer.Description"]</p>
+                        <ul class="social-icon">
+                            <li class="light-bg">
+                                <a href="https://www.facebook.com/" class="footer-link-color">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                            </li>
+                            <li class="light-bg">
+                                <a href="https://accounts.google.com/signin/v2/identifier?flowName=GlifWebSignIn&flowEntry=ServiceLogin"
+                                   class="footer-link-color">
+                                    <i class="fab fa-google"></i>
+                                </a>
+                            </li>
+                            <li class="light-bg">
+                                <a href="https://twitter.com/i/flow/login" class="footer-link-color">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                            </li>
+                            <li class="light-bg">
+                                <a href="https://www.instagram.com/" class="footer-link-color">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            </li>
+                            <li class="light-bg">
+                                <a href="https://in.pinterest.com/" class="footer-link-color">
+                                    <i class="fab fa-pinterest-p"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-xxl-2 col-xl-4 col-sm-6">
+                        <div class="footer-title">
+                            <h4 class="text-white">@lang["Footer.AboutTitle"]</h4>
+                        </div>
+                        <ul class="footer-list footer-contact footer-list-light">
+                            <li>
+                                <a href="/about-us" class="light-text">@lang["Footer.AboutUs"]</a>
+                            </li>
+                            <li>
+                                <a href="/contact-us" class="light-text">@lang["Footer.Contact"]</a>
+                            </li>
+                       
+                        </ul>
+                    </div>
+
+                    <div class="col-xxl-2 col-xl-4 col-sm-6">
+                        <div class="footer-title">
+                            <h4 class="text-white">@lang["Footer.LinksTitle"]</h4>
+                        </div>
+                        <ul class="footer-list footer-list-light footer-contact">
+                       
+                            <li>
+                                <a href="/user-dashboard" class="light-text">@lang["Footer.Account"]</a>
+                            </li>
+                     
+                            <li>
+                                <a href="/wishlist" class="light-text">@lang["Footer.Wishlist"]</a>
+                            </li>
+                            <li>
+                                <a href="/Faq" class="light-text">@lang["Footer.FAQ"]</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-xxl-2 col-xl-4 col-sm-6">
+                        <div class="footer-title">
+                            <h4 class="text-white">@lang["Footer.Categories"]</h4>
+                        </div>
+                        <ul class="footer-list footer-list-light footer-contact">
+                            @if (categories is not null && categories.Any())
+                            {
+                            @foreach (var category in categories)
+                            {
+                            <li>
+                                <a href="@($"/product-search?catid={category.Id}&catname={FriendlyUrlHelper.GetFriendlyTitle(category.Name)}")"
+                                   class="light-text">
+                                    @category.Name
+                                </a>
+                            </li>
+                            }
+                            }
+                            else
+                            {
+                            <li>
+                                <span class="light-text">@lang["Footer.NoCategories"]</span>
+                            </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="col-xxl-3 col-xl-4 col-sm-6">
+                        <div class="footer-title">
+                            <h4 class="text-white">@lang["Footer.StoreInfo"]</h4>
+                        </div>
+                        <ul class="footer-address footer-contact">
+                            <li>
+                                <a href="javascript:void(0)" class="light-text">
+                                    <div class="inform-box flex-start-box">
+                                        <i class="fa-solid fa-map-marker-alt"></i>
+                                        <p>@lang["Footer.Address"]</p>
+                                    </div>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="javascript:void(0)" class="light-text">
+                                    <div class="inform-box">
+                                        <i class="fa-solid fa-phone"></i>
+                                        <p>@lang["Footer.CallUs"]</p>
+                                    </div>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="javascript:void(0)" class="light-text">
+                                    <div class="inform-box">
+                                        <i class="fa-solid fa-envelope"></i>
+                                        <p>@lang["Footer.Email"]</p>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sub-footer sub-footer-lite section-b-space section-t-space">
+                <div class="left-footer">
+                    <p class="light-text">@lang["Footer.CopyRight"]</p>
+                </div>
+
+                <ul class="payment-box">
+                    <li>
+                        <img src="../assets/images/icon/paymant/visa.png" class="blur-up lazyload" alt="">
+                    </li>
+                    <li>
+                        <img src="../assets/images/icon/paymant/discover.png" alt="" class="blur-up lazyload">
+                    </li>
+                    <li>
+                        <img src="../assets/images/icon/paymant/american.png" alt="" class="blur-up lazyload">
+                    </li>
+                    <li>
+                        <img src="../assets/images/icon/paymant/master-card.png" alt="" class="blur-up lazyload">
+                    </li>
+                    <li>
+                        <img src="../assets/images/icon/paymant/giro-pay.png" alt="" class="blur-up lazyload">
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>

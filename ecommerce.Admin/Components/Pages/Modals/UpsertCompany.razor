@@ -1,0 +1,692 @@
+﻿@page "/upsert-company"
+
+@using Blazored.FluentValidation
+@using ecommerce.Admin.Domain.Dtos.CompanyCargoDto;
+@using ecommerce.Admin.Domain.Dtos.CompanyDto;
+@using ecommerce.Admin.Domain.Dtos.CompanyRateDto;
+@using ecommerce.Core.Entities
+@using ecommerce.Core.Utils;
+@inject IStringLocalizer<Culture_TR> Loc
+
+
+
+@attribute [Authorize]
+
+<PageTitle>Şirket / Düzenle</PageTitle>
+<div class="col-md-12">
+<RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Şirket Kayıt Edilemedi!</RadzenAlert>
+
+<RadzenTemplateForm TItem="CompanyUpsertDto" Data="@company" Visible="@(company != null)" Submit="@FormSubmit" OnInvalidSubmit="ShowErrors">
+<FluentValidationValidator @ref="_fluentValidationValidator"/>
+
+<RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Client">
+<Tabs>
+
+<RadzenTabsItem Text="Genel Bilgiler">
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Çalışma Tipi" Component="CompanyTitle" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenDropDown style="display: block; width: 100%" Data="CompanyTypes" @bind-Value="@company.CompanyWorkingType" Name="CompanyType" Placeholder="Seçiniz" 
+                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Kullanıcı Tipi" Component="UserType" style="width: 100%"/>
+        </div>
+
+
+        <div class="col-md-9">
+            <RadzenDropDown TValue="UserType" style="display: block; width: 100%" Data="UserTypes" @bind-Value="@company.UserType" Name="UserType" Change="(args => ChangeUserType(args))" Placeholder="Seçiniz" 
+                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+        </div>
+    </div>
+   
+    @if(IsShowLocalStorage){
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Yerel Depo?" Component="IsLocalStorage" style="width: 100%"/>
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox Change="CheckIsLocalWarehouse" TValue="bool" @bind-Value="@company.IsLocalStorage" Name="IsLocalStorage"/>
+            </div>
+        </div>
+    }
+
+
+
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Adı" Component="FirstName" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.FirstName" Name="FirstName"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Soyadı" Component="LastName" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.LastName" Name="LastName"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Doğum Tarihi" Component="BirthDate" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenDatePicker style="display: block; width: 100%" @bind-Value="@company.BirthDate" Name="BirthDate" DateFormat="dd/MM/yyyy" AllowClear="true"/>
+        </div>
+    </div>
+
+
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Min. Sipariş Tutar" Component="MinBasketAmount" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@company.MinCartTotal" Name="MinBasketAmount" Format="c"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Durum" Component="Status" style="width: 100%"/>
+        </div>
+        <div class="col-md-3">
+            <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status"/>
+        </div>
+    </div>
+
+
+</RadzenTabsItem>
+
+<RadzenTabsItem Text="İletişim Bilgileri">
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="İl" Component="CityId" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenDropDownDataGrid Data="@cities" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@company.CityId" Name="CityId" Change="@CityChange" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="İlçe" Component="TownId" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenDropDownDataGrid Data="@towns" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@company.TownId" Name="TownId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="E-Mail Adresi" Component="EmailAddress" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.EmailAddress" Disabled="@Id.HasValue" Name="EmailAddress"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Telefon Numarası" Component="PhoneNumber" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.PhoneNumber" Name="PhoneNumber"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Adres" Component="PhoneNumber" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextArea Rows="5" style="display: block; width: 100%" @bind-Value="@company.Address" Name="Address"/>
+        </div>
+    </div>
+
+</RadzenTabsItem>
+
+
+<RadzenTabsItem Text="Şirket Bilgileri">
+
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Iban" Component="PhoneNumber" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenMask style="display: block; width: 100%" @bind-Value="@company.Iban" Name="Iban" Mask="TR************************" CharacterPattern="[0-9]" Pattern="TR\d{2} \d{4} \d{4} \d{4} \d{4} \d{4} \d{2}"/>
+        </div>
+    </div>
+@if(company.CompanyWorkingType == CompanyWorkingType.Seller || company.CompanyWorkingType == CompanyWorkingType.BuyerAndSeller){
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Banka Hesap Bilgileri" Component="BankAccountName" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.BankAccountName" Name="BankAccountName"/>
+        </div>
+    </div>
+    }
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Hesap Adı" Component="AccountName" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.AccountName" Name="AccountName"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Fatura E-Mail Adresi" Component="AccountEmailAddress" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.AccountEmailAddress" Name="AccountEmailAddress"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Vergi Numarası/TCKN" Component="TaxNumber" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.TaxNumber" Name="TaxNumber"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Vergi Adı" Component="TaxName" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.TaxName" Name="TaxName"/>
+        </div>
+    </div>
+
+    @if(company.UserType == UserType.Custormer){
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Fatura Adresi" Component="InvoiceAddress" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@company.InvoiceAddress" Name="InvoiceAddress"/>
+            </div>
+        </div>
+    }
+
+
+    <div style="margin-bottom: 1rem " class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Açıklama" Component="Description" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextArea style="display: block; width: 100%" @bind-Value="@company.Description" Name="Description"/>
+        </div>
+    </div>
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Mavi Tik" Component="IsBlueTick" style="width: 100%"/>
+        </div>
+        <div class="col-md-3">
+            <RadzenCheckBox TValue="bool" @bind-Value="@company.IsBlueTick" Name="IsBlueTick"/>
+        </div>
+    </div>
+
+
+</RadzenTabsItem>
+<RadzenTabsItem Visible="false" Text="Ödeme Bilgileri">
+
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Iyzico Key" Component="IyzicoKey" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox ReadOnly="true" style="display: block; width: 100%" @bind-Value="@company.IyzicoSubmerhantKey" Name="IyzicoKey"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Iyzico Ödeme Günü" Component="IyzicoPaymentDay" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@company.VendorPaymentTransferTime" Name="IyzicoPaymentDay" Min="1" Max="100"/>
+        </div>
+    </div>
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Iyzico Satış Komisyonu" Component="IyzicoCommision" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@company.Rate" Name="IyzicoCommision" Min="1" Max="100"/>
+        </div>
+    </div>
+    
+
+    <div style="margin-bottom: 1rem;display: none;" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Sipay Key" Component="SipayKey" style="width: 100%"/>
+        </div>
+        <div style="display:none;" class="col-md-9">
+            <RadzenTextBox ReadOnly="true" style="display: block; width: 100%" @bind-Value="@company.SipaySubmerchantKey" Name="SipayKey"/>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1rem;display: none" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Sipay Ödeme Günü" Component="SipayPaymentDay" style="width: 100%"/>
+        </div>
+        <div style="display:none;" class="col-md-9">
+            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@company.SipayPaymentDay" Name="SipayPaymentDay" Min="1" Max="100"/>
+        </div>
+    </div>
+    <div style="margin-bottom: 1rem;display: none" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Sipay Satış Komisyonu" Component="SipayCommision" style="width: 100%" />
+        </div>
+        <div style="display:none;" class="col-md-9">
+            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@company.SipayCommission" Name="SipayCommision" Min="1" Max="100"/>
+        </div>
+    </div>
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Üye Notu" Component="SellerNotes" style="width: 100%"/>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox  style="display: block; width: 100%" @bind-Value="@company.SellerNotes" Name="SellerNotes"/>
+        </div>
+    </div>
+
+
+
+</RadzenTabsItem>
+
+
+
+<RadzenTabsItem Text="Kargo Bilgileri">
+
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Medium" AlertStyle="AlertStyle.Warning" Visible="@IsUserSaved">Önce kullanıcı kaydetmelisiniz.</RadzenAlert>
+
+    <div style="width: 100%; overflow: hidden;" class="mb-2">
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Kargo Ekle" Variant="Variant.Flat" Click="@AddCompanyCargoButtonClick" class="mt-2" Visible=@IsShowPanels/>
+        </div>
+    </div>
+
+    <RadzenDataGrid AllowFiltering="false"
+                    AllowColumnResize="true"
+                    AllowAlternatingRows="false"
+                    FilterMode="FilterMode.Advanced"
+                    AllowSorting="false"
+                    AllowPaging="true"
+                    PagerHorizontalAlign="HorizontalAlign.Left"
+                    ShowPagingSummary="false"
+                    RowSelect="EditRowCompanyCargo"
+                    Data="@companyCargoList"
+                    TItem="CompanyCargoListDto"
+                    ColumnWidth="300px"
+                    LogicalFilterOperator="LogicalFilterOperator.Or"
+                    PageSize="10">
+        <Columns>
+            <RadzenDataGridColumn TItem="CompanyCargoListDto" Title="Id" Property="Id" Width="50px"/>
+
+            <RadzenDataGridColumn TItem="CompanyCargoListDto" Title="Kargo" Width="50px">
+                <Template Context="data">
+                    <RadzenText Text="@data.Cargo.Name" Style="width: 2rem;"/>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CompanyCargoListDto" Title="Min. Sepet Tutarı" Property="MinBasketAmount" Width="50px"/>
+            <RadzenDataGridColumn TItem="CompanyCargoListDto" Title="Varsayılan Kargo" TextAlign="TextAlign.Center" Property="IsDefault" Width="50px">
+                <Template Context="data">
+                    @(data.IsDefault ? "✓" : "")
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="CompanyCargoListDto" Title="Aksiyon" Width="100px" TextAlign="TextAlign.Center">
+                <Template Context="data">
+
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteCompanyCargoButtonClick(args, data)) @onclick:stopPropagation="true"/>
+
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenTabsItem>
+<RadzenTabsItem Visible="@(company.IsLocalStorage == true ? true : false)" Text="Yerel Depo Bilgileri">
+
+
+    <div style="width: 100%; overflow: hidden;" class="mb-2">
+        <div style="float:left  ">
+            <RadzenDropDownDataGrid Data="@cities" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@CityId" Name="CityId" Change="@CityChange" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+        </div>
+        <div style="float:left  ">
+            <RadzenDropDownDataGrid Data="@towns" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@TownId" Name="TownId" Change="@TownChange" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true"/>
+        </div>
+
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Ekle" Variant="Variant.Flat" Click="@AddCompanyWarehouseButtonClick" class="mt-2"/>
+        </div>
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Seçilen İlin İlçelerini Ekle" Variant="Variant.Flat" Click="@AddCompanyWarehouseCityButtonClick" class="mt-2"/>
+        </div>
+
+    </div>
+
+    <RadzenDataGrid
+        AllowFiltering="true"
+
+        AllowPaging="true"
+        AllowSorting="true"
+        PagerAlwaysVisible=true
+        PageSize=8
+        AllowFilterDateInput=true
+        TItem="CompanyWarehouseListDto"
+
+        Data="@CompanyWarehouseList"
+        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+        FilterMode="FilterMode.Simple"
+        EqualsText="@Loc.GetString("EqualsText")"
+        NotEqualsText="@Loc.GetString("NotEqualsText")"
+        LessThanText="@Loc.GetString("LessThanText")"
+        LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+        GreaterThanText="@Loc.GetString("GreaterThanText")"
+        GreaterThanOrEqualsText="@Loc.GetString("GreaterThanOrEqualsText")"
+        IsNullText="@Loc.GetString("IsNullText")"
+        IsNotNullText="@Loc.GetString("IsNotNullText")"
+        ApplyFilterText="@Loc.GetString("ApplyFilterText")"
+        ClearFilterText="@Loc.GetString("ClearFilterText")">
+
+        <Columns>
+            <RadzenDataGridColumn TItem="CompanyWarehouseListDto" Title="Id" Property="Id" Width="50px"/>
+
+            <RadzenDataGridColumn TItem="CompanyWarehouseListDto" Property="City.Name" Title="İl Adı" Width="50px"/>
+
+
+            <RadzenDataGridColumn TItem="CompanyWarehouseListDto" Property="Town.Name" Title="İlçe Adı" Width="50px"/>
+
+
+            <RadzenDataGridColumn TItem="CompanyWarehouseListDto" Title="Aksiyon" Width="100px" TextAlign="TextAlign.Center">
+                <Template Context="data">
+
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteCompanyWarehouseClick(args, data)) @onclick:stopPropagation="true"/>
+
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenTabsItem>
+
+
+
+<RadzenTabsItem Text="Dökümanlar">
+    <div style="margin-bottom: 1rem" class="row">
+        <div class="col-md-3">
+            <RadzenLabel Text="Dökümanlar" Component="Document" style="width: 100%"/>
+        </div>
+        @if(CompanyDocumentList != null){
+            <RadzenDataGrid AllowFiltering="false"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="false"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="false"
+                            Data="@CompanyDocumentList"
+                            TItem="CompanyDocumentListDto"
+                            ColumnWidth="300px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            PageSize="10">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CompanyDocumentListDto" Title="Id" Property="Id" Width="50px"/>
+
+
+                    <RadzenDataGridColumn TItem="CompanyDocumentListDto" Title="Evrak Adı" Property="FileName" Width="100px"/>
+                    <RadzenDataGridColumn TItem="CompanyDocumentListDto" Width="100px" Title="Evrak Linki">
+                        <Template Context="CompanyDocumentListDto">
+                            <a href="@(BaseUrl + "/" + CompanyDocumentListDto.Root)" target="_blank">@(CompanyDocumentListDto.Root)</a>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                </Columns>
+            </RadzenDataGrid>
+        }
+    </div>
+</RadzenTabsItem>
+@if(company.CompanyWorkingType == CompanyWorkingType.Seller || company.CompanyWorkingType == CompanyWorkingType.BuyerAndSeller){
+    <RadzenTabsItem Text="Satıcı İlanları">
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                @if(_productSellerItems != null){
+                    <span style="width: 100%">Toplan Ilan Sayısı : @_productSellerItems.Count()</span>
+                   
+                }
+             
+            </div>
+                <div style="width: 100%; overflow: hidden;" class="mb-2">
+                    <div style="float:right">
+                        <RadzenButton Icon="cloud_download" Text="Excel olarak indir"  Click="@(args => ExcelExporProductSellerItemtClick())" download Variant="Variant.Flat" class="mt-2" Style="background-color:green" />
+                    </div>
+                </div>
+            @if(_productSellerItems != null){
+                <RadzenDataGrid AllowFiltering="false"
+                                AllowColumnResize="true"
+                                AllowAlternatingRows="false"
+                                FilterMode="FilterMode.Simple"
+                                AllowSorting="true"
+                                AllowPaging="true"
+                                PagerHorizontalAlign="HorizontalAlign.Left"
+                                ShowPagingSummary="false"
+                                Data="@_productSellerItems"
+                                TItem="ProductSellerItem"
+                                ColumnWidth="300px"
+                                LogicalFilterOperator="LogicalFilterOperator.Or"
+                                PageSize="5">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="ProductSellerItem" Title="Id" Property="Id" Width="30px"/>
+
+
+                        <RadzenDataGridColumn Title="Ürün Adı" TItem="ProductSellerItem" Width="150px">
+                       
+                            <Template Context="Product">
+                                <p style="white-space:pre-wrap">@Product.Product.Name</p>
+                            </Template>
+                           
+                        
+                           
+                        </RadzenDataGridColumn>
+                      <RadzenDataGridColumn Title="Barkod" TItem="ProductSellerItem" Width="50px">
+                                                                                          
+                                                <Template Context="Product">
+                                                    <p style="white-space:pre-wrap">@Product.Product.Barcode</p>
+                                                </Template>
+                                            </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="ProductSellerItem" Title="Stok" Property="Stock" Width="30px"/>
+                    
+                        <RadzenDataGridColumn Title="Fiyat" TItem="ProductSellerItem" Width="40px">
+                                                                      
+                            <Template Context="Product">
+                                <p style="white-space:pre-wrap">@Product.Price.ToString("n")</p>
+                            </Template>
+                        </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Title="Kdv" TItem="ProductSellerItem" Width="40px">
+                                                                                              
+                                                    <Template Context="Product">
+                                                        <p style="white-space:pre-wrap">@Product.Product.Tax.TaxRate</p>
+                                                    </Template>
+                                                </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="O.Fiyat" TItem="ProductSellerItem" Width="40px">
+                                                                                              
+                            <Template Context="Product">
+                                <p style="white-space:pre-wrap">@Product.AvgSameProductPrice.Value.ToString("n")</p>
+                            </Template>
+                        </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="ProductSellerItem" Title="Diğer İlan Sayısı" Property="CountSameProduct" Width="30px"/>
+                        <RadzenDataGridColumn Title="Miat" TItem="ProductSellerItem" Width="40px">
+                                              
+                            <Template Context="Product">
+                                <p style="white-space:pre-wrap">@Product.ExprationDate.ToShortDateString()</p>
+                            </Template>
+                        </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Title="Durumu" TItem="ProductSellerItem" Width="40px">
+                                                                      
+                                <Template Context="Product">
+                                    
+                                    <p style="white-space:pre-wrap">@(Product.Status==1 ?"Aktif":"Pasif")</p>
+                                </Template>
+                                                   </RadzenDataGridColumn>
+                       
+
+                    </Columns>
+                </RadzenDataGrid>
+            }
+        </div>
+    </RadzenTabsItem>
+}
+    <RadzenTabsItem Visible="false" Text="Entegrasyon Ayarları">
+
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Medium" AlertStyle="AlertStyle.Warning" Visible="@IsUserSaved">Önce kullanıcı kaydetmelisiniz.</RadzenAlert>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Entegra XML Linki" Component="Entegra" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox  style="display: block; width: 100%" @bind-Value="@company.EntegraXmlLink" Name="Entegra"/>
+            </div>
+        </div>
+        @if(company.EntegraXmlLink != null){
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Entegra Siparis Xml Linki" Component="EntegraOrderUrl" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox ReadOnly="true"  style="display: block; width: 100%" @bind-Value="@company.EntegraOrderXml" Name="EntegraOrderUrl"/>
+            </div>
+        </div>
+        }
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Bizim Hesap XML Linki" Component="BizimHesap" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox  style="display: block; width: 100%" @bind-Value="@company.BizimHesapXmlLink" Name="BizimHesap"/>
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Paraşüt XML Linki" Component="Parasut" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox  style="display: block; width: 100%" @bind-Value="@company.ParasutXmlLink" Name="Parasut"/>
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Bi Fatura XML Linki" Component="BiFatura" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox  style="display: block; width: 100%" @bind-Value="@company.BiFaturaXmlLink" Name="BiFatura"/>
+            </div>
+        </div>
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Pro Pazar XML Linki" Component="ProPazar" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox  style="display: block; width: 100%" @bind-Value="@company.ProPazarXmlLink" Name="ProPazar"/>
+            </div>
+        </div>
+
+      
+
+
+
+
+
+    </RadzenTabsItem>
+    <RadzenTabsItem Text="Görüşme Notları">
+
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Medium" AlertStyle="AlertStyle.Warning" Visible="@IsUserSaved">Önce kullanıcı kaydetmelisiniz.</RadzenAlert>
+
+        <div style="width: 100%; overflow: hidden;" class="mb-2">
+            <div style="float:right">
+                <RadzenButton Icon="add_circle_outline" Text="Yeni Not Ekle" Variant="Variant.Flat" Click="@AddCompanyInterviewButtonClick" class="mt-2" Visible=@IsShowPanels/>
+            </div>
+        </div>
+
+        <RadzenDataGrid AllowFiltering="false"
+                        AllowColumnResize="true"
+                        AllowAlternatingRows="false"
+                        FilterMode="FilterMode.Advanced"
+                        AllowSorting="false"
+                        AllowPaging="true"
+                        PagerHorizontalAlign="HorizontalAlign.Left"
+                        ShowPagingSummary="false"
+                        RowSelect="EditCompanyInterviewButtonClick"
+                        Data="@_companyInterview"
+                        TItem="CompanyInterviewDto"
+                        ColumnWidth="300px"
+                        LogicalFilterOperator="LogicalFilterOperator.Or"
+                        PageSize="10">
+            <Columns>
+                <RadzenDataGridColumn TItem="CompanyInterviewDto" Title="Id" Property="Id" Width="30px"/>
+
+                <RadzenDataGridColumn TItem="CompanyInterviewDto" Title="Tarih" Width="90px">
+                    <Template Context="data">
+                        <RadzenText Text="@data.Created.ToString()" Style="width: 2rem;"/>
+                    </Template>
+                </RadzenDataGridColumn>
+              
+                <RadzenDataGridColumn TItem="CompanyInterviewDto" Title="Görüşülen Kişi" Width="300px">
+                    <Template Context="data">
+                        <RadzenText Text="@data.InterviewPersonel" Style="width: 2rem;"/>
+                    </Template>
+                </RadzenDataGridColumn>
+               
+
+                <RadzenDataGridColumn TItem="CompanyInterviewDto" Title="Aksiyon" Width="100px" TextAlign="TextAlign.Center">
+                    <Template Context="data">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteCompanyInterviewButtonClick(data.Id)) @onclick:stopPropagation="true"/>
+
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+
+    </RadzenTabsItem>
+</Tabs>
+
+
+</RadzenTabs>
+
+
+<div class="row">
+    <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+
+
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled"/>
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+
+
+    </div>
+</div>
+
+</RadzenTemplateForm>
+</div>

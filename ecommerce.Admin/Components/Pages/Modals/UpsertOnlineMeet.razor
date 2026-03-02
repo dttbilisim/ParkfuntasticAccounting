@@ -1,0 +1,258 @@
+@using ecommerce.Admin.Domain.Dtos.CompanyDto
+@using ecommerce.Admin.Domain.Dtos.DiscountDto
+@using ecommerce.Admin.Domain.Dtos.ZoomDto
+@using ecommerce.Core.Entities
+@attribute [Authorize]
+
+
+<PageTitle>Yeni İkili Görüşme Ekle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTemplateForm TItem="OnlineMeetUpsertDto" Data="@_OnlineMeetUpsertDto">
+                <RadzenTabsItem Selected="true"  Text="Toplantı Bİlgileri">
+
+           
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Firma Seçiniz" Component="Seller" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDropDownDataGrid Data="@SellerList"
+                                                        TextProperty="FullName"
+                                                        ValueProperty="Id"
+                                                        Placeholder="Seçiniz"
+                                                        @bind-Value="_OnlineMeetUpsertDto.SellerId"
+                                                        AllowFiltering="true"
+                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                        style="display: block; width: 100%"
+                                                        Change="@(args => OnSellerChanged(args))"
+                                                        AllowClear="true">
+                    
+
+                                </RadzenDropDownDataGrid>
+
+                            </div>
+                        </div>
+      
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Firma Yetkilisi (Zorunlu)" Component="SellerName" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_OnlineMeetUpsertDto.SellerName" Name="SellerName"/>
+                                <RadzenRequiredValidator Component="SellerName" Text="Firma Yetkilisi Bos Olamaz"/>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Marka Email Adresi" Component="SellerEmail" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_OnlineMeetUpsertDto.SellerEmail" Name="SellerEmail"/>
+               
+                            </div>
+                        </div>
+             
+           
+         
+
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Konusu (Zorunlu)" Component="Subject" style="width: 100%"/>
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_OnlineMeetUpsertDto.Subject" Name="Subject"/>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Tarihi (Zorunlu)" Component="MeetDate" style="width: 100%"/>
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenDatePicker  Style="width: 100%" @bind-Value="@_OnlineMeetUpsertDto.MeetDate" ShowTime="true" DateFormat="g" AllowClear="true"/>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Dakika ((Zorunlu))" Component="Duration" style="width: 100%"/>
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@_OnlineMeetUpsertDto.Duration" Name="Duration"/>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Parolasi (Zorunlu)" Component="Password" style="width: 100%"/>
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@_OnlineMeetUpsertDto.Password" Name="Password"/>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Açıklama" Component="Description" style="width: 100%"/>
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_OnlineMeetUpsertDto.Description" Name="Description"/>
+                        </div>
+                    </div>
+                    @if(Id > 0){
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Link" Component="Link" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox ReadOnly="true" style="display: block; width: 100%" @bind-Value="@_OnlineMeetUpsertDto.MeetLink" Name="Link"/>
+                            </div>
+                        </div>
+                    }
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Durum" Component="Status" style="width: 100%"/>
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status"/>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                            <RadzenButton Click="@Submit" ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat"/>
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="DialogService.Close"/>
+                        </div>
+                    </div>
+                </RadzenTabsItem>
+            </RadzenTemplateForm>
+            <RadzenTabsItem Text="Katılımcı Bilgileri">
+          
+                <RadzenStack AlignItems="AlignItems.End" class="mb-2">
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="add_circle_outline" Click="InsertDiscountCompanyCouponRow" Text="Katılımcı Ekle" />
+                </RadzenStack>
+                <RadzenDataGrid CellRender="RowRender" @ref="RadzenDataGrid" TItem="OnlineMeetCalendarPharmacy" AllowAlternatingRows="false" AllowFiltering="false" AllowPaging="false" EditMode="DataGridEditMode.Single" Data="@_OnlineMeetUpsertDto.OnlineMeetCalendarPharmacies">
+                    <Columns>
+                        <RadzenDataGridColumn Width="300px" Context="context" TItem="OnlineMeetCalendarPharmacy" Property="CompanyId" Title="Eczane">
+                            <Template>
+                                @context.CompanyName
+                            </Template>
+                            <EditTemplate>
+                                <RadzenDropDown Change="@(args => OnCompanyChanged(args, context))"  Data="@CompanyList"   @bind-Value="@OnlineMeetCalendarPharmacy.CompanyId"  AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowVirtualization="true" TextProperty="FullName" ValueProperty="Id" class="w-100"/>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="context" TItem="OnlineMeetCalendarPharmacy" Property="Name" Title="Adı" Width="100px">
+                            <Template>
+                                @context.Name
+                            </Template>
+                            <EditTemplate>
+                                <RadzenTextBox @bind-Value="@OnlineMeetCalendarPharmacy.Name"   class="flex-fill"/>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="context" TItem="OnlineMeetCalendarPharmacy" Property="Name" Title="Soyadı" Width="100px">
+                            <Template>
+                                @context.SurName
+                            </Template>
+                            <EditTemplate>
+                                <RadzenTextBox @bind-Value="@OnlineMeetCalendarPharmacy.SurName" class="flex-fill"/>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="context" TItem="OnlineMeetCalendarPharmacy" Property="Email" Title="Email" Width="200px">
+                            <Template>
+                                @context.Email
+                            </Template>
+                            <EditTemplate>
+                                <RadzenTextBox Style="width: 100%" @bind-Value="@OnlineMeetCalendarPharmacy.Email"   class="flex-fill"/>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                      
+
+                        <RadzenDataGridColumn Context="context" TItem="OnlineMeetCalendarPharmacy" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="50px">
+                            <Template>
+                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" Click="@(() => AddOrUpdatePharmacy(context))" @onclick:stopPropagation="true"/>
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => RemovePharmacy(context))" @onclick:stopPropagation="true"/>
+                            </Template>
+                            @* <EditTemplate> *@
+                            @*     $1$ <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Small" Click="@(() => SaveDiscountCompanyCouponRow(companyCoupon))"/> #1# *@
+                            @*     $1$ <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => CancelDiscountCompanyCouponEdit(companyCoupon))"/> #1# *@
+                            @* </EditTemplate> *@
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+               
+            </RadzenTabsItem>
+        <RadzenTabsItem Visible="@recordShow"  Text="Toplantı Kayıtları">
+
+            <RadzenDataGrid @ref="radzenDataGridZoom"
+                            AllowFiltering="false"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="false"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="false"
+
+                            Data="@_recordingResponses"
+                            TItem="ZoomRecordingFile"
+                            ColumnWidth="300px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            PageSize="10">
+                <Columns>
+                      
+                    <RadzenDataGridColumn TItem="ZoomRecordingFile" Title="PlayUrl" Width="50px">
+                        <Template Context="data">
+                            <a href="@data.PlayUrl" target="_blank" download>
+                                Izle
+                            </a>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                       
+                    <RadzenDataGridColumn TItem="ZoomRecordingFile" Title="Tipi" Property="RecordingType" Width="100px"/>
+                    <RadzenDataGridColumn TItem="ZoomRecordingFile" Title="Size" Property="FileSize" Width="100px"/>
+
+
+
+                </Columns>
+            </RadzenDataGrid>
+             
+
+        </RadzenTabsItem>
+            <RadzenTabsItem Visible="@recordShow"  Text="Katılımcı Kayıtları">
+
+                <RadzenDataGrid @ref="radzenDataGridZoomCompnay"
+                                AllowFiltering="false"
+                                AllowColumnResize="true"
+                                AllowAlternatingRows="false"
+                                FilterMode="FilterMode.Advanced"
+                                AllowSorting="false"
+                                AllowPaging="true"
+                                PagerHorizontalAlign="HorizontalAlign.Left"
+                                ShowPagingSummary="false"
+
+                                Data="@_participantResponses"
+                                TItem="ZoomParticipantResponse"
+                                ColumnWidth="300px"
+                                LogicalFilterOperator="LogicalFilterOperator.Or"
+                                PageSize="10">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Id" Property="UserId" Width="50px"/>
+                        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Adı" Property="Name" Width="100px"/>
+                        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Email" Property="UserEmail" Width="100px"/>
+                        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Katılma Zamanı" Property="JoinTime" Width="100px"/>
+                        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Ayrılma Zamanı" Property="LeaveTime" Width="100px"/>
+                        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Süre (Dakika)" Property="DurationInMinutes" Width="100px"/>
+
+
+                    </Columns>
+                </RadzenDataGrid>
+
+
+            </RadzenTabsItem>
+        </Tabs>
+     
+    </RadzenTabs>
+   
+</div>

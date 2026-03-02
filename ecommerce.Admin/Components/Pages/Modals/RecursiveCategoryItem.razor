@@ -1,0 +1,304 @@
+@namespace ecommerce.Admin.Components.Pages.Modals
+@using ecommerce.Core.Entities
+@using Radzen
+@using Radzen.Blazor
+@using ecommerce.Admin.Domain.Interfaces
+@inject ICategoryService CategoryService
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+@{
+    var hasChildren = Category.SubCategories != null && Category.SubCategories.Any();
+    var isDragOverItem = DragState.IsDragOverItem(Category.Id);
+    var isDragOverTop = DragState.IsDragOverZone(Category.Id, "top");
+    var isDragOverBottom = DragState.IsDragOverZone(Category.Id, "bottom");
+}
+
+<style>
+    .menu-item-container {
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    .drop-zone {
+        height: 2px;
+        margin: 0;
+        z-index: 10;
+        position: relative;
+        transition: all 0.2s;
+        border-radius: 2px;
+    }
+
+    .drop-zone.active {
+        height: 24px;
+        background: rgba(var(--rz-primary-rgb), 0.1);
+        border: 2px dashed var(--rz-primary);
+        margin: 4px 0;
+    }
+    
+    .category-card {
+        padding: 4px 8px;
+        border: 1px solid var(--rz-border-color);
+        border-radius: 6px;
+        background: var(--rz-base-background-color);
+        margin-bottom: 2px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .category-card:hover {
+        border-color: var(--rz-primary-light);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transform: translateY(-1px);
+    }
+
+    .category-card.drag-over {
+        background-color: var(--rz-secondary-lighter);
+        border: 2px solid var(--rz-primary) !important;
+        transform: scale(1.02);
+    }
+    
+    .category-card[draggable="true"] {
+        cursor: grab;
+    }
+    .category-card[draggable="true"]:active {
+        cursor: grabbing;
+    }
+
+    /* Tree View Lines */
+    .category-children {
+        margin-left: 24px;
+        padding-left: 0;
+        border-left: 2px dashed var(--rz-border-color);
+        position: relative;
+    }
+    
+    .category-item-wrapper {
+        position: relative;
+    }
+
+    /* Horizontal connection line for items */
+    .category-item-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 18px; /* Center of the card roughly */
+        left: -24px; /* Should reach the parent border */
+        width: 24px;
+        height: 2px;
+        border-top: 2px dashed var(--rz-border-color);
+        display: none; /* Only for children */
+    }
+
+    /* Only show connection line if inside children container (Level > 0) */
+    .category-children > .category-item-wrapper::before {
+        display: block;
+    }
+</style>
+
+<!-- Top Drop Zone -->
+<div class="drop-zone @(isDragOverTop ? "active" : "")"
+     @ondragenter="@(args => HandleDragEnterZone(args, "top"))"
+     @ondragleave="@(args => HandleDragLeaveZone(args, "top"))"
+     @ondragover="HandleDragOverZone"
+     @ondragover:preventDefault="true"
+     @ondrop="@(args => HandleDropZone(args, "top"))">
+</div>
+
+<div class="category-item-wrapper menu-item-container @(isDragOverItem ? "drag-over" : "")">
+    <div class="category-card @(isDragOverItem ? "drag-over" : "")"
+         draggable="true"
+         @ondragstart="@(args => HandleDragStart(args))"
+         @ondragover="@(args => HandleDragOverItem(args))"
+         @ondragover:preventDefault="true"
+         @ondragleave="@HandleDragLeaveItem"
+         @ondrop="@HandleDropOnItem">
+         
+        <div class="d-flex align-items-center" style="flex: 1;">
+            
+            @if (hasChildren)
+            {
+                <div @onclick:stopPropagation="true" @onclick="ToggleExpand" 
+                     class="d-flex align-items-center justify-content-center me-2" 
+                     style="width: 18px; height: 18px; cursor: pointer; border-radius: 4px; transition: background 0.2s;">
+                    <RadzenIcon Icon="@(IsExpanded ? "expand_more" : "chevron_right")" 
+                               style="color: var(--rz-text-secondary-color); font-size: 1.1rem;" />
+                </div>
+            }
+            else
+            {
+                <div style="width: 26px;"></div> <!-- Spacer -->
+            }
+
+            <div class="d-flex align-items-center justify-content-center me-2" 
+                 style="width: 24px; height: 24px; background: var(--rz-base-200); border-radius: 6px;">
+                <RadzenIcon Icon="@(hasChildren ? "folder_open" : "folder")" 
+                           style="@(hasChildren ? "color: var(--rz-primary); font-size: 14px;" : "color: var(--rz-text-disabled-color); font-size: 14px;")" />
+            </div>
+            
+            <div class="d-flex flex-column" @onclick="ToggleExpand" style="cursor: pointer;">
+                <span style="font-weight: 600; color: var(--rz-text-title-color); font-size: 0.85rem; line-height: 1.1;">
+                    @Category.Name
+                </span>
+                @if(Category.ParentId == null) {
+                     <span style="font-size: 0.65rem; color: var(--rz-text-disabled-color); font-weight: 500;">Ana Kategori</span>
+                }
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-1 opacity-50 hover-opacity-100" style="transition: opacity 0.2s;">
+             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small" Click="@(args => OnEdit.InvokeAsync(Category))" @onclick:stopPropagation="true" />
+             <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Text" Size="ButtonSize.Small" Click="@(args => OnDelete.InvokeAsync(Category))" @onclick:stopPropagation="true" />
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Drop Zone -->
+<div class="drop-zone @(isDragOverBottom ? "active" : "")"
+     @ondragenter="@(args => HandleDragEnterZone(args, "bottom"))"
+     @ondragleave="@(args => HandleDragLeaveZone(args, "bottom"))"
+     @ondragover="HandleDragOverZone"
+     @ondragover:preventDefault="true"
+     @ondrop="@(args => HandleDropZone(args, "bottom"))">
+</div>
+
+@if (hasChildren)
+{
+    var sortedChildren = Category.SubCategories.OrderBy(x => x.Order).ThenBy(x => x.Id).ToList();
+    
+    if (IsExpanded)
+    {
+        <div class="category-children">
+            @foreach(var child in sortedChildren)
+            {
+                <RecursiveCategoryItem Category="@child" Level="@(Level + 1)" Index="@sortedChildren.IndexOf(child)" OnEdit="@OnEdit" OnDelete="@OnDelete" OnStructureChanged="@OnStructureChanged" />
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public Category Category { get; set; } = default!;
+    [Parameter] public int Level { get; set; } = 0;
+    [Parameter] public int Index { get; set; } = 0;
+    [Parameter] public EventCallback<Category> OnEdit { get; set; }
+    [Parameter] public EventCallback<Category> OnDelete { get; set; }
+    [Parameter] public EventCallback OnStructureChanged { get; set; }
+
+    private bool IsExpanded { get; set; }
+
+    protected override void OnInitialized()
+    {
+        // Default expand top level items, collapse others
+        IsExpanded = Level == 0;
+    }
+
+    private void ToggleExpand()
+    {
+        IsExpanded = !IsExpanded;
+    }
+
+    // Static State helper
+    public static class DragState 
+    {
+        public static int? DraggedId { get; set; }
+        public static int? OverItemId { get; set; }
+        public static string? OverZone { get; set; } 
+        public static int? OverZoneId { get; set; }
+
+        public static bool IsDragOverItem(int id) => OverItemId == id;
+        public static bool IsDragOverZone(int id, string zone) => OverZoneId == id && OverZone == zone;
+    }
+
+    private void HandleDragStart(DragEventArgs args)
+    {
+        DragState.DraggedId = Category.Id;
+        args.DataTransfer.EffectAllowed = "move";
+    }
+
+    private void HandleDragOverItem(DragEventArgs args)
+    {
+        if (DragState.DraggedId == null || DragState.DraggedId == Category.Id) return;
+        
+        DragState.OverItemId = Category.Id;
+        DragState.OverZone = null;
+        DragState.OverZoneId = null;
+        
+        args.DataTransfer.DropEffect = "move";
+    }
+
+    private void HandleDragLeaveItem()
+    {
+        if (DragState.OverItemId == Category.Id)
+            DragState.OverItemId = null;
+    }
+
+    private async Task HandleDropOnItem()
+    {
+        DragState.OverItemId = null;
+        if (DragState.DraggedId == null || DragState.DraggedId == Category.Id) return;
+
+        // Nest dragged item under this category
+        await UpdateLocation(DragState.DraggedId.Value, Category.Id, 999); 
+    }
+
+    private void HandleDragEnterZone(DragEventArgs args, string zone)
+    {
+        if (DragState.DraggedId == null || DragState.DraggedId == Category.Id) return;
+        
+        DragState.OverZone = zone;
+        DragState.OverZoneId = Category.Id;
+        DragState.OverItemId = null;
+    }
+    
+    private void HandleDragOverZone(DragEventArgs args)
+    {
+        if (DragState.DraggedId == null || DragState.DraggedId == Category.Id) return;
+        args.DataTransfer.DropEffect = "move";
+    }
+
+    private void HandleDragLeaveZone(DragEventArgs args, string zone)
+    {
+        if (DragState.OverZoneId == Category.Id && DragState.OverZone == zone)
+        {
+             DragState.OverZone = null;
+             DragState.OverZoneId = null;
+        }
+    }
+
+    private async Task HandleDropZone(DragEventArgs args, string zone)
+    {
+        DragState.OverZone = null;
+        DragState.OverZoneId = null;
+        
+        if (DragState.DraggedId == null || DragState.DraggedId == Category.Id) return;
+
+        var draggedId = DragState.DraggedId.Value;
+        
+        int targetIndex = Index;
+        if (zone == "bottom") targetIndex++; 
+        // Logic fix: if dropping to bottom of an item that is implicitly index+1 in the current list
+        
+        // Use parentId of the current category (target of drop zone)
+        await UpdateLocation(draggedId, Category.ParentId, targetIndex);
+    }
+    
+    private async Task UpdateLocation(int id, int? parentId, int order)
+    {
+         var result = await CategoryService.UpdateCategoryLocation(id, parentId, order);
+        
+        if (result.Ok)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Kategori taşındı");
+            DragState.DraggedId = null;
+            await OnStructureChanged.InvokeAsync();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Hata", result.Metadata?.Message ?? "İşlem başarısız");
+            DragState.DraggedId = null;
+        }
+    }
+}

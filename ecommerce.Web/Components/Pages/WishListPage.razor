@@ -1,0 +1,73 @@
+@page "/wishlist"
+
+@using ecommerce.Domain.Shared.Dtos.Product
+
+<!-- Desktop Breadcrumb -->
+<section class="breadcrumb-section pt-0 d-none d-md-block">
+    <div class="container-fluid-lg">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-contain">
+                    <h2>@lang["WishlistPage"]</h2>
+                    <nav>
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="/">
+                                    <i class="fa-solid fa-house"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@lang["WishlistPage"]</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Desktop & Mobile Wishlist Section (ProductComponent handles responsive design) -->
+<section class="wishlist-section section-b-space">
+    <div class="container-fluid-lg">
+        @if (!favoritesLoaded)
+        {
+            <div class="row g-sm-4 g-3">
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">@lang["Wishlist.Loading"]</p>
+                </div>
+            </div>
+        }
+        else if (FavoriteProducts != null && FavoriteProducts.Any())
+        {
+            <!-- Favorites grid with proper row class -->
+            <div class="row g-sm-4 g-3 row-cols-xxl-4 row-cols-xl-3 row-cols-lg-2 row-cols-md-3 row-cols-2">
+                <ecommerce.Web.Components.Pages.Components.ProductComponent FavoriteProducts="@FavoriteProducts" CartResult="@CartResult" OnFavoriteChanged="() => LoadFavorites(false)" />
+            </div>
+        }
+        else
+        {
+            <div class="row g-sm-4 g-3">
+                <div class="col-12 text-center py-5">
+                    <div class="empty-wishlist-modern">
+                        <div class="empty-wishlist-icon">
+                            <i class="fa-regular fa-heart fa-4x text-muted mb-4"></i>
+                        </div>
+                        <h3 class="empty-wishlist-title">@lang["WishlistNoFavoritesFound"]</h3>
+                        <p class="empty-wishlist-text mb-4">@lang["Wishlist.Empty"]</p>
+                        <a href="/" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-shopping-bag me-2"></i>
+                            @lang["Cart.StartShopping"]
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (TotalPages > 1)
+        {
+            <PagingComponent TItem="ProductElasticDto"
+                             CurrentPage="@CurrentPage"
+                             TotalPages="@TotalPages"
+                             OnPageChanged="OnPageChanged" />
+        }
+    </div>
+</section>

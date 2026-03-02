@@ -1,0 +1,152 @@
+@page "/cash-register-movements"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+
+<PageTitle>Kasa Hareketlerim</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0 text-gray-800">Kasa Hareketlerim</h1>
+        </div>
+        <div class="col text-end">
+            <RadzenButton Icon="account_balance_wallet" Text="Kasa Bakiyeleri" Click="@OpenBalanceModal" ButtonStyle="ButtonStyle.Secondary" class="me-2" />
+            <RadzenButton Icon="swap_horiz" Text="Kasalar Arası Virman" Click="@OpenTransferModal" ButtonStyle="ButtonStyle.Secondary" class="me-2" />
+            <RadzenButton Icon="add" Text="Yeni Kasa Hareketi" Click="@AddClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 shadow-sm">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            <RadzenDropDown @bind-Value="FilterCashRegisterId"
+                            Data="CashRegisterList"
+                            TextProperty="Name"
+                            ValueProperty="Id"
+                            Placeholder="Tüm Kasalar"
+                            AllowClear="true"
+                            AllowFiltering="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="min-width: 220px;"
+                            Loading="@CashRegistersLoading"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDropDown @bind-Value="FilterMovementType"
+                            Data="MovementTypeOptions"
+                            TextProperty="Text"
+                            ValueProperty="Value"
+                            Placeholder="Tüm Tipler"
+                            AllowClear="true"
+                            Style="min-width: 160px;"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDropDown @bind-Value="FilterCustomerId"
+                            Data="CustomerList"
+                            TextProperty="DisplayName"
+                            ValueProperty="Id"
+                            Placeholder="Tüm Cariler"
+                            AllowClear="true"
+                            AllowFiltering="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="min-width: 260px;"
+                            Loading="@CustomersLoading"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDatePicker @bind-Value="FilterStartDate"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Başlangıç"
+                              Style="min-width: 150px;" />
+            <RadzenDatePicker @bind-Value="FilterEndDate"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Bitiş"
+                              Style="min-width: 150px;" />
+            <RadzenButton Text="Filtrele" ButtonStyle="ButtonStyle.Primary" Icon="filter" Click="ApplyFilter" />
+            <label class="d-flex align-items-center gap-2 mb-0">
+                <RadzenCheckBox @bind-Value="GroupByKasa" Change="@(async (bool _) => await ApplyFilter())" />
+                <span class="small">Kasaya göre grupla</span>
+            </label>
+            @if (FilterCashRegisterId.HasValue || FilterMovementType.HasValue || FilterCustomerId.HasValue || FilterStartDate.HasValue || FilterEndDate.HasValue)
+            {
+                <RadzenButton Text="Temizle" ButtonStyle="ButtonStyle.Light" Icon="close" Click="ClearFilter" />
+            }
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="Grid"
+                           TItem="CashRegisterMovementListDto"
+                           Data="@Items"
+                           Count="@Count"
+                           LoadData="@LoadData"
+                           AllowPaging="true"
+                           PageSize="25"
+                           AllowSorting="true"
+                           AllowGrouping="true"
+                           ShowGroupPanel="false"
+                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                           PagerHorizontalAlign="HorizontalAlign.Left"
+                           ShowPagingSummary="true"
+                           RowSelect="@OnRowSelect"
+                           SelectionMode="DataGridSelectionMode.Single"
+                           EmptyText="Kasa hareketi bulunamadı.">
+                <GroupHeaderTemplate>
+                    <div class="d-flex flex-wrap align-items-center gap-3 py-2 px-3 cash-group-header">
+                        <span class="fw-semibold">@(context.Data.Key?.ToString() ?? "")</span>
+                        <span class="badge bg-secondary rounded-pill">@context.Data.Count hareket</span>
+                        <span class="text-success small">Giriş: @(GetGroupTotalIn(context.Data.Key?.ToString()))</span>
+                        <span class="text-danger small">Çıkış: @(GetGroupTotalOut(context.Data.Key?.ToString()))</span>
+                        <span class="small fw-medium">Sayfa bakiyesi: @(GetGroupBalance(context.Data.Key?.ToString()))</span>
+                        @if (!string.IsNullOrEmpty(GetGroupSummaryText(context.Data.Key?.ToString())))
+                        {
+                            <span class="small @(GetGroupSummaryClass(context.Data.Key?.ToString()))">@(GetGroupSummaryText(context.Data.Key?.ToString()))</span>
+                        }
+                    </div>
+                </GroupHeaderTemplate>
+                <Columns>
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="Id" Title="Id" Width="70px" />
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="TransactionDate" Title="Tarih" Width="120px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="CashRegisterName" Title="Kasa" Width="140px" />
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Title="Tip" Width="110px">
+                        <Template Context="ctx">
+                            <span class="badge @(ctx.MovementType == CashRegisterMovementType.In ? "bg-success" : "bg-danger")">
+                                @ctx.MovementTypeName
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="CustomerName" Title="Cari" Width="180px">
+                        <Template Context="ctx">
+                            @(ctx.CustomerName ?? "-")
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="PaymentTypeName" Title="Ödeme Tipi" Width="120px">
+                        <Template Context="ctx">
+                            @(ctx.PaymentTypeName ?? "-")
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Title="Tutar" Width="130px" TextAlign="TextAlign.Right">
+                        <Template Context="ctx">
+                            @ctx.Amount.ToString("N2") @ctx.CurrencyCode
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="Description" Title="Açıklama" Width="200px">
+                        <Template Context="ctx">
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@(ctx.Description ?? "")">@(ctx.Description ?? "-")</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="ctx">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" Click="@(() => EditRow(ctx))" @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(() => DeleteRow(ctx))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cash-group-header {
+        background: linear-gradient(90deg, rgba(13, 110, 253, 0.1) 0%, rgba(255,255,255,0) 100%);
+        border-left: 4px solid var(--rz-primary, #0d6efd);
+    }
+</style>

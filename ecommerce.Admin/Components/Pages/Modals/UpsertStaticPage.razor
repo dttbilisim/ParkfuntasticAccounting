@@ -1,0 +1,110 @@
+@page "/upsert-staticpages"
+@using ecommerce.Admin.Domain.Dtos.StaticPageDto;
+@using ecommerce.Core.Helpers
+@attribute [Authorize]
+
+<PageTitle>Statik Sayfa İçeriği Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kayıt Edilemedi!</RadzenAlert>
+
+    <RadzenTemplateForm TItem="StaticPageUpsertDto" Data="@staticPage" Visible="@(staticPage != null)" Submit="@FormSubmit">
+
+        <div style="margin-bottom: 1rem" class="row">
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Sayfa Tipi" Component="StaticPageType" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDown Data="@staticPageTypes" style="display: block; width: 100%" @bind-Value="@staticPage.StaticPageType" Name="StaticPageType" 
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                </div>
+            </div>
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Url" Component="StaticPageUrl" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="staticPage.Url" Name="Url" />
+                </div>
+            </div>
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="İçerik" Component="Content" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                          <RadzenHtmlEditor @bind-Value="@staticPage.Content" style="height: 400px; width: 100%">
+                                                  <RadzenHtmlEditorUndo/>
+                                                  <RadzenHtmlEditorRedo/>
+                                                  <RadzenHtmlEditorSeparator/>
+                                                  <RadzenHtmlEditorBold/>
+                                                  <RadzenHtmlEditorItalic/>
+                                                  <RadzenHtmlEditorUnderline/>
+                                                  <RadzenHtmlEditorStrikeThrough/>
+                                                  <RadzenHtmlEditorSeparator/>
+                                                  <RadzenHtmlEditorAlignLeft/>
+                                                  <RadzenHtmlEditorAlignCenter/>
+                                                  <RadzenHtmlEditorAlignRight/>
+                                                  <RadzenHtmlEditorJustify/>
+                                                  <RadzenHtmlEditorSeparator/>
+                                                  <RadzenHtmlEditorIndent/>
+                                                  <RadzenHtmlEditorOutdent/>
+                                                  <RadzenHtmlEditorUnorderedList/>
+                                                  <RadzenHtmlEditorOrderedList/>
+                                                  <RadzenHtmlEditorSeparator/>
+                                                  <RadzenHtmlEditorColor/>
+                                                  <RadzenHtmlEditorBackground/>
+                                                  <RadzenHtmlEditorRemoveFormat/>
+                                                  <RadzenHtmlEditorSeparator/>
+                                                  <RadzenHtmlEditorSubscript/>
+                                                  <RadzenHtmlEditorSuperscript/>
+                                                  <RadzenHtmlEditorSeparator/>
+                                                  <RadzenHtmlEditorLink/>
+                                                  <RadzenHtmlEditorUnlink/>
+                                                  <RadzenHtmlEditorImage/>
+                                                  <RadzenHtmlEditorFontName/>
+                                                  <RadzenHtmlEditorFontSize/>
+                                                  <RadzenHtmlEditorFormatBlock/>
+                                                  <RadzenHtmlEditorSeparator/>
+                                                  <RadzenHtmlEditorSource/>
+                                              </RadzenHtmlEditor>
+                </div>
+            </div>
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Dosya" Component="File" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <InputFile OnChange="LoadFiles" class="mb-2" accept="image/jpg,image/png,image/jpeg" />
+                    @if (Id.HasValue)
+                    {
+                        <br />
+                        if(staticPage.Root != null){
+                            <RadzenImage Style="width: 75px;height: 75px" Path="@FileHelper.GetFileUrl(staticPage.Root)" Visible="@(staticPage.Root != null)" class="img-fluid"/>
+                        }
+
+                    }
+                </div>
+            </div>
+
+
+
+            <div style="margin-top:1rem; margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Durum" Component="Length" style="width: 100%" />
+                </div>
+                <div class="col-md-9">
+                    <RadzenCheckBox @bind-Value="@staticPage.StatusBool" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+

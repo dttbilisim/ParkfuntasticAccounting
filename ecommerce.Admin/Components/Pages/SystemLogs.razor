@@ -1,0 +1,92 @@
+@page "/logs"
+@using ecommerce.Admin.Services.Dtos.LogDto
+@using ecommerce.Admin.Services.Interfaces
+@inject ILogService LogService
+@rendermode InteractiveServer
+
+@layout MainLayout
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Components.Shared
+<PageTitle>Sistem Logları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Sistem Logları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="refresh" Click="@RefreshLogs" ButtonStyle="ButtonStyle.Light" />
+        </div>
+    </div>
+    
+    <RadzenCard class="mb-4 d-flex align-items-center gap-3 flex-wrap shadow-sm">
+        <div class="col-md-4">
+            <RadzenTextBox @bind-Value="searchTerm" Placeholder="Ara (Mesaj, Exception, Source)..." Change="@(args => OnSearch(args))" Class="w-100" />
+        </div>
+        <div class="col-md-3">
+             <RadzenDropDown @bind-Value="selectedApplication" Data="@applications" Change="@(args => OnApplicationChange())" Placeholder="Uygulama" Class="w-100" 
+                             AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+        </div>
+        <div class="col-md-3">
+             <RadzenDropDown @bind-Value="selectedLevel" Data="@logLevels" Change="@(args => OnLevelChange())" Placeholder="Log Seviyesi" Class="w-100" 
+                             AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="grid" 
+                            Data="@logs" 
+                            Count="@totalLogs" 
+                            LoadData="@LoadLogs" 
+                            AllowPaging="true" 
+                            PageSize="20" 
+                            AllowSorting="true" 
+                            TItem="LogDto" 
+                            IsLoading="@isLoading" 
+                            LoadingText="Yükleniyor..."
+                            EmptyText="Kayıt bulunamadı."
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true">
+                <Columns>
+                    <RadzenDataGridColumn TItem="LogDto" Property="Timestamp" Title="Tarih" Width="180px">
+                        <Template Context="log">
+                            @log.Timestamp.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LogDto" Property="Application" Title="Uygulama" Width="120px">
+                        <Template Context="log">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Secondary" Text="@log.Application" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LogDto" Property="PageUrl" Title="Sayfa" Width="200px">
+                        <Template Context="log">
+                            <span title="@log.PageUrl" style="font-size: 0.8em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
+                                @log.PageUrl
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LogDto" Property="Level" Title="Seviye" Width="100px">
+                        <Template Context="log">
+                            <RadzenBadge BadgeStyle="@GetBadgeStyle(log.Level)" Text="@log.Level" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LogDto" Property="Username" Title="Kullanıcı" Width="120px" />
+                    <RadzenDataGridColumn TItem="LogDto" Property="ClientIp" Title="IP" Width="120px" />
+                     <RadzenDataGridColumn TItem="LogDto" Property="Message" Title="Mesaj">
+                        <Template Context="log">
+                            <span title="@log.Message">@log.Message</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LogDto" Title="Detay" Width="80px" TextAlign="TextAlign.Center">
+                        <Template Context="log">
+                            <RadzenButton Icon="info" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.ExtraSmall" Click="@(() => ShowDetails(log))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

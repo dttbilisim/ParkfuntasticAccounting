@@ -1,0 +1,61 @@
+@using Blazored.Modal
+@using ecommerce.Web.Domain.Dtos.Cart
+@using I18NPortable
+
+@if (SelectedCargo?.Properties?.Any() == true)
+{
+    <div class="basket-cargoModal">
+        <div class="basket-cargoModal-header">
+            <span><i class="fas fa-truck me-2"></i>@Text("Cart.CargoDetailLink")</span>
+            <button type="button" class="basket-cargoModal-close" @onclick="CloseAsync">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <hr class="basket-cargoModal-divider" />
+
+        <div class="basket-cargoModal-desc">
+            @Text("Cart.CargoDetailDescription")
+        </div>
+
+        <div class="basket-cargoModal-grid">
+            @foreach (var cargoProperty in SelectedCargo.Properties)
+            {
+                <div class="basket-cargoModal-card">
+                    <i class="fas fa-box fa-lg"></i>
+                    <div class="basket-cargoModal-card-size">@cargoProperty.Size</div>
+                    <div class="basket-cargoModal-card-desc">@cargoProperty.DesiMinValue - @cargoProperty.DesiMaxValue @Text("Cart.CargoDetailDesi")</div>
+                    <div class="basket-cargoModal-card-price">@cargoProperty.Price.ToString("C")</div>
+                </div>
+            }
+        </div>
+
+        @if (SelectedCargo.CargoOverloadPrice > 0)
+        {
+            <div class="basket-cargoModal-card-info">
+                <i class="fas fa-circle-info me-2"></i>
+                @string.Format(Text("Cart.CargoDetailOverload"), SelectedCargo.CargoOverloadPrice.ToString("C"))
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter] public BlazoredModalInstance ModalInstance { get; set; } = null!;
+    [Parameter] public CartCargoDto SelectedCargo { get; set; } = null!;
+    [CascadingParameter] protected II18N lang { get; set; } = null!;
+
+    private Task CloseAsync() => ModalInstance.CloseAsync();
+
+    private string Text(string key)
+    {
+        try
+        {
+            var v = lang?[key];
+            if (!string.IsNullOrWhiteSpace(v) && v != key) return v;
+            v = I18N.Current?.Translate(key);
+            return string.IsNullOrWhiteSpace(v) ? key : v;
+        }
+        catch { return key; }
+    }
+}

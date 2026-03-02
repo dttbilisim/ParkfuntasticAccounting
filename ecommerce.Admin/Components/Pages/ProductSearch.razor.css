@@ -1,0 +1,292 @@
+/* =========================================
+   ProductSearch High-End SaaS Design System
+   ========================================= */
+
+.product-search-root {
+    --ps-bg: #f1f5f9;
+    /* Slate 100 */
+    --ps-primary: #10b981;
+    /* Emerald 500 */
+    --ps-primary-dark: #059669;
+    /* Emerald 600 */
+    --ps-primary-soft: #d1fae5;
+    /* Emerald 100 */
+    --ps-surface: #ffffff;
+    --ps-text-main: #0f172a;
+    /* Slate 900 */
+    --ps-text-muted: #64748b;
+    /* Slate 500 */
+    --ps-border: #e2e8f0;
+    /* Slate 200 */
+    --ps-shadow-main: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --ps-radius-lg: 1.5rem;
+    --ps-radius-full: 9999px;
+    --ps-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    background-color: var(--ps-bg);
+    min-height: 100vh;
+    padding-bottom: 3rem;
+    color: var(--ps-text-main);
+}
+
+/* Header Container */
+.product-search-header-outer {
+    background-color: transparent;
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+.product-search-header-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: var(--ps-surface);
+    border-radius: var(--ps-radius-lg);
+    box-shadow: var(--ps-shadow-main);
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Search Input Area */
+.search-box {
+    background: #f8fafc;
+    border: 2px solid var(--ps-border);
+    border-radius: var(--ps-radius-full);
+    padding: 0.5rem 0.5rem 0.5rem 1.75rem;
+    transition: var(--ps-transition);
+    display: flex;
+    align-items: center;
+}
+
+.search-box:focus-within {
+    background: white;
+    border-color: var(--ps-primary);
+    box-shadow: 0 0 0 4px var(--ps-primary-soft);
+}
+
+.search-input {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 1.15rem;
+    font-weight: 500;
+    height: 50px;
+    color: var(--ps-text-main);
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+}
+
+/* Redesigned Buttons */
+.btn-premium-search {
+    background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--ps-radius-full);
+    padding: 0 2rem;
+    height: 50px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: var(--ps-transition);
+}
+
+.btn-premium-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    filter: brightness(1.1);
+    color: white;
+}
+
+.btn-premium-secondary {
+    background: white;
+    color: var(--ps-primary-dark);
+    border: 2px solid var(--ps-primary);
+    border-radius: var(--ps-radius-full);
+    padding: 0.6rem 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: var(--ps-transition);
+}
+
+.btn-premium-secondary:hover {
+    background: var(--ps-primary-soft);
+    transform: translateY(-2px);
+}
+
+/* Toggle Chips as Segmented Controls */
+.toggles-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.toggle-chip {
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--ps-radius-full);
+    background: #f1f5f9;
+    border: 1px solid var(--ps-border);
+    color: var(--ps-text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--ps-transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toggle-chip:hover {
+    background: #e2e8f0;
+    color: var(--ps-text-main);
+}
+
+.toggle-chip.active {
+    background: var(--ps-primary);
+    color: white;
+    border-color: var(--ps-primary);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Welcome State - SaaS Style */
+.welcome-container {
+    max-width: 900px;
+    margin: 4rem auto;
+    text-align: center;
+}
+
+.welcome-card-premium {
+    background: white;
+    border-radius: 2rem;
+    padding: 4rem 2rem;
+    box-shadow: var(--ps-shadow-main);
+    border: 1px solid var(--ps-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(to right, var(--ps-primary), #06b6d4);
+}
+
+.welcome-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    background: var(--ps-primary-soft);
+    color: var(--ps-primary);
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 3rem;
+    transform: rotate(-10deg);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
+.feature-item {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--ps-border);
+    transition: var(--ps-transition);
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+    border-color: var(--ps-primary);
+    background: white;
+}
+
+.feature-item i {
+    font-size: 1.5rem;
+    color: var(--ps-primary);
+    margin-bottom: 1rem;
+}
+
+/* Main Content Area */
+.product-results-area {
+    margin-top: 2rem;
+}
+
+/* DataGrid Customization */
+::deep .rz-datagrid {
+    border-radius: var(--ps-radius-lg) !important;
+    overflow: hidden;
+    border: 1px solid var(--ps-border) !important;
+    box-shadow: var(--ps-shadow-main);
+}
+
+::deep .rz-grid-table thead th {
+    background: #f8fafc !important;
+    color: var(--ps-text-muted) !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 1.25rem !important;
+}
+
+/* Card View */
+.product-pill-card {
+    background: white;
+    border-radius: 1.25rem;
+    border: 1px solid var(--ps-border);
+    padding: 1.25rem;
+    transition: var(--ps-transition);
+    height: 100%;
+}
+
+.product-pill-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--ps-shadow-main);
+    border-color: var(--ps-primary-soft);
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.pointer-events-none {
+    pointer-events: none;
+}

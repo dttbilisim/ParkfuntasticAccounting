@@ -1,0 +1,42 @@
+  Determining projects to restore...
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-cfh4-9f7v-fhrc
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-fh55-q5pj-pxgw
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-hm4x-r5hc-794f
+  All projects are up-to-date for restore.
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-cfh4-9f7v-fhrc
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-fh55-q5pj-pxgw
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-hm4x-r5hc-794f
+  ecommerce.Iyzico.Payment -> /Users/sezgin/Repos/ecommerce/ecommerce.Iyzico.Payment/bin/Debug/net9.0/ecommerce.Iyzico.Payment.dll
+  ecommerce.Core -> /Users/sezgin/Repos/ecommerce/Common/ecommerce.Core/bin/Debug/net9.0/ecommerce.Core.dll
+  ecommerce.Virtual.Pos -> /Users/sezgin/Repos/ecommerce/ecommerce.Virtual.Pos/bin/Debug/net9.0/ecommerce.Virtual.Pos.dll
+  ecommerce.EFCore -> /Users/sezgin/Repos/ecommerce/Common/ecommerce.EFCore/bin/Debug/net9.0/ecommerce.EFCore.dll
+  ecommerce.Payments -> /Users/sezgin/Repos/ecommerce/ecommerce.Payments/bin/Debug/net9.0/ecommerce.Payments.dll
+  ecommerce.Domain.Shared -> /Users/sezgin/Repos/ecommerce/Common/ecommerce.Domain.Shared/bin/Debug/net9.0/ecommerce.Domain.Shared.dll
+  ecommerce.Cargo.Sendeo -> /Users/sezgin/Repos/ecommerce/ecommerce.Cargo.Sendeo/bin/Debug/net9.0/ecommerce.Cargo.Sendeo.dll
+  CurrencyAuto -> /Users/sezgin/Repos/ecommerce/CurrencyAuto/bin/Debug/net9.0/CurrencyAuto.dll
+  ecommerce.Cargo.Mng -> /Users/sezgin/Repos/ecommerce/ecommerce.Cargo.Mng/bin/Debug/net9.0/ecommerce.Cargo.Mng.dll
+  Otokoc -> /Users/sezgin/Repos/ecommerce/Otokoc/bin/Debug/net9.0/Otokoc.dll
+  Dot.Integration -> /Users/sezgin/Repos/ecommerce/Dot.Integration/bin/Debug/net9.0/Dot.Integration.dll
+  Telecom.Address -> /Users/sezgin/Repos/ecommerce/Telecom.Address/bin/Debug/net9.0/Telecom.Address.dll
+  ecommerce.Cargo.Yurtici -> /Users/sezgin/Repos/ecommerce/ecommerce.Cargo.Yurtici/bin/Debug/net9.0/ecommerce.Cargo.Yurtici.dll
+  ecommerce.Admin.Domain -> /Users/sezgin/Repos/ecommerce/ecommerce.Admin.Services/bin/Debug/net9.0/ecommerce.Admin.Domain.dll
+  BasbugOto -> /Users/sezgin/Repos/ecommerce/BasbugOto/bin/Debug/net9.0/BasbugOto.dll
+  Remar -> /Users/sezgin/Repos/ecommerce/Remar/bin/Debug/net9.0/Remar.dll
+  Dega -> /Users/sezgin/Repos/ecommerce/Dega/bin/Debug/net9.0/Dega.dll
+  OtoIsmail -> /Users/sezgin/Repos/ecommerce/OtoIsmail/bin/Debug/net9.0/OtoIsmail.dll
+  ecommerce.Web.Domain -> /Users/sezgin/Repos/ecommerce/ecommerce.Web.Domain/bin/Debug/net9.0/ecommerce.Web.Domain.dll
+  ImageDownload -> /Users/sezgin/Repos/ecommerce/ImageDownload/bin/Debug/net9.0/ImageDownload.dll
+  ecommerce.Admin -> /Users/sezgin/Repos/ecommerce/ecommerce.Admin/bin/Debug/net9.0/ecommerce.Admin.dll
+
+Build succeeded.
+
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-cfh4-9f7v-fhrc
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-fh55-q5pj-pxgw
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-hm4x-r5hc-794f
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-cfh4-9f7v-fhrc
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-fh55-q5pj-pxgw
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj : warning NU1901: Package 'Magick.NET-Q16-AnyCPU' 14.5.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-hm4x-r5hc-794f
+    6 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.76

@@ -1,0 +1,384 @@
+/* 
+ * Mor-Pembe-Fuşya-Altın Tema
+ * Mobil uygulama ile uyumlu renk paleti
+ */
+
+:root {
+    /* Mor tonları - Ana renkler */
+    --purple-50: #F3E5F5;
+    --purple-100: #E1BEE7;
+    --purple-200: #CE93D8;
+    --purple-300: #BA68C8;
+    --purple-400: #AB47BC;
+    --purple-500: #9C27B0;
+    --purple-600: #8E24AA;
+    --purple-700: #7B1FA2;
+    --purple-800: #6A1B9A;
+    --purple-900: #4A148C;
+    
+    /* Altın sarısı aksanlar */
+    --gold-50: #FFF8E1;
+    --gold-100: #FFECB3;
+    --gold-200: #FFE082;
+    --gold-300: #FFD54F;
+    --gold-400: #FFCA28;
+    --gold-500: #FFC107;
+    --gold-600: #FFB300;
+    --gold-700: #FFA000;
+    --gold-800: #FF8F00;
+    --gold-900: #FF6F00;
+    
+    /* Pembe-Fuşya aksanlar */
+    --pink-50: #FCE4EC;
+    --pink-100: #F8BBD0;
+    --pink-200: #F48FB1;
+    --pink-300: #F06292;
+    --pink-400: #EC407A;
+    --pink-500: #E91E63;
+    --pink-600: #D81B60;
+    --pink-700: #C2185B;
+    --pink-800: #AD1457;
+    --pink-900: #880E4F;
+    
+    /* Ana tema renkleri */
+    --primary-color: var(--purple-500);
+    --primary-hover: var(--purple-600);
+    --primary-active: var(--purple-700);
+    --accent-color: var(--gold-500);
+    --accent-hover: var(--gold-600);
+    --secondary-color: var(--pink-500);
+    --secondary-hover: var(--pink-600);
+}
+
+/* Sidebar - Mor gradient arka plan */
+.rz-sidebar {
+    background: linear-gradient(180deg, var(--purple-700) 0%, var(--purple-900) 100%) !important;
+}
+
+/* Sidebar menü öğeleri */
+.rz-sidebar .rz-panel-menu-item-text,
+.rz-sidebar .rz-navigation-item-text {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.rz-sidebar .rz-panel-menu-item:hover .rz-panel-menu-item-text {
+    color: var(--gold-300) !important;
+}
+
+.rz-sidebar .rz-panel-menu-item.rz-state-active .rz-panel-menu-item-text,
+.rz-sidebar .rz-panel-menu-item.rz-state-selected .rz-panel-menu-item-text {
+    color: var(--gold-400) !important;
+    font-weight: 600 !important;
+}
+
+/* Header - Mor tonları */
+.rz-header {
+    background: linear-gradient(90deg, var(--purple-600) 0%, var(--purple-700) 100%) !important;
+    color: white !important;
+}
+
+/* Primary butonlar - Mor */
+.btn-primary,
+.rz-button-primary {
+    background: linear-gradient(135deg, var(--purple-500) 0%, var(--purple-600) 100%) !important;
+    border-color: var(--purple-600) !important;
+    color: white !important;
+}
+
+.btn-primary:hover,
+.rz-button-primary:hover {
+    background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-700) 100%) !important;
+    border-color: var(--purple-700) !important;
+    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3) !important;
+}
+
+/* Success butonlar - Altın sarısı */
+.btn-success,
+.rz-button-success {
+    background: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-600) 100%) !important;
+    border-color: var(--gold-600) !important;
+    color: #1e293b !important;
+    font-weight: 600 !important;
+}
+
+.btn-success:hover,
+.rz-button-success:hover {
+    background: linear-gradient(135deg, var(--gold-600) 0%, var(--gold-700) 100%) !important;
+    border-color: var(--gold-700) !important;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4) !important;
+}
+
+/* Info butonlar - Pembe-Fuşya */
+.btn-info,
+.rz-button-info {
+    background: linear-gradient(135deg, var(--pink-500) 0%, var(--pink-600) 100%) !important;
+    border-color: var(--pink-600) !important;
+    color: white !important;
+}
+
+.btn-info:hover,
+.rz-button-info:hover {
+    background: linear-gradient(135deg, var(--pink-600) 0%, var(--pink-700) 100%) !important;
+    border-color: var(--pink-700) !important;
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3) !important;
+}
+
+/* Linkler - Mor */
+a {
+    color: var(--purple-600) !important;
+}
+
+a:hover {
+    color: var(--purple-700) !important;
+}
+
+/* Badge'ler */
+.badge-primary,
+.rz-badge-primary {
+    background-color: var(--purple-500) !important;
+    color: white !important;
+}
+
+.badge-success,
+.rz-badge-success {
+    background-color: var(--gold-600) !important;
+    color: #1e293b !important;
+}
+
+.badge-info,
+.rz-badge-info {
+    background-color: var(--pink-500) !important;
+    color: white !important;
+}
+
+/* Kartlar - Hafif mor arka plan */
+.rz-card {
+    border: 1px solid var(--purple-100) !important;
+    background-color: #ffffff !important;
+}
+
+.rz-card-header {
+    background: linear-gradient(135deg, var(--purple-50) 0%, var(--purple-100) 100%) !important;
+    border-bottom: 2px solid var(--purple-200) !important;
+    color: var(--purple-900) !important;
+}
+
+/* DataGrid header - Mor tonları */
+.rz-datagrid thead th,
+.rz-datagrid-header th {
+    background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-700) 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* DataGrid hover */
+.rz-datagrid tbody tr:hover {
+    background-color: var(--purple-50) !important;
+}
+
+/* DataGrid seçili satır */
+.rz-datagrid tbody tr.rz-state-selected {
+    background-color: var(--purple-100) !important;
+}
+
+/* Input focus - Mor border */
+.rz-inputtext:focus,
+.rz-textbox:focus,
+.rz-dropdown:focus,
+.rz-multiselect:focus {
+    border-color: var(--purple-500) !important;
+    box-shadow: 0 0 0 0.2rem rgba(156, 39, 176, 0.25) !important;
+}
+
+/* Checkbox ve Radio - Mor */
+.rz-chkbox-box.rz-state-active,
+.rz-radiobutton-box.rz-state-active {
+    background-color: var(--purple-500) !important;
+    border-color: var(--purple-500) !important;
+}
+
+/* Progress bar - Mor gradient */
+.rz-progressbar-value {
+    background: linear-gradient(90deg, var(--purple-500) 0%, var(--purple-600) 100%) !important;
+}
+
+/* Tabs - Mor aksanlar */
+.rz-tabview-nav li.rz-state-active a {
+    border-bottom: 3px solid var(--purple-500) !important;
+    color: var(--purple-700) !important;
+    font-weight: 600 !important;
+}
+
+.rz-tabview-nav li a:hover {
+    color: var(--purple-600) !important;
+}
+
+/* Pagination - Mor */
+.rz-paginator .rz-paginator-page.rz-state-active {
+    background-color: var(--purple-500) !important;
+    border-color: var(--purple-500) !important;
+    color: white !important;
+}
+
+.rz-paginator .rz-paginator-page:hover {
+    background-color: var(--purple-100) !important;
+    color: var(--purple-700) !important;
+}
+
+/* Dropdown panel - Mor aksanlar */
+.rz-dropdown-panel .rz-dropdown-item.rz-state-highlight {
+    background-color: var(--purple-100) !important;
+    color: var(--purple-900) !important;
+}
+
+/* Scrollbar - Mor */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--purple-500) 0%, var(--purple-600) 100%) !important;
+    border-radius: 5px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--purple-600) 0%, var(--purple-700) 100%) !important;
+}
+
+/* Loading spinner - Mor */
+.loading-progress circle:last-child {
+    stroke: var(--purple-500) !important;
+}
+
+/* Tooltip - Mor arka plan */
+.rz-tooltip,
+.rz-popup.rz-tooltip {
+    background-color: var(--purple-700) !important;
+    color: white !important;
+}
+
+.rz-tooltip-arrow::before {
+    border-top-color: var(--purple-700) !important;
+}
+
+/* Notification - Altın sarısı aksanlar */
+.rz-notification-success {
+    background-color: var(--gold-50) !important;
+    border-left: 4px solid var(--gold-600) !important;
+    color: #1e293b !important;
+}
+
+.rz-notification-info {
+    background-color: var(--purple-50) !important;
+    border-left: 4px solid var(--purple-600) !important;
+    color: var(--purple-900) !important;
+}
+
+/* Dialog header - Mor gradient */
+.rz-dialog-header {
+    background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-700) 100%) !important;
+    color: white !important;
+}
+
+/* Fieldset legend - Mor */
+.rz-fieldset-legend {
+    background-color: var(--purple-500) !important;
+    color: white !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 4px !important;
+}
+
+/* Panel header - Mor tonları */
+.rz-panel-header {
+    background: linear-gradient(135deg, var(--purple-100) 0%, var(--purple-200) 100%) !important;
+    color: var(--purple-900) !important;
+    font-weight: 600 !important;
+}
+
+/* Accordion - Mor aksanlar */
+.rz-accordion-header.rz-state-active {
+    background-color: var(--purple-100) !important;
+    color: var(--purple-900) !important;
+}
+
+/* Menu items hover - Altın sarısı */
+.rz-menu-item:hover {
+    background-color: var(--gold-50) !important;
+    color: var(--purple-900) !important;
+}
+
+/* Chips - Mor ve altın kombinasyonu */
+.rz-chip {
+    background-color: var(--purple-100) !important;
+    color: var(--purple-900) !important;
+}
+
+.rz-chip-remove-icon:hover {
+    background-color: var(--pink-500) !important;
+    color: white !important;
+}
+
+/* Rating - Altın yıldızlar */
+.rz-rating-icon.rz-state-active {
+    color: var(--gold-500) !important;
+}
+
+/* Slider - Mor */
+.rz-slider-handle {
+    background-color: var(--purple-500) !important;
+    border-color: var(--purple-600) !important;
+}
+
+.rz-slider-range {
+    background-color: var(--purple-400) !important;
+}
+
+/* Steps - Mor progression */
+.rz-steps-item.rz-state-highlight .rz-steps-number {
+    background-color: var(--purple-500) !important;
+    border-color: var(--purple-500) !important;
+    color: white !important;
+}
+
+/* Timeline - Mor çizgi */
+.rz-timeline-event-marker {
+    background-color: var(--purple-500) !important;
+    border-color: var(--purple-600) !important;
+}
+
+/* Tree - Mor seçim */
+.rz-tree-node.rz-state-selected {
+    background-color: var(--purple-100) !important;
+    color: var(--purple-900) !important;
+}
+
+/* Özel gradient butonlar */
+.btn-gradient-purple {
+    background: linear-gradient(135deg, var(--purple-500) 0%, var(--pink-500) 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-gradient-purple:hover {
+    background: linear-gradient(135deg, var(--purple-600) 0%, var(--pink-600) 100%) !important;
+    box-shadow: 0 6px 16px rgba(156, 39, 176, 0.4) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.btn-gradient-gold {
+    background: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-700) 100%) !important;
+    border: none !important;
+    color: #1e293b !important;
+    font-weight: 600 !important;
+}
+
+.btn-gradient-gold:hover {
+    background: linear-gradient(135deg, var(--gold-600) 0%, var(--gold-800) 100%) !important;
+    box-shadow: 0 6px 16px rgba(255, 193, 7, 0.5) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Footer - Mor gradient */
+.footer-bar {
+    background: linear-gradient(90deg, var(--purple-800) 0%, var(--purple-900) 100%) !important;
+    color: white !important;
+}

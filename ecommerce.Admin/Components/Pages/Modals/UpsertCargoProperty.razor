@@ -1,0 +1,50 @@
+﻿@page "/upsert-cargoproperty"
+@using ecommerce.Admin.Domain.Dtos.CargoPropertyDto;
+@attribute [Authorize]
+
+<PageTitle>Kategori Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kategori Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="CargoPropertyUpsertDto" Data="@cargoProperty" Visible="@(cargoProperty != null)" Submit="@FormSubmit">
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Ölçü" Component="Name" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cargoProperty.Size" Name="Size"/>
+                <RadzenRequiredValidator Component="Size" Text="Ölçü Adı Girmelisiniz" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Desi Aralığı" Component="Name" style="width: 100%"/>
+            </div>
+            <div class="col-md-4">
+                <RadzenNumeric Min="0" style="display: block; width: 100%" @bind-Value="@cargoProperty.DesiMinValue" Name="DesiMinValue"/>
+            </div>
+            <div class="col-md-4">
+                <RadzenNumeric Min="0" style="display: block; width: 100%" @bind-Value="@cargoProperty.DesiMaxValue" Name="DesiMaxValue"/>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Ekstra Fiyat" Component="ExtraPrice" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@cargoProperty.Price" Name="Price" Format="c"/>
+                <RadzenRequiredValidator Component="Price" Text="Fiyat Girmelisiniz"/>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

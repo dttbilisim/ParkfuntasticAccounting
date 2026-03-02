@@ -1,0 +1,9 @@
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Services/Concreate/DashboardCacheService.cs(110,68): error CS1061: 'DbSet<Orders>' does not contain a definition for 'IgnoreQueryFilters' and no accessible extension method 'IgnoreQueryFilters' accepting a first argument of type 'DbSet<Orders>' could be found (are you missing a using directive or an assembly reference?) [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Services/Concreate/DashboardCacheService.cs(111,73): error CS1061: 'DbSet<Orders>' does not contain a definition for 'CountAsync' and no accessible extension method 'CountAsync' accepting a first argument of type 'DbSet<Orders>' could be found (are you missing a using directive or an assembly reference?) [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Services/Concreate/DashboardCacheService.cs(117,71): error CS1061: 'DbSet<Orders>' does not contain a definition for 'IgnoreQueryFilters' and no accessible extension method 'IgnoreQueryFilters' accepting a first argument of type 'DbSet<Orders>' could be found (are you missing a using directive or an assembly reference?) [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+
+Build FAILED.
+    1910 Warning(s)
+    3 Error(s)
+
+Time Elapsed 00:00:09.94

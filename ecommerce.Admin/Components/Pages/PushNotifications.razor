@@ -1,0 +1,471 @@
+@page "/push-notifications"
+@rendermode InteractiveServer
+@using ecommerce.Core.Entities
+@using ecommerce.Core.Entities.Authentication
+@using ecommerce.Admin.Services
+@using ecommerce.Admin.Services.Interfaces
+@using ecommerce.Core.BackgroundJobs
+@inject IPushNotificationPageService PushNotificationPageService
+@inject IHangfireJobManager HangfireJobManager
+@inject AuthenticationService Security
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<PageTitle>Push Bildirimler</PageTitle>
+
+<style>
+    .page-header { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .page-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: #333; }
+    .form-panel { background: #fff; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .history-panel { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .modern-grid-table { border-radius: 12px; overflow: hidden; border: 1px solid #eee !important; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .stat-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+    .stat-success { background: #e8f5e9; color: #2e7d32; }
+    .stat-fail { background: #ffebee; color: #c62828; }
+    .stat-total { background: #e3f2fd; color: #1565c0; }
+</style>
+
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="page-header">
+        <div class="d-flex align-items-center">
+            <RadzenIcon Icon="notifications_active" Style="font-size: 2rem; color: var(--rz-primary); margin-right: 1rem;" />
+            <h3 class="page-title">Push Bildirimler</h3>
+        </div>
+    </div>
+
+    <!-- Bildirim Gönderim Formu -->
+    <div class="form-panel">
+        <h5 class="mb-3">
+            <RadzenIcon Icon="send" Style="margin-right: 0.5rem;" />
+            Bildirim Gönder
+        </h5>
+
+        <div class="row gx-3 gy-3">
+            <!-- Başlık -->
+            <div class="col-md-6">
+                <RadzenLabel Text="Başlık" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                <RadzenTextBox @bind-Value="@notificationTitle" Placeholder="Bildirim başlığını girin..." class="w-100" MaxLength="200" />
+            </div>
+
+            <!-- Hedef Kitle -->
+            <div class="col-md-3">
+                <RadzenLabel Text="Hedef Kitle" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                <RadzenDropDown TValue="string" Data="@audienceOptions" TextProperty="Text" ValueProperty="Value"
+                                @bind-Value="@selectedAudience" class="w-100"
+                                Change="@OnAudienceChanged" />
+            </div>
+
+            <!-- Deep Link Tipi -->
+            <div class="col-md-3">
+                <RadzenLabel Text="Deep Link Hedefi" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                <RadzenDropDown TValue="string" Data="@deepLinkTypeOptions" TextProperty="Text" ValueProperty="Value"
+                                @bind-Value="@selectedDeepLinkType" class="w-100"
+                                Change="@OnDeepLinkTypeChanged" />
+            </div>
+
+            <!-- Mesaj -->
+            <div class="col-md-6">
+                <RadzenLabel Text="Mesaj" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                <RadzenTextArea @bind-Value="@notificationBody" Placeholder="Bildirim mesajını girin..." class="w-100" Rows="3" />
+            </div>
+
+            <!-- Deep Link Seçici — tipe göre dinamik -->
+            <div class="col-md-3">
+                @if (selectedDeepLinkType == "product" || selectedDeepLinkType == "category" || selectedDeepLinkType == "brand")
+                {
+                    <RadzenLabel Text="@GetDeepLinkPickerLabel()" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                    <RadzenDropDownDataGrid TValue="int?" @bind-Value="@selectedDeepLinkItemId"
+                                            Data="@deepLinkItems" TextProperty="Name" ValueProperty="Id"
+                                            AllowFiltering="true" AllowClear="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            Placeholder="@GetDeepLinkPickerPlaceholder()"
+                                            LoadData="@OnDeepLinkItemSearch" class="w-100"
+                                            Change="@OnDeepLinkItemSelected"
+                                            MinLength="2">
+                        <Columns>
+                            <RadzenDropDownDataGridColumn Property="Name" Title="Ad" />
+                        </Columns>
+                    </RadzenDropDownDataGrid>
+                }
+                else if (selectedDeepLinkType == "campaign")
+                {
+                    <RadzenLabel Text="Kampanya Seç" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                    <RadzenDropDownDataGrid TValue="int?" @bind-Value="@selectedCampaignId"
+                                            Data="@deepLinkCampaigns" TextProperty="Name" ValueProperty="Id"
+                                            AllowFiltering="true" AllowClear="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            Placeholder="Kampanya adı ile arayın..."
+                                            LoadData="@OnCampaignSearch" class="w-100"
+                                            Change="@OnCampaignSelected"
+                                            MinLength="1">
+                        <Columns>
+                            <RadzenDropDownDataGridColumn Property="Name" Title="Kampanya Adı" />
+                        </Columns>
+                    </RadzenDropDownDataGrid>
+                }
+                else if (selectedDeepLinkType == "custom")
+                {
+                    <RadzenLabel Text="Özel Deep Link URL" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                    <RadzenTextBox @bind-Value="@deepLinkUrl" Placeholder="bicops://products" class="w-100" />
+                }
+            </div>
+
+            <!-- Oluşturulan Deep Link Önizleme -->
+            <div class="col-md-3">
+                @if (!string.IsNullOrEmpty(deepLinkUrl) && selectedDeepLinkType != "custom")
+                {
+                    <RadzenLabel Text="Oluşturulan Link" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                    <RadzenTextBox Value="@deepLinkUrl" class="w-100" ReadOnly="true" Style="background: #f5f5f5; font-size: 0.8rem;" />
+                }
+            </div>
+
+            <!-- Belirli Kullanıcı Seçimi (sadece "specific" seçildiğinde görünür) -->
+            <div class="col-md-3">
+                @if (selectedAudience == "specific")
+                {
+                    <RadzenLabel Text="Kullanıcı Seç" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                    <RadzenDropDownDataGrid TValue="int?" @bind-Value="@selectedUserId"
+                                            Data="@filteredUsers" TextProperty="FullName" ValueProperty="Id"
+                                            AllowFiltering="true" AllowClear="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            Placeholder="Ad, soyad veya e-posta ile arayın..."
+                                            LoadData="@OnUserSearch" class="w-100"
+                                            MinLength="2">
+                        <Columns>
+                            <RadzenDropDownDataGridColumn Property="FullName" Title="Ad Soyad" Width="200px" />
+                            <RadzenDropDownDataGridColumn Property="Email" Title="E-posta" Width="200px" />
+                        </Columns>
+                    </RadzenDropDownDataGrid>
+                }
+            </div>
+
+            <!-- Gönder Butonu -->
+            <div class="col-md-3 d-flex align-items-end">
+                <RadzenButton Text="Bildirim Gönder" Icon="send" ButtonStyle="ButtonStyle.Primary"
+                              Click="@OnSendNotification" class="w-100"
+                              Disabled="@(!IsFormValid)" IsBusy="@isSending" />
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(formMessage))
+        {
+            <div class="mt-3">
+                <RadzenAlert AlertStyle="@formAlertStyle" ShowIcon="true" Variant="Variant.Flat" Size="AlertSize.Small">
+                    @formMessage
+                </RadzenAlert>
+            </div>
+        }
+    </div>
+
+    <!-- Gönderim Geçmişi -->
+    <div class="history-panel">
+        <h5 class="mb-3">
+            <RadzenIcon Icon="history" Style="margin-right: 0.5rem;" />
+            Gönderim Geçmişi
+        </h5>
+
+        <RadzenDataGrid @ref="historyGrid" Data="@notificationLogs" Count="@logCount"
+                         TItem="NotificationLog" AllowPaging="true" PageSize="10"
+                         AllowSorting="true" IsLoading="@isLoadingHistory"
+                         LoadData="@LoadHistoryData" class="modern-grid-table">
+            <Columns>
+                <RadzenDataGridColumn TItem="NotificationLog" Property="SentAt" Title="Tarih" Width="160px">
+                    <Template Context="log">
+                        @log.SentAt.ToString("dd.MM.yyyy HH:mm")
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="NotificationLog" Property="Title" Title="Başlık" />
+                <RadzenDataGridColumn TItem="NotificationLog" Property="TargetAudience" Title="Hedef Kitle" Width="150px">
+                    <Template Context="log">
+                        @GetAudienceDisplayName(log.TargetAudience)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="NotificationLog" Property="TotalTargets" Title="Toplam" Width="100px" TextAlign="TextAlign.Center">
+                    <Template Context="log">
+                        <span class="stat-badge stat-total">@log.TotalTargets</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="NotificationLog" Property="SuccessCount" Title="Başarılı" Width="100px" TextAlign="TextAlign.Center">
+                    <Template Context="log">
+                        <span class="stat-badge stat-success">@log.SuccessCount</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="NotificationLog" Property="FailureCount" Title="Başarısız" Width="100px" TextAlign="TextAlign.Center">
+                    <Template Context="log">
+                        <span class="stat-badge stat-fail">@log.FailureCount</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="NotificationLog" Title="İşlemler" Width="80px" TextAlign="TextAlign.Center" Sortable="false">
+                    <Template Context="log">
+                        <RadzenButton Icon="info" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
+                                      Size="ButtonSize.Small" Click="@(() => ShowDetail(log))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>
+
+@code {
+    private string notificationTitle = "";
+    private string notificationBody = "";
+    private string? deepLinkUrl;
+    private string selectedAudience = "all";
+    private int? selectedUserId;
+    private bool isSending;
+    private string? formMessage;
+    private AlertStyle formAlertStyle = AlertStyle.Info;
+
+    private string selectedDeepLinkType = "none";
+    private int? selectedDeepLinkItemId;
+    private IEnumerable<DeepLinkItem> deepLinkItems = Enumerable.Empty<DeepLinkItem>();
+    private IEnumerable<DeepLinkCampaignItem> deepLinkCampaigns = Enumerable.Empty<DeepLinkCampaignItem>();
+    private int? selectedCampaignId;
+
+    private readonly List<AudienceOption> deepLinkTypeOptions = new()
+    {
+        new("none", "Yok"),
+        new("product", "Ürün"),
+        new("category", "Kategori"),
+        new("brand", "Marka"),
+        new("campaign", "Kampanya"),
+        new("custom", "Özel URL")
+    };
+
+    private RadzenDataGrid<NotificationLog> historyGrid = null!;
+    private List<NotificationLog>? notificationLogs;
+    private int logCount;
+    private bool isLoadingHistory;
+    private bool _dataLoaded;
+
+    private readonly List<AudienceOption> audienceOptions = new()
+    {
+        new("all", "Tüm Kullanıcılar"),
+        new("merchant", "Tüccarlar"),
+        new("salesman", "Plasiyerler"),
+        new("b2c", "B2C Kullanıcılar"),
+        new("specific", "Belirli Kullanıcı")
+    };
+
+    private IEnumerable<ApplicationUser> filteredUsers = Enumerable.Empty<ApplicationUser>();
+
+    private bool IsFormValid =>
+        !string.IsNullOrWhiteSpace(notificationTitle) &&
+        !string.IsNullOrWhiteSpace(notificationBody) &&
+        (selectedAudience != "specific" || selectedUserId.HasValue);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_dataLoaded)
+        {
+            _dataLoaded = true;
+            await LoadHistoryData(new LoadDataArgs { Skip = 0, Top = 10 });
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadHistoryData(LoadDataArgs args)
+    {
+        isLoadingHistory = true;
+        try
+        {
+            var result = await PushNotificationPageService.GetNotificationLogsAsync(args.Skip ?? 0, args.Top ?? 10);
+            notificationLogs = result.Items;
+            logCount = result.TotalCount;
+        }
+        catch (Exception)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Hata", "Bildirim geçmişi yüklenirken hata oluştu.");
+        }
+        finally
+        {
+            isLoadingHistory = false;
+        }
+    }
+
+    private async Task OnUserSearch(LoadDataArgs args)
+    {
+        filteredUsers = await PushNotificationPageService.SearchUsersAsync(args.Filter);
+    }
+
+    private void OnAudienceChanged(object value)
+    {
+        if (value is string audience && audience != "specific")
+        {
+            selectedUserId = null;
+        }
+    }
+
+    private void OnDeepLinkTypeChanged(object value)
+    {
+        selectedDeepLinkItemId = null;
+        selectedCampaignId = null;
+        deepLinkItems = Enumerable.Empty<DeepLinkItem>();
+        deepLinkCampaigns = Enumerable.Empty<DeepLinkCampaignItem>();
+        deepLinkUrl = null;
+    }
+
+    private void OnDeepLinkItemSelected(object value)
+    {
+        if (value is int id)
+        {
+            deepLinkUrl = selectedDeepLinkType switch
+            {
+                "product" => $"bicops://products/{id}",
+                "category" => $"bicops://products?categoryIds={id}",
+                "brand" => $"bicops://products?brandIds={id}",
+                _ => null
+            };
+        }
+        else
+        {
+            deepLinkUrl = null;
+        }
+    }
+
+    private void OnCampaignSelected(object value)
+    {
+        if (value is int campaignId)
+        {
+            var campaign = deepLinkCampaigns.FirstOrDefault(c => c.Id == campaignId);
+            if (campaign == null)
+            {
+                deepLinkUrl = "bicops://products";
+                return;
+            }
+            var entityIds = campaign.AssignedEntityIds;
+            deepLinkUrl = campaign.DiscountType switch
+            {
+                4 when entityIds?.Count > 0 => $"bicops://products?brandIds={string.Join(",", entityIds)}",
+                3 when entityIds?.Count > 0 => $"bicops://products?categoryIds={string.Join(",", entityIds)}",
+                _ => "bicops://products"
+            };
+        }
+        else
+        {
+            deepLinkUrl = null;
+        }
+    }
+
+    private async Task OnDeepLinkItemSearch(LoadDataArgs args)
+    {
+        deepLinkItems = selectedDeepLinkType switch
+        {
+            "product" => await PushNotificationPageService.SearchProductsAsync(args.Filter),
+            "category" => await PushNotificationPageService.SearchCategoriesAsync(args.Filter),
+            "brand" => await PushNotificationPageService.SearchBrandsAsync(args.Filter),
+            _ => Enumerable.Empty<DeepLinkItem>()
+        };
+    }
+
+    private async Task OnCampaignSearch(LoadDataArgs args)
+    {
+        deepLinkCampaigns = await PushNotificationPageService.SearchCampaignsAsync(args.Filter);
+    }
+
+    private async Task OnSendNotification()
+    {
+        if (!IsFormValid)
+        {
+            formMessage = "Lütfen başlık ve mesaj alanlarını doldurun.";
+            formAlertStyle = AlertStyle.Warning;
+            return;
+        }
+
+        isSending = true;
+        formMessage = null;
+
+        try
+        {
+            var targetAudience = selectedAudience == "specific"
+                ? $"user:{selectedUserId}"
+                : selectedAudience;
+
+            await HangfireJobManager.EnqueueAsync<Jobs.SendPushNotificationJob>(
+                new Jobs.SendPushNotificationJobArgs
+                {
+                    Title = notificationTitle.Trim(),
+                    Body = notificationBody.Trim(),
+                    DeepLink = string.IsNullOrWhiteSpace(deepLinkUrl) ? null : deepLinkUrl.Trim(),
+                    TargetAudience = targetAudience,
+                    SentByUserId = Security.User.Id
+                });
+
+            formMessage = "Bildirim gönderim kuyruğuna eklendi.";
+            formAlertStyle = AlertStyle.Success;
+            ResetForm();
+            await LoadHistoryData(new LoadDataArgs { Skip = 0, Top = 10 });
+        }
+        catch (Exception)
+        {
+            formMessage = "Bildirim gönderilirken bir hata oluştu.";
+            formAlertStyle = AlertStyle.Danger;
+        }
+        finally
+        {
+            isSending = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        notificationTitle = "";
+        notificationBody = "";
+        deepLinkUrl = null;
+        selectedDeepLinkType = "none";
+        selectedDeepLinkItemId = null;
+        selectedCampaignId = null;
+        deepLinkItems = Enumerable.Empty<DeepLinkItem>();
+        deepLinkCampaigns = Enumerable.Empty<DeepLinkCampaignItem>();
+        selectedAudience = "all";
+        selectedUserId = null;
+    }
+
+    private async Task ShowDetail(NotificationLog log)
+    {
+        var message = $"Başlık: {log.Title}\nMesaj: {log.Body}\n" +
+                      $"Hedef: {GetAudienceDisplayName(log.TargetAudience)}\n" +
+                      $"Tarih: {log.SentAt:dd.MM.yyyy HH:mm}\n" +
+                      $"Toplam: {log.TotalTargets} | Başarılı: {log.SuccessCount} | Başarısız: {log.FailureCount}";
+
+        if (!string.IsNullOrEmpty(log.DeepLink))
+            message += $"\nDeep Link: {log.DeepLink}";
+
+        if (!string.IsNullOrEmpty(log.ErrorDetails))
+            message += $"\nHata Detayı: {log.ErrorDetails}";
+
+        await DialogService.Alert(message, "Bildirim Detayı");
+    }
+
+    private static string GetAudienceDisplayName(string audience) => audience switch
+    {
+        "all" => "Tüm Kullanıcılar",
+        "merchant" => "Tüccarlar",
+        "salesman" => "Plasiyerler",
+        "b2c" => "B2C Kullanıcılar",
+        _ when audience.StartsWith("user:") => $"Kullanıcı #{audience[5..]}",
+        _ => audience
+    };
+
+    private record AudienceOption(string Value, string Text);
+
+    private string GetDeepLinkPickerLabel() => selectedDeepLinkType switch
+    {
+        "product" => "Ürün Seç",
+        "category" => "Kategori Seç",
+        "brand" => "Marka Seç",
+        _ => "Seç"
+    };
+
+    private string GetDeepLinkPickerPlaceholder() => selectedDeepLinkType switch
+    {
+        "product" => "Ürün adı veya barkod ile arayın...",
+        "category" => "Kategori adı ile arayın...",
+        "brand" => "Marka adı ile arayın...",
+        _ => "Arayın..."
+    };
+}

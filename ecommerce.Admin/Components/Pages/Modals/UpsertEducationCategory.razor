@@ -1,0 +1,76 @@
+﻿@page "/upsert-educationcategory"
+@using ecommerce.Admin.Domain.Dtos.EducationDto;
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+<PageTitle>Eğitim Kategori Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kategori Kayıt Edilemedi!</RadzenAlert>
+
+    <RadzenTemplateForm TItem="EducationCategoryUpsertDto" Data="@educationcategory" Visible="@(educationcategory != null)" Submit="@FormSubmitAsync">
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Kategori Tipi" Component="Banner" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDown style="display: block; width: 100%" Data="@(Enum.GetValues<EducationCategoryType>())" @bind-Value="@educationcategory.EducationCategoryType" 
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom: 1rem">
+            <div class="col-md-3">
+                <RadzenLabel Text="Kategori Adı" Component="Name" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@educationcategory.Name" Name="Name"/>
+                <RadzenRequiredValidator Component="Name" Text="Kategori Adı Girmelisiniz"/>
+            </div>
+
+        </div>
+        <div class="row" style="margin-bottom: 1rem">
+            <div class="col-md-3">
+                <RadzenLabel Text="Üst Kategori" Component="Brand" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDownDataGrid Data="@educationcategories"
+                                        TextProperty="Name"
+                                        ValueProperty="Id"
+                                        Placeholder="Seçiniz"
+                                        style="display: block; width: 100%"
+                                        @bind-Value="@educationcategory.ParentId"
+                                        Name="ParentId"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        AllowVirtualization="true"
+                                        AllowClear="true"
+                                        AllowFiltering="true">
+
+                    <Template Context="data">
+                        <p style="white-space:pre-wrap">@data.Name</p>
+                    </Template>
+                </RadzenDropDownDataGrid>
+            </div>
+        </div>
+        <div class="row" style="margin-bottom: 1rem">
+            <div class="col-md-3">
+                <RadzenLabel Text="Kategori Sırası" Component="Order" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@educationcategory.Order" Name="Order"/>
+                <RadzenRequiredValidator Component="Order" Text="Kategori Sırası Girmelisiniz"/>
+            </div>
+        </div>
+        <div class="row" style="margin-bottom: 1rem">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Status" style="width: 100%"/>
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

@@ -1,0 +1,129 @@
+@page "/about-us"
+<BreadcrumbComponent BreadcrumbText="@lang["AboutUs.breadcrumb"]"/>    <!-- Breadcrumb Section End -->
+
+    <!-- Fresh Vegetable Section Start -->
+    <section class="fresh-vegetable-section section-lg-space">
+        <div class="container-fluid-lg">
+            <div class="row gx-xl-5 gy-xl-0 g-4 align-items-center">
+                <div class="col-xl-6 col-12">
+                    <div class="row g-sm-4 g-2">
+                        <div class="col-6">
+                            <div class="fresh-image-2">
+                                <div>
+                                    <img src="../assets/images/inner-page/about-us/1.jpg"
+                                         class="img-fluid w-100 rounded-3 about-img" alt="">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="fresh-image">
+                                <div>
+                                    <img src="../assets/images/inner-page/about-us/2.jpg"
+                                         class="img-fluid w-100 rounded-3 about-img" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6 col-12">
+                    <div class="fresh-contain p-center-left">
+                        <div>
+                            <div class="review-title">
+                                <h4>@lang["AboutUs.title"]</h4>
+                                <h2>@lang["AboutUs.subtitle"]</h2>
+                            </div>
+
+                            <div class="delivery-list">
+                                <p class="text-content">
+                                    @lang["AboutUs.section1.description"]
+                                </p>
+
+                                <ul class="delivery-box list-unstyled p-0 m-0">
+
+                                    <li>
+                                        <div class="delivery-box d-flex flex-row align-items-start gap-3">
+                                            <div class="delivery-icon">
+                                                <img src="../assets/svg/3/work.svg" class="blur-up lazyload icon-img" alt="">
+                                            </div>
+                                            <div class="delivery-detail">
+                                                <h5 class="text mb-1">@lang["AboutUs.section1.point2.title"]</h5>
+                                                <p class="text-content">@lang["AboutUs.section1.point2.description"]</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    
+
+                                    <li>
+                                        <div class="delivery-box d-flex flex-row align-items-start gap-3">
+                                            <div class="delivery-icon">
+                                                <img src="../assets/svg/3/user.svg" class="blur-up lazyload icon-img" alt="">
+                                            </div>
+                                            <div class="delivery-detail">
+                                                <h5 class="text mb-1">@lang["AboutUs.section1.point4.title"]</h5>
+                                                <p class="text-content">@lang["AboutUs.section1.point4.description"]</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Fresh Vegetable Section End -->
+
+    <!-- Client Section Start -->
+    <section class="client-section section-lg-space">
+        <div class="container-fluid-lg">
+            <div class="row">
+                <div class="col-12">
+                    <div class="about-us-title text-center">
+                        <h4>@lang["AboutUs.clients.title"]</h4>
+                        <h2 class="center">@lang["AboutUs.clients.subtitle"]</h2>
+                    </div>
+
+                    @* <div class="slider-3_1 product-wrapper"> *@
+                        <SlickSlider SliderName="slider-3_1" SliderId="slider-3_1" Config="@SliderConfigs.Slider_3_1">
+
+                        <div class="h-100">
+                            <div class="clint-contain h-100 d-flex flex-column">
+                                <div class="client-icon">
+                                    <img src="../assets/svg/3/work.svg" class="blur-up lazyload" alt="">
+                                </div>
+                                <h2 class="client-number">35+</h2>
+                                <h4>@lang["AboutUs.clients.point1.title"]</h4>
+                                <p>@lang["AboutUs.clients.point1.description"]</p>
+                            </div>
+                        </div>
+
+                        <div class="h-100">
+                            <div class="clint-contain h-100 d-flex flex-column">
+                                <div class="client-icon">
+                                    <img src="../assets/svg/3/buy.svg" class="blur-up lazyload" alt="">
+                                </div>
+                                <h2 class="client-number">80K+</h2>
+                                <h4>@lang["AboutUs.clients.point2.title"]</h4>
+                                <p>@lang["AboutUs.clients.point2.description"]</p>
+                            </div>
+                        </div>
+
+                        <div class="h-100">
+                            <div class="clint-contain h-100 d-flex flex-column">
+                                <div class="client-icon">
+                                    <img src="../assets/svg/3/user.svg" class="blur-up lazyload" alt="">
+                                </div>
+                                <h2 class="client-number">95%</h2>
+                                <h4>@lang["AboutUs.clients.point3.title"]</h4>
+                                <p>@lang["AboutUs.clients.point3.description"]</p>
+                            </div>
+                        </div>
+                    @* </div> *@
+                    </SlickSlider>
+                </div>
+            </div>
+        </div>
+    </section>

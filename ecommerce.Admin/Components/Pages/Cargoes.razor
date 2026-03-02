@@ -1,0 +1,56 @@
+@page "/cargoes"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.CargoDto
+@using ecommerce.Admin.Resources
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Kargo Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Kargo Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Kargo Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" 
+                            LoadData="@LoadData" 
+                            Data="@cargoes" 
+                            Count="@count" 
+                            TItem="CargoListDto" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            AllowFilterDateInput="true" 
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+                            RowSelect="@EditRow"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CargoListDto" Property="Id" Title="Id" Width="50px"/>
+                    <RadzenDataGridColumn TItem="CargoListDto" Property="Name" Title="Kargo Adı"/>
+                    <RadzenDataGridColumn TItem="CargoListDto" Property="CargoTypeStr" Title="Kargo Tipi"/>
+                    <RadzenDataGridColumn TItem="CargoListDto" Property="StatusStr" Title="Durumu"/>
+                    <RadzenDataGridColumn TItem="CargoListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="context">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, context)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

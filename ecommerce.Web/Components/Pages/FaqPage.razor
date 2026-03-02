@@ -1,0 +1,131 @@
+@page "/faq"
+<section class="faq-contain">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="product-wrapper">
+                    <SlickSlider SliderName="slider-4-2" SliderId="slider-4-2" Config="@SliderConfigs.Slider4_Responsive">
+                    <div>
+                        <div class="faq-top-box">
+                            <div class="faq-box-icon">
+                                <img src="../assets/images/inner-page/faq/start.png" class="blur-up lazyload" alt="">
+                            </div>
+                            <div class="faq-box-contain">
+                                <h3>@lang["FAQ.GettingStarted"]</h3>
+                                <p>@lang["FAQ.GettingStartedDesc"]</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="faq-top-box">
+                            <div class="faq-box-icon">
+                                <img src="../assets/images/inner-page/faq/help.png" class="blur-up lazyload" alt="">
+                            </div>
+                            <div class="faq-box-contain">
+                                <h3>@lang["FAQ.SalesQuestions"]</h3>
+                                <p>@lang["FAQ.SalesQuestionsDesc"]</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="faq-top-box">
+                            <div class="faq-box-icon">
+                                <img src="../assets/images/inner-page/faq/price.png" class="blur-up lazyload" alt="">
+                            </div>
+                            <div class="faq-box-contain">
+                                <h3>@lang["FAQ.PricingPlans"]</h3>
+                                <p>@lang["FAQ.PricingPlansDesc"]</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="faq-top-box">
+                            <div class="faq-box-icon">
+                                <img src="../assets/images/inner-page/faq/contact.png" class="blur-up lazyload" alt="">
+                            </div>
+                            <div class="faq-box-contain">
+                                <h3>@lang["FAQ.SupportContact"]</h3>
+                                <p>@lang["FAQ.SupportContactDesc"]</p>
+                            </div>
+                        </div>
+                    </div>
+                    </SlickSlider>
+                </div>
+              
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="faq-box-contain section-b-space">
+    <div class="container">
+        <div class="faq-search mb-4">
+            <input type="text" class="form-control" placeholder="@lang["FAQ.SearchPlaceholder"]"
+                   @bind="searchText" @bind:event="oninput" />
+        </div>
+        <div class="row">
+            <div class="col-xl-5">
+                <div class="faq-contain">
+                    <h2>@lang["FrequentlyAskedQuestions"]</h2>
+                    <p>
+                        @lang["FAQ.Intro"]
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-xl-7">
+                <div class="faq-accordion">
+                    <div class="accordion" id="accordionExample">
+                        @if (faqItems is null)
+                        {
+                            <div class="text-center text-muted py-5">@lang["Common.Loading"]...</div>
+                        }
+                        else if (!faqItems.Any())
+                        {
+                            <div class="text-center text-muted py-5">@lang["FAQ.Empty"]</div>
+                        }
+                        else
+                        {
+                            var items = FilteredFaqItems.ToList();
+                            @for (var i = 0; i < items.Count; i++)
+                            {
+                                var item = items[i];
+                                var collapseId = $"collapse{i}";
+                                var headingId = $"heading{i}";
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="@headingId">
+                                        <button class="accordion-button collapsed"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="@($"#{collapseId}")"
+                                                aria-expanded="false"
+                                                aria-controls="@collapseId">
+                                            @item.Name <i class="fa-solid fa-angle-down"></i>
+                                        </button>
+                                    </h2>
+                                    <div id="@collapseId" class="accordion-collapse collapse"
+                                         aria-labelledby="@headingId" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            @((MarkupString)item.Description)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+@* <style> *@
+@*   /* keep original look; only tweak mobile type a little */ *@
+@*   @media (max-width: 575.98px){ *@
+@*     .faq-accordion .accordion-button{ font-size: 1rem; } *@
+@*     .faq-accordion .accordion-body{ font-size: .95rem; } *@
+@*   } *@
+@* </style> *@
+

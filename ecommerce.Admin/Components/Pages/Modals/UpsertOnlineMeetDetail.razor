@@ -1,0 +1,32 @@
+
+@using ecommerce.Admin.Domain.Dtos.ZoomDto
+@attribute [Authorize]
+
+<PageTitle>Yeni İkili Görüşme Detay (@Id.Value)</PageTitle>
+
+<RadzenDataGrid @ref="radzenDataGridZoom"
+                AllowFiltering="false"
+                AllowColumnResize="true"
+                AllowAlternatingRows="false"
+                FilterMode="FilterMode.Advanced"
+                AllowSorting="false"
+                AllowPaging="true"
+                PagerHorizontalAlign="HorizontalAlign.Left"
+                ShowPagingSummary="false"
+                      
+                Data="@_participantResponses"
+                TItem="ZoomParticipantResponse"
+                ColumnWidth="300px"
+                LogicalFilterOperator="LogicalFilterOperator.Or"
+                PageSize="10">
+    <Columns>
+        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Id" Property="UserId" Width="50px"/>
+        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Adı" Property="Name" Width="100px"/>
+        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Email" Property="UserEmail" Width="100px"/>
+        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Katılma Zamanı" Property="JoinTime" Width="100px"/>
+        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Ayrılma Zamanı" Property="LeaveTime" Width="100px"/>
+        <RadzenDataGridColumn TItem="ZoomParticipantResponse" Title="Süre (Dakika)" Property="DurationInMinutes" Width="100px"/>
+       
+               
+    </Columns>
+</RadzenDataGrid>

@@ -1,0 +1,100 @@
+﻿@page "/products"
+@using ecommerce.Admin.Domain.Dtos.ProductDto;
+@using ecommerce.Core.Utils;
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Ürün Tanımları</PageTitle>
+
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Components.Shared
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Ürün Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Ürün Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 d-flex align-items-center gap-3 flex-wrap shadow-sm">
+        <div class="d-flex align-items-center gap-2 flex-grow-1">
+             <RadzenTextBox Placeholder="Akıllı arama (İsim, Barkod...)" @bind-Value="@SearchText" 
+                           class="w-100" @onchange="@(args => radzenDataGrid.Reload())" 
+                           Style="max-width: 400px;" />
+             <RadzenButton Icon="search" Click="@(args => radzenDataGrid.Reload())" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Secondary" />
+        </div>
+       
+        <div class="d-flex gap-2">
+            <RadzenButton Icon="merge_type" Text="Ürün Birleştir" Click="ClickMergeProduct" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Success" />
+            <RadzenButton Icon="filter_list" Text="Filtrele" Click="FilterButtonClick" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Info" />
+            <RadzenButton Icon="cloud_download" Text="Excel" Click="@(args => ExcelExportClick())" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Success" />
+        </div>
+    </RadzenCard>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" 
+                            AllowFiltering="true" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PagerAlwaysVisible=true
+                            PageSize="25" 
+                            AllowFilterDateInput="true" 
+                            TItem="ProductListDto" 
+                            RowSelect="@EditRow" 
+                            LoadData="@LoadData" 
+                            Count="@count" 
+                            Data="@products" 
+                            CellRender="@RowRender" 
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+                            FilterMode="FilterMode.Advanced"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenProgressBar ProgressBarStyle="ProgressBarStyle.Success" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="height:5px;" />
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="Id" Title="Id" Width="70px" TextAlign="TextAlign.Center"></RadzenDataGridColumn>                 
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="Name" Title="Ürün Adı">
+                        <Template Context="product">
+                           <RadzenText Style="white-space:normal">@product.Name</RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="Brand.Name" Title="Marka" Width="150px">
+                        <Template Context="product">
+                            <RadzenText>@product.Brand.Name</RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="Barcode" Title="Barkod" Width="200px" Visible="false"></RadzenDataGridColumn>
+                 
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="ProductsImageCount" Title="Foto" Width="70px" TextAlign="TextAlign.Center"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="ProductAdvertCount" Title="İlan" Width="70px" Visible="false"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="RetailPrice" Title="Psf" FormatString="{0:n2}" Width="100px" Visible="false"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="IsCustomerCreated" Title="Onay?" Width="80px" Filterable="true" TextAlign="TextAlign.Center" Visible="false">
+                        <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.IsCustomerCreated" ReadOnly="true"/>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductListDto" Property="CreatedDate" Title="Tarih" Width="120px" FormatString="{0:d}"></RadzenDataGridColumn>
+    
+                    <RadzenDataGridColumn TItem="ProductListDto" Title="İşlem" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="product">
+                            @if (product.Status != EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small"
+                                              Shade="Shade.Lighter" Variant="Variant.Flat"
+                                              Click=@(args => GridDeleteButtonClick(args, product)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+

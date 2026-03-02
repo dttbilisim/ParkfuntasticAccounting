@@ -1,0 +1,93 @@
+@using ecommerce.Admin.Domain.Dtos.CourierDto
+@using ecommerce.Admin.Domain.Dtos.MembershipDto
+@using Radzen
+@using Radzen.Blazor
+
+<div class="modal-wrapper">
+    <div class="modal-header-modern">
+        <h5 class="modal-title-modern">@Title</h5>
+        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" Click="@(() => DialogService.Close(false))" Size="ButtonSize.Small" />
+    </div>
+    <div class="modal-content-body p-3">
+        @if (Loading)
+        {
+            <div class="d-flex justify-content-center p-4">
+                <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+            </div>
+        }
+        else
+        {
+            <p class="text-muted small mb-3">İl ve ilçe seçerek kuryenin hizmet vereceği bölgeleri ekleyin. Her bölge bir araçla ilişkilidir. Önce kurye araçları tanımlı olmalı.</p>
+            @if (!Vehicles.Any())
+            {
+                <div class="alert alert-warning small">Bu kurye için henüz araç tanımlanmamış. Önce kurye detayından araç ekleyin.</div>
+            }
+            <div class="mb-3">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                    <RadzenDropDown TValue="int?"
+                                    Value="@NewVehicleId"
+                                    ValueChanged="@OnVehicleValueChanged"
+                                    Data="@Vehicles"
+                                    TextProperty="Display"
+                                    ValueProperty="Id"
+                                    Placeholder="Araç seçin"
+                                    AllowClear="true"
+                                    Style="min-width: 200px;" />
+                    <RadzenDropDown TValue="int?"
+                                    Value="@NewCityId"
+                                    ValueChanged="@OnCityValueChanged"
+                                    Data="@Cities"
+                                    TextProperty="Name"
+                                    ValueProperty="Id"
+                                    Placeholder="İl seçin"
+                                    AllowClear="true"
+                                    Style="min-width: 180px;" />
+                    <RadzenDropDown TValue="int?"
+                                    Value="@NewTownId"
+                                    ValueChanged="@OnTownValueChanged"
+                                    Data="@Towns"
+                                    TextProperty="Name"
+                                    ValueProperty="Id"
+                                    Placeholder="İlçe seçin"
+                                    AllowClear="true"
+                                    Disabled="@(NewCityId == null || NewCityId == 0)"
+                                    Style="min-width: 180px;" />
+                    <RadzenButton Icon="add" Text="Ekle" ButtonStyle="ButtonStyle.Primary" Click="@OnAddArea" Disabled="@(!Vehicles.Any())" />
+                </RadzenStack>
+            </div>
+            @if (Areas.Any())
+            {
+                <RadzenDataGrid TItem="CourierServiceAreaListDto" Data="@Areas" AllowPaging="false" AllowSorting="false" AllowFiltering="false" ShowColumnChooser="false" Density="Density.Compact">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="CourierServiceAreaListDto" Property="VehicleDisplay" Title="Araç" Width="160px" />
+                        <RadzenDataGridColumn TItem="CourierServiceAreaListDto" Property="CityName" Title="İl" Width="120px" />
+                        <RadzenDataGridColumn TItem="CourierServiceAreaListDto" Property="TownName" Title="İlçe" Width="120px" />
+                        <RadzenDataGridColumn TItem="CourierServiceAreaListDto" Title="Çalışma başlangıç" Width="130px">
+                            <Template Context="row">
+                                <RadzenTextBox @bind-Value="row.WorkStartTime" Placeholder="09:00" Style="width: 100%;" class="form-control form-control-sm" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="CourierServiceAreaListDto" Title="Çalışma bitiş" Width="130px">
+                            <Template Context="row">
+                                <RadzenTextBox @bind-Value="row.WorkEndTime" Placeholder="18:00" Style="width: 100%;" class="form-control form-control-sm" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="CourierServiceAreaListDto" Title="" Width="80px" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+                            <Template Context="row">
+                                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Text" Size="ButtonSize.Small" Click="@(() => RemoveArea(row))" @onclick:stopPropagation="true" title="Kaldır" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            }
+            else
+            {
+                <p class="text-muted small">Henüz bölge eklenmedi. Yukarıdan il ve ilçe seçip "Ekle" ile ekleyin.</p>
+            }
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <RadzenButton ButtonType="ButtonType.Button" Text="İptal" ButtonStyle="ButtonStyle.Light" Click="@(() => DialogService.Close(false))" />
+                <RadzenButton ButtonType="ButtonType.Button" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" Click="@Save" Disabled="@Saving" />
+            </div>
+        }
+    </div>
+</div>

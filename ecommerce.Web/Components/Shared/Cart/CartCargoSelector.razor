@@ -1,0 +1,73 @@
+@using ecommerce.Web.Domain.Dtos.Cart
+@using I18NPortable
+
+<div class="cargo-selection-container @(IsDisabled ? "cargo-disabled" : string.Empty) @Class">
+    @if (HasCargoes)
+    {
+        <div class="cargo-list-full">
+            @foreach (var cargo in CargoList)
+            {
+                var isSelected = SelectedCargo?.CargoId == cargo.CargoId;
+                <div class="cargo-radio-item @(isSelected ? "selected" : "")" 
+                     @onclick="() => SelectCargo(cargo)">
+                    
+                    <div class="radio-circle">
+                        @if (isSelected)
+                        {
+                            <div class="radio-dot"></div>
+                        }
+                    </div>
+
+                    <div class="cargo-info">
+                        <div class="cargo-name">@cargo.Name</div>
+                        <div class="cargo-delivery">Tahmini Teslimat: Pazartesi</div>
+                    </div>
+
+                    <div class="cargo-price">
+                        @FormatPrice(cargo)
+                    </div>
+
+                    <button class="cargo-detail-btn" 
+                            @onclick="() => OpenCargoDetailModal()"
+                            @onclick:stopPropagation
+                            type="button">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="cargo-empty">
+            @L("Cart.NoCargoOptions")
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isOpen = false;
+
+    private void ToggleDropdown()
+    {
+        if (!IsDisabled)
+        {
+            _isOpen = !_isOpen;
+        }
+    }
+
+    private void CloseDropdown()
+    {
+        _isOpen = false;
+    }
+
+    private async Task SelectCargo(CartCargoDto cargo)
+    {
+        if (SelectedCargo?.CargoId != cargo.CargoId)
+        {
+            await OnSelectChanged(new ChangeEventArgs { Value = cargo.CargoId.ToString() });
+        }
+        _isOpen = false;
+    }
+}
+

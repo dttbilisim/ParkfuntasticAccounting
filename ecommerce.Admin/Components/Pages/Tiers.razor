@@ -1,0 +1,47 @@
+﻿@page "/tiers"
+@using ecommerce.Admin.Domain.Dtos.TierDto
+@using ecommerce.Core.Utils;
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Ürün Grup Tanımları</PageTitle>
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+            <RadzenText Text="Ürün Grubu Tanımları" TextStyle="TextStyle.H5" style="color:#598087" class="mt-2" />
+        </div>
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Ürün Grubu Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+</RadzenCard>
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="TierListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@tiers" CellRender="@RowRender" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        EqualsText="@Loc.GetString("EqualsText")"
+                        NotEqualsText="@Loc.GetString("NotEqualsText")"
+                        LessThanText="@Loc.GetString("LessThanText")"
+                        LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                        GreaterThanText="@Loc.GetString("GreaterThanText")"
+                        IsNullText="@Loc.GetString("IsNullText")"
+                        IsNotNullText="@Loc.GetString("IsNotNullText")">
+
+
+            <Columns>
+                <RadzenDataGridColumn TItem="TierListDto" Property="Id" Title="Id" Width="50px"></RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="TierListDto" Property="Name" Title="Adı"></RadzenDataGridColumn>
+               
+                <RadzenDataGridColumn TItem="TierListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="scaleUnit">
+                        @if (scaleUnit.Status != EntityStatus.Deleted)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, scaleUnit)) @onclick:stopPropagation="true" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>

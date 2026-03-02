@@ -1,0 +1,343 @@
+@page "/upsert-banneritems"
+@using ecommerce.Admin.Domain.Dtos.BannerItemDto;
+@using ecommerce.Admin.Domain.Dtos.BannerSubItemDto;
+@using ecommerce.Core.Utils;
+@attribute [Authorize]
+@inject IStringLocalizer<Culture_TR> Loc
+<PageTitle>Banner Item Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Banner Kayıt Edilemedi!</RadzenAlert>
+
+
+
+
+    <RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Client" Change="TabChange" Visible="!IsShowLoadingBar">
+        <Tabs>
+            <RadzenTabsItem Text="Banner Bilgileri">
+                <RadzenFieldset Text="Banner Bilgileri">
+                    <RadzenTemplateForm TItem="BannerItemUpsertDto" Data="@BannerItem" Visible="@(BannerItem != null)" Submit="@FormSubmit">
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Banner" Component="Banner" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDropDownDataGrid Data="@banners" TextProperty="Name" ValueProperty="Id" Change="@BannerItemTypeChange" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@BannerItem.BannerId" Name="BannerId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowVirtualization="true" AllowClear="true" AllowFiltering="true">
+
+                                    <Template Context="data">
+                                        <p style="white-space:pre-wrap;cursor:pointer">@data.Name</p>
+                                    </Template>
+
+                                </RadzenDropDownDataGrid>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Banner Adı" Component="Title" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@BannerItem.Title" Name="Title" />
+                                <RadzenRequiredValidator Component="Title" Text="Banner Adı Girmelisiniz" />
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Banner Açıklama" Component="Description" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@BannerItem.Description" Name="Description" />
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Banner Sırası" Component="Order" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenNumeric style="display: block; width: 100%" Min="1" @bind-Value="@BannerItem.Order" Name="Order" />
+                                <RadzenRequiredValidator Component="Order" Text="Banner için sıra Girmelisiniz" />
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Url" Component="Order" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@BannerItem.Url" Name="Url" />
+                                @* <RadzenRequiredValidator Component="Url" Text="Banner için url Girmelisiniz" /> *@
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Başlangıç Zamanı" Component="StartDate" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDatePicker style="display: block; width: 100%" @bind-Value="@BannerItem.StartDate" Name="Url" ShowTime="true" DateFormat="g" AllowClear="true" />
+                                @*<RadzenRequiredValidator Component="StartDate" Text="" />*@
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Bitiş Zamanı" Component="EndDate" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDatePicker style="display: block; width: 100%" @bind-Value="@BannerItem.EndDate" Name="Url" ShowTime="true" DateFormat="g" AllowClear="true" />
+                                @*<RadzenRequiredValidator Component="EndDate" Text="" />*@
+                            </div>
+                        </div>                       
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Yeni Sekmede Aç" Component="IsNewTab" style="width: 100%" />
+                            </div>
+                            <div class="col-md-3">
+                                <RadzenCheckBox TValue="bool" @bind-Value="@BannerItem.IsNewTab" Name="IsNewTab" />
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Button Durumu" Component="IsButton" style="width: 100%" />
+                            </div>
+                            <div class="col-md-3">
+                                <RadzenCheckBox TValue="bool" @bind-Value="@BannerItem.IsButton" Name="IsButton" />
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Button Adı" Component="ButtonName" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@BannerItem.ButtonName" Name="ButtonName" />
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Video mu?" Component="IsVideo" style="width: 100%" />
+                            </div>
+                            <div class="col-md-3">
+                                <RadzenCheckBox TValue="bool" @bind-Value="@BannerItem.IsVideo" Name="IsVideo" />
+                            </div>
+                        </div>
+                        @if(BannerItem.IsVideo){
+                            <div style="margin-bottom: 1rem" class="row">
+                                <div class="col-md-3">
+                                    <RadzenLabel Text="Video Url" Component="VideoUrl" style="width: 100%" />
+                                </div>
+                                <div class="col-md-9">
+                                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@BannerItem.VideoUrl" Name="VideoUrl" />
+                                </div>
+                            </div>
+                        }
+                        @if(!BannerItem.IsVideo){
+                                       <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Dosya" Component="File" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <InputFile OnChange="(args)=>LoadFiles(args,false)" class="mb-2" accept="image/webp,image/png,image/gif,image/jpeg,video/mp4" />
+                              
+                            </div>
+                        </div>
+                 
+                         
+                    
+                       
+
+                        @if (BannerItem.FileGuid != null)
+                        {
+                            <div style="margin-bottom: 1rem" class="row">
+                                <div class="col-md-3">
+                                    <RadzenLabel Text="Yüklenen Görsel" Component="File" style="width: 100%" />
+                                </div>
+                                <div class="col-md-9">
+
+                                    @if (BannerItem.FileName != null)
+                                    {
+                                        if (BannerItem.FileName.Contains(".png") == true)
+                                        {
+                                            <RadzenImage Path="@($"data:image/png;base64,{Convert.ToBase64String(BannerItem.Base64Str)}")" Style="width: 400px;" />
+                                        }
+                                        if (BannerItem.FileName.Contains(".webp") == true)
+                                        {
+                                            <RadzenImage Path="@($"data:image/webp;base64,{Convert.ToBase64String(BannerItem.Base64Str)}")" Style="width: 400px;" />
+                                        }
+                                        else if (BannerItem.FileName.Contains(".jpeg") == true || BannerItem.FileName.Contains(".jpg") == true)
+                                        {
+                                            <RadzenImage Path="@($"data:image/jpeg;base64,{Convert.ToBase64String(BannerItem.Base64Str)}")" Style="width: 400px;" />
+                                        }
+                                        else if (BannerItem.FileName.Contains(".gif") == true)
+                                        {
+                                            <RadzenImage Path="@($"data:image/gif;base64,{Convert.ToBase64String(BannerItem.Base64Str)}")" Style="width: 400px;" />
+                                        }
+                                        else if (BannerItem.FileName.Contains(".mp4") == true && IsShowLoadingFile == false)
+                                        {
+                                            <RadzenHtml>
+                                                <video style="width:400px" controls="controls">
+                                                    <source src="@($"data:video/mp4;base64,{Convert.ToBase64String(File.ReadAllBytes(BannerItem.Root))}")" type="video/mp4">
+                                                </video>
+                                            </RadzenHtml>
+                                        }
+                                        else if (BannerItem.FileName.Contains(".avi") == true && IsShowLoadingFile == false)
+                                        {
+                                            <video style="width:400px" controls="controls">
+                                                <source src="@($"data:video/avi;base64,{Convert.ToBase64String(File.ReadAllBytes(BannerItem.Root))}")" type="video/avi">
+                                            </video>
+                                        }
+
+                                    }
+
+                                </div>
+                            </div>
+                        }
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Mobile" Component="Mobile" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <InputFile OnChange="(args) => LoadFiles(args, true)" class="mb-2" accept="image/webp,image/png,image/gif,image/jpeg,video/mp4">
+                                    <RadzenLabel Text="Sadece Loginsiz Sayfa ve Ana Sayfa Header için mobile kullanınız" Component="Mobile" style="width: 100%" />
+                                </InputFile>
+                                                              
+                            </div>
+                        </div>
+                         @if (BannerItem.FileNameMobile != null)
+                                                {
+                                                    <div style="margin-bottom: 1rem" class="row">
+                                                        <div class="col-md-3">
+                                                            <RadzenLabel Text="Yüklenen Görsel" Component="File" style="width: 100%" />
+                                                        </div>
+                                                        <div class="col-md-9">
+                        
+                                                            @if (BannerItem.FileNameMobile != null)
+                                                            {
+                                                                if (BannerItem.FileNameMobile.Contains(".png") == true)
+                                                                {
+                                                                    <RadzenImage Path="@($"data:image/png;base64,{Convert.ToBase64String(BannerItem.MobileBase64Str)}")" Style="width: 400px;" />
+                                                                }
+                                                                if (BannerItem.FileNameMobile.Contains(".webp") == true)
+                                                                {
+                                                                    <RadzenImage Path="@($"data:image/webp;base64,{Convert.ToBase64String(BannerItem.MobileBase64Str)}")" Style="width: 400px;" />
+                                                                }
+                                                                else if (BannerItem.FileNameMobile.Contains(".jpeg") == true || BannerItem.FileNameMobile.Contains(".jpg") == true)
+                                                                {
+                                                                    <RadzenImage Path="@($"data:image/jpeg;base64,{Convert.ToBase64String(BannerItem.MobileBase64Str)}")" Style="width: 400px;" />
+                                                                }
+                                                                else if (BannerItem.FileNameMobile.Contains(".gif") == true)
+                                                                {
+                                                                    <RadzenImage Path="@($"data:image/gif;base64,{Convert.ToBase64String(BannerItem.MobileBase64Str)}")" Style="width: 400px;" />
+                                                                }
+                                                                else if (BannerItem.FileNameMobile.Contains(".mp4") == true && IsShowLoadingFile == false)
+                                                                {
+                                                                    <RadzenHtml>
+                                                                        <video style="width:400px" controls="controls">
+                                                                            <source src="@($"data:video/mp4;base64,{Convert.ToBase64String(File.ReadAllBytes(BannerItem.MobileImageUrl))}")" type="video/mp4">
+                                                                        </video>
+                                                                    </RadzenHtml>
+                                                                }
+                                                                else if (BannerItem.FileNameMobile.Contains(".avi") == true && IsShowLoadingFile == false)
+                                                                {
+                                                                    <video style="width:400px" controls="controls">
+                                                                        <source src="@($"data:video/avi;base64,{Convert.ToBase64String(File.ReadAllBytes(BannerItem.MobileImageUrl))}")" type="video/avi">
+                                                                    </video>
+                                                                }
+                        
+                                                            }
+                        
+                                                        </div>
+                                                    </div>
+                                                }
+                        }
+
+             
+
+
+  <div style="margin-top:1rem; margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Full Slider" Component="Length" style="width: 100%"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenCheckBox @bind-Value="@BannerItem.FullSlider"/>
+                </div>
+            </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+                            </div>
+                            <div class="col-md-3">
+                                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status" />
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled" />
+                                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+                            </div>
+                        </div>
+
+                    </RadzenTemplateForm>
+                </RadzenFieldset>
+            </RadzenTabsItem>
+
+
+            <RadzenTabsItem Text="Banner Alt Öğe Bilgileri">
+                <RadzenFieldset Text="Banner Alt Öğe Bilgileri">
+                    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Medium" AlertStyle="AlertStyle.Warning" Visible="@IsBannerSaved">Önce banneri kaydetmelisiniz!</RadzenAlert>
+
+
+                    <RadzenCard class="mb-3" style="display: flex; align-items: center;">
+
+                        <div style="width: 100%; overflow: hidden;">
+                            <div style="float:right">
+                                <RadzenButton Icon="add_circle_outline" Text="Yeni Banner Alt Öğe Ekle" Click="@AddSubItemButtonClick" Variant="Variant.Flat" class="mt-2" />
+                            </div>
+                        </div>
+
+
+                    </RadzenCard>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <RadzenDataGrid @ref="grid1" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="BannerSubItemListDto" RowSelect="@EditSubItemRow" LoadData="@LoadDataSubItem" Count="@count" Data="@subitems" CellRender="@RowRenderSubItem" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            EqualsText="@Loc.GetString("EqualsText")"
+                                            NotEqualsText="@Loc.GetString("NotEqualsText")"
+                                            LessThanText="@Loc.GetString("LessThanText")"
+                                            LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                                            GreaterThanText="@Loc.GetString("GreaterThanText")"
+                                            IsNullText="@Loc.GetString("IsNullText")"
+                                            IsNotNullText="@Loc.GetString("IsNotNullText")">
+
+
+                                <Columns>
+                                    <RadzenDataGridColumn TItem="BannerSubItemListDto" Property="Id" Title="Id" Width="50px">
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="BannerSubItemListDto" Property="Title" Title="Alt Öğe Başlığı">
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="BannerSubItemListDto" Property="CreatedDate" FormatString="{0:dd/MM/yyyy HH:mm}" Width="100px" Title="Oluşturulma Tarihi">
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="BannerSubItemListDto" Property="StatusStr" Title="Durum" Width="70px">
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="BannerSubItemListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                                        <Template Context="BannerSubItem">
+                                            @if (BannerSubItem.Status != EntityStatus.Deleted.GetHashCode())
+                                            {
+                                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat" Click=@(args => GridDeleteSubItemButtonClick(args, BannerSubItem)) @onclick:stopPropagation="true" />
+                                            }
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                </Columns>
+                            </RadzenDataGrid>
+                        </div>
+                    </div>
+
+
+                </RadzenFieldset>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+
+
+
+
+</div>
+

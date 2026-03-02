@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/ecommerce.Admin.props" />
+</Project>

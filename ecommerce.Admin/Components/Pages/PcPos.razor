@@ -1,0 +1,65 @@
+@page "/pcpos"
+@using ecommerce.Admin.Domain.Dtos.PcPosDto
+@using ecommerce.Core.Utils;
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>PcPos Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">PcPos Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Click="@AddButtonClick" Text="Yeni PcPos Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <RadzenDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="25"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="PcPosListDto"
+                            RowSelect="@EditRow"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@pcPosList"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single"
+                            PagerAlwaysVisible="true"
+                            AllowFilterDateInput="true"
+                            EqualsText="@Loc.GetString("EqualsText")"
+                            NotEqualsText="@Loc.GetString("NotEqualsText")"
+                            LessThanText="@Loc.GetString("LessThanText")"
+                            LessThanOrEqualsText="@Loc.GetString("LessThanOrEqualsText")"
+                            GreaterThanText="@Loc.GetString("GreaterThanText")"
+                            IsNullText="@Loc.GetString("IsNullText")"
+                            IsNotNullText="@Loc.GetString("IsNotNullText")">
+                <Columns>
+                    <RadzenDataGridColumn TItem="PcPosListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="PcPosListDto" Property="Name" Title="PcPos Adı" />
+                    <RadzenDataGridColumn TItem="PcPosListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="row">
+                            @if (row.Status != EntityStatus.Deleted)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat"
+                                              Click=@(args => GridDeleteButtonClick(args, row)) @onclick:stopPropagation="true" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+</div>
+

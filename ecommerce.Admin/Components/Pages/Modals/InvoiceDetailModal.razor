@@ -1,0 +1,171 @@
+@using ecommerce.Admin.Domain.Dtos.InvoiceDto
+@using Radzen
+@using Radzen.Blazor
+
+
+
+@if (selectedInvoice != null)
+{
+    <div class="invoice-modal-content">
+        <!-- Header Section -->
+        <div class="invoice-header-card">
+            <div class="header-grid">
+                <div class="header-item">
+                    <span class="header-label">Fatura No</span>
+                    <span class="header-value">@selectedInvoice.InvoiceNo</span>
+                </div>
+                <div class="header-item">
+                    <span class="header-label">Tarih</span>
+                    <span class="header-value">@($"{selectedInvoice.InvoiceDate:dd.MM.yyyy}")</span>
+                </div>
+                <div class="header-item">
+                    <span class="header-label">Cari Hesap</span>
+                    <span class="header-value">@selectedInvoice.CustomerName</span>
+                </div>
+                <div class="header-item">
+                    <span class="header-label">Tip</span>
+                    <span>
+                        <span class="status-badge invoice-type">@selectedInvoice.InvoiceTypeName</span>
+                    </span>
+                </div>
+                @if (!string.IsNullOrEmpty(selectedInvoice.OrderNumber))
+                {
+                    <div class="header-item">
+                        <span class="header-label">Sipariş No</span>
+                        <a href="/b2b/my-orders?search=@selectedInvoice.OrderNumber" class="header-value link">
+                            <i class="fas fa-link"></i> @selectedInvoice.OrderNumber
+                        </a>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(selectedInvoice.Ettn))
+                {
+                    <div class="header-item" style="grid-column: 1 / -1;">
+                        <span class="header-label">ETTN</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <code style="background: #e5e7eb; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; letter-spacing: 0.3px; user-select: all;">@selectedInvoice.Ettn</code>
+                            @if (!string.IsNullOrEmpty(selectedInvoice.EInvoiceStatus))
+                            {
+                                <span class="badge" style="background: @(selectedInvoice.EInvoiceStatus?.ToUpperInvariant() == "IPTAL" ? "#dc3545" : "#059669"); color: #fff; font-size: 0.7rem;">@selectedInvoice.EInvoiceStatus</span>
+                            }
+                            @if (selectedInvoice.EInvoiceStatus?.ToUpperInvariant() != "IPTAL")
+                            {
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-success py-0 px-2" 
+                                        style="font-size: 0.75rem;"
+                                        @onclick="DownloadEInvoicePdf"
+                                        disabled="@_isDownloading"
+                                        title="e-Fatura PDF İndir">
+                                    @if (_isDownloading)
+                                    {
+                                        <i class="fas fa-spinner fa-spin me-1"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-download me-1"></i>
+                                    }
+                                    PDF İndir
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        @if (selectedInvoice.Items != null && selectedInvoice.Items.Any())
+        {
+            <div class="items-table-wrapper">
+                <div class="table-responsive">
+                    <table class="custom-table" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th style="width: auto;">Ürün</th>
+                                <th class="col-center" style="width: 90px;">Miktar</th>
+                                <th class="col-right" style="width: 100px;">Birim Fiyat</th>
+                                <th class="col-right" style="width: 80px;">İskonto</th>
+                                <th class="col-right" style="width: 100px;">Net Fiyat</th>
+                                <th class="col-center" style="width: 60px;">KDV</th>
+                                <th class="col-right" style="width: 100px;">Toplam</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in selectedInvoice.Items.OrderBy(i => i.Order))
+                            {
+                                var totalDiscount = item.Discount1 + item.Discount2 + item.Discount3 + item.Discount4 + item.Discount5;
+                                var netPrice = item.Price - (totalDiscount / (item.Quantity > 0 ? item.Quantity : 1)); // Birim başına iskonto düş
+                                
+                                // Doğrudan toplam iskonto miktarını gösterelim
+                                var discountDisplay = totalDiscount > 0 ? $"₺{totalDiscount:N2}" : "-";
+
+                                <tr>
+                                    <td>@item.Order</td>
+                                    <td>
+                                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="@item.ProductName">
+                                            <span class="product-name">@item.ProductName</span>
+                                        </div>
+                                        <span class="product-code">@item.ProductCode</span>
+                                    </td>
+                                    <td class="col-center">
+                                        @($"{item.Quantity:N2}") <span class="text-muted small">@item.Unit</span>
+                                    </td>
+                                    <td class="col-right">₺@($"{item.Price:N2}")</td>
+                                    <td class="col-right text-danger">@discountDisplay</td>
+                                    <td class="col-right">₺@($"{netPrice:N2}")</td>
+                                    <td class="col-center">
+                                        <span class="badge bg-light text-dark">@($"{item.VatRate:N0}")%</span>
+                                    </td>
+                                    <td class="col-right fw-bold">₺@($"{item.Total:N2}")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Footer Summary -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <div class="summary-row">
+                    <span>Ara Toplam</span>
+                    <span>₺@($"{selectedInvoice.TotalAmount:N2}")</span>
+                </div>
+                
+                @if (selectedInvoice.DiscountTotal > 0)
+                {
+                    <div class="summary-row discount">
+                        <span>Toplam İskonto</span>
+                        <span>-₺@($"{selectedInvoice.DiscountTotal:N2}")</span>
+                    </div>
+                }
+                
+                <div class="summary-row">
+                    <span>KDV Toplam</span>
+                    <span>₺@($"{selectedInvoice.VatTotal:N2}")</span>
+                </div>
+                
+                <div class="summary-row final">
+                    <span>GENEL TOPLAM</span>
+                    <span>₺@($"{selectedInvoice.GeneralTotal:N2}")</span>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(selectedInvoice.Description))
+        {
+            <div class="mt-4 p-3 bg-light rounded border">
+                <h6 class="text-xs font-bold text-uppercase text-secondary mb-1">Açıklama</h6>
+                <p class="text-sm text-dark mb-0">@selectedInvoice.Description</p>
+            </div>
+        }
+    </div>
+}
+else if (isLoading)
+{
+    <div class="loading-state">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+        <span class="mt-2">Fatura detayı yükleniyor...</span>
+    </div>
+}

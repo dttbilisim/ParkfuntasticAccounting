@@ -1,0 +1,69 @@
+@using ecommerce.Domain.Shared.Dtos.OtoIsmail
+@using Radzen
+@using Radzen.Blazor
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenText TextStyle="TextStyle.Subtitle1" TagName="TagName.H3" class="mb-3">Teslimat Carisi Seçimi</RadzenText>
+        
+        @if (CariListesi == null)
+        {
+            <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        }
+        else if (!CariListesi.Any())
+        {
+             <RadzenAlert Severity="AlertSeverity.Warning" AllowClose="false">
+                Teslimat carisi bulunamadı. Lütfen ana cari ile devam ediniz veya kontrol ediniz.
+             </RadzenAlert>
+        }
+        else
+        {
+            <RadzenLabel Text="Teslimat Noktası (Cari)" Component="ddCari" class="w-100" />
+            <RadzenDropDown @bind-Value="SelectedCariKodu" Data="@CariListesi" TextProperty="Unvan" ValueProperty="CariKodu" Name="ddCari" class="w-100 mb-3"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true" />
+        }
+
+        <RadzenLabel Text="Sipariş Notu" Component="txtNote" class="w-100 mt-2" />
+        <RadzenTextArea @bind-Value="OrderNote" Name="txtNote" class="w-100 mb-3" Rows="2" />
+
+        <div class="row justify-content-center">
+            <div class="col-md-12 d-flex align-items-end justify-content-end" style="gap: 10px;">
+                <RadzenButton Text="İptal" Click="@((args) => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" />
+                <RadzenButton Text="Sipariş Oluştur" Click="@Confirm" ButtonStyle="ButtonStyle.Success" Disabled="@(CariListesi != null && CariListesi.Any() && string.IsNullOrEmpty(SelectedCariKodu))" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] DialogService DialogService { get; set; }
+
+    [Parameter] public List<OtoIsmailCariDto> CariListesi { get; set; }
+    [Parameter] public string DefaultNote { get; set; }
+
+    public string SelectedCariKodu { get; set; }
+    public string OrderNote { get; set; }
+
+    protected override void OnInitialized()
+    {
+        OrderNote = DefaultNote;
+        if (CariListesi != null && CariListesi.Count == 1)
+        {
+            SelectedCariKodu = CariListesi.First().CariKodu;
+        }
+    }
+
+    void Confirm()
+    {
+        DialogService.Close(new OtoIsmailOrderDialogResult { CariKodu = SelectedCariKodu, BizAlacagiz = false, OrderNote = OrderNote });
+    }
+}
+
+@code {
+    public class OtoIsmailOrderDialogResult
+    {
+        public string CariKodu { get; set; }
+        public bool BizAlacagiz { get; set; }
+        public string OrderNote { get; set; }
+    }
+}

@@ -1,0 +1,50 @@
+﻿@page "/upsert-notificationtype"
+@using ecommerce.Admin.Domain.Dtos.NotificationTypeDto;
+@using ecommerce.Core.Utils;
+@attribute [Authorize]
+
+<PageTitle>Bildirim Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Ölçüm Cinsi Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="NotificationTypeUpsertDto" Data="@notificationType" Visible="@(notificationType != null)" Submit="@FormSubmit">
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Bildirim Tipi" Component="UserType" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDown TValue="NotificationTypeList" style="display: block; width: 100%" Data="notificationTypeList" @bind-Value="@notificationType.NotificationTypeList" Name="NotificationTypeList" Placeholder="Seçiniz" 
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Bildirim" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@notificationType.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="Bildirim Tip Adı Girmelisiniz" />
+            </div>
+        </div>
+
+
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Değer" Component="Value" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@notificationType.Value" Name="Value" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+

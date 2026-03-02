@@ -1,0 +1,261 @@
+@page "/contact-us"
+@using ecommerce.Web.Domain.Email
+@using FluentValidation
+@using Blazored.FluentValidation
+@using Radzen
+
+
+<BreadcrumbComponent BreadcrumbText="@lang["Contact.ContactUs"]"/>
+
+<style>
+    /* Contact page ONLY — tüm form tipografisini eşitle */
+    :root { --contact-font: var(--app-font, "Public Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif); }
+    .contact-box-section .form-label,
+    .contact-box-section label,
+    .contact-box-section .form-control,
+    .contact-box-section .form-select,
+    .contact-box-section input,
+    .contact-box-section select,
+    .contact-box-section textarea,
+    .contact-box-section .rz-inputtext,
+    .contact-box-section .select-modern-input,
+    .contact-box-section .custom-input,
+    .contact-box-section .custom-textarea {
+        font-family: var(--contact-font) !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;   /* hepsi aynı kalınlık */
+        line-height: 1.35 !important;
+        color: #212529 !important;     /* hepsi aynı renk */
+    }
+
+    /* Dropdown içi seçenekler */
+    .contact-box-section select option {
+        font-family: var(--contact-font) !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        color: #212529 !important;
+    }
+
+    /* Placeholder'lar */
+    .contact-box-section ::placeholder,
+    .contact-box-section .form-control::placeholder {
+        font-family: var(--contact-font) !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        color: #6c757d !important;
+        opacity: 1 !important;
+    }
+</style>
+
+<!-- Breadcrumb Section End -->
+
+<!-- Contact Box Section Start -->
+<section class="contact-box-section">
+    <div class="container-fluid-lg">
+        <div class="row g-lg-5 g-3">
+            <div class="col-lg-6">
+                <div class="left-sidebar-box">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="contact-title">
+                                <h3>@lang["Contact.GetInTouch"]</h3>
+                            </div>
+                            <div class="contact-image">
+                                <img src="../assets/images/inner-page/otp.png"
+                                     class="img-fluid blur-up lazyloaded" alt="">
+                            </div>
+                            <div class="contact-detail">
+                                <div class="row g-4">
+                                    <div class="col-xxl-6 col-lg-12 col-sm-6">
+                                        <div class="contact-detail-box">
+                                            <div class="contact-icon">
+                                                <i class="fa-solid fa-phone"></i>
+                                            </div>
+                                            <div class="contact-detail-title">
+                                                <h4>@lang["Contact.Phone"]</h4>
+                                            </div>
+
+                                            <div class="contact-detail-contain">
+                                                <p>0850 840 7300</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xxl-6 col-lg-12 col-sm-6">
+                                        <div class="contact-detail-box">
+                                            <div class="contact-icon">
+                                                <i class="fa-solid fa-envelope"></i>
+                                            </div>
+                                            <div class="contact-detail-title">
+                                                <h4>@lang["Contact.Email"]</h4>
+                                            </div>
+
+                                            <div class="contact-detail-contain">
+                                                <p>destek@parpazar.com</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xxl-6 col-lg-12 col-sm-6">
+                                        <div class="contact-detail-box">
+                                            <div class="contact-icon">
+                                                <i class="fa-solid fa-location-dot"></i>
+                                            </div>
+                                            <div class="contact-detail-title">
+                                                <h4>@lang["Contact.LondonOffice"]</h4>
+                                            </div>
+
+                                            <div class="contact-detail-contain">
+                                                <p>Şafak Mah. 5003. Sk. No 85 Kepez/ANTALYA</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @* <div class="col-xxl-6 col-lg-12 col-sm-6"> *@
+                                    @*     <div class="contact-detail-box"> *@
+                                    @*         <div class="contact-icon"> *@
+                                    @*             <i class="fa-solid fa-building"></i> *@
+                                    @*         </div> *@
+                                    @*         <div class="contact-detail-title"> *@
+                                    @*             <h4>@lang["Contact.BournemouthOffice"]</h4> *@
+                                    @*         </div> *@
+                                    @* *@
+                                    @*         <div class="contact-detail-contain"> *@
+                                    @*             <p>Visitación de la Encina 22</p> *@
+                                    @*         </div> *@
+                                    @*     </div> *@
+                                    @* </div> *@
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="title d-xxl-none d-block">
+                    <h2>@lang["Contact.ContactUs"]</h2>
+                </div>
+                <EditForm Model="@supportModel" OnValidSubmit="SubmitSupportLine" >
+                    <FluentValidationValidator/>
+                <div class="right-sidebar-box">
+                    <div class="row">
+                                <div class="col-12">
+    <div class="mb-md-4 mb-3 select-option">
+        <label for="faqId" class="form-label">@lang["Contact.FAQId"]</label>
+        <select id="faqId" class="form-select theme-form-select select-modern-input"
+                @bind="supportModel.FrequentlyAskedQuestionsId" @bind:after="OnFaqChanged">
+            <option value="0">@lang["Common.Select"]</option>
+            @foreach (var f in supportQuestion)
+            {
+                <option value="@f.Id">@f.Name</option>
+            }
+        </select>
+        <ValidationMessage For="@(() => supportModel.FrequentlyAskedQuestionsId)" class="text-danger" />
+    </div>
+</div>
+                        <div class="col-12">
+                            <div class="mb-md-4 mb-3 custom-form">
+                                <label for="firstName" class="form-label">@lang["Contact.FirstName"]</label>
+                                <div class="custom-input">
+                                    <input type="text" class="form-control" id="firstName"
+                                           placeholder="@lang["Contact.FirstName.Placeholder"]" @bind="supportModel.FirstName">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <ValidationMessage For="@(() => supportModel.FirstName)" class="text-danger"/>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="mb-md-4 mb-3 custom-form">
+                                <label for="lastName" class="form-label">@lang["Contact.LastName"]</label>
+                                <div class="custom-input">
+                                    <input type="text" class="form-control" id="lastName"
+                                           placeholder="@lang["Contact.LastName.Placeholder"]" @bind="supportModel.LastName">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <ValidationMessage For="@(() => supportModel.LastName)" class="text-danger"/>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="mb-md-4 mb-3 custom-form">
+                                <label for="exampleFormControlInput2" class="form-label">@lang["Contact.EmailAddress"]</label>
+                                <div class="custom-input">
+                                    <input type="email" class="form-control" id="exampleFormControlInput2"
+                                           placeholder="@lang["Contact.EnterEmailAddress"]" @bind="supportModel.Email">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <ValidationMessage For="@(() => supportModel.Email)" class="text-danger"/>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="mb-md-4 mb-3 custom-form">
+                                <label for="phoneNumber" class="form-label">@lang["Contact.Phone"]</label>
+                                <div class="custom-input">
+                                    <input type="tel" class="form-control" id="phoneNumber"
+                                           placeholder="@lang["Contact.Phone.Placeholder"]" @bind="supportModel.PhoneNumber">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <ValidationMessage For="@(() => supportModel.PhoneNumber)" class="text-danger"/>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+    <div class="mb-md-4 mb-3 select-option">
+        <label for="returnType" class="form-label">@lang["Contact.PreferredContact"]</label>
+        <select id="returnType" class="form-select theme-form-select select-modern-input" @bind="supportModel.SupportLineReturnType">
+            <option value="">@lang["Common.Select"]</option>
+            <option value="Email">@lang["Contact.Return.Email"]</option>
+            <option value="Sms">@lang["Contact.Return.Sms"]</option>
+            <option value="Telefon">@lang["Contact.Return.Phone"]</option>
+        </select>
+        <ValidationMessage For="@(() => supportModel.SupportLineReturnType)" class="text-danger" />
+    </div>
+</div>
+
+                        <div class="col-12">
+    <div class="mb-md-4 mb-3 select-option">
+        <label for="supportType" class="form-label">@lang["Contact.RequestType"]</label>
+        <select id="supportType" class="form-select theme-form-select select-modern-input" @bind="supportModel.SupportLineType">
+            <option value="">@lang["Common.Select"]</option>
+            <option value="ContactForm">@lang["Contact.Type.Contact"]</option>
+            <option value="SupportLine">@lang["Contact.Type.Support"]</option>
+            <option value="OrderSupport">@lang["Contact.Type.OrderSupport"]</option>
+        </select>
+        <ValidationMessage For="@(() => supportModel.SupportLineType)" class="text-danger" />
+    </div>
+</div>
+
+                        @* <div class="col-xxl-12 col-lg-12 col-sm-12"> *@
+                        @*     <div class="mb-md-4 mb-3 custom-form"> *@
+                        @*         <label for="faqId" class="form-label">@lang["Contact.FAQId"]</label> *@
+                        @*         <div class="custom-input"> *@
+                        @*             <input type="number" class="form-control" id="faqId" @bind="supportModel.FrequentlyAskedQuestionsId"> *@
+                        @*             <i class="fa-solid fa-circle-question"></i> *@
+                        @*         </div> *@
+                        @*         <ValidationMessage For="@(() => supportModel.FrequentlyAskedQuestionsId)" /> *@
+                        @*     </div> *@
+                        @* </div> *@
+
+                        <div class="col-12">
+                            <div class="mb-md-4 mb-3 custom-form">
+                                <label for="exampleFormControlTextarea" class="form-label">@lang["Contact.Message"]</label>
+                                <div class="custom-textarea">
+                                    <textarea class="form-control" id="exampleFormControlTextarea"
+                                              placeholder="@lang["Contact.EnterYourMessage"]" rows="6" @bind="supportModel.Description"></textarea>
+                                    <i class="fa-solid fa-message"></i>
+                                </div>
+                                <ValidationMessage For="@(() => supportModel.Description)" class="text-danger"/>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-animation btn-md fw-bold ms-auto" type="submit">@lang["Contact.SendMessage"]</button>
+                </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</section>

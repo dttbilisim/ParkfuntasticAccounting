@@ -1,0 +1,82 @@
+.input-card-submodels[b-77a9v93c95] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.submodel-container[b-77a9v93c95] {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e2e6ea;
+    min-height: 72px;
+}
+
+.submodel-container.empty[b-77a9v93c95] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.submodel-list[b-77a9v93c95] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.submodel-card[b-77a9v93c95] {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.submodel-card:hover[b-77a9v93c95] {
+    border-color: var(--bs-success);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.submodel-card.active[b-77a9v93c95] {
+    border-color: var(--bs-success);
+    background: rgba(0, 171, 85, 0.08);
+    box-shadow: 0 6px 16px rgba(0, 171, 85, 0.12);
+}
+
+.submodel-name[b-77a9v93c95] {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2a2f3a;
+    line-height: 1.2;
+}
+
+.clear-input[b-77a9v93c95] {
+    background: none;
+    border: none;
+    color: #adb5bd;
+    padding: 0;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clear-input:hover[b-77a9v93c95] {
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .submodel-card[b-77a9v93c95] {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+}
+

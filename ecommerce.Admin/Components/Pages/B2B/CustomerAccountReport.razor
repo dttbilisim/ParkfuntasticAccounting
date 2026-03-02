@@ -1,0 +1,279 @@
+@page "/b2b/customer-account-report"
+@attribute [Authorize]
+@layout MainLayout
+@using ecommerce.Admin.Components.Shared
+@using ecommerce.Admin.Domain.Dtos.CustomerAccountTransactionDto
+@using ecommerce.Core.Utils
+@using Radzen
+@using Radzen.Blazor
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Cari Hesap Raporu</PageTitle>
+
+<div class="b2b-account-report-page">
+    <RadzenCard class="report-card">
+        <div class="report-header">
+            <div class="header-title">
+                <i class="fas fa-chart-line"></i>
+                <h2>Cari Hesap Raporu</h2>
+            </div>
+            
+            <!-- Compact Date Range Filter -->
+            <div class="filter-group">
+                <RadzenDatePicker @bind-Value="startDate" 
+                                  DateFormat="dd.MM.yyyy" 
+                                  Placeholder="Başlangıç"
+                                  class="compact-date-picker" />
+                <RadzenDatePicker @bind-Value="endDate" 
+                                  DateFormat="dd.MM.yyyy" 
+                                  Placeholder="Bitiş"
+                                  class="compact-date-picker" />
+                <RadzenButton Text="Filtrele" 
+                              ButtonStyle="ButtonStyle.Primary" 
+                              Icon="filter"
+                              Size="ButtonSize.Small"
+                              Click="ApplyDateFilter" />
+                @if (startDate.HasValue || endDate.HasValue)
+                {
+                    <RadzenButton Text="Temizle" 
+                                  ButtonStyle="ButtonStyle.Light" 
+                                  Size="ButtonSize.Small"
+                                  Icon="close"
+                                  Click="ClearDateFilter" />
+                }
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <p>Yükleniyor...</p>
+            </div>
+        }
+        else if (accountReport != null)
+        {
+            <!-- Compact Balance Summary Cards -->
+            <div class="balance-summary">
+                <div class="balance-item balance-debit">
+                    <div class="balance-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="balance-info">
+                        <div class="balance-label">Toplam Borç</div>
+                        <div class="balance-value">₺@($"{accountReport.TotalDebit:N2}")</div>
+                    </div>
+                </div>
+                <div class="balance-item balance-credit">
+                    <div class="balance-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="balance-info">
+                        <div class="balance-label">Toplam Alacak</div>
+                        <div class="balance-value">₺@($"{accountReport.TotalCredit:N2}")</div>
+                    </div>
+                </div>
+                <div class="balance-item balance-total @(accountReport.Balance >= 0 ? "balance-positive" : "balance-negative")">
+                    <div class="balance-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="balance-info">
+                        <div class="balance-label">Bakiye</div>
+                        <div class="balance-value">₺@($"{accountReport.Balance:N2}")</div>
+                        <div class="balance-status">
+                            @if (accountReport.Balance < 0)
+                            {
+                                <span class="status-badge status-credit">Alacaklı</span>
+                            }
+                            else if (accountReport.Balance > 0)
+                            {
+                                <span class="status-badge status-debit">Borçlu</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-neutral">Ödenmiş</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compact Customer Info -->
+            <div class="customer-info">
+                <span class="customer-badge">
+                    <i class="fas fa-user"></i>
+                    <strong>@accountReport.CustomerName</strong>
+                    <span class="customer-code">[@accountReport.CustomerCode]</span>
+                </span>
+            </div>
+
+            <!-- Compact Transactions Table -->
+            <div class="transactions-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-list"></i> Hareketler</h5>
+                </div>
+                @if (accountReport.Transactions != null && accountReport.Transactions.Any())
+                {
+                    <AdminDataGrid @ref="transactionsGrid" 
+                                    Data="@accountReport.Transactions" 
+                                    TItem="CustomerAccountTransactionListDto"
+                                    AllowPaging="true" 
+                                    PageSize="15"
+                                    AllowSorting="true"
+                                    class="compact-transactions-grid">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="TransactionDate" 
+                                                  Title="Tarih" 
+                                                  Width="110px">
+                                <Template>
+                                    <div class="compact-date">
+                                        <div class="date-main">@($"{context.TransactionDate:dd.MM.yyyy}")</div>
+                                        <div class="date-time">@($"{context.TransactionDate:HH:mm}")</div>
+                                    </div>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="TransactionTypeName" 
+                                                  Title="Tip" 
+                                                  Width="80px">
+                                <Template>
+                                    <span class="type-badge @(context.TransactionType == CustomerAccountTransactionType.Debit ? "type-debit" : "type-credit")">
+                                        @(context.TransactionType == CustomerAccountTransactionType.Debit ? "Borç" : "Alacak")
+                                    </span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="Description" 
+                                                  Title="Açıklama"
+                                                  Width="200px">
+                                <Template>
+                                    <div class="description-text">@context.Description</div>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="OrderNumber" 
+                                                  Title="Sipariş" 
+                                                  Width="120px">
+                                <Template>
+                                    @if (context.LinkedOrders != null && context.LinkedOrders.Any())
+                                    {
+                                        <div class="order-links">
+                                            @foreach (var order in context.LinkedOrders)
+                                            {
+                                                <a href="/b2b/my-orders?search=@order.OrderNumber" 
+                                                   class="link-compact" style="display:block;">
+                                                    @order.OrderNumber
+                                                </a>
+                                            }
+                                        </div>
+                                    }
+                                    else if (!string.IsNullOrEmpty(context.OrderNumber))
+                                    {
+                                        <a href="/b2b/my-orders?search=@context.OrderNumber" 
+                                           class="link-compact">
+                                            @context.OrderNumber
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="InvoiceNo" 
+                                                  Title="Fatura" 
+                                                  Width="130px">
+                                <Template>
+                                    @if (!string.IsNullOrEmpty(context.InvoiceNo))
+                                    {
+                                        <a href="/b2b/my-invoices?search=@context.InvoiceNo" 
+                                           class="link-compact">
+                                            @context.InvoiceNo
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="PaymentTypeName" 
+                                                  Title="Ödeme" 
+                                                  Width="100px">
+                                <Template>
+                                    @if (!string.IsNullOrEmpty(context.PaymentTypeName))
+                                    {
+                                        <span class="payment-badge">@context.PaymentTypeName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="IncomingAmount" 
+                                                  Title="Alacak" 
+                                                  Width="100px">
+                                <Template>
+                                    @if (context.IncomingAmount > 0)
+                                    {
+                                        <span class="amount-incoming">
+                                            <i class="fas fa-arrow-down"></i> ₺@($"{context.IncomingAmount:N2}")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="OutgoingAmount" 
+                                                  Title="Borç" 
+                                                  Width="100px">
+                                <Template>
+                                    @if (context.OutgoingAmount > 0)
+                                    {
+                                        <span class="amount-outgoing">
+                                            <i class="fas fa-arrow-up"></i> ₺@($"{context.OutgoingAmount:N2}")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="CustomerAccountTransactionListDto" 
+                                                  Property="BalanceAfterTransaction" 
+                                                  Title="Kalan" 
+                                                  Width="110px">
+                                <Template>
+                                    <span class="balance-amount @(context.BalanceAfterTransaction >= 0 ? "balance-debt" : "balance-credit")">
+                                        ₺@($"{context.BalanceAfterTransaction:N2}")
+                                    </span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </AdminDataGrid>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted">Henüz hareket kaydı bulunmamaktadır.</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <p class="text-muted">Rapor yüklenemedi.</p>
+            </div>
+        }
+    </RadzenCard>
+</div>

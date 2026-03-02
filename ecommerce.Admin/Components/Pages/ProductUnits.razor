@@ -1,0 +1,57 @@
+@page "/product-units"
+@using ecommerce.Admin.Domain.Dtos.ProductUnitDto
+@attribute [Authorize]
+@layout MainLayout
+
+<PageTitle>Ürün Birim Tanımları</PageTitle>
+
+<RadzenCard class="mb-3" style="display: flex; align-items: center;">
+    <div style="width: 100%; overflow: hidden;">
+        <div style="width: 600px; float: left;">
+            <RadzenText Text="Ürün Birim Tanımları" TextStyle="TextStyle.H5" style="color:#598087" class="mt-2" />
+        </div>
+        <div style="float:right">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Ürün Birimi Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+</RadzenCard>
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenDataGrid @ref="radzenDataGrid"
+                        ColumnWidth="140px"
+                        AllowFiltering="true"
+                        FilterMode="FilterMode.Simple"
+                        AllowPaging="true"
+                        AllowSorting="true"
+                        PagerAlwaysVisible="true"
+                        PageSize="25"
+                        AllowFilterDateInput="true"
+                        TItem="ProductUnitListDto"
+                        RowSelect="@EditRow"
+                        LoadData="@LoadData"
+                        Count="@count"
+                        Data="@productUnits"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+            <Columns>
+                <RadzenDataGridColumn TItem="ProductUnitListDto" Property="Id" Title="Id" Width="70px" />
+                <RadzenDataGridColumn TItem="ProductUnitListDto" Property="ProductName" Title="Ürün Adı" Width="200px" />
+                <RadzenDataGridColumn TItem="ProductUnitListDto" Property="UnitName" Title="Birim" Width="120px" />
+                <RadzenDataGridColumn TItem="ProductUnitListDto" Property="Barcode" Title="Barkod" Width="150px" />
+                <RadzenDataGridColumn TItem="ProductUnitListDto" Property="UnitValue" Title="Birim Değeri" Width="120px" FormatString="{0:N2}" TextAlign="TextAlign.Right" />
+                <RadzenDataGridColumn TItem="ProductUnitListDto" Property="CreatedDate" Title="Oluşturma" Width="160px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                <RadzenDataGridColumn TItem="ProductUnitListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="80px" TextAlign="TextAlign.Center">
+                    <Template Context="pu">
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                      Icon="delete"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Shade="Shade.Dark"
+                                      Variant="Variant.Flat"
+                                      Click="@((args) => GridDeleteButtonClick(args, pu))"
+                                      @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>

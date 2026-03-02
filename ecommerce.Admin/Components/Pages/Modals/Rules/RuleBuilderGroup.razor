@@ -1,0 +1,50 @@
+﻿@using ecommerce.Core.Rules
+
+<div class="fp-group-container">
+    <div class="fp-group-header">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start">
+            <RadzenSelectBar @bind-Value="@GroupExpression.GroupOperator" TValue="RuleGroupOperator?" Disabled="@(!GroupExpression.IsGroupOperatorEnabled)">
+                <Items>
+                    <RadzenSelectBarItem Text="Ve" Value="@RuleGroupOperator.And"/>
+                    <RadzenSelectBarItem Text="Veya" Value="@RuleGroupOperator.Or"/>
+                </Items>
+            </RadzenSelectBar>
+
+            <RadzenSplitButton Click="@AddGroupOrExpression" Text="Grup/Koşul Ekle" AlwaysOpenPopup="true" Icon="add">
+                <ChildContent>
+                    <RadzenSplitButtonItem Text="Grup Ekle" Value="Group"/>
+                    <RadzenSplitButtonItem Text="Koşul Ekle" Value="Expression"/>
+                </ChildContent>
+            </RadzenSplitButton>
+
+            @if (OnDelete.HasDelegate)
+            {
+                <RadzenButton Icon="delete_forever" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Filled" Click="@RemoveGroup"></RadzenButton>
+            }
+        </RadzenStack>
+    </div>
+
+    <div class="fp-group-body">
+        <div class="fp-rule-list">
+            <div class="fp-rule-container fp-joined-rule">
+                <RuleBuilderExpression @bind-Expression="GroupExpression"></RuleBuilderExpression>
+            </div>
+
+            @for (var i = 0; i < GroupExpression.Children.Count; i++)
+            {
+                var expression = GroupExpression.Children[i];
+
+                if (expression.IsGroup)
+                {
+                    <RuleBuilderGroup @bind-GroupExpression="expression" OnDelete="RemoveExpression"></RuleBuilderGroup>
+
+                    continue;
+                }
+
+                <div class="fp-rule-container fp-joined-rule bg-transparent">
+                    <RuleBuilderExpression @bind-Expression="expression" OnDelete="RemoveExpression"></RuleBuilderExpression>
+                </div>
+            }
+        </div>
+    </div>
+</div>

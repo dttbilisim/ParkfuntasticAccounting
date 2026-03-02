@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /sitemap.xml
+
+# Admin sayfalarını engelle
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
+
+# Arama sayfalarını engelle
+Disallow: /*?q=*
+Disallow: /*?page=*
+
+# Sitemap
+Sitemap: /sitemap.xml

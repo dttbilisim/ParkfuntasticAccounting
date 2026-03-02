@@ -1,0 +1,339 @@
+@page "/dat-sync"
+@using Dot.Integration.Services
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@layout MainLayout
+
+<PageTitle>DAT Senkronizasyon</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>DAT SilverDAT API Senkronizasyon</h3>
+                </div>
+                <div class="card-body">
+
+                    <!-- Ana Senkronizasyon Butonları -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <RadzenButton Text="⚡ BULK SENKRONIZASYON"
+                                          Click="@BulkSyncAllVehicleTypes"
+                                          ButtonStyle="ButtonStyle.Success"
+                                          Size="ButtonSize.Large"
+                                          Disabled="@isRunning"
+                                          Icon="flash_on" />
+                            <small class="form-text text-muted">🚀 Çok hızlı - Paralel işlem</small>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenButton Text="🚗 TÜM ARAÇ TİPLERİ"
+                                          Click="@SyncAllVehicleTypes"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Size="ButtonSize.Large"
+                                          Disabled="@isRunning"
+                                          Icon="sync" />
+                            <small class="form-text text-muted">📋 Sırayla tüm araç tipleri</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3 mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                <h5>📊 DatData Seed İşlemi</h5>
+                                <p>DatData tablosunu manuel parça verileriyle doldurmak için bu butonu kullanın. Bu veriler daha sonra bulk sync sırasında parça aramada kullanılacak.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <RadzenButton Text="🌱 SEED: DatData Tablosunu Doldur" 
+                                          Click="@SeedDatDataTable" 
+                                          ButtonStyle="ButtonStyle.Secondary" 
+                                          Size="ButtonSize.Large"
+                                          Disabled="@isRunning"
+                                          Icon="storage" />
+                            <small class="form-text text-muted">📋 Bilinen parça process numaralarını tabloya ekler</small>
+                        </div>
+                        <div class="col-md-4">
+                            <RadzenButton Text="🔄 SYNC: From DatDatas" 
+                                          Click="@SyncFromDatDatas" 
+                                          ButtonStyle="ButtonStyle.Warning" 
+                                          Size="ButtonSize.Large"
+                                          Disabled="@isRunning"
+                                          Icon="autorenew" />
+                            <small class="form-text text-muted">📥 DatDatas tablosundaki bekleyen kayıtları işler</small>
+                        </div>
+                        <div class="col-md-4">
+                            <RadzenButton Text="🖼️ SYNC: Missing Images" 
+                                          Click="@SyncMissingImages" 
+                                          ButtonStyle="ButtonStyle.Info" 
+                                          Size="ButtonSize.Large"
+                                          Disabled="@isRunning"
+                                          Icon="image" />
+                            <small class="form-text text-muted">🖼️ DotCompiledCodes'dan eksik image'ları çek</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <RadzenButton Text="🕐 1️⃣ Sync ConstructionPeriods" 
+                                          Click="@BulkSyncConstructionPeriods" 
+                                          ButtonStyle="ButtonStyle.Info" 
+                                          Size="ButtonSize.Large"
+                                          Disabled="@(isRunning || isBulkSyncingConstructionPeriods || isUpdatingYears)"
+                                          Icon="schedule" />
+                            <small class="form-text text-muted">🕐 ÖNCE BU! ConstructionTime'ları çeker</small>
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenButton Text="🚀 2️⃣ Sync VehicleData" 
+                                          Click="@BulkSyncAllVehicleData" 
+                                          ButtonStyle="ButtonStyle.Danger" 
+                                          Size="ButtonSize.Large"
+                                          Disabled="@(isRunning || isBulkSyncingConstructionPeriods || isUpdatingYears)"
+                                          Icon="rocket_launch" />
+                            <small class="form-text text-muted">🔥 VehicleData çeker</small>
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenButton Text="📅 3️⃣ Update Years" 
+                                          Click="@UpdateConstructionPeriodYears" 
+                                          ButtonStyle="ButtonStyle.Success" 
+                                          Size="ButtonSize.Large"
+                                          Disabled="@(isRunning || isBulkSyncingConstructionPeriods || isUpdatingYears)"
+                                          Icon="calendar_today" />
+                            <small class="form-text text-muted">📆 EN SON! Null yılları doldurur</small>
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenButton Text="🧪 TEST: VehicleData" 
+                                          Click="@TestVehicleDataSync" 
+                                          ButtonStyle="ButtonStyle.Warning" 
+                                          Size="ButtonSize.Large"
+                                          Disabled="@(isRunning || isBulkSyncingConstructionPeriods || isUpdatingYears)"
+                                          Icon="science" />
+                            <small class="form-text text-muted">🚗 İlk 50 kayıt test</small>
+                        </div>
+                    </div>
+
+                    <!-- Ayrı Ayrı Seçim Bölümü -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h4 class="mb-0">🚗 Ayrı Ayrı Araç Seçimi</h4>
+                                    <small>Kontrollü senkronizasyon için adım adım seçim yapın</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <h6>🚗 Araç Tipi</h6>
+                                            <RadzenDropDown @bind-Value="selectedVehicleTypeId"
+                                                           Data="@vehicleTypes"
+                                                           TextProperty="Name"
+                                                           ValueProperty="Id"
+                                                           Placeholder="Araç tipi seçin..."
+                                                           Change="@(args => SelectVehicleType((int)args))"
+                                                           Disabled="@isRunning"
+                                                           Style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>🏭 Üretici (Marka)</h6>
+                                            <RadzenDropDown @bind-Value="selectedManufacturerKey"
+                                                           Data="@manufacturers"
+                                                           TextProperty="Name"
+                                                           ValueProperty="DatKey"
+                                                           Placeholder="@(selectedVehicleTypeId.HasValue ? "Üretici seçin..." : "Önce araç tipi seçin")"
+                                                           Disabled="@(!selectedVehicleTypeId.HasValue || isRunning)"
+                                                           Style="width: 100%;" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Seçili Kombinasyon ve Senkronizasyon Butonu -->
+                                    @if (selectedVehicleTypeId.HasValue && !string.IsNullOrEmpty(selectedManufacturerKey))
+                                    {
+                                        var selectedVehicleType = vehicleTypes.FirstOrDefault(vt => vt.Id == selectedVehicleTypeId.Value);
+                                        var selectedManufacturer = manufacturers.FirstOrDefault(m => m.DatKey == selectedManufacturerKey);
+
+                                        <div class="alert alert-success">
+                                            <h6>✅ Seçili Kombinasyon:</h6>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <strong>Araç Tipi:</strong><br />
+                                                    <span class="badge bg-primary fs-6">@selectedVehicleType?.Name (@selectedVehicleType?.Id)</span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <strong>Üretici:</strong><br />
+                                                    <span class="badge bg-success fs-6">@selectedManufacturer?.Name (@selectedManufacturer?.DatKey)</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="alert alert-info">
+                                                <i class="fa fa-info-circle"></i> <strong>Not:</strong> Bu markanın TÜM modelleri, serileri ve alt modelleri otomatik olarak senkronize edilecek.
+                                                <br />
+                                                <i class="fa fa-bolt"></i> <strong>Performans:</strong> Paralel işlem ile <span class="badge bg-success">5x daha hızlı</span> (aynı anda 5 model işlenir)
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <RadzenButton Text="⚡ Bu Marka İçin TÜM Modelleri HIZLI Senkronize Et"
+                                                              Click="@SyncSelectedManufacturer"
+                                                              ButtonStyle="ButtonStyle.Success"
+                                                              Size="ButtonSize.Large"
+                                                              Disabled="@isRunning"
+                                                              Icon="flash_on" />
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-warning">
+                                            <p class="mb-0">⚠️ Araç tipi ve üretici seçerek senkronizasyonu başlatın</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (isRunning)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                                <p class="mt-2">Senkronizasyon devam ediyor... Lütfen bekleyin.</p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info" style="max-height: 600px; overflow-y: auto;">
+                                    <pre style="white-space: pre-wrap; word-wrap: break-word;">@statusMessage</pre>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (syncStats != null)
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>📊 Senkronizasyon İstatistikleri</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-primary text-white p-3 rounded">
+                                                    <h6>Araç Tipleri</h6>
+                                                    <h3>@syncStats.VehicleTypesCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-success text-white p-3 rounded">
+                                                    <h6>Üreticiler</h6>
+                                                    <h3>@syncStats.ManufacturersCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-info text-white p-3 rounded">
+                                                    <h6>Ana Modeller</h6>
+                                                    <h3>@syncStats.BaseModelsCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-warning text-white p-3 rounded">
+                                                    <h6>Alt Modeller</h6>
+                                                    <h3>@syncStats.SubModelsCount</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-danger text-white p-3 rounded">
+                                                    <h6>Araçlar (Vehicles)</h6>
+                                                    <h3>@syncStats.VehiclesCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-secondary text-white p-3 rounded">
+                                                    <h6>Opsiyonlar</h6>
+                                                    <h3>@syncStats.OptionsCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-dark text-white p-3 rounded">
+                                                    <h6>Motor Opsiyonları</h6>
+                                                    <h3>@syncStats.EngineOptionsCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-info text-white p-3 rounded">
+                                                    <h6>Kasa Opsiyonları</h6>
+                                                    <h3>@syncStats.CarBodyOptionsCount</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-success text-white p-3 rounded">
+                                                    <h6>Compiled Codes</h6>
+                                                    <h3>@syncStats.CompiledCodesCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-warning text-white p-3 rounded">
+                                                    <h6>Parçalar</h6>
+                                                    <h3>@syncStats.PartsCount</h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="stat-card bg-primary text-white p-3 rounded">
+                                                    <h6>Görseller</h6>
+                                                    <h3>@syncStats.ImagesCount</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-12">
+                                                <div class="alert alert-success">
+                                                    <h6>✅ Tam Senkronizasyon Aktif</h6>
+                                                    <p class="mb-0">
+                                                        <i class="fa fa-check-circle"></i> 
+                                                        <strong>Kaydedilen:</strong> Araç Tipleri, Markalar, Ana Modeller, Alt Modeller, Options (Classification, Engine, CarBody), CompiledCodes, Parts, Images
+                                                    </p>
+                                                    <p class="mb-0">
+                                                        <i class="fa fa-bolt"></i> 
+                                                        <strong>Paralel İşlem:</strong> 5x daha hızlı (aynı anda 5 model işlenir)
+                                                    </p>
+                                                    <p class="mb-0">
+                                                        <i class="fa fa-database"></i> 
+                                                        <strong>Tam Veri:</strong> Tüm DAT verileri kaydediliyor!
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-danger">
+                                    <strong>Hata:</strong> @errorMessage
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,662 @@
+@using ecommerce.Domain.Shared.Dtos.Product
+@using ecommerce.Admin.Services.Interfaces
+@inject IAdminProductSearchService ProductSearchService
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ecommerce.Web.Domain.Services.Abstract.ICartService CartService
+@inject ICartStateService CartStateService
+@inject ecommerce.Admin.Services.AuthenticationService Security
+@implements IDisposable
+
+<div class="similar-products-modal">
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <div class="mt-2 text-muted">Muadil ürünler aranıyor...</div>
+        </div>
+    }
+    else if (products != null && products.Any())
+    {
+        <div class="alert alert-info py-2 mb-3 small border-0 bg-info-subtle text-info-emphasis">
+            <i class="fa-solid fa-info-circle me-2"></i>
+            Bu grup kodu (<strong>@(OemCodes != null && OemCodes.Any() ? string.Join(", ", OemCodes.Take(3)) + (OemCodes.Count > 3 ? "..." : "") : "-")</strong>) altında <strong>@products.Count</strong> adet muadil ürün bulundu.
+        </div>
+
+        <RadzenDataGrid @ref="grid" Data="@products" TItem="SellerProductViewModel" AllowPaging="true" PageSize="20" 
+                        AllowSorting="true"
+                        Style="height: 320px;"
+                        Class="custom-grid shadow-sm border rounded-3 overflow-hidden">
+            <Columns>
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Title="ID / SATICI" Width="100px">
+                    <Template Context="product">
+                        <div class="fw-bold text-dark">@product.ProductId</div>
+                        <div class="small text-muted" style="font-size: 0.75rem;">@product.SellerName</div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Title="Görsel" Width="80px" Sortable="false">
+                    <Template Context="product">
+                         <img src="@ResolveSearchImage(product)" style="width: 40px; height: 40px; object-fit: contain;" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Property="PartNumber" Title="Kod" Width="120px" />
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Property="ProductName" Title="Ürün Adı" />
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Property="Brand.Name" Title="Marka" Width="100px" />
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Property="SalePrice" Title="Fiyat" Width="100px" TextAlign="TextAlign.Right">
+                    <Template Context="product">
+                        <div class="fw-bold text-primary">@product.SalePrice.ToString("N2") @product.Currency</div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                    <Template Context="product">
+                         @if (IsPlasiyer())
+                         {
+                             @* Plasiyer: Stok miktarını göster *@
+                             @if (product.Stock > 0)
+                             {
+                                 <span class="badge bg-success-subtle text-success">@product.Stock</span>
+                             }
+                             else
+                             {
+                                 <span class="badge bg-danger-subtle text-danger">0</span>
+                             }
+                         }
+                         else
+                         {
+                             @* CustomerB2B: Stokta/Tükendi göster *@
+                             @if (product.Stock > 0)
+                             {
+                                 <span class="badge bg-success-subtle text-success">Stokta</span>
+                             }
+                             else
+                             {
+                                 <span class="badge bg-danger-subtle text-danger">Tükendi</span>
+                             }
+                         }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SellerProductViewModel" Title="SEPET" Width="150px" Sortable="false">
+                    <Template Context="product">
+                        @if (product.Stock > 0 && product.SalePrice > 0)
+                        {
+                            var isItemLoading = IsProductLoading(product.SellerItemId);
+                            var currentCart = CartStateService?.CurrentCart;
+                            var isInCart = currentCart?.Sellers?
+                                .SelectMany(s => s.Items)
+                                .Any(i => i.ProductSellerItemId == product.SellerItemId) ?? false;
+                            var cartQty = isInCart
+                                ? (currentCart?.Sellers?
+                                    .SelectMany(s => s.Items)
+                                    .FirstOrDefault(i => i.ProductSellerItemId == product.SellerItemId)?.Quantity ?? 1)
+                                : 1;
+                            
+                            @if (isInCart)
+                            {
+                                @if (isItemLoading)
+                                {
+                                    <div class="d-flex justify-content-center align-items-center" style="min-height: 36px;">
+                                        <span class="spinner-border spinner-border-sm text-success" role="status" title="Güncelleniyor...">
+                                            <span class="visually-hidden">Güncelleniyor...</span>
+                                        </span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="quantity-controls d-flex justify-content-center align-items-center gap-1">
+                                        <button class="qty-btn minus btn btn-sm btn-outline-secondary" 
+                                                style="width: 28px; height: 28px; padding: 0;"
+                                                disabled="@isItemLoading"
+                                                @onclick="@(async () => await UpdateQuantity(product.SellerItemId, cartQty - 1))"
+                                                @onclick:stopPropagation="true">
+                                            @if (isItemLoading)
+                                            {
+                                                <span class="spinner-border spinner-border-sm" style="width: 0.7rem; height: 0.7rem;"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa-solid fa-minus" style="font-size: 0.7rem;"></i>
+                                            }
+                                        </button>
+                                        
+                                        <input type="number" 
+                                               class="form-control form-control-sm text-center"
+                                               style="width: 60px; height: 28px; font-size: 0.8rem;"
+                                               value="@cartQty" 
+                                               @onchange="@(async (ChangeEventArgs e) => { if (int.TryParse(e.Value?.ToString(), out int qty) && qty > 0) await UpdateQuantity(product.SellerItemId, qty); })"
+                                               min="1"
+                                               max="@product.Stock"
+                                               disabled="@isItemLoading"
+                                               @onclick:stopPropagation="true" />
+                                               
+                                        <button class="qty-btn plus btn btn-sm btn-outline-secondary" 
+                                                style="width: 28px; height: 28px; padding: 0;"
+                                                disabled="@isItemLoading"
+                                                @onclick="@(async () => await UpdateQuantity(product.SellerItemId, cartQty + 1))"
+                                                @onclick:stopPropagation="true">
+                                            @if (isItemLoading)
+                                            {
+                                                <span class="spinner-border spinner-border-sm" style="width: 0.7rem; height: 0.7rem;"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa-solid fa-plus" style="font-size: 0.7rem;"></i>
+                                            }
+                                        </button>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <!-- Add to Cart Button - Only show when item is NOT in cart -->
+                                <button class="btn btn-sm btn-success d-flex align-items-center justify-content-center" 
+                                        style="width: 36px; height: 36px; padding: 0;"
+                                        title="Sepete Ekle"
+                                        disabled="@isItemLoading"
+                                        @onclick="@(async () => await AddToCart(product))"
+                                        @onclick:stopPropagation="true">
+                                    @if(isItemLoading) {
+                                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                                    } else {
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    }
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted small">-</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i>
+            <p>Muadil ürün bulunamadı.</p>
+        </div>
+    }
+    
+
+</div>
+
+@code {
+    [Parameter] public List<string> OemCodes { get; set; } = null!;
+    [Parameter] public int SellerId { get; set; }
+    [Parameter] public List<int>? ExcludedProductSellerItemIds { get; set; } = new();
+
+    private RadzenDataGrid<SellerProductViewModel>? grid;
+    private bool isLoading = true;
+    private List<SellerProductViewModel> products = new();
+    private Dictionary<int, int> productQuantities = new();
+    private Dictionary<int, int> existingCartItems = new();
+    private Dictionary<int, bool> productLoadingStates = new();
+
+    private bool IsPlasiyer()
+    {
+        return Security?.User?.Roles.Any(r => r.Name == "Plasiyer") ?? false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartStateService.OnChange += OnCartChanged;
+        LoadExistingCartItems();
+        await LoadSimilarProducts();
+    }
+
+    public void Dispose()
+    {
+        CartStateService.OnChange -= OnCartChanged;
+    }
+    
+    private async void OnCartChanged()
+    {
+        LoadExistingCartItems();
+        if (grid != null)
+        {
+            await InvokeAsync(async () => 
+            {
+                await grid.Reload();
+                StateHasChanged();
+            });
+        }
+        else
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    
+    private void OnQuantityInputChanged(int sellerItemId, int newQty)
+    {
+        // This method is no longer needed - UpdateQuantity handles it
+        // Keeping for backward compatibility but redirecting to UpdateQuantity
+        _ = UpdateQuantity(sellerItemId, newQty);
+    }
+
+    private void LoadExistingCartItems()
+    {
+        existingCartItems.Clear();
+        if (CartStateService?.CurrentCart?.Sellers != null)
+        {
+            foreach (var item in CartStateService.CurrentCart.Sellers.SelectMany(s => s.Items))
+            {
+                existingCartItems[item.ProductSellerItemId] = item.Quantity;
+                productQuantities[item.ProductSellerItemId] = item.Quantity;
+            }
+        }
+    }
+
+    private bool IsProductInCart(int sellerItemId) => existingCartItems.ContainsKey(sellerItemId);
+    
+    private bool IsProductLoading(int sellerItemId) => productLoadingStates.ContainsKey(sellerItemId) && productLoadingStates[sellerItemId];
+    
+    private int GetQuantity(int sellerItemId)
+    {
+        // If in cart, show cart quantity
+        if (existingCartItems.TryGetValue(sellerItemId, out var cartQty))
+            return cartQty;
+        
+        // Otherwise show local quantity (for new items)
+        if (productQuantities.TryGetValue(sellerItemId, out var localQty))
+            return localQty;
+            
+        return 1;
+    }
+
+    private async Task LoadSimilarProducts()
+    {
+        try
+        {
+            isLoading = true;
+            if (OemCodes == null || !OemCodes.Any())
+            {
+                isLoading = false;
+                return;
+            }
+
+            var result = await ProductSearchService.GetSimilarProductsAsync(OemCodes);
+            if (result.Ok && result.Result != null)
+            {
+                var query = result.Result.Where(p => p.SalePrice > 0);
+
+                products = query
+                    .OrderByDescending(p => p.Stock > 0)
+                    .ThenBy(p => p.SalePrice)
+                    .ToList();
+                
+                // Initialize quantities for each product
+                foreach (var product in products)
+                {
+                    productQuantities[product.SellerItemId] = 1;
+                }
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage 
+                { 
+                    Severity = NotificationSeverity.Warning, 
+                    Summary = "Uyarı", 
+                    Detail = "Muadil ürünler getirilemedi." 
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage 
+            { 
+                Severity = NotificationSeverity.Error, 
+                Summary = "Hata", 
+                Detail = ex.Message 
+            });
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private async Task UpdateQuantity(int sellerItemId, int newQuantity)
+    {
+        
+        if (IsProductLoading(sellerItemId)) return;
+        
+        var product = products.FirstOrDefault(p => p.SellerItemId == sellerItemId);
+        if (product == null) return;
+        
+        // If quantity is 0 or less, remove item (like CartDrawer)
+        if (newQuantity <= 0)
+        {
+            await RemoveFromCart(sellerItemId);
+            return;
+        }
+        
+        // Check stock limit
+        if (newQuantity > product.Stock)
+        {
+            newQuantity = product.Stock;
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Stok Sınırı",
+                Detail = $"Stok limitine ({product.Stock}) ulaşıldı.",
+                Duration = 2000
+            });
+        }
+        
+        // Get current cart quantity
+        int currentCartQty = existingCartItems.GetValueOrDefault(sellerItemId, 0);
+        
+        // Calculate delta (like CartDrawer)
+        int delta = newQuantity - currentCartQty;
+        
+        if (delta == 0)
+        {
+            return;
+        }
+        
+        // Update via delta (optimized)
+        await UpdateCartQuantity(sellerItemId, delta);
+    }
+    
+    
+    private async Task RemoveFromCart(int sellerItemId)
+    {
+        if (IsProductLoading(sellerItemId)) return;
+        
+        productLoadingStates[sellerItemId] = true;
+        await InvokeAsync(StateHasChanged);
+        
+        try
+        {
+            // Find cart item ID
+            var currentCart = CartStateService.CurrentCart;
+            var cartItem = currentCart?.Sellers?
+                .SelectMany(s => s.Items)
+                .FirstOrDefault(i => i.ProductSellerItemId == sellerItemId);
+            
+            if (cartItem == null)
+            {
+                productLoadingStates[sellerItemId] = false;
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+            
+            // OPTIMIZE: Use CartItemRemove and get returned cart directly
+            var result = await CartService.CartItemRemove(cartItem.Id);
+            
+            if (result.Ok && result.Result != null)
+            {
+                // OPTIMIZE: Use returned cart directly instead of RefreshCart (avoids cache issues)
+                CartStateService.SetCart(result.Result);
+                
+                // Update existingCartItems from returned cart
+                if (result.Result.Sellers != null)
+                {
+                    existingCartItems = result.Result.Sellers
+                        .SelectMany(s => s.Items)
+                        .ToDictionary(i => i.ProductSellerItemId, i => i.Quantity);
+                }
+                else
+                {
+                    // Remove from dictionary if cart is empty
+                    existingCartItems.Remove(sellerItemId);
+                }
+                
+                // Remove from productQuantities
+                productQuantities.Remove(sellerItemId);
+                
+                // Force grid to re-render
+                if (grid != null)
+                {
+                    await grid.Reload();
+                }
+                await InvokeAsync(StateHasChanged);
+                
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "Silindi",
+                    Detail = "Ürün sepetten kaldırıldı.",
+                    Duration = 2000
+                });
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Hata",
+                    Detail = result.Metadata?.Message ?? "Ürün sepetten kaldırılamadı.",
+                    Duration = 4000
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Hata",
+                Detail = ex.Message,
+                Duration = 4000
+            });
+        }
+        finally
+        {
+            productLoadingStates[sellerItemId] = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    
+    private async Task UpdateCartQuantity(int sellerItemId, int delta)
+    {
+        if (IsProductLoading(sellerItemId)) return;
+        
+        productLoadingStates[sellerItemId] = true;
+        await InvokeAsync(StateHasChanged);
+        
+        try
+        {
+            // Create cart item request (optimized - like ProductSearch modal)
+            var cartItem = new ecommerce.Web.Domain.Dtos.Cart.CartItemUpsertDto
+            {
+                ProductSellerItemId = sellerItemId,
+                Quantity = delta,
+                CustomerId = Security?.SelectedCustomerId
+            };
+
+            var result = await CartService.CreateCartItem(cartItem);
+            
+            if (result.Ok && result.Result != null)
+            {
+                // OPTIMIZE: Use returned cart directly instead of RefreshCart (avoids cache issues)
+                CartStateService.SetCart(result.Result);
+                
+                // Update existingCartItems from returned cart
+                if (result.Result.Sellers != null)
+                {
+                    existingCartItems = result.Result.Sellers
+                        .SelectMany(s => s.Items)
+                        .ToDictionary(i => i.ProductSellerItemId, i => i.Quantity);
+                    
+                    // Sync productQuantities
+                    foreach (var item in existingCartItems)
+                    {
+                        productQuantities[item.Key] = item.Value;
+                    }
+                }
+                
+                // Force grid to re-render
+                if (grid != null)
+                {
+                    await grid.Reload();
+                }
+                await InvokeAsync(StateHasChanged);
+                
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Güncellendi",
+                    Detail = "Sepet güncellendi.",
+                    Duration = 2000
+                });
+            }
+            else
+            {
+                var errMsg = result.Metadata?.Message ?? "Sepet güncellenirken hata oluştu";
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Sepet Hatası",
+                    Detail = errMsg,
+                    Duration = 3000
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Hata",
+                Detail = ex.Message,
+                Duration = 3000
+            });
+        }
+        finally
+        {
+            productLoadingStates[sellerItemId] = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    
+    private async Task AddToCart(SellerProductViewModel product)
+    {
+        if (IsProductLoading(product.SellerItemId)) return;
+        
+        productLoadingStates[product.SellerItemId] = true;
+        await InvokeAsync(StateHasChanged);
+        
+        try
+        {
+            // Get current cart quantity (optimized - like ProductSearch modal)
+            int currentCartQty = existingCartItems.GetValueOrDefault(product.SellerItemId, 0);
+            
+            // Target quantity is 1 for new items
+            int targetQty = 1;
+            int delta = targetQty - currentCartQty;
+            
+            // If no change needed, return
+            if (delta == 0) 
+            {
+                productLoadingStates[product.SellerItemId] = false;
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+            
+            // Check stock limit
+            if (targetQty > product.Stock)
+            {
+                targetQty = product.Stock;
+                delta = targetQty - currentCartQty;
+                if (delta == 0)
+                {
+                    productLoadingStates[product.SellerItemId] = false;
+                    await InvokeAsync(StateHasChanged);
+                    return;
+                }
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Stok Sınırı",
+                    Detail = $"Stok limitine ({product.Stock}) ulaşıldı.",
+                    Duration = 2000
+                });
+            }
+
+            // Create cart item request (optimized)
+            var cartItem = new ecommerce.Web.Domain.Dtos.Cart.CartItemUpsertDto
+            {
+                ProductSellerItemId = product.SellerItemId,
+                Quantity = delta,
+                CustomerId = Security?.SelectedCustomerId
+            };
+
+            var result = await CartService.CreateCartItem(cartItem);
+            
+            if (result.Ok && result.Result != null)
+            {
+                // OPTIMIZE: Use returned cart directly instead of RefreshCart (avoids cache issues)
+                CartStateService.SetCart(result.Result);
+                
+                // Update existingCartItems from returned cart
+                if (result.Result.Sellers != null)
+                {
+                    existingCartItems = result.Result.Sellers
+                        .SelectMany(s => s.Items)
+                        .ToDictionary(i => i.ProductSellerItemId, i => i.Quantity);
+                    
+                    // Sync productQuantities
+                    foreach (var item in existingCartItems)
+                    {
+                        productQuantities[item.Key] = item.Value;
+                    }
+                }
+                
+                // Force grid to re-render
+                if (grid != null)
+                {
+                    await grid.Reload();
+                }
+                await InvokeAsync(StateHasChanged);
+                
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Sepete Eklendi",
+                    Detail = "Ürün sepete eklendi.",
+                    Duration = 2000
+                });
+            }
+            else
+            {
+                var errMsg = result.Metadata?.Message ?? "Ürün sepete eklenemedi.";
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Hata",
+                    Detail = errMsg,
+                    Duration = 4000
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Hata",
+                Detail = ex.Message,
+                Duration = 4000
+            });
+        }
+        finally
+        {
+            productLoadingStates[product.SellerItemId] = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    
+     private string ResolveSearchImage(SellerProductViewModel product)
+    {
+        if (!string.IsNullOrWhiteSpace(product.DocumentUrl)) return product.DocumentUrl;
+        if (product.Images != null && product.Images.Any())
+        {
+             // Simple fallback path logic, ideally injected config
+            return $"https://cdn.yedeksen.com/images/ProductImages/{product.Images.First().FileName}";
+        }
+        return "/images/no-photo.png";
+    }
+}

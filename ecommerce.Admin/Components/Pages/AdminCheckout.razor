@@ -1,0 +1,468 @@
+@page "/admin-checkout"
+@using ecommerce.Admin.Services.Interfaces
+@using ecommerce.Admin.Domain.Dtos.UserAddressDto
+@using ecommerce.Web.Domain.Dtos.Cart
+@using ecommerce.Core.Entities.Authentication
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Web.Domain.Dtos.Bank
+@using ecommerce.Web.Domain.Dtos.Order
+@using Radzen
+@using Radzen.Blazor
+@layout MainLayout
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+<PageTitle>Sipariş Onayı</PageTitle>
+
+@if (isLoading)
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-success"></div>
+    </div>
+}
+else
+{
+    <!-- Global Cart Update Loading Overlay -->
+    @if (isUpdatingCart)
+    {
+        <div class="cart-update-overlay">
+            <div class="cart-update-spinner">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <div class="spinner-text">Sepet güncelleniyor...</div>
+            </div>
+        </div>
+    }
+
+    <!-- Global Order Processing Loading Overlay -->
+    @if (isProcessing)
+    {
+        <div class="cart-update-overlay" style="z-index: 2000; position: fixed;">
+            <div class="cart-update-spinner"></div>
+            <h4 class="mt-4 fw-bold" style="color: #10b981; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);">Siparişiniz Hazırlanıyor</h4>
+            <p class="text-white-50 mt-2">Lütfen bekleyiniz...</p>
+        </div>
+    }
+    
+    <div class="container-fluid-lg py-4">
+        <div class="row g-4">
+            <!-- Left: Order Items (CartPage Style) -->
+            <div class="col-lg-8">
+                <div class="modern-cart-container">
+                    @if (CurrentCart?.Sellers != null && CurrentCart.Sellers.Any())
+                    {
+                        @foreach (var seller in CurrentCart.Sellers.Where(s => s.Items?.Any() == true))
+                        {
+                            <div class="seller-group">
+                                <!-- Seller Header -->
+                                <div class="seller-header">
+                                    <div class="seller-info">
+                                        <div class="seller-checkbox">
+                                            @if (isUpdatingCart)
+                                            {
+                                                <div class="checkbox-loading">
+                                                    <div class="spinner-border spinner-border-sm text-success" role="status">
+                                                        <span class="visually-hidden">Yükleniyor...</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" 
+                                                       checked="@(!seller.IsAllItemsPassive)"
+                                                       id="seller-@seller.SellerId" 
+                                                       class="seller-checkbox-input"
+                                                       @onchange="(e) => OnSellerCheckboxChanged(seller.SellerId, e)">
+                                            }
+                                        </div>
+                                        <i class="fas fa-store me-2"></i>
+                                        <span class="seller-name">@seller.SellerName</span>
+                                    </div>
+                                    <div class="seller-total">@seller.OrderTotal.ToString("C")</div>
+                                </div>
+
+                                <!-- Products List -->
+                                <div class="products-list">
+                                    @foreach (var item in seller.Items)
+                                    {
+                                        <div class="product-card @(item.Status != 1 ? "passive" : "")">
+                                            <!-- Product Checkbox -->
+                                            <div class="product-checkbox-wrapper">
+                                                @if (IsItemUpdating(item))
+                                                {
+                                                    <div class="checkbox-loading">
+                                                        <div class="spinner-border spinner-border-sm text-success" role="status">
+                                                            <span class="visually-hidden">Yükleniyor...</span>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" 
+                                                           checked="@(item.Status == 1)"
+                                                           id="product-@item.ProductSellerItemId" 
+                                                           class="product-checkbox-input"
+                                                           @onchange="(e) => OnProductCheckboxChanged(item.ProductSellerItemId, e)"
+                                                           disabled="@isUpdatingCart">
+                                                }
+                                            </div>
+                                            
+                                            <!-- Product Image -->
+                                            <div class="product-image">
+                                                @if (!string.IsNullOrEmpty(item.PictureUrl))
+                                                {
+                                                    var cdnBase = Configuration["Cdn:BaseUrl"] ?? "";
+                                                    var imageUrl = item.PictureUrl.StartsWith("http") ? item.PictureUrl : $"{cdnBase}/ProductImages/{item.PictureUrl}";
+                                                    <img src="@imageUrl" 
+                                                         alt="@item.ProductName" 
+                                                         onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                                    <div class="product-image-placeholder" style="display: none;">
+                                                        <i class="fa-solid fa-image"></i>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="product-image-placeholder">
+                                                        <i class="fa-solid fa-image"></i>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- Product Details -->
+                                            <div class="product-details">
+                                                <div class="product-info">
+                                                    @{
+                                                        var checkoutProductNameId = $"checkout-product-name-{item.Id}";
+                                                    }
+                                                    <a @ref="@(_elementReferences[checkoutProductNameId])"
+                                                       href="#" 
+                                                       class="product-name"
+                                                       @onmouseenter="@(() => ShowTooltip(checkoutProductNameId, item.ProductName))"
+                                                       @onmouseleave="@(() => HideTooltip())">@item.ProductName</a>
+                                                </div>
+
+                                                <!-- Product Discounts & Savings -->
+                                                @if (item.DiscountAmount > 0 && item.AppliedDiscounts != null && item.AppliedDiscounts.Any())
+                                                {
+                                                    <div class="product-promotions">
+                                                        @foreach (var discount in item.AppliedDiscounts)
+                                                        {
+                                                            <span class="promo-badge">
+                                                                <i class="fa-solid fa-tag me-1"></i>
+                                                                @discount.Name
+                                                                @if (discount.UsePercentage && discount.DiscountPercentage.HasValue)
+                                                                {
+                                                                    <text>(@discount.DiscountPercentage.Value.ToString("N0")%)</text>
+                                                                }
+                                                                else if (discount.DiscountAmount.HasValue)
+                                                                {
+                                                                    <text>(@discount.DiscountAmount.Value.ToString("C"))</text>
+                                                                }
+                                                            </span>
+                                                        }
+                                                        @if (item.DisplaySavings > 0)
+                                                        {
+                                                            <span class="savings-badge">
+                                                                <i class="fa-solid fa-gift me-1"></i>
+                                                                Kazancınız: @((item.DisplaySavings * item.Quantity).ToString("C"))
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                }
+
+                                                <!-- Price & Quantity -->
+                                                <div class="product-actions">
+                                                    <div class="price-section">
+                                                        <div class="total-price">@item.Total.ToString("C")</div>
+                                                    </div>
+                                                    
+                                                    <div class="quantity-section">
+                                                        @{
+                                                            var isItemUpdating = IsItemUpdating(item);
+                                                        }
+                                                        <div class="quantity-controls @(isItemUpdating ? "updating" : "")">
+                                                            @if (isItemUpdating)
+                                                            {
+                                                                <div class="quantity-loading">
+                                                                    <div class="spinner-border spinner-border-sm text-success" role="status">
+                                                                        <span class="visually-hidden">Yükleniyor...</span>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <button type="button" 
+                                                                        class="qty-btn minus" 
+                                                                        @onclick="() => UpdateQuantity(item, -1)"
+                                                                        @onclick:stopPropagation="true"
+                                                                        disabled="@(isUpdatingCart || item.Quantity <= (item.MinSellCount > 0 ? item.MinSellCount : 1))">
+                                                                    <i class="fa-solid fa-minus"></i>
+                                                                </button>
+                                                                <input type="number" 
+                                                                       class="qty-input" 
+                                                                       value="@item.Quantity" 
+                                                                       min="@(item.MinSellCount > 0 ? item.MinSellCount : 1)"
+                                                                       max="@(item.MaxSellCount > 0 ? item.MaxSellCount : 9999)"
+                                                                       step="@(item.Step > 0 ? item.Step : 1)"
+                                                                       @onchange="@((ChangeEventArgs e) => OnQuantityChanged(item, e))"
+                                                                       @onclick:stopPropagation="true"
+                                                                       disabled="@isUpdatingCart" />
+                                                                <button type="button" 
+                                                                        class="qty-btn plus" 
+                                                                        @onclick="() => UpdateQuantity(item, 1)"
+                                                                        @onclick:stopPropagation="true"
+                                                                        disabled="@(isUpdatingCart || (item.MaxSellCount > 0 && item.Quantity >= item.MaxSellCount))">
+                                                                    <i class="fa-solid fa-plus"></i>
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="product-remove-section product-remove-inline">
+                                                        <button type="button" 
+                                                                class="product-remove-btn"
+                                                                @onclick="() => RemoveItem(item.Id, item.ProductSellerItemId)"
+                                                                @onclick:stopPropagation="true"
+                                                                disabled="@(isUpdatingCart || IsItemUpdating(item))"
+                                                                title="Sepetten Kaldır">
+                                                            <i class="fa-solid fa-trash-can"></i>
+                                                        </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+
+                                <!-- Seller Discounts -->
+                                @if (seller.AppliedDiscounts != null && seller.AppliedDiscounts.Any())
+                                {
+                                    <div class="seller-discounts">
+                                        <div class="discounts-header">
+                                            <i class="fa-solid fa-tags me-2"></i>
+                                            <span class="fw-bold">Satıcı İndirimleri</span>
+                                        </div>
+                                        <div class="discounts-list">
+                                            @foreach (var discount in seller.AppliedDiscounts)
+                                            {
+                                                <div class="discount-item">
+                                                    <span class="discount-name">@discount.Name</span>
+                                                    @if (discount.UsePercentage && discount.DiscountPercentage.HasValue)
+                                                    {
+                                                        <span class="discount-value">@discount.DiscountPercentage.Value.ToString("N0")%</span>
+                                                    }
+                                                    else if (discount.DiscountAmount.HasValue)
+                                                    {
+                                                        <span class="discount-value">-@discount.DiscountAmount.Value.ToString("C")</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Cargo Selection -->
+                                @if (seller.Cargoes != null && seller.Cargoes.Any())
+                                {
+                                    <div class="seller-cargo-container">
+                                        <div class="cargo-header">
+                                            <i class="fa-solid fa-truck me-2"></i>
+                                            <span class="fw-bold">Kargo Seçimi</span>
+                                        </div>
+                                        <div class="cargo-list">
+                                            @foreach (var cargo in seller.Cargoes)
+                                            {
+                                                var isSelected = seller.SelectedCargo?.CargoId == cargo.CargoId;
+                                                <div class="cargo-radio-item @(isSelected ? "selected" : "")" 
+                                                     @onclick="() => OnSellerCargoChanged(seller, cargo)">
+                                                    <div class="radio-circle">
+                                                        @if (isSelected)
+                                                        {
+                                                            <div class="radio-dot"></div>
+                                                        }
+                                                    </div>
+                                                    <div class="cargo-info">
+                                                        <div class="cargo-name">@cargo.Name</div>
+                                                        <div class="cargo-delivery">Tahmini Teslimat: @GetEstimatedDelivery()</div>
+                                                    </div>
+                                                    <div class="cargo-price">
+                                                        @(cargo.CargoPrice > 0 ? cargo.CargoPrice.ToString("C") : "Ücretsiz")
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Seller Footer (Total) -->
+                                <div class="seller-footer">
+                                    <div class="seller-footer-row">
+                                        <span class="summary-label">Toplam</span>
+                                        <span class="summary-price">@seller.OrderTotal.ToString("C")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+
+                </div>
+            </div>
+
+            <!-- Right: Summary & Complete (CartPage Style) -->
+            <div class="col-lg-4">
+                <div class="order-summary-card">
+                    <div class="summary-header">
+                        <h3>Sipariş Özeti</h3>
+                    </div>
+
+                    <!-- Customer Address Selection -->
+                    @if (CustomerInfo != null)
+                    {
+                        <div class="summary-content">
+                            <div class="mb-3 pb-3 border-bottom">
+                                <h6 class="fw-bold mb-2 delivery-info-header">
+                                    <i class="fa-solid fa-truck me-2"></i>Teslimat Bilgileri
+                                </h6>
+                                
+                                @if (CustomerAddresses != null && CustomerAddresses.Any())
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold mb-2">
+                                            <i class="fa-solid fa-map-marker-alt text-muted me-1"></i>
+                                            Teslimat Adresi
+                                        </label>
+                                        <RadzenDropDown @bind-Value="@SelectedUserAddressId"
+                                                        Data="@CustomerAddresses"
+                                                        TextProperty="AddressDisplayName"
+                                                        ValueProperty="Id"
+                                                        Placeholder="Adres seçiniz..."
+                                                        class="w-100 form-control-modern"
+                                                        AllowClear="false" 
+                                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    </div>
+                                    
+                                    @if (SelectedUserAddressId.HasValue)
+                                    {
+                                        var selectedAddress = CustomerAddresses.FirstOrDefault(a => a.Id == SelectedUserAddressId.Value);
+                                        @if (selectedAddress != null)
+                                        {
+                                            <div class="delivery-info-content">
+                                                <div class="mb-1 fw-semibold delivery-info-name">@selectedAddress.FullName</div>
+                                                <div class="mb-1">@selectedAddress.Address</div>
+                                                <div class="mb-1 small text-muted">@selectedAddress.CityName / @selectedAddress.TownName</div>
+                                                <div><i class="fa-solid fa-phone me-1"></i>@selectedAddress.PhoneNumber</div>
+                                                @if (!string.IsNullOrWhiteSpace(selectedAddress.Email))
+                                                {
+                                                    <div><i class="fa-solid fa-envelope me-1"></i>@selectedAddress.Email</div>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <!-- Fallback to Customer entity address if no UserAddresses -->
+                                    <div class="delivery-info-content">
+                                        <div class="mb-1 fw-semibold delivery-info-name">@CustomerInfo.Name</div>
+                                        <div class="mb-1">@CustomerInfo.Address</div>
+                                        <div><i class="fa-solid fa-phone me-1"></i>@(CustomerInfo.Phone ?? CustomerInfo.Mobile)</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+
+                    <!-- Order Note -->
+                    <div class="summary-content">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold mb-2 order-note-label">
+                                <i class="fa-solid fa-note-sticky text-muted me-1"></i>
+                                Sipariş Notu (Opsiyonel)
+                            </label>
+                            <textarea class="form-control form-control-sm order-note-input" 
+                                      rows="2" 
+                                      placeholder="Özel notunuzu yazınız..." 
+                                      @bind="OrderNote"></textarea>
+                        </div>
+                    </div>
+
+
+                    <!-- Discount Summaries -->
+                    @if (CurrentCart?.DiscountSummaries != null && CurrentCart.DiscountSummaries.Any())
+                    {
+                        <div class="summary-content">
+                            <div class="discounts-section">
+                                @foreach (var discount in CurrentCart.DiscountSummaries)
+                                {
+                                    <div class="discount-item">
+                                        <div class="discount-info">
+                                            <i class="fa-solid fa-tag me-2"></i>
+                                            <span>@discount.Name</span>
+                                            @if (discount.Percentage.HasValue)
+                                            {
+                                                <span class="discount-percentage">(@discount.Percentage.Value.ToString("N0")%)</span>
+                                            }
+                                        </div>
+                                        <div class="discount-amount">
+                                            @discount.Amount.ToString("C")
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Summary Totals -->
+                    <div class="summary-totals">
+                        <div class="total-row">
+                            <span>Ara Toplam</span>
+                            <span>@CurrentCart?.SubTotal.ToString("C")</span>
+                        </div>
+                        <div class="total-row cargo-row">
+                            <span>Kargo Ücreti</span>
+                            <span>@CurrentCart?.CargoPrice.ToString("C")</span>
+                        </div>
+                        @if (CurrentCart?.OrderTotalDiscount > 0)
+                        {
+                            <div class="total-row discount-row">
+                                <span>İndirim</span>
+                                <span class="text-success">-@CurrentCart.OrderTotalDiscount.ToString("C")</span>
+                            </div>
+                        }
+                        @if (ShouldShowPaymentModal && InterestDifference > 0)
+                        {
+                            <div class="total-row installment-total">
+                                <span>Vade Farkı</span>
+                                <span class="text-danger">+@InterestDifference.ToString("C")</span>
+                            </div>
+                        }
+                        <div class="total-row final-total">
+                            <span>Toplam</span>
+                            <span class="final-price">@(ShouldShowPaymentModal && CalculatedGrandTotal > 0 ? CalculatedGrandTotal.ToString("C") : CurrentCart?.OrderTotal.ToString("C"))</span>
+                        </div>
+                    </div>
+
+                    <!-- Complete Button -->
+                    <div class="checkout-section">
+                        <button class="btn-checkout w-100" 
+                                @onclick="CompleteOrder" 
+                                disabled="@(isProcessing || CurrentCart == null || CurrentCart.TotalItems == 0 || CustomerInfo == null)">
+                            @if (isProcessing)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>İşleminizi Yapıyorum...</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-check-circle me-2"></i>
+                                <span>Siparişi Tamamla</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

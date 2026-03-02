@@ -1,0 +1,351 @@
+@page "/product-search"
+
+@using ecommerce.Core.Utils
+@using ecommerce.Domain.Shared.Dtos.Product
+@using ecommerce.Web.Components.Pages.Components
+<BreadcrumbComponent BreadcrumbText="@(catname ?? brandname ?? lang["Catalog.Products"])"/>
+
+
+<section class="section-b-space shop-section category-filter-layout">
+    <div class="container-fluid-lg">
+        <div class="row">
+            @if (IsMobileFilterOpen)
+            {
+                <div class="filter-overlay d-lg-none" @onclick="CloseMobileFilter"></div>
+            }
+            <div class="col-custom-3 filter-column @(IsMobileFilterOpen ? "is-open" : string.Empty)">
+                <div class="left-box @(IsMobileFilterOpen ? "is-open" : string.Empty)">
+                    <div class="shop-left-sidebar filter-card">
+                        <div class="filter-panel-header">
+                            <div class="filter-panel-title">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>@lang["Catalog.Filters"]</span>
+                            </div>
+                            <div class="filter-panel-actions">
+                                <button type="button" class="btn-filter-reset" @onclick="CleanFilter" disabled="@(!IsAnyFilterSelected)">
+                                    <i class="fa-solid fa-rotate"></i>
+                                    @lang["Common.Clear"]
+                                </button>
+                                <button type="button" class="filter-close d-lg-none" @onclick="CloseMobileFilter" aria-label="@lang["Common.Close"]">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                        @{ var activeChips = ActiveFilterChips.ToList(); }
+                        @if (activeChips.Any())
+                        {
+                            <div class="filter-active-chips">
+                                @foreach (var chip in activeChips)
+                                {
+                                    <span class="filter-chip">
+                                        <span>@chip.Label</span>
+                                        <button type="button" @onclick="() => RemoveChip(chip)" aria-label="@lang["Common.Clear"]">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </span>
+                                }
+                            </div>
+                        }
+                        <div class="filter-card-body">
+                            <div class="accordion custom-accordion filter-accordion" id="accordionExample">
+                            @if(category != null && category.Any()){
+                                <div class="accordion-item filter-group">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button filter-toggle @(SelectedCategoryIds.Any() ? string.Empty : "collapsed")" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseOne">
+                                            <span>@lang["Catalog.Categories"]</span>
+                                        </button>
+                                    </h2>
+
+
+                                    <div id="collapseOne" class="accordion-collapse collapse @(SelectedCategoryIds.Any() ? "show" : string.Empty)">
+                                        <div class="accordion-body filter-group-body">
+                                            <div class="form-floating theme-form-floating-2 search-box">
+                                                <input type="search" class="form-control filter-search-input" id="searchCategory"
+                                                       placeholder="@lang["Catalog.SearchCategoryPlaceholder"]" @bind-value="searchCategory" @bind-value:event="oninput" />
+                                            </div>
+                                            <ul class="category-list custom-padding custom-height" style="display:block; overflow-x:hidden;">
+
+                                                @foreach(var item in FilteredCategories){
+                                                    <li @key="@("cat-" + item.Id)">
+                                                        <div class="form-check ps-0 m-0 category-list-box">
+                                                            <input class="checkbox_animated" type="checkbox" id="@item.Id"
+                                                                   checked="@SelectedCategoryIds.Contains(item.Id!.Value)"
+                                                                   @onchange="e => OnCategoryChanged(e, item.Id.Value)">
+                                                            <label class="form-check-label" for="@item.Id" style="display:flex; align-items:flex-start; flex-wrap:wrap; width:100%;">
+                                                                <span class="name" style="display:block; width:100%; white-space:normal; overflow:visible; word-break:break-word; font-size:0.70rem; line-height:1.25;">@_appStateManager.ToTitleCase(item.Name)</span>
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                }
+
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            }
+                            @if(brands != null && brands.Any()){
+                                <div class="accordion-item filter-group">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                        <button class="accordion-button filter-toggle @(SelectedBrandIds.Any() ? string.Empty : "collapsed")" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                            <span>@lang["Catalog.Brands"]</span>
+                                        </button>
+                                    </h2>
+
+                                    <div id="collapseTwo" class="accordion-collapse collapse @(SelectedBrandIds.Any() ? "show" : string.Empty)">
+                                        <div class="accordion-body filter-group-body">
+                                            <div class="form-floating theme-form-floating-2 search-box">
+                                                <input type="search" class="form-control filter-search-input" id="searchBrand"
+                                                       placeholder="@lang["Catalog.SearchBrandPlaceholder"]" @bind-value="searchBrand" @bind-value:event="oninput" />
+                                            </div>
+                                            <ul class="category-list custom-padding custom-height" style="display:block; overflow-x:hidden;">
+
+                                                @foreach(var item in FilteredBrands){
+                                                    <li @key="@("brand-" + item.Id)">
+                                                        <div class="form-check ps-0 m-0 category-list-box">
+                                                            <input class="checkbox_animated" type="checkbox" id="brand-@item.Id"
+                                                                   checked="@SelectedBrandIds.Contains(item.Id!.Value)"
+                                                                   @onchange="e => OnBrandChanged(e, item.Id.Value)">
+                                                            <label class="form-check-label" for="brand-@item.Id" style="display:flex; align-items:flex-start; flex-wrap:wrap; width:100%;">
+                                                                <span class="name" style="display:block; width:100%; white-space:normal; overflow:visible; word-break:break-word; font-size:0.70rem; line-height:1.25;">@_appStateManager.ToTitleCase(item.Name)</span>
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                }
+
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            }
+
+                            @if(dotPartNames.Any())
+                            {
+                                <div class="accordion-item filter-group">
+                                    <h2 class="accordion-header" id="headingDotPart">
+                                        <button class="accordion-button filter-toggle @(SelectedDotPartNames.Any() ? string.Empty : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDotPart">
+                                            <span>@lang["Catalog.DotPart"]</span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseDotPart" class="accordion-collapse collapse @(SelectedDotPartNames.Any() ? "show" : string.Empty)">
+                                        <div class="accordion-body filter-group-body">
+                                            <div class="form-floating theme-form-floating-2 search-box">
+                                                <input type="search" class="form-control filter-search-input" id="searchDotPart"
+                                                       placeholder="@lang["Catalog.SearchDotPartPlaceholder"]" @bind-value="searchDotPart" @bind-value:event="oninput" />
+                                            </div>
+                                            <ul class="category-list custom-padding custom-height dotpart-list" style="display:block; overflow-x:hidden;">
+                                                @foreach (var dotPart in FilteredDotParts)
+                                                {
+                                                    <li @key="@("dot-" + dotPart)">
+                                                        <div class="form-check ps-0 m-0 category-list-box">
+                                                            <input class="checkbox_animated" type="checkbox" id="dotPart-@dotPart.GetHashCode()" value="@dotPart"
+                                                                   checked="@SelectedDotPartNames.Contains(dotPart)" @onchange="e => OnDotPartFilterChanged(dotPart, (bool)e.Value!)">
+                                                            <label class="form-check-label" for="dotPart-@dotPart.GetHashCode()" style="display:flex; align-items:flex-start; flex-wrap:wrap; width:100%;">
+                                                                <span class="name" style="display:block; width:100%; white-space:normal; overflow:visible; word-break:break-word; font-size:0.70rem; line-height:1.25;">@_appStateManager.ToTitleCase(dotPart)</span>
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            @if(manufacturerNames.Any())
+                            {
+                                <div class="accordion-item filter-group">
+                                    <h2 class="accordion-header" id="headingManufacturer">
+                                        <button class="accordion-button filter-toggle @(SelectedManufacturerNames.Any() ? string.Empty : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManufacturer">
+                                            <span>@lang["Catalog.Manufacturer"]</span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseManufacturer" class="accordion-collapse collapse @(SelectedManufacturerNames.Any() ? "show" : string.Empty)">
+                                        <div class="accordion-body filter-group-body">
+                                            <div class="form-floating theme-form-floating-2 search-box">
+                                                <input type="search" class="form-control filter-search-input" id="searchManufacturer"
+                                                       placeholder="@lang["Catalog.SearchManufacturerPlaceholder"]" @bind-value="searchManufacturer" @bind-value:event="oninput" />
+                                            </div>
+                                            <ul class="category-list custom-padding custom-height" style="display:block; overflow-x:hidden;">
+                                                @foreach (var manufacturer in FilteredManufacturers)
+                                                {
+                                                    <li>
+                                                        <div class="form-check ps-0 m-0 category-list-box">
+                                                            <input class="checkbox_animated" type="checkbox" id="manufacturer-@manufacturer.GetHashCode()" value="@manufacturer"
+                                                                   checked="@SelectedManufacturerNames.Contains(manufacturer)" @onchange="e => OnManufacturerFilterChanged(manufacturer, (bool)e.Value!)">
+                                                            <label class="form-check-label" for="manufacturer-@manufacturer.GetHashCode()" style="display:flex; align-items:flex-start; flex-wrap:wrap; width:100%;">
+                                                                <span class="name" style="display:block; width:100%; white-space:normal; overflow:visible; word-break:break-word; font-size:0.70rem; line-height:1.25;">@_appStateManager.ToTitleCase(manufacturer)</span>
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            @if(baseModelNames.Any())
+                            {
+                                <div class="accordion-item filter-group">
+                                    <h2 class="accordion-header" id="headingBaseModel">
+                                        <button class="accordion-button filter-toggle @(SelectedBaseModelNames.Any() ? string.Empty : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBaseModel">
+                                            <span>@lang["Catalog.BaseModel"]</span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseBaseModel" class="accordion-collapse collapse @(SelectedBaseModelNames.Any() ? "show" : string.Empty)">
+                                        <div class="accordion-body filter-group-body">
+                                            <div class="form-floating theme-form-floating-2 search-box">
+                                                <input type="search" class="form-control filter-search-input" id="searchBaseModel"
+                                                       placeholder="@lang["Catalog.SearchBaseModelPlaceholder"]" @bind-value="searchBaseModel" @bind-value:event="oninput" />
+                                            </div>
+                                            <ul class="category-list custom-padding custom-height" style="display:block; overflow-x:hidden;">
+                                                @foreach (var model in FilteredBaseModels)
+                                                {
+                                                    <li>
+                                                        <div class="form-check ps-0 m-0 category-list-box">
+                                                            <input class="checkbox_animated" type="checkbox" id="baseModel-@model.GetHashCode()" value="@model"
+                                                                   checked="@SelectedBaseModelNames.Contains(model)" @onchange="e => OnBaseModelFilterChanged(model, (bool)e.Value!)">
+                                                            <label class="form-check-label" for="baseModel-@model.GetHashCode()" style="display:flex; align-items:flex-start; flex-wrap:wrap; width:100%;">
+                                                                <span class="name" style="display:block; width:100%; white-space:normal; overflow:visible; word-break:break-word; font-size:0.70rem; line-height:1.25;">@_appStateManager.ToTitleCase(model)</span>
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            @if(subModelNames.Any())
+                            {
+                                <div class="accordion-item filter-group">
+                                    <h2 class="accordion-header" id="headingSubModel">
+                                        <button class="accordion-button filter-toggle @(SelectedSubModelNames.Any() ? string.Empty : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSubModel">
+                                            <span>@lang["Product.MotorType"]</span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseSubModel" class="accordion-collapse collapse @(SelectedSubModelNames.Any() ? "show" : string.Empty)">
+                                        <div class="accordion-body filter-group-body">
+                                            <div class="form-floating theme-form-floating-2 search-box">
+                                                <input type="search" class="form-control filter-search-input" id="searchSubModel"
+                                                       placeholder="@lang["Car.SearchModel"]" @bind-value="searchSubModel" @bind-value:event="oninput" />
+                                            </div>
+                                            <ul class="category-list custom-padding custom-height" style="display:block; overflow-x:hidden;">
+                                                @foreach (var sub in FilteredSubModels)
+                                                {
+                                                    <li>
+                                                        <div class="form-check ps-0 m-0 category-list-box">
+                                                            <input class="checkbox_animated" type="checkbox" id="subModel-@sub.GetHashCode()" value="@sub"
+                                                                   checked="@SelectedSubModelNames.Contains(sub)" @onchange="e => OnSubModelFilterChanged(sub, (bool)e.Value!)">
+                                                            <label class="form-check-label" for="subModel-@sub.GetHashCode()" style="display:flex; align-items:flex-start; flex-wrap:wrap; width:100%;">
+                                                                <span class="name" style="display:block; width:100%; white-space:normal; overflow:visible; word-break:break-word; font-size:0.70rem; line-height:1.25;">@_appStateManager.ToTitleCase(sub)</span>
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-custom-">
+                <div class="show-button">
+                    <div class="filter-button-group mt-0">
+                        <button type="button" class="filter-open-btn d-inline-flex d-lg-none align-items-center gap-2" @onclick="ToggleMobileFilter">
+                            <i class="fa-solid fa-filter"></i>
+                            <span>@lang["Common.FilterMenu"]</span>
+                        </button>
+                    </div>
+
+                    <div class="top-filter-menu d-flex align-items-center justify-content-between flex-wrap mb-3">
+                        <div class="d-flex align-items-center gap-2 mb-2 mb-md-0">
+                            <span class="text-content fw-medium">@lang["Common.Sort"]</span>
+                            <div class="dropdown sort-pill">
+                                <button class="btn btn-sm btn-light dropdown-toggle d-inline-flex align-items-center gap-2" type="button"
+                                        id="dropdownMenuButtonSort" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-arrow-up-wide-short"></i>
+                                    <span class="sort-current">@GetEnumDescription((ProductFilter)selectedSort)</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="dropdownMenuButtonSort">
+                                    @foreach (ProductFilter sortOption in Enum.GetValues(typeof(ProductFilter)))
+                                    {
+                                        var val = (int)sortOption;
+                                        var isActive = selectedSort == val;
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center justify-content-between @(isActive?"active":"")"
+                                               href="javascript:void(0)" @onclick="() => OnSortSelected(val)">
+                                                <span>@GetEnumDescription(sortOption)</span>
+                                                @if (isActive)
+                                                {
+                                                    <i class="fa-solid fa-check"></i>
+                                                }
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto mb-2 mb-md-0">
+                          <form class="search-pill" @onsubmit="OnSearchSubmit" @onsubmit:preventDefault>
+                              <input type="search" class="search-input" placeholder="@lang["Search.Placeholder"]"
+                                     @bind="productSearch" @oninput="OnSearchInput" />
+                              <button type="submit" class="icon-btn submit-btn" title="@lang["Common.Search"]">
+                                  <i class="fa fa-search fa-xl"></i>
+                              </button>
+                              @if (!string.IsNullOrWhiteSpace(productSearch))
+                              {
+                                  <button type="button" class="icon-btn clear-btn" title="@lang["Common.Clear"]" @onclick="ClearSearch">
+                                      <i class="fa fa-times"></i>
+                                  </button>
+                              }
+                          </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-sm-4 g-3 row-cols-xxl-4 row-cols-xl-3 row-cols-lg-2 row-cols-md-3 row-cols-2 product-list-section">
+                    @if(Products != null && Products.Any()){
+                        @foreach(var product in Products){
+                            <ecommerce.Web.Components.Pages.Components.ProductComponent 
+                                @key="@("p-" + product.SellerItemId)"
+                                CartResult="@CartResult"
+                                Product="@(new List<SellerProductViewModel> { product })">
+                            </ecommerce.Web.Components.Pages.Components.ProductComponent>
+                        }
+                    }
+                </div>
+
+           
+                <div @ref="scrollSentinel" class="scroll-sentinel text-center py-4" style="@(HasMoreProducts ? "" : "display:none;")">
+                    <button class="btn btn-link text-muted" @onclick="ScrollToLoadMore" disabled="@_isLoadingMore" style="text-decoration: none;">
+                        @if(_isLoadingMore){
+                            <p class="mb-0 mt-2 small text-muted">@lang["Common.LoadingMore"]</p>
+                        } else {
+                            <i class="fa-solid fa-chevron-down fa-2x fa-bounce"></i>
+                            <p class="mb-0 mt-2 small">@lang["Common.ScrollForMore"]</p>
+                        }
+                    </button>
+                </div>
+                
+                @if(!HasMoreProducts && Products?.Any() == true){
+                    <div class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-check-circle fa-2x mb-2"></i>
+                        <p>@lang["Catalog.AllProductsLoaded"]</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

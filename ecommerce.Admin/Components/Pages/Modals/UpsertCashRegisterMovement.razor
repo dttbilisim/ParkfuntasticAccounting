@@ -1,0 +1,216 @@
+@using ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
+@using ecommerce.Core.Utils
+@using Radzen
+@using Radzen.Blazor
+
+@if (Model == null)
+{
+    <div class="d-flex justify-content-center p-4">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+    </div>
+}
+else
+{
+    <RadzenTemplateForm Data="@Model" Submit="@(async (CashRegisterMovementUpsertDto a) => await FormSubmit(a))">
+        <div class="cash-movement-modal">
+            <div class="cash-movement-modal__header">
+                <h6 class="cash-movement-modal__title">@(Model.Id == 0 || !Model.Id.HasValue ? "Yeni Kasa Hareketi" : "Kasa Hareketi Düzenle")</h6>
+                <button type="button" class="cash-movement-modal__close" @onclick="@(() => DialogService.Close(false))" aria-label="Kapat">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="cash-movement-modal__body">
+                <div class="cash-movement-modal__section">
+                    <span class="cash-movement-modal__section-title">Hareket Tipi, Kasa, Ödeme Tipi, Döviz</span>
+                    <div class="cash-movement-modal__row">
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="Hareket Tipi" Component="MovementType" class="small" />
+                            <RadzenDropDown Name="MovementType"
+                                            @bind-Value="@Model.MovementType"
+                                            Data="@MovementTypeOptions"
+                                            TextProperty="Text"
+                                            ValueProperty="Value"
+                                            Style="width:100%"
+                                            Placeholder="Giriş / Çıkış" />
+                            <RadzenRequiredValidator Component="MovementType" Text="Hareket tipi zorunludur" />
+                        </div>
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="Kasa" Component="CashRegisterId" class="small" />
+                            <RadzenDropDown Name="CashRegisterId"
+                                            @bind-Value="@Model.CashRegisterId"
+                                            Data="@CashRegisterList"
+                                            TextProperty="Name"
+                                            ValueProperty="Id"
+                                            Change="@OnCashRegisterChange"
+                                            Style="width:100%"
+                                            Placeholder="Kasa seçiniz" />
+                            <RadzenRequiredValidator Component="CashRegisterId" Text="Kasa zorunludur" />
+                        </div>
+                    </div>
+                    <div class="cash-movement-modal__row">
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="Ödeme Tipi" Component="PaymentTypeId" class="small" />
+                            <RadzenDropDown Name="PaymentTypeId"
+                                            @bind-Value="@Model.PaymentTypeId"
+                                            Data="@FilteredPaymentTypeOptions"
+                                            TextProperty="Text"
+                                            ValueProperty="Value"
+                                            AllowClear="true"
+                                            Style="width:100%"
+                                            Placeholder="Ödeme tipi (opsiyonel)"
+                                            Disabled="@(Model.CashRegisterId == 0)" />
+                        </div>
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="Döviz" Component="CurrencyId" class="small" />
+                            <RadzenDropDown Name="CurrencyId"
+                                            @bind-Value="@Model.CurrencyId"
+                                            Data="@CurrencyOptions"
+                                            TextProperty="Text"
+                                            ValueProperty="Value"
+                                            Style="width:100%"
+                                            Placeholder="Döviz seçiniz" />
+                            <RadzenRequiredValidator Component="CurrencyId" Text="Döviz zorunludur" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cash-movement-modal__section">
+                    <span class="cash-movement-modal__section-title">Cari</span>
+                    <div class="cash-movement-modal__field cash-movement-modal__field--full">
+                        <RadzenLabel Text="Cari ara veya seçin (opsiyonel)" Component="CustomerId" class="small" />
+                        <RadzenDropDown Name="CustomerId"
+                                        @bind-Value="@Model.CustomerId"
+                                        Data="@CustomerList"
+                                        TextProperty="DisplayName"
+                                        ValueProperty="Id"
+                                        AllowClear="true"
+                                        AllowFiltering="true"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        Style="width:100%"
+                                        Placeholder="Cari adı veya kodu ile arayın..." />
+                    </div>
+                </div>
+
+                <div class="cash-movement-modal__section">
+                    <span class="cash-movement-modal__section-title">Tutar & Tarih</span>
+                    <div class="cash-movement-modal__row">
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="Tutar" Component="Amount" class="small" />
+                            <RadzenNumeric Name="Amount"
+                                           @bind-Value="@Model.Amount"
+                                           Style="width:100%"
+                                           Format="N2"
+                                           Min="@((decimal?)0.01)"
+                                           ShowUpDown="false" />
+                            <RadzenRequiredValidator Component="Amount" Text="Tutar zorunludur" />
+                        </div>
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="İşlem Tarihi" Component="TransactionDate" class="small" />
+                            <RadzenDatePicker Name="TransactionDate"
+                                              @bind-Value="@Model.TransactionDate"
+                                              DateFormat="dd.MM.yyyy HH:mm"
+                                              ShowTime="true"
+                                              Style="width:100%"
+                                              Placeholder="Tarih" />
+                            <RadzenRequiredValidator Component="TransactionDate" Text="Tarih zorunludur" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cash-movement-modal__section">
+                    <RadzenLabel Text="Açıklama (opsiyonel)" Component="Description" class="small" />
+                    <RadzenTextArea Name="Description"
+                                    @bind-Value="@Model.Description"
+                                    Style="width:100%"
+                                    Rows="2"
+                                    Placeholder="Kısa açıklama..." />
+                </div>
+            </div>
+
+            <div class="cash-movement-modal__footer">
+                <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Small" />
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" Size="ButtonSize.Small" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}
+
+<style>
+    .cash-movement-modal {
+        display: flex;
+        flex-direction: column;
+        max-height: 85vh;
+        min-width: 420px;
+    }
+    .cash-movement-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--rz-border-color, #e9ecef);
+        flex-shrink: 0;
+        background: var(--rz-base-50, #f8f9fa);
+    }
+    .cash-movement-modal__title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--rz-text-color, #212529);
+    }
+    .cash-movement-modal__close {
+        background: none;
+        border: none;
+        padding: 4px 8px;
+        color: var(--rz-text-secondary-color, #6c757d);
+        cursor: pointer;
+        border-radius: 4px;
+        line-height: 1;
+    }
+    .cash-movement-modal__close:hover {
+        color: var(--rz-text-color);
+        background: rgba(0,0,0,0.06);
+    }
+    .cash-movement-modal__body {
+        padding: 12px 16px;
+        overflow-y: auto;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+    .cash-movement-modal__section {
+        margin-bottom: 12px;
+    }
+    .cash-movement-modal__section:last-child {
+        margin-bottom: 0;
+    }
+    .cash-movement-modal__section-title {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--rz-text-secondary-color, #6c757d);
+        margin-bottom: 6px;
+    }
+    .cash-movement-modal__row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .cash-movement-modal__field {
+        min-width: 0;
+    }
+    .cash-movement-modal__field--full {
+        grid-column: 1 / -1;
+    }
+    .cash-movement-modal__footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--rz-border-color, #e9ecef);
+        flex-shrink: 0;
+        background: var(--rz-base-50, #f8f9fa);
+    }
+</style>

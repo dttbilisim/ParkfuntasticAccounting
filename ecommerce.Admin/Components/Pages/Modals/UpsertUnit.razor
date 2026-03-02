@@ -1,0 +1,37 @@
+@using ecommerce.Admin.Domain.Dtos.UnitDto
+@using Radzen
+@using Radzen.Blazor
+
+@if (unit == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <RadzenTemplateForm Data="@unit" Submit="@(async (UnitUpsertDto args) => { await FormSubmit(args); })">
+        <div class="modal-content-body">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <RadzenLabel Text="Birim Adı" Component="Name" />
+                    <RadzenTextBox Name="Name"
+                                   @bind-Value="@unit.Name"
+                                   class="w-100 form-control-modern"
+                                   Placeholder="Örn: Adet, Kg, Litre" />
+
+                    @* Farklı validasyon tarzı: popup yerine input altında kırmızı uyarı *@
+                    <RadzenRequiredValidator Component="Name"
+                                              Text="Birim adı zorunludur"
+                                              Popup="false"
+                                              Style="display:block; margin-top:4px; color:#dc3545; font-size:0.85rem;" />
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-sticky-footer d-flex justify-content-end gap-2">
+            <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" />
+        </div>
+    </RadzenTemplateForm>
+}

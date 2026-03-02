@@ -1,0 +1,769 @@
+@page "/product-detail"
+@inject NavigationManager Nav
+
+@using ecommerce.Domain.Shared.Dtos.Product
+
+@if (Product != null)
+{
+    <PageTitle>@Product.ProductName - ParPazar</PageTitle>
+    <HeadContent>
+        <meta name="description" content="@((Product?.ProductDescription ?? Product?.DotPartDescription ?? Product?.ProductName) ?? "Ürün")">
+        <link rel="canonical" href="@Nav.Uri" />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content="@Product.ProductName" />
+        <meta property="og:description" content="@((Product?.ProductDescription ?? Product?.DotPartDescription ?? Product?.ProductName) ?? "Ürün")" />
+        <meta property="og:url" content="@Nav.Uri" />
+        <meta property="og:image" content="@(
+            Product?.Images != null && Product.Images.Any() && !string.IsNullOrEmpty(Product.Images.First().FileGuid) ? $"{CdnConfig.BaseUrl}/ProductImages/{Product.Images.First().FileGuid}" :
+            Product?.Images != null && Product.Images.Any() && Product.Images.First().FileName != null ? $"{CdnConfig.BaseUrl}/ProductImages/{Product.Images.First().FileName}" :
+            "assets/images/product/category/1.jpg")" />
+    </HeadContent>
+    <BreadcrumbComponent BreadcrumbText="@Product.ProductName"/>
+    
+    <!-- Modern Product Detail Section -->
+    <section class="modern-product-section">
+        <div class="container-fluid-lg">
+            <div class="row g-4">
+                <!-- Product Images - Left Column -->
+                <div class="col-lg-7 col-xl-6">
+                    <div class="modern-product-gallery">
+                        <!-- Main Image -->
+                        <div class="main-image-container">
+                            <div class="image-zoom-wrapper">
+                                <img src="@_appStateManager.GetProductImageUrl(Product?.Images)" 
+                                         class="main-product-image" 
+                                         alt="@Product?.ProductName"
+                                         loading="lazy"
+                                         onerror="@_appStateManager.GetImageFallbackScript()">
+                            </div>
+                            
+                            <!-- Image Navigation Arrows -->
+                            <button class="image-nav-btn prev-btn" onclick="previousImage()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="image-nav-btn next-btn" onclick="nextImage()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <div @key="@("gallery-" + (Product?.ProductId ?? 0))" class="thumbnail-gallery">
+                            <div class="thumbnails-container">
+                                @if (Product?.Images != null && Product.Images.Any())
+                                {
+                                    @foreach (var (image, index) in Product.Images.OrderBy(x => x.Order).Select((img, i) => (img, i)))
+                                    {
+                                        <div @key="@(image.Id != 0 ? "img-" + image.Id : "img-fn-" + image.FileName)" class="thumbnail-item" onclick="selectImage(@index)">
+                                            <img src="@_appStateManager.GetProductImageUrl(image.FileName, image.FileGuid)" 
+                                                 alt="Thumbnail @index"
+                                                 onerror="@_appStateManager.GetImageFallbackScript()">
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Info - Right Column -->
+                <div class="col-lg-5 col-xl-6">
+                    <div class="modern-product-info">
+                        <!-- Brand Badge -->
+                        @if (!string.IsNullOrEmpty(Product?.Brand?.Name))
+                        {
+                            <div class="brand-badge">
+                                <i class="fas fa-tag me-2"></i>
+                                @Product.Brand.Name
+                            </div>
+                        }
+
+  
+
+                        <!-- Product Title -->
+                        <h1 class="product-title">@Product?.ProductName</h1>
+
+                        <!-- Price Section -->
+                        <div class="price-section">
+                            <div class="current-price">
+                                @Product.SalePrice.ToString("C")
+                            </div>
+                        </div>
+
+                        <!-- Product Features -->
+                        <div class="product-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span>                      <div class="stock-status @(Product?.Stock > 0 ? "in-stock" : "out-of-stock")">
+                                    <i class="fa-solid @(Product?.Stock > 0 ? "fa-box" : "fa-circle-exclamation")"></i>
+                                    <span>
+                                        @((Product?.Stock > 0)
+                                            ? $"{lang["Product.InStockLabel"] ?? "Stokta"}"
+                                            : lang["Product.OutOfStockLabel"] ?? "Stokta Yok")
+                                    </span>
+                                </div></span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-truck text-primary"></i>
+                                <span>@lang["Product.FastShipping"]</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt text-info"></i>
+                                <span>@lang["Product.SecureShopping"]</span>
+                            </div>
+                        </div>
+
+                        <!-- Cart Actions -->
+                        <div class="cart-actions-section">
+                            @{
+                                var qty = CartResult?.Sellers?
+                                    .SelectMany(s => s.Items)
+                                    .Where(i => i.ProductSellerItemId == Product.SellerItemId)
+                                    .Select(i => i.Quantity)
+                                    .DefaultIfEmpty(0)
+                                    .Sum() ?? 0;
+                                var qtyKey = qty;
+                            }
+
+                            @if(qty > 0){
+                                <div @key="@("detail-qty-" + Product.SellerItemId)" class="quantity-selector">
+                                    @{
+                                        var minQty = Math.Max(1, (int)Product.MinSaleAmount);
+                                        var isAtMinimum = qty <= minQty;
+                                        var qtyToRemove = isAtMinimum ? qty : Math.Max(1, (int)Product.Step);
+                                    }
+                                    <button @onclick="() => CartInsert(false, qtyToRemove)" class="qty-btn minus-btn">
+                                        <i class="fas @(isAtMinimum ? "fa-trash" : "fa-minus")"></i>
+                                    </button>
+                                    <div class="qty-display">
+                                        <span class="qty-number">@qty</span>
+                                        <small class="qty-label">@lang["Product.Quantity"]</small>
+                                    </div>
+                                    <button @onclick="() => CartInsert(true, Math.Max(1, (int)Product.Step))" class="qty-btn plus-btn" disabled="@(Product.MaxSaleAmount > 0 && qty + Math.Max(1, (int)Product.Step) > Product.MaxSaleAmount)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            } else {
+                                <button @onclick="() => CartInsert(true, 1, Math.Max(1, (int)Product.MinSaleAmount))" class="btn-add-to-cart">
+                                    <i class="fas fa-shopping-cart me-2"></i>
+                                    @lang["AddButon"]
+                                </button>
+                            }
+
+                            <!-- Wishlist Button -->
+                            <button @onclick="() => ToggleFavorite(Product)" class="btn-wishlist">
+                                <i class="fas fa-heart"></i>
+                                <span>@lang["AddToWishList"]</span>
+                            </button>
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="product-details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">@lang["Product.Brand"]</span>
+                                <span class="detail-value">@Product?.Brand?.Name</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">@lang["Product.StockStatus"]</span>
+                                <div class="stock-status @(Product?.Stock > 0 ? "in-stock" : "out-of-stock")">
+                                    <i class="fa-solid @(Product?.Stock > 0 ? "fa-box" : "fa-circle-exclamation")"></i>
+                                    <span>
+                                @((Product?.Stock > 0)
+                                        ? $"{lang["Product.InStockLabel"] ?? "Stokta"}"
+                                        : lang["Product.OutOfStockLabel"] ?? "Stokta Yok")
+                            </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @{
+                            var compatibilitySummaries = GetProductCompatibilitySummaries();
+                        }
+                        @if(compatibilitySummaries.Count > 0){
+                            <div class="compatibility-card">
+                                <div class="compatibility-card-header">
+                                    <span class="compatibility-card-icon">
+                                        <i class="fas fa-car-side"></i>
+                                    </span>
+                                    <div class="compatibility-card-text">
+                                        <h6>@lang["Product.PerfectCompatibilityMatchesTitle"]</h6>
+                                        <span class="compatibility-card-sub">@string.Format(lang["Product.PerfectCompatibilityMatchesCount"] ?? "{0} araç uyumlu", compatibilitySummaries.Count)</span>
+                                    </div>
+                                </div>
+                                <div class="compatibility-card-body">
+                                    @foreach(var summary in compatibilitySummaries){
+                                        <span @key="summary" class="compatibility-tag-pill">@summary</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Security Badges -->
+                        <div class="security-badges">
+                            <h6 class="badges-title">@lang["Product.SecurePayment"]</h6>
+                            <div class="payment-icons">
+                                <img src="../assets/images/product/payment/1.svg" alt="Payment" class="payment-icon">
+                                <img src="../assets/images/product/payment/2.svg" alt="Payment" class="payment-icon">
+                                <img src="../assets/images/product/payment/3.svg" alt="Payment" class="payment-icon">
+                                <img src="../assets/images/product/payment/4.svg" alt="Payment" class="payment-icon">
+                                <img src="../assets/images/product/payment/5.svg" alt="Payment" class="payment-icon">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Tabs Section -->
+    <section class="product-tabs-section">
+        <div class="container-fluid-lg">
+            <div class="row">
+                <div class="col-12">
+                    <div class="modern-tabs-container">
+                        <!-- Tab Navigation -->
+                        <div class="tabs-navigation">
+                            <button class="tab-btn @(activeTab == "features" ? "active" : "")" 
+                                    @onclick="@(() => SetActiveTab("features"))">
+                                <i class="fas fa-info-circle"></i>
+                                <span>@lang["Product.Features"]</span>
+                            </button>
+                            <button class="tab-btn @(activeTab == "compatible" ? "active" : "")" 
+                                    @onclick="@(() => SetActiveTab("compatible"))">
+                                <i class="fas fa-car"></i>
+                                <span>@lang["Product.CompatibleVehicles"]</span>
+                            </button>
+                            @* <button class="tab-btn @(activeTab == "reviews" ? "active" : "")" 
+                                    @onclick="@(() => SetActiveTab("reviews"))">
+                                <i class="fas fa-comments"></i>
+                                <span>@lang["Product.Reviews"]</span>
+                            </button>
+                            <button class="tab-btn @(activeTab == "faq" ? "active" : "")" 
+                                    @onclick="@(() => SetActiveTab("faq"))">
+                                <i class="fas fa-question-circle"></i>
+                                <span>@lang["Product.FAQ"]</span>
+                            </button> *@
+                            <button class="tab-btn @(activeTab == "alternatives" ? "active" : "")" 
+                                    @onclick="@(() => SetActiveTab("alternatives"))">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>@lang["Product.AlternativeBrands"]</span>
+                            </button>
+                            <button class="tab-btn @(activeTab == "installment" ? "active" : "")" 
+                                    @onclick="@(() => SetActiveTab("installment"))">
+                                <i class="fas fa-credit-card"></i>
+                                <span>@lang["Product.InstallmentOptions"]</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div @key="@("tabs-panel-" + activeTab)" class="tabs-content">
+                            @if (activeTab == "features")
+                            {
+                                <div class="tab-panel active">
+                                    <div class="tab-header">
+                                        <h3>@lang["Product.Features"]</h3>
+                                        <p class="tab-description">@lang["Product.FeaturesDescription"]</p>
+                                    </div>
+                                    <div class="features-grid">
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <i class="fas fa-cog"></i>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h5>@lang["Product.TechnicalSpecs"]</h5>
+                                                <p>@lang["Product.TechnicalSpecsDescription"]</p>
+                                            </div>
+                                        </div>
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <i class="fas fa-shield-alt"></i>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h5>@lang["Product.Warranty"]</h5>
+                                                <p>@lang["Product.WarrantyDescription"]</p>
+                                            </div>
+                                        </div>
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <i class="fas fa-truck"></i>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h5>@lang["Product.Shipping"]</h5>
+                                                <p>@lang["Product.ShippingDescription"]</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="product-description">
+                                        <h4>@lang["Product.Description"]</h4>
+                                        @{
+                                            var primaryOemCode = GetPrimaryOemCode();
+                                            var alternateOemCodes = GetAlternateOemCodes();
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(primaryOemCode) || alternateOemCodes.Count > 0)
+                                        {
+                                            <div class="oem-info-card">
+                                                @if (!string.IsNullOrWhiteSpace(primaryOemCode))
+                                                {
+                                                    <div class="oem-info-row">
+                                                        <span class="oem-info-label">@lang["Product.OemPrimaryLabel"]</span>
+                                                        <span class="oem-pill oem-pill-primary">@primaryOemCode</span>
+                                                    </div>
+                                                }
+                                                @if (alternateOemCodes.Count > 0)
+                                                {
+                                                    <div class="oem-info-row">
+                                                        <span class="oem-info-label">@lang["Product.OemAlternativesLabel"]</span>
+                                                        <div class="oem-alt-list">
+                                                            @foreach (var alt in alternateOemCodes)
+                                            {
+                                                <span @key="alt" class="oem-pill">@alt</span>
+                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        <p>@Product?.ProductDescription</p>
+                                    </div>
+                                </div>
+                            }
+                            else if (activeTab == "compatible")
+                            {
+                                <div class="tab-panel active">
+                                    <div class="tab-header-compact">
+                                        <h4>@lang["Product.CompatibleVehicles"]</h4>
+                                    </div>
+                                    
+                                    @if (!vehiclesLoaded)
+                                    {
+                                        <div class="loading-message">
+                                            <p>@lang["Product.LoadingVehicles"]</p>
+                                        </div>
+                                    }
+                                    else if (compatibleModels != null && compatibleModels.Any())
+                                    {
+                                        <div class="compatible-vehicles">
+                                            <!-- Arama ve Filtre Bölümü -->
+                                            <div class="vehicle-filters">
+                                                @if (manufacturers.Count > 1)
+                                                {
+                                                    <div class="brand-filter">
+                                                        <h5>@lang["Product.SelectBrand"]</h5>
+                                                        <div class="brand-buttons">
+                                                            <button class="brand-btn @(string.IsNullOrEmpty(selectedManufacturer) ? "active" : "")" 
+                                                                    @onclick="@(() => SelectManufacturer(""))">
+                                                                @lang["Product.AllBrands"]
+                                                            </button>
+                                                            @foreach (var manufacturer in manufacturers)
+                                            {
+                                                <button @key="manufacturer" class="brand-btn @(selectedManufacturer == manufacturer ? "active" : "")" 
+                                                        @onclick="@(() => SelectManufacturer(manufacturer))">
+                                                    @manufacturer
+                                                </button>
+                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                                
+                                             
+                                                
+                                            
+                                                <!-- <div class="results-count">
+                                                    <span>@GetTotalFilteredCount() @lang["Product.VehiclesFound"]</span>
+                                                </div> -->
+                                            </div>
+                                        
+                                            <div class="vehicles-tabs-container">
+                                                <!-- Tabs Header -->
+                                                <div class="vehicles-tabs-header">
+                                                    @foreach (var model in GetPaginatedModels())
+                                                    {
+                                                        <div @key="model.BaseModelKey" class="vehicle-tab-item @(selectedBaseModelKey == model.BaseModelKey ? "active" : "")" 
+                                                             @onclick="@(() => SelectModel(model.BaseModelKey))">
+                                                            @if (!string.IsNullOrEmpty(model.ImageUrl))
+                                                            {
+                                                                <img src="@model.ImageUrl" alt="@model.Name" class="tab-model-img" />
+                                                            }
+                                                            <span class="tab-model-name">@model.Name</span>
+                                                            @if (model.SubModels != null && model.SubModels.Any())
+                                                            {
+                                                               <span class="model-year-badge">@model.SubModels.Count alt model</span>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                                <!-- Tab Content -->
+                                                <div @key="@("vehicles-tab-" + selectedBaseModelKey)" class="vehicles-tab-content">
+                                                    @{
+                                                        var activeModel = compatibleModels.FirstOrDefault(m => m.BaseModelKey == selectedBaseModelKey);
+                                                    }
+                                                    
+                                                    @if (activeModel != null && activeModel.SubModels != null)
+                                                    {
+                                                       
+                                                        
+                                                        <div class="submodels-table-grid">
+                                                            @foreach (var subModel in activeModel.SubModels.Where(sm => !string.IsNullOrWhiteSpace(sm.Name)).OrderBy(sm => sm.Name))
+                                                        {
+                                                            <div @key="subModel.Name" class="submodel-grid-item">
+                                                                    <span class="submodel-name">@subModel.Name</span>
+                                                                    
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Pagination -->
+                                            @if (GetTotalPages() > 1)
+                                            {
+                                                <div class="pagination-controls">
+                                                    <button class="pagination-btn @(currentPage == 1 ? "disabled" : "")" 
+                                                            @onclick="@(() => ChangePage(1))" 
+                                                            disabled="@(currentPage == 1)">
+                                                        <i class="fas fa-angle-double-left"></i>
+                                                    </button>
+                                                    <button class="pagination-btn @(currentPage == 1 ? "disabled" : "")" 
+                                                            @onclick="@(() => ChangePage(currentPage - 1))" 
+                                                            disabled="@(currentPage == 1)">
+                                                        <i class="fas fa-angle-left"></i>
+                                                    </button>
+
+                                                    @foreach (var page in GetPageNumbers())
+                                                    {
+                                                        var pageNumber = page;
+                                                        <button @key="pageNumber" class="pagination-btn @(pageNumber == currentPage ? "active" : "")" 
+                                                                @onclick="@(() => ChangePage(pageNumber))">
+                                                            @pageNumber
+                                                        </button>
+                                                    }
+
+                                                    <button class="pagination-btn @(currentPage == GetTotalPages() ? "disabled" : "")" 
+                                                            @onclick="@(() => ChangePage(currentPage + 1))" 
+                                                            disabled="@(currentPage == GetTotalPages())">
+                                                        <i class="fas fa-angle-right"></i>
+                                                    </button>
+                                                    <button class="pagination-btn @(currentPage == GetTotalPages() ? "disabled" : "")" 
+                                                            @onclick="@(() => ChangePage(GetTotalPages()))" 
+                                                            disabled="@(currentPage == GetTotalPages())">
+                                                        <i class="fas fa-angle-double-right"></i>
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="no-data-message">
+                                            <i class="fas fa-car fa-3x text-muted mb-3"></i>
+                                            <p>@lang["Product.NoCompatibleVehicles"]</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            @* else if (activeTab == "reviews")
+                            {
+                                <div class="tab-panel active">
+                                    <div class="tab-header">
+                                        <h3>@lang["Product.Reviews"]</h3>
+                                        <p class="tab-description">@lang["Product.ReviewsDescription"]</p>
+                                    </div>
+                                    <div class="reviews-summary">
+                                        <div class="rating-overview">
+                                            <div class="rating-score">
+                                                <span class="score">4.5</span>
+                                                <div class="stars">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                </div>
+                                                <span class="review-count">(24 @lang["Product.Reviews"])</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="reviews-list">
+                                        <div class="review-item">
+                                            <div class="review-header">
+                                                <div class="reviewer-info">
+                                                    <div class="reviewer-avatar">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div class="reviewer-details">
+                                                        <h6>@lang["Product.CustomerName"]</h6>
+                                                        <div class="review-rating">
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="review-date">@lang["Product.ReviewDate"]</span>
+                                            </div>
+                                            <div class="review-content">
+                                                <p>@lang["Product.SampleReview"]</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else if (activeTab == "faq")
+                            {
+                                <div class="tab-panel active">
+                                    <div class="tab-header">
+                                        <h3>@lang["Product.FAQ"]</h3>
+                                        <p class="tab-description">@lang["Product.FAQDescription"]</p>
+                                    </div>
+                                    <div class="faq-list">
+                                        <div class="faq-item">
+                                            <div class="faq-question">
+                                                <h6>@lang["Product.FAQQuestion1"]</h6>
+                                                <button class="faq-toggle" onclick="toggleFAQ(this)">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <div class="faq-answer">
+                                                <p>@lang["Product.FAQAnswer1"]</p>
+                                            </div>
+                                        </div>
+                                        <div class="faq-item">
+                                            <div class="faq-question">
+                                                <h6>@lang["Product.FAQQuestion2"]</h6>
+                                                <button class="faq-toggle" onclick="toggleFAQ(this)">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <div class="faq-answer">
+                                                <p>@lang["Product.FAQAnswer2"]</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            } *@
+                            else if (activeTab == "alternatives")
+                            {
+                                <div class="tab-panel active">
+                                    <div class="tab-header">
+                                        <h3>@lang["Product.AlternativeBrands"]</h3>
+                                        <p class="tab-description">@lang["Product.AlternativeBrandsDescription"]</p>
+                                    </div>
+                                    <div class="alternatives-grid">
+                                        @if (IsLoadingAlternatives)
+                                        {
+                                            <div class="d-flex justify-content-center align-items-center py-5 w-100">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Yükleniyor...</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (AlternativeProducts != null && AlternativeProducts.Any())
+                                        {
+                                            @foreach (var altProduct in AlternativeProducts)
+                                            {
+                                                <div @key="altProduct.SellerItemId" class="alternative-item">
+                                                    <a href="/product-detail?productId=@altProduct.SellerItemId&brandId=@(altProduct.Brand?.Id ?? 0)" class="alternative-link">
+                                                        <div class="alternative-image">
+                                                            <img src="@_appStateManager.GetProductImageUrl(altProduct?.Images)" 
+                                                                class="img-fluid" alt="@altProduct.ProductName"
+                                                                onerror="@_appStateManager.GetImageFallbackScript()">
+                                                        </div>
+                                                        <div class="alternative-brand">
+                                                            <h6>@(altProduct.Brand?.Name ?? "Markasız")</h6>
+                                                            <div class="alternative-product-info">
+                                                                <span class="product-name" title="@altProduct.ProductName">@altProduct.ProductName</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="alternative-footer">
+                                                            <div class="alternative-price">
+                                                                <span class="price">@altProduct.SalePrice.ToString("C2")</span>
+                                                            </div>
+                                                            <div class="stock-status @(altProduct.Stock > 0 ? "in-stock" : "out-of-stock")">
+                                                                <i class="fa-solid @(altProduct.Stock > 0 ? "fa-box" : "fa-circle-exclamation")"></i>
+                                                                <span>
+                                                                    @((altProduct.Stock > 0)
+                                                                        ? $"{lang["Product.InStockLabel"] ?? "Stokta"}"
+                                                                        : lang["Product.OutOfStockLabel"] ?? "Stokta Yok")
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="col-12 text-center py-5">
+                                                     <i class="fas fa-boxes fa-3x text-muted mb-3 opacity-25"></i>
+                                                    <p class="text-muted">Bu ürün için alternatif marka bulunamadı.</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else if (activeTab == "installment")
+                            {
+                                <div class="tab-panel active">
+                                    <div class="tab-header">
+                                        <h3>@lang["Product.InstallmentOptions"]</h3>
+                                        <p class="tab-description">@lang["Product.InstallmentOptionsDescription"]</p>
+                                    </div>
+                                    <div class="installment-container">
+                                        @if (IsLoadingInstallments)
+                                        {
+                                            <div class="d-flex justify-content-center align-items-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Yükleniyor...</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (BankInstallments != null && BankInstallments.Any(b => b.Cards.Any(c => c.Installments.Any())))
+                                        {
+                                            var activeBanks = BankInstallments.Where(b => b.Cards.Any(c => c.Installments.Any())).ToList();
+                                            
+                                            // Initialize selection if needed
+                                            if (SelectedBankId == 0 && activeBanks.Any())
+                                            {
+                                                SelectedBankId = activeBanks.First().BankId;
+                                            }
+
+                                            <!-- Bank Tabs -->
+                                            <div class="d-flex flex-wrap gap-2 mb-4" id="installmentTabs" role="tablist">
+                                                @foreach (var bank in activeBanks)
+                                                {
+                                                    var isActive = bank.BankId == SelectedBankId;
+                                                    <button @key="bank.BankId" class="btn @(isActive ? "btn-white border-primary border-2 shadow-sm" : "btn-light border") d-flex align-items-center justify-content-center p-2 rounded-3 position-relative overflow-hidden" 
+                                                            style="width: 120px; height: 60px; transition: all 0.2s;"
+                                                            @onclick="() => SelectedBankId = bank.BankId"
+                                                            title="@bank.BankName">
+                                                        @if (!string.IsNullOrEmpty(bank.BankLogo))
+                                                        {
+                                                            <img src="@($"{CdnConfig.BaseUrl}/BanksLogo/{bank.BankLogo}")" alt="@bank.BankName" style="max-height: 80%; max-width: 90%; object-fit: contain;">
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="fw-bold small text-dark text-truncate w-100">@bank.BankName</span>
+                                                        }
+                                                    </button>
+                                                }
+                                            </div>
+
+                                            <!-- Installment Content -->
+                                            <div class="tab-content" id="installmentTabContent">
+                                                @{
+                                                    var selectedBank = activeBanks.FirstOrDefault(b => b.BankId == SelectedBankId);
+                                                    if (selectedBank != null)
+                                                    {
+                                                        var primaryCard = selectedBank.Cards.FirstOrDefault();
+                                                        if (primaryCard != null && primaryCard.Installments.Any())
+                                                        {
+                                                            <div class="bank-section border rounded-3 p-0 overflow-hidden shadow-sm">
+                                                                <div class="bank-header bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+                                                                    <div class="d-flex align-items-center gap-3">
+                                                                         <h6 class="m-0 fw-bold text-dark">@selectedBank.BankName Taksit Seçenekleri</h6>
+                                                                    </div>
+                                                                    @if(primaryCard.CardName != selectedBank.BankName)
+                                                                    {
+                                                                         <span class="badge bg-light text-secondary border">@primaryCard.CardName</span>
+                                                                    }
+                                                                </div>
+
+                                                                <div class="installment-list p-0 bg-white">
+                                                                    <div class="row mx-0 bg-light py-2 border-bottom">
+                                                                        <div class="col-4 ps-4 fw-bold text-secondary text-uppercase small">Taksit</div>
+                                                                        <div class="col-4 text-end fw-bold text-secondary text-uppercase small">Aylık Tutar</div>
+                                                                        <div class="col-4 text-end pe-4 fw-bold text-secondary text-uppercase small">Toplam</div>
+                                                                    </div>
+                                                                    
+                                                                    @{
+                                                                         decimal cashPrice = (decimal)Product.SalePrice; 
+                                                                    }
+
+                                                                    @foreach (var inst in primaryCard.Installments.OrderBy(x => x.Installment))
+                                                                    {
+                                                                        decimal totalAmount = cashPrice;
+                                                                        if (inst.InstallmentRate > 0)
+                                                                        {
+                                                                            totalAmount = cashPrice * (1 + (inst.InstallmentRate / 100m));
+                                                                        }
+                                                                        
+                                                                        decimal monthlyAmount = totalAmount / inst.Installment;
+
+                                                                        <div @key="inst.Installment" class="installment-row py-3 border-bottom mb-0 bg-white row mx-0 align-items-center hover-bg-light transition-base">
+                                                                            <div class="col-4 ps-4 d-flex align-items-center gap-3">
+                                                                                <div class="installment-circle bg-white border text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px; font-size: 14px;">
+                                                                                    @inst.Installment
+                                                                                </div>
+                                                                                <span class="fw-medium text-dark">Taksit</span>
+                                                                            </div>
+                                                                            <div class="col-4 text-end">
+                                                                                <span class="fw-bold text-dark fs-6">@monthlyAmount.ToString("N2") TL</span>
+                                                                            </div>
+                                                                            <div class="col-4 text-end pe-4">
+                                                                                <span class="text-muted small">Top: @totalAmount.ToString("N2") TL</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    }
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="alert alert-light text-center border-0 py-5">
+                                                <i class="fas fa-credit-card fa-3x text-muted mb-3 opacity-25"></i>
+                                                <p class="text-muted m-0">Bu ürün için taksit seçeneği bulunmamaktadır.</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Related Product Section Start -->
+<section class="product-list-section section-b-space">
+    <div class="container-fluid-lg">
+        <div class="title">
+            <h2>@lang["Product.RelatedProducts"]</h2>
+            <span class="title-leaf">
+                    <svg class="icon-width">
+                        <use xlink:href="../assets/svg/leaf.svg#leaf"></use>
+                    </svg>
+                </span>
+        </div>
+        <div class="row">
+            <div class="col-12">
+@if (brandProducts != null && brandProducts.Any())
+{
+    <div @key="@("related-products-" + Product.SellerItemId)">
+        <SlickSlider SliderName="slider-6_1" SliderId="slider-6_1" Config="SliderConfigs.Slider6_1">
+            <ProductComponent Product="brandProducts" CartResult="@CartResult"/>
+        </SlickSlider>
+    </div>
+}
+else
+{
+    <div>
+        <div class="product-box-3">
+            <div class="product-footer">
+                <div class="product-detail">
+                    <h5 class="name text-muted">@lang["Product.NoBrandProducts"]</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+            </div>
+        </div>
+    </div>
+</section>}

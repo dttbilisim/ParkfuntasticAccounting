@@ -1,0 +1,53 @@
+﻿@page "/faq"
+@using ecommerce.Admin.Domain.Dtos.FrequentlyAskedQuestionsDto;
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+
+<PageTitle>S.S.S Tanımları</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">S.S.S Tanımları</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add_circle_outline" Text="Yeni Ekle" Click="@AddButtonClick" Variant="Variant.Flat" class="mt-2" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid 
+                @ref="radzenDataGrid" 
+                ColumnWidth="200px" 
+                AllowFiltering="true" 
+                FilterMode="FilterMode.Simple" 
+                AllowPaging="true" 
+                AllowSorting="true" 
+                PagerAlwaysVisible=true 
+                PageSize=25
+                AllowFilterDateInput=true
+                TItem="FrequentlyAskedQuestionListDto"
+                RowSelect="@EditRow" 
+                LoadData="@LoadData" 
+                Count="@count" 
+                Data="@sssList"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                        <RadzenDataGridColumn TItem="FrequentlyAskedQuestionListDto" Property="Order" Title="Sıra" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="FrequentlyAskedQuestionListDto" Property="Group" Title="Grup" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="FrequentlyAskedQuestionListDto" Property="ParentName" Title="Üst Grup" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="FrequentlyAskedQuestionListDto" Property="Name" Title="Başlık" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="FrequentlyAskedQuestionListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="40px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                          Shade="Shade.Dark" Variant="Variant.Flat"
+                                          Click=@(args => GridDeleteButtonClick(args, data)) @onclick:stopPropagation="true"/>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

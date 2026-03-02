@@ -1,0 +1,260 @@
+@using ecommerce.Web.Domain.Dtos.Order
+@using ecommerce.Web.Domain.Dtos.Bank
+@using ecommerce.Web.Domain.Services.Abstract
+@using Radzen
+@using Radzen.Blazor
+
+@inject IBankService BankService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<div class="rz-p-4">
+    <RadzenStack Gap="1.5rem">
+        <!-- Bank Selection -->
+        <div>
+            <RadzenText TextStyle="TextStyle.Caption" Text="Banka" Class="rz-mb-1 rz-display-block" />
+            <RadzenDropDown @bind-Value="@PaymentModel.BankId"
+                            Data="@Banks"
+                            TValue="int?"
+                            TextProperty="Name"
+                            ValueProperty="Id"
+                            Change="@OnBankChanged"
+                            Style="width: 100%;"
+                            AllowClear="true"
+                            Placeholder="Banka seçiniz..." 
+                            AllowFiltering="false"
+                            PopupStyle="z-index: 1000001;" />
+        </div>
+
+        <!-- Bank Card Selection -->
+        @if (BankCards != null && BankCards.Any())
+        {
+            <div>
+                <RadzenText TextStyle="TextStyle.Caption" Text="Kart Tipi" Class="rz-mb-1 rz-display-block" />
+                <RadzenDropDown @bind-Value="@PaymentModel.BankCardId"
+                                Data="@BankCards"
+                                TValue="int?"
+                                TextProperty="Name"
+                                ValueProperty="Id"
+                                Change="@OnBankCardChanged"
+                                Style="width: 100%;"
+                                AllowClear="true"
+                                Placeholder="Kart tipi seçiniz..." 
+                                AllowFiltering="false"
+                                PopupStyle="z-index: 1000001;" />
+            </div>
+        }
+
+        <!-- Installment Selection -->
+        @if (InstallmentDropdownItems != null && InstallmentDropdownItems.Count > 0)
+        {
+            <div>
+                <RadzenText TextStyle="TextStyle.Caption" Text="Taksit Seçenekleri" Class="rz-mb-1 rz-display-block" />
+                <RadzenDropDown @bind-Value="@PaymentModel.InstallmentId"
+                                Data="@InstallmentDropdownItems"
+                                TValue="int?"
+                                TextProperty="Text"
+                                ValueProperty="Value"
+                                Change="@OnInstallmentChanged"
+                                Style="width: 100%;"
+                                AllowClear="false"
+                                Placeholder="Taksit seçiniz..." 
+                                AllowFiltering="false"
+                                PopupStyle="z-index: 1000001;" />
+            </div>
+        }
+        
+        <!-- Totals Summary -->
+        <div class="rz-mt-4 rz-p-4 rz-background-color-info-lighter rz-border-radius-2">
+            <RadzenStack Gap="0.5rem">
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenText TextStyle="TextStyle.Body2">Sipariş Tutarı:</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1" FontWeight="FontWeight.Bold">@OrderTotal.ToString("C")</RadzenText>
+                </RadzenStack>
+                
+                @if (InterestDifference > 0)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText TextStyle="TextStyle.Body2" Class="rz-color-danger">Vade Farkı:</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" FontWeight="FontWeight.Bold" Class="rz-color-danger">+@InterestDifference.ToString("C")</RadzenText>
+                    </RadzenStack>
+                }
+                
+                <hr style="border: none; border-top: 1px solid var(--rz-divider); margin: 0.5rem 0;" />
+                
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+                    <RadzenText TextStyle="TextStyle.H6" FontWeight="FontWeight.Bold">Toplam:</RadzenText>
+                    <RadzenText TextStyle="TextStyle.H5" FontWeight="FontWeight.Bold" Class="rz-color-success">@CalculatedGrandTotal.ToString("C")</RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+        </div>
+        
+        <!-- Action Buttons -->
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" JustifyContent="JustifyContent.End" Class="rz-mt-4">
+            <RadzenButton Text="İptal" Click="@(() => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" Style="flex: 1;" />
+            <RadzenButton Text="Onayla" 
+                          Click="@ConfirmSelection" 
+                          ButtonStyle="ButtonStyle.Primary" 
+                          Disabled="@(!PaymentModel.BankCardId.HasValue)"
+                          Style="flex: 1;" />
+        </RadzenStack>
+    </RadzenStack>
+</div>
+
+@code {
+    [Parameter] public CardPaymentRequest PaymentModel { get; set; } = new();
+    [Parameter] public decimal OrderTotal { get; set; }
+
+    private List<BankListDto> Banks = new();
+    private List<BankCardListDto> BankCards = new();
+    private List<BankInstallmentListDto> Installments = new();
+    private List<InstallmentDropdownItem> InstallmentDropdownItems = new();
+    
+    private decimal InterestDifference = 0;
+    private decimal CalculatedGrandTotal = 0;
+
+    private class InstallmentDropdownItem
+    {
+        public int? Value { get; set; }
+        public string Text { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CalculatedGrandTotal = OrderTotal;
+        await LoadBanks();
+        
+        if (PaymentModel.BankId.HasValue)
+        {
+            await LoadBankCards(PaymentModel.BankId.Value);
+        }
+        
+        if (PaymentModel.BankCardId.HasValue)
+        {
+            await LoadInstallments(PaymentModel.BankCardId.Value);
+        }
+    }
+
+    private async Task LoadBanks()
+    {
+        try
+        {
+            var result = await BankService.GetActiveBanksAsync();
+            if (result.Ok && result.Result != null)
+            {
+                Banks = result.Result;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Hata", "Bankalar yüklenirken hata oluştu.");
+        }
+    }
+
+    private async Task OnBankChanged(object value)
+    {
+        PaymentModel.BankCardId = null;
+        PaymentModel.InstallmentId = null;
+        BankCards.Clear();
+        InstallmentDropdownItems.Clear();
+        Installments.Clear();
+        InterestDifference = 0;
+        CalculatedGrandTotal = OrderTotal;
+
+        if (value is int bankId)
+        {
+            await LoadBankCards(bankId);
+        }
+        
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadBankCards(int bankId)
+    {
+        try
+        {
+            var result = await BankService.GetBankCardsAsync(bankId);
+            if (result.Ok && result.Result != null)
+            {
+                BankCards = result.Result;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+             NotificationService.Notify(NotificationSeverity.Error, "Hata", "Kart tipleri yüklenirken hata oluştu.");
+        }
+    }
+
+    private async Task OnBankCardChanged(object value)
+    {
+        PaymentModel.InstallmentId = null;
+        InstallmentDropdownItems.Clear();
+        Installments.Clear();
+        InterestDifference = 0;
+        CalculatedGrandTotal = OrderTotal;
+
+        if (value is int cardId)
+        {
+            await LoadInstallments(cardId);
+        }
+        
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadInstallments(int cardId)
+    {
+        try
+        {
+            var result = await BankService.GetBankInstallmentsAsync(cardId);
+            if (result.Ok && result.Result != null)
+            {
+                Installments = result.Result.OrderBy(x => x.Installment).ToList();
+                
+                InstallmentDropdownItems = Installments.Select(i => new InstallmentDropdownItem
+                {
+                    Value = i.Id,
+                    Text = i.Installment == 1 ? "Tek Çekim" : $"{i.Installment} Taksit"
+                }).ToList();
+
+                // Auto select first option if available
+                if (InstallmentDropdownItems.Any() && !PaymentModel.InstallmentId.HasValue)
+                {
+                    PaymentModel.InstallmentId = InstallmentDropdownItems.First().Value;
+                    OnInstallmentChanged(PaymentModel.InstallmentId);
+                }
+                
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void OnInstallmentChanged(object value)
+    {
+        if (value is int instId)
+        {
+            var inst = Installments.FirstOrDefault(x => x.Id == instId);
+            if (inst != null)
+            {
+                InterestDifference = OrderTotal * (inst.InstallmentRate / 100);
+                CalculatedGrandTotal = OrderTotal + InterestDifference;
+            }
+        }
+        else
+        {
+             InterestDifference = 0;
+             CalculatedGrandTotal = OrderTotal;
+        }
+        StateHasChanged();
+    }
+
+    private void ConfirmSelection()
+    {
+        DialogService.Close(true);
+    }
+}

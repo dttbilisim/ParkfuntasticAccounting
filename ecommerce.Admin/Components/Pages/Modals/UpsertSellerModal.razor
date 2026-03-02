@@ -1,0 +1,224 @@
+@using ecommerce.Admin.Domain.Dtos.SellerDto
+@using ecommerce.Admin.Domain.Dtos.MembershipDto
+@using ecommerce.Admin.Domain.Dtos.CompanyCargoDto
+@using ecommerce.Admin.Domain.Dtos.SellerAddressDto
+@using ecommerce.Core.Models
+
+@using ecommerce.Admin.Components.Layout
+
+<style>
+    .compact-grid { padding: 0.5rem; }
+    .compact-label { font-size: 0.8rem; font-weight: 700; color: #444; margin-bottom: 0px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+    .compact-input { 
+        border-radius: 6px !important; 
+        border: 1px solid #ced4da !important; 
+        padding: 0.4rem 0.5rem !important; 
+        font-size: 0.9rem !important; 
+        height: 36px !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .compact-input:focus { border-color: var(--rz-primary) !important; box-shadow: 0 0 0 0.2rem rgba(var(--rz-primary-rgb), 0.15) !important; }
+    .compact-check-wrapper { 
+        background: #fff; 
+        border: 1px solid #dee2e6; 
+        border-radius: 6px; 
+        padding: 0 0.75rem; 
+        height: 36px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between;
+    }
+    .compact-check-wrapper:hover { background-color: #f8f9fa; border-color: #adb5bd; }
+    .section-card { background-color: #f8f9fa; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #eee; }
+    .modal-sticky-footer { background: #fff; border-top: 1px solid #eee; padding: 0.75rem 1.5rem; margin: 0 -0.5rem -0.5rem -0.5rem; border-radius: 0 0 8px 8px; }
+    .rz-tabview-nav { margin-bottom: 0 !important; border-bottom: 1px solid #dee2e6 !important; }
+    .rz-tabview-panels { background: #fff !important; border: none !important; padding: 0 !important; }
+</style>
+
+<div class="modal-wrapper" style="padding: 0;">
+    <RadzenTemplateForm TItem="SellerUpsertDto" Data="model" Submit="Save" InvalidSubmit="ShowErrors">
+        <RadzenFluentValidator @ref="SellerFluentValidator" Validator="@SellerValidator" />
+        
+        <div class="modal-content-body">
+            <RadzenTabs @bind-SelectedIndex="selectedTabIndex" RenderMode="TabRenderMode.Client" style="min-height: 400px;">
+                <Tabs>
+                    <RadzenTabsItem Text="Satıcı Bilgileri" Icon="store">
+                        <div class="compact-grid">
+                            <div class="row g-2">
+                                <!-- Base Info Section -->
+                                <div class="col-12">
+                                    <div class="section-card">
+                                        <div class="row g-2">
+                                            <div class="col-md-6">
+                                                <RadzenLabel Text="Satıcı Adı" Component="Name" class="compact-label" />
+                                                <RadzenTextBox @bind-Value="model.Name" Name="Name" class="w-100 compact-input" />
+                                                <RadzenText Text="@SellerFluentValidator.GetValidationMessage(r => r.Name)" TextStyle="TextStyle.Caption" class="text-danger mb-0" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <RadzenLabel Text="E-posta" Component="Email" class="compact-label" />
+                                                <RadzenTextBox @bind-Value="model.Email" Name="Email" class="w-100 compact-input" />
+                                                <RadzenText Text="@SellerFluentValidator.GetValidationMessage(r => r.Email)" TextStyle="TextStyle.Caption" class="text-danger mb-0" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <RadzenLabel Text="Telefon" Component="PhoneNumber" class="compact-label" />
+                                                <RadzenTextBox @bind-Value="model.PhoneNumber" Name="PhoneNumber" class="w-100 compact-input" />
+                                                <RadzenText Text="@SellerFluentValidator.GetValidationMessage(r => r.PhoneNumber)" TextStyle="TextStyle.Caption" class="text-danger mb-0" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <RadzenLabel Text="Komisyon (%)" Component="Commission" class="compact-label" />
+                                                <RadzenNumeric @bind-Value="model.Commission" Name="Commission" class="w-100 compact-input" ShowUpDown="true" Min="0" Max="100" />
+                                                <RadzenText Text="@SellerFluentValidator.GetValidationMessage(r => r.Commission)" TextStyle="TextStyle.Caption" class="text-danger mb-0" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Financial & Location combined in two columns -->
+                                <div class="col-md-6">
+                                    <div class="section-card h-100">
+                                        <h6 class="text-muted mb-2 border-bottom pb-1" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Finansal Bilgiler</h6>
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <RadzenLabel Text="Vergi Dairesi" Component="TaxOffice" class="compact-label" />
+                                                <RadzenTextBox @bind-Value="model.TaxOffice" Name="TaxOffice" class="w-100 compact-input" />
+                                            </div>
+                                            <div class="col-12">
+                                                <RadzenLabel Text="Vergi Numarası" Component="TaxNumber" class="compact-label" />
+                                                <RadzenTextBox @bind-Value="model.TaxNumber" Name="TaxNumber" class="w-100 compact-input" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="section-card h-100">
+                                        <h6 class="text-muted mb-2 border-bottom pb-1" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Konum Bilgileri</h6>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <RadzenLabel Text="Şehir" Component="CityId" class="compact-label" />
+                                                <RadzenDropDown TValue="int?" @bind-Value="model.CityId" Data="cities" TextProperty="Name" ValueProperty="Id"
+                                                                Change="OnCityChanged" Placeholder="Seçiniz" class="w-100 compact-input" AllowFiltering="true" />
+                                            </div>
+                                            <div class="col-6">
+                                                <RadzenLabel Text="İlçe" Component="TownId" class="compact-label" />
+                                                <RadzenDropDown TValue="int?" @bind-Value="model.TownId" Data="towns" TextProperty="Name" ValueProperty="Id"
+                                                                Placeholder="Seçiniz" class="w-100 compact-input" AllowFiltering="true" Disabled="@(!model.CityId.HasValue)" />
+                                            </div>
+                                            <div class="col-12">
+                                                <RadzenLabel Text="Açık Adres" Component="Address" class="compact-label" />
+                                                <RadzenTextArea @bind-Value="model.Address" Name="Address" Rows="2" class="w-100 compact-input" style="height: auto !important;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Status Bar -->
+                                <div class="col-12">
+                                    <div class="section-card py-2">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3">
+                                                <span class="compact-label">DURUM</span>
+                                                <RadzenSelectBar @bind-Value="model.Status" TValue="int" Size="ButtonSize.Small" class="w-100 mt-1">
+                                                    <Items>
+                                                        <RadzenSelectBarItem Text="Aktif" Value="1" />
+                                                        <RadzenSelectBarItem Text="Pasif" Value="2" />
+                                                    </Items>
+                                                </RadzenSelectBar>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <span class="compact-label">AYARLAR</span>
+                                                <div class="compact-check-wrapper mt-1">
+                                                    <RadzenLabel Text="Bu satıcı sipariş süreçlerinde aktif olarak kullanılsın" Component="IsOrderUse" style="font-size: 0.85rem; color: #555;" />
+                                                    <RadzenSwitch @bind-Value="model.IsOrderUse" Name="IsOrderUse" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </RadzenTabsItem>
+                    
+                    <RadzenTabsItem Text="Kargo Tanımları" Icon="local_shipping" Disabled="@(!CanManageCargo)">
+                        <!-- Same as before -->
+                        <div class="compact-grid">
+                            @if (!CanManageCargo)
+                            {
+                                <RadzenAlert Title="Bilgi" AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter">
+                                    Kargo tanımları için önce satıcıyı kaydediniz.
+                                </RadzenAlert>
+                            }
+                            else
+                            {
+                                <div class="d-flex justify-content-end mb-2">
+                                    <RadzenButton Icon="add" Text="Yeni Kargo" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="AddCargoAsync" class="modern-button" />
+                                </div>
+                                
+                                <RadzenDataGrid Data="companyCargos" TItem="CompanyCargoListDto" AllowPaging="false" AllowSorting="false" Density="Density.Compact" class="modern-grid-table">
+                                    <Columns>
+                                        <RadzenDataGridColumn TItem="CompanyCargoListDto" Property="Cargo.Name" Title="Kargo Şirketi" />
+                                        <RadzenDataGridColumn TItem="CompanyCargoListDto" Property="MinBasketAmount" Title="Min. Sepet" FormatString="{0:C}" />
+                                        <RadzenDataGridColumn TItem="CompanyCargoListDto" Property="IsDefault" Title="Varsayılan">
+                                            <Template Context="cargo">
+                                                <RadzenBadge BadgeStyle="@(cargo.IsDefault ? BadgeStyle.Success : BadgeStyle.Light)" Text="@(cargo.IsDefault ? "Evet" : "Hayır")" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn TItem="CompanyCargoListDto" Title="İşlemler" Width="100px" TextAlign="TextAlign.Center">
+                                            <Template Context="cargo">
+                                                <RadzenButton Icon="edit" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Light" Click="@(args => EditCargoAsync(cargo))" />
+                                                <RadzenButton Icon="delete" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Danger" Click="@(args => DeleteCargoAsync(cargo))" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                </RadzenDataGrid>
+                            }
+                        </div>
+                    </RadzenTabsItem>
+                    
+                    <RadzenTabsItem Text="Depo & Adres" Icon="warehouse" Disabled="@(!CanManageCargo)">
+                        <!-- Same as before -->
+                        <div class="compact-grid">
+                            @if (!CanManageCargo)
+                            {
+                                <RadzenAlert Title="Bilgi" AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter">
+                                    Adres tanımları için önce satıcıyı kaydediniz.
+                                </RadzenAlert>
+                            }
+                            else
+                            {
+                                <div class="d-flex justify-content-end mb-2">
+                                    <RadzenButton Icon="add" Text="Yeni Adres" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="AddAddressAsync" class="modern-button" />
+                                </div>
+
+                                <RadzenDataGrid Data="sellerAddresses" TItem="SellerAddressListDto" AllowPaging="false" AllowSorting="false" Density="Density.Compact" class="modern-grid-table">
+                                    <Columns>
+                                        <RadzenDataGridColumn TItem="SellerAddressListDto" Property="Title" Title="Başlık" />
+                                        <RadzenDataGridColumn TItem="SellerAddressListDto" Property="CityName" Title="Şehir" />
+                                        <RadzenDataGridColumn TItem="SellerAddressListDto" Property="TownName" Title="İlçe" />
+                                        <RadzenDataGridColumn TItem="SellerAddressListDto" Property="IsDefault" Title="Varsayılan">
+                                            <Template Context="address">
+                                                <RadzenBadge BadgeStyle="@(address.IsDefault ? BadgeStyle.Success : BadgeStyle.Light)" Text="@(address.IsDefault ? "Evet" : "Hayır")" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn TItem="SellerAddressListDto" Title="İşlemler" Width="100px" TextAlign="TextAlign.Center">
+                                            <Template Context="address">
+                                                <RadzenButton Icon="edit" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Light" Click="@(args => EditAddressAsync(address))" />
+                                                <RadzenButton Icon="delete" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Danger" Click="@(args => DeleteAddressAsync(address))" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                </RadzenDataGrid>
+                            }
+                        </div>
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </div>
+
+        <div class="modal-sticky-footer d-flex justify-content-end gap-2">
+            <RadzenButton Text="Vazgeç" Click="Close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="Saving" BusyText="Kaydediliyor..." />
+        </div>
+    </RadzenTemplateForm>
+</div>

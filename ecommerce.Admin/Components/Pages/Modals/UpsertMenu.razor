@@ -1,0 +1,77 @@
+@using ecommerce.Admin.Domain.Dtos.MenuDto
+@using ecommerce.Core.Entities.Admin
+
+<PageTitle>Menü Ekle/Düzenle</PageTitle>
+
+<RadzenTemplateForm TItem="MenuUpsertDto" Data="@EditingEntity" Visible="@(Id == EditingEntity.Id)" Submit="@FormSubmit">
+    <RadzenStack>
+        <RadzenFormField Text="Menü Adı (*)" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenTextBox @bind-Value="@EditingEntity.Name" class="w-100"/>
+            </ChildContent>
+        </RadzenFormField>
+        
+        <RadzenFormField Text="Üst Menü" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenDropDown @bind-Value="@EditingEntity.ParentId" 
+                               Data="@AvailableParentMenus" 
+                               TextProperty="@nameof(Menu.Name)" 
+                               ValueProperty="@nameof(Menu.Id)"
+                               AllowClear="true"
+                               Placeholder="Üst menü seçin (opsiyonel)"
+                               AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                               class="w-100"/>
+            </ChildContent>
+        </RadzenFormField>
+
+        <RadzenFormField Text="İzin Verilen Roller" Variant="Variant.Outlined" class="w-100">
+             <ChildContent>
+                 <RadzenDropDown @bind-Value="@EditingEntity.SelectedRoleIds" 
+                                Data="@AvailableRoles" 
+                                TextProperty="Name" 
+                                ValueProperty="Id"
+                                Multiple="true"
+                                AllowClear="true"
+                                Placeholder="Bu menüyü görebilecek rolleri seçin"
+                                Chips="true"
+                                AllowFiltering="true"
+                                class="w-100"/>
+             </ChildContent>
+              <Helper>
+                 <RadzenText TextStyle="TextStyle.Caption" class="rz-text-secondary-color">Seçim yapılmazsa sadece yönetici görebilir (veya backend mantığına göre)</RadzenText>
+             </Helper>
+        </RadzenFormField>
+
+        <RadzenFormField Text="Yol (*)" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenTextBox @bind-Value="@EditingEntity.Path" Placeholder="/path/to/page" class="w-100"/>
+            </ChildContent>
+        </RadzenFormField>
+
+        <RadzenFormField Text="İkon (*)" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenTextBox @bind-Value="@EditingEntity.Icon" Placeholder="home, settings, etc." Style="flex:1"/>
+                    @if (!string.IsNullOrEmpty(EditingEntity.Icon))
+                    {
+                        <RadzenIcon Icon="@EditingEntity.Icon" Style="font-size: 24px;"/>
+                    }
+                </RadzenStack>
+            </ChildContent>
+            <Helper>
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-text-secondary-color">Material Design ikon adı girin (örn: home, dashboard, settings)</RadzenText>
+            </Helper>
+        </RadzenFormField>
+
+        <RadzenFormField Text="Etiketler" Variant="Variant.Outlined" class="w-100">
+            <ChildContent>
+                <RadzenTextBox @bind-Value="@EditingEntity.Tags" Placeholder="tag1,tag2,tag3" class="w-100"/>
+            </ChildContent>
+        </RadzenFormField>
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" BusyText="Kaydediliyor..." IsBusy="Saving" Variant="Variant.Flat" class="rz-mr-1"/>
+    </RadzenStack>
+</RadzenTemplateForm>

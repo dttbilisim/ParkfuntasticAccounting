@@ -1,0 +1,154 @@
+@page "/stock-transfer"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.ProductStockDto
+@using ecommerce.Admin.Components.Pages.Modals
+@using ecommerce.Admin.Domain.Interfaces
+@using ecommerce.Core.Helpers
+@using ecommerce.Core.Models
+@using Microsoft.AspNetCore.Authorization
+@using ecommerce.Admin.Services
+@layout MainLayout
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject AuthenticationService Security
+@inject IProductStockService StockService
+
+<PageTitle>Stok Sevk/Transfer</PageTitle>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Class="rz-p-4 rz-mb-4" Style="background-color: var(--rz-base-background-color); border-bottom: 1px solid var(--rz-border-color);">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+        <RadzenIcon Icon="local_shipping" Style="font-size: 2rem; color: var(--rz-primary);" />
+        <RadzenStack Gap="0">
+            <RadzenText TextStyle="TextStyle.H5" Class="rz-m-0">Stok Transfer Merkezi</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2" Class="rz-m-0" Style="color: var(--rz-text-secondary-color);">Depolar arası ürün sevk işlemlerini buradan yönetebilirsiniz.</RadzenText>
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenButton Icon="add_circle" Text="Ürün Sevk Et" Click="@OpenTransferModal" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Medium" />
+</RadzenStack>
+
+<RadzenCard Class="rz-mx-4">
+    <RadzenText TextStyle="TextStyle.H6" Class="rz-mb-3">Son İşlemler</RadzenText>
+    <div @key="@transferBatches.Count">
+        <AdminDataGrid @ref="logsGrid" TItem="StockTransferBatchDto" Data="@transferBatches" AllowPaging="true" PageSize="10" AllowSorting="true" IsLoading="@isLoading" RowSelect="@(args => EditBatch(args.BatchId))">
+            <Columns>
+                 <RadzenDataGridColumn TItem="StockTransferBatchDto" Property="TransferDate" Title="Tarih" Width="150px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                 <RadzenDataGridColumn TItem="StockTransferBatchDto" Title="Çıkış" Width="200px">
+                     <Template Context="batch">
+                         @batch.SourceWarehouseName - @batch.SourceShelfCodes
+                     </Template>
+                 </RadzenDataGridColumn>
+                 <RadzenDataGridColumn TItem="StockTransferBatchDto" Title="Giriş" Width="200px">
+                     <Template Context="batch">
+                         @batch.TargetWarehouseName - @batch.TargetShelfCodes
+                     </Template>
+                 </RadzenDataGridColumn>
+                 <RadzenDataGridColumn TItem="StockTransferBatchDto" Property="TotalItems" Title="Ürün Sayısı" Width="120px" TextAlign="TextAlign.Center" />
+                 <RadzenDataGridColumn TItem="StockTransferBatchDto" Property="TotalQuantity" Title="Toplam Miktar" Width="130px" TextAlign="TextAlign.Center" FormatString="{0:N2}" />
+                 <RadzenDataGridColumn TItem="StockTransferBatchDto" Property="TransferredByUserName" Title="İşlemi Yapan" Width="150px" />
+                 <RadzenDataGridColumn TItem="StockTransferBatchDto" Title="İşlemler" Width="100px" TextAlign="TextAlign.Center" Frozen="true" Sortable="false">
+                     <Template Context="batch">
+                         <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(() => DeleteBatch(batch.BatchId))" title="Sil" @onclick:stopPropagation="true" />
+                     </Template>
+                 </RadzenDataGridColumn>
+            </Columns>
+            <Template Context="batch">
+                <RadzenCard Style="margin: 10px;">
+                    <RadzenText TextStyle="TextStyle.H6" Class="mb-2">Transfer Detayları</RadzenText>
+                    <AdminDataGrid Data="@batch.Items" TItem="StockTransferLogListDto" AllowPaging="false">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="StockTransferLogListDto" Property="ProductName" Title="Ürün" />
+                            <RadzenDataGridColumn TItem="StockTransferLogListDto" Title="Kaynak Raf" Width="150px">
+                                <Template Context="item">
+                                    @item.SourceShelfCode
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="StockTransferLogListDto" Title="Hedef Raf" Width="150px">
+                                <Template Context="item">
+                                    @item.TargetShelfCode
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="StockTransferLogListDto" Property="Quantity" Title="Miktar" Width="100px" TextAlign="TextAlign.Center" FormatString="{0:N2}" />
+                        </Columns>
+                    </AdminDataGrid>
+                </RadzenCard>
+            </Template>
+            <EmptyTemplate>
+                <div class="text-center p-5 text-muted">
+                    <RadzenIcon Icon="history_toggle_off" Style="font-size: 3rem; opacity: 0.5;" />
+                    <p class="mt-2">Henüz herhangi bir transfer işlemi kaydı bulunmamaktadır.</p>
+                </div>
+            </EmptyTemplate>
+        </AdminDataGrid>
+    </div>
+</RadzenCard>
+
+@code {
+    List<StockTransferBatchDto> transferBatches = new();
+    AdminDataGrid<StockTransferBatchDto> logsGrid;
+    int totalCount;
+    bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTransferBatches();
+    }
+
+    async Task LoadTransferBatches()
+    {
+        isLoading = true;
+        var pager = new PageSetting("", "", 0, 100); // Load last 100 batches
+        var result = await StockService.GetTransferBatches(pager);
+        
+        if (result.Ok && result.Result?.Data != null)
+        {
+            transferBatches = result.Result.Data;
+            totalCount = result.Result.DataCount;
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    async Task OpenTransferModal()
+    {
+        var result = await DialogService.OpenAsync<UpsertStockTransferModal>("Yeni Stok Transferi",
+            new Dictionary<string, object>(),
+            new DialogOptions { Width = "1000px", Height = "auto", Resizable = true, Draggable = true });
+
+        if (result == true)
+        {
+            await LoadTransferBatches(); // Reload real data
+            await InvokeAsync(StateHasChanged);
+            if(logsGrid != null) await logsGrid.Reload();
+        }
+    }
+
+    async Task EditBatch(Guid batchId)
+    {
+        var result = await DialogService.OpenAsync<UpsertStockTransferModal>("Transfer Düzenle",
+            new Dictionary<string, object> { { "BatchId", batchId } },
+            new DialogOptions { Width = "1000px", Height = "auto", Resizable = true, Draggable = true });
+
+        if (result == true)
+        {
+            await LoadTransferBatches();
+            await InvokeAsync(StateHasChanged);
+            if(logsGrid != null) await logsGrid.Reload();
+        }
+    }
+
+    async Task DeleteBatch(Guid batchId)
+    {
+        var confirm = await DialogService.Confirm("Bu transfer işlemini silmek istediğinize emin misiniz? Stok miktarları geri alınacaktır.", 
+            "Transfer Sil", 
+            new ConfirmOptions { OkButtonText = "Evet, Sil", CancelButtonText = "İptal" });
+
+        if (confirm == true)
+        {
+            // TODO: Implement delete batch service method
+            NotificationService.Notify(NotificationSeverity.Info, "Bilgi", "Silme işlevi yakında eklenecek.");
+            // await StockService.DeleteTransferBatch(batchId);
+            // await LoadTransferBatches();
+        }
+    }
+}

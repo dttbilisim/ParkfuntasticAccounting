@@ -1,0 +1,286 @@
+@using ecommerce.Domain.Shared.Dtos.Bank.BankAccountDto
+@using ecommerce.Domain.Shared.Dtos.Bank.BankAccountExpenseDto
+@using ecommerce.Domain.Shared.Dtos.Bank.BankAccountInstallmentDto
+@using ecommerce.Core.Utils
+@using ecommerce.Core.Extensions
+@using Radzen
+@using Radzen.Blazor
+@inherits ecommerce.Admin.Components.Pages.Modals.UpsertBankAccountModalBase
+
+@if (model == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <RadzenTemplateForm TItem="BankAccountUpsertDto" Data="@model" Submit="@(async (BankAccountUpsertDto args) => { await Save(); })">
+        <div class="modal-content-body" style="max-height: calc(90vh - 120px); overflow-y: auto;">
+            <RadzenTabs RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="Genel Bilgiler" Icon="account_balance">
+                        <div class="tab-content-wrapper" style="padding: 1rem;">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Hesap Kodu" Component="AccountCode" />
+                                    <RadzenTextBox Name="AccountCode" @bind-Value="@model.AccountCode" class="w-100 form-control-modern" />
+                                    <RadzenRequiredValidator Component="AccountCode"
+                                                              Text="Hesap kodu zorunludur" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenLabel Text="Hesap Adı" Component="AccountName" />
+                                    <RadzenTextBox Name="AccountName" @bind-Value="@model.AccountName" class="w-100 form-control-modern" />
+                                    <RadzenRequiredValidator Component="AccountName"
+                                                              Text="Hesap adı zorunludur" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Banka Adı" Component="BankName" />
+                                    <RadzenTextBox Name="BankName" @bind-Value="@model.BankName" class="w-100 form-control-modern" />
+                                    <RadzenRequiredValidator Component="BankName"
+                                                              Text="Banka adı zorunludur" />
+                                </div>
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Şube" Component="BranchName" />
+                                    <RadzenTextBox Name="BranchName" @bind-Value="@model.BranchName" class="w-100 form-control-modern" />
+                                    <RadzenRequiredValidator Component="BranchName"
+                                                              Text="Şube zorunludur" />
+                                </div>
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Şehir" Component="City" />
+                                    <RadzenTextBox Name="City" @bind-Value="@model.City" class="w-100 form-control-modern" />
+                                    <RadzenRequiredValidator Component="City"
+                                                              Text="Şehir zorunludur" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="IBAN" Component="Iban" />
+                                    <RadzenTextBox Name="Iban" @bind-Value="@model.Iban" class="w-100 form-control-modern" />
+                                    <RadzenRequiredValidator Component="Iban"
+                                                              Text="IBAN zorunludur" />
+                                </div>
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Kart Numarası" Component="CardNumber" />
+                                    <RadzenTextBox Name="CardNumber" @bind-Value="@model.CardNumber" class="w-100 form-control-modern" />
+                                </div>
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Ödeme Tipi" Component="PaymentType" />
+                                    <RadzenDropDown Name="PaymentType"
+                                                    Data="@PaymentTypeOptions"
+                                                    @bind-Value="@model.PaymentType"
+                                                    TValue="BankPaymentType"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="false" 
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                                        <Template Context="item">
+                                            @((item as BankPaymentType?)?.GetDisplayName() ?? item?.ToString())
+                                        </Template>
+                                        <ValueTemplate Context="item">
+                                            @((item as BankPaymentType?)?.GetDisplayName() ?? item?.ToString())
+                                        </ValueTemplate>
+                                    </RadzenDropDown>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Para Birimi" Component="CurrencyId" />
+                                    <RadzenDropDown Name="CurrencyId"
+                                                    Data="@Currencies"
+                                                    TextProperty="CurrencyName"
+                                                    ValueProperty="Id"
+                                                    TValue="int?"
+                                                    @bind-Value="@model.CurrencyId"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="true"
+                                                    Placeholder="Seçiniz..." 
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <RadzenLabel Text="Aktif" Component="Active" />
+                                    <RadzenCheckBox @bind-Value="@model.Active" TValue="bool" Name="Active" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <RadzenLabel Text="Açıklama" Component="Description" />
+                                    <RadzenTextArea Name="Description" @bind-Value="@model.Description" class="w-100 form-control-modern" Rows="3" />
+                                    <RadzenRequiredValidator Component="Description"
+                                                              Text="Açıklama zorunludur" />
+                                </div>
+                            </div>
+                        </div>
+                    </RadzenTabsItem>
+
+                    <RadzenTabsItem Text="Gider Bağlantıları" Icon="link" Disabled="@(!CanEditDetails)">
+                        <div class="tab-content-wrapper" style="padding: 1rem;">
+                            @if (!CanEditDetails)
+                            {
+                                <RadzenAlert AlertStyle="AlertStyle.Info" Shade="Shade.Lighter" Size="AlertSize.Small">
+                                    Önce hesap kaydedilmeli.
+                                </RadzenAlert>
+                            }
+                            else
+                            {
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <RadzenLabel Text="Ana Gider" Component="MainExpenseId" />
+                                        <RadzenDropDown Name="MainExpenseId"
+                                                        Data="@MainExpenses"
+                                                        TextProperty="Name"
+                                                        ValueProperty="Id"
+                                                        TValue="int?"
+                                                        @bind-Value="@SelectedMainExpenseId"
+                                                        Change="@OnMainExpenseChanged"
+                                                        class="w-100 form-control-modern"
+                                                        AllowClear="true"
+                                                        Placeholder="Seçiniz..." 
+                                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <RadzenLabel Text="Alt Gider" Component="SubExpenseId" />
+                                        <RadzenDropDown Name="SubExpenseId"
+                                                        Data="@SubExpenses"
+                                                        TextProperty="Name"
+                                                        ValueProperty="Id"
+                                                        TValue="int?"
+                                                        @bind-Value="@SelectedSubExpenseId"
+                                                        class="w-100 form-control-modern"
+                                                        AllowClear="true"
+                                                        Placeholder="Seçiniz..." 
+                                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <RadzenButton Icon="add_circle_outline"
+                                                      Text="Ekle"
+                                                      ButtonStyle="ButtonStyle.Primary"
+                                                      Variant="Variant.Flat"
+                                                      Click="@AddExpenseLinkAsync" />
+                                    </div>
+                                </div>
+
+                                <RadzenDataGrid TItem="BankAccountExpenseListDto"
+                                                Data="@ExpenseLinks"
+                                                AllowPaging="false"
+                                                AllowSorting="false"
+                                                AllowFiltering="false">
+                                    <Columns>
+                                        <RadzenDataGridColumn TItem="BankAccountExpenseListDto" Property="MainExpenseName" Title="Ana Gider" />
+                                        <RadzenDataGridColumn TItem="BankAccountExpenseListDto" Property="SubExpenseName" Title="Alt Gider" />
+                                        <RadzenDataGridColumn TItem="BankAccountExpenseListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                                            <Template Context="item">
+                                                <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                                              Icon="delete"
+                                                              Size="ButtonSize.ExtraSmall"
+                                                              Shade="Shade.Dark"
+                                                              Variant="Variant.Flat"
+                                                              Click="@(args => DeleteExpenseLinkAsync(item))"
+                                                              @onclick:stopPropagation="true" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                </RadzenDataGrid>
+                            }
+                        </div>
+                    </RadzenTabsItem>
+
+                    <RadzenTabsItem Text="Taksit Seçenekleri" Icon="credit_card" Disabled="@(!CanEditDetails)">
+                        <div class="tab-content-wrapper" style="padding: 1rem;">
+                            @if (!CanEditDetails)
+                            {
+                                <RadzenAlert AlertStyle="AlertStyle.Info" Shade="Shade.Lighter" Size="AlertSize.Small">
+                                    Önce hesap kaydedilmeli.
+                                </RadzenAlert>
+                            }
+                            else
+                            {
+                                <div class="row mb-3">
+                                    <div class="col-md-2">
+                                        <RadzenLabel Text="Taksit" Component="Installment" />
+                                        <RadzenNumeric Name="Installment" @bind-Value="@NewInstallment.Installment" TValue="int" class="w-100 form-control-modern" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <RadzenLabel Text="Komisyon (%)" Component="CommissionRate" />
+                                        <RadzenNumeric Name="CommissionRate" @bind-Value="@NewInstallment.CommissionRate" TValue="decimal" class="w-100 form-control-modern" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <RadzenLabel Text="Tutar" Component="Amount" />
+                                        <RadzenNumeric Name="Amount" @bind-Value="@NewInstallment.Amount" TValue="decimal" class="w-100 form-control-modern" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <RadzenLabel Text="Açıklama" Component="Note" />
+                                        <RadzenTextBox Name="Note" @bind-Value="@NewInstallment.Note" class="w-100 form-control-modern" />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-12 d-flex justify-content-end">
+                                        <RadzenButton Icon="add_circle_outline"
+                                                      Text="Ekle"
+                                                      ButtonStyle="ButtonStyle.Primary"
+                                                      Variant="Variant.Flat"
+                                                      Click="@AddInstallmentAsync" />
+                                    </div>
+                                </div>
+
+                                <RadzenDataGrid TItem="BankAccountInstallmentListDto"
+                                                Data="@Installments"
+                                                AllowPaging="false"
+                                                AllowSorting="false"
+                                                AllowFiltering="false">
+                                    <Columns>
+                                        <RadzenDataGridColumn TItem="BankAccountInstallmentListDto" Property="Installment" Title="Taksit" Width="100px" />
+                                        <RadzenDataGridColumn TItem="BankAccountInstallmentListDto" Property="CommissionRate" Title="Komisyon (%)" Width="120px" FormatString="{0:N2}" />
+                                        <RadzenDataGridColumn TItem="BankAccountInstallmentListDto" Property="Amount" Title="Tutar" Width="120px" FormatString="{0:N2} ₺" TextAlign="TextAlign.Right" />
+                                        <RadzenDataGridColumn TItem="BankAccountInstallmentListDto" Property="Note" Title="Açıklama" />
+                                        <RadzenDataGridColumn TItem="BankAccountInstallmentListDto" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                                            <Template Context="item">
+                                                <RadzenBadge BadgeStyle="@(item.Active ? BadgeStyle.Success : BadgeStyle.Light)" Text="@(item.Active ? "Aktif" : "Pasif")" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn TItem="BankAccountInstallmentListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                                            <Template Context="item">
+                                                <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                                              Icon="delete"
+                                                              Size="ButtonSize.ExtraSmall"
+                                                              Shade="Shade.Dark"
+                                                              Variant="Variant.Flat"
+                                                              Click="@(args => DeleteInstallmentAsync(item))"
+                                                              @onclick:stopPropagation="true" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                </RadzenDataGrid>
+                            }
+                        </div>
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+
+            <div class="row" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                <div class="col d-flex justify-content-end">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  ButtonType="ButtonType.Submit"
+                                  Icon="save"
+                                  Text="Kaydet"
+                                  Style="margin-right: 0.5rem"
+                                  Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light"
+                                  Text="Vazgeç"
+                                  Variant="Variant.Flat"
+                                  Click="@Close" />
+                </div>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}
+
+

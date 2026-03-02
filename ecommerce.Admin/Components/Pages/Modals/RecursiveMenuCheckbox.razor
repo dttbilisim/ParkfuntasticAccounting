@@ -1,0 +1,51 @@
+@using ecommerce.Core.Entities.Admin
+
+<div style="margin-bottom: 0.25rem;">
+    <input type="checkbox" 
+           checked="@IsSelected" 
+           @onchange="@(e => OnCheckChange((bool)e.Value))" />
+    <RadzenIcon Icon="@Menu.Icon" class="rz-mx-1" />
+    @if (IsTopLevel)
+    {
+        <strong>@Menu.Name</strong>
+    }
+    else
+    {
+        @Menu.Name
+    }
+    
+    @if (HasChildren)
+    {
+        <div style="margin-left: 2rem; margin-top: 0.25rem;">
+            @foreach (var child in Menu.InverseParent.OrderBy(x => x.Id))
+            {
+                <RecursiveMenuCheckbox Menu="@child" 
+                                       SelectedMenuIds="@SelectedMenuIds" 
+                                       OnMenuSelectionChanged="@OnMenuSelectionChanged"
+                                       IsTopLevel="false" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Menu Menu { get; set; } = default!;
+    
+    [Parameter]
+    public List<int> SelectedMenuIds { get; set; } = new();
+    
+    [Parameter]
+    public EventCallback<(bool isChecked, int menuId)> OnMenuSelectionChanged { get; set; }
+    
+    [Parameter]
+    public bool IsTopLevel { get; set; } = true;
+
+    private bool HasChildren => Menu.InverseParent != null && Menu.InverseParent.Count > 0;
+    private bool IsSelected => SelectedMenuIds.Contains(Menu.Id);
+
+    private async Task OnCheckChange(bool isChecked)
+    {
+        await OnMenuSelectionChanged.InvokeAsync((isChecked, Menu.Id));
+    }
+}

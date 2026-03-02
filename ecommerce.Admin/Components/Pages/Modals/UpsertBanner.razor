@@ -1,0 +1,93 @@
+﻿@page "/upsert-Banner"
+@using ecommerce.Admin.Domain.Dtos.BannerDto;
+@using ecommerce.Core.Utils;
+@attribute [Authorize]
+
+
+<PageTitle>Banner Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Banner Kayıt Edilemedi!</RadzenAlert>
+    <RadzenTemplateForm TItem="BannerUpsertDto" Data="@Banner" Visible="@(Banner != null)" Submit="@FormSubmit">
+        <div style="margin-bottom: 1rem" class="row">
+
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Banner Tipi" Component="Banner" style="width: 100%"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenDropDownDataGrid Data="@(Enum.GetValues<BannerType>())" Change="@BannerTypeChange" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@Banner.BannerType" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowVirtualization="true" AllowClear="true" AllowFiltering="true">
+
+                        <Template Context="data">
+                            <p style="white-space:pre-wrap;cursor:pointer">@(((BannerType) data).GetDisplayDescription())</p>
+                        </Template>
+
+                    </RadzenDropDownDataGrid>
+                </div>
+            </div>
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Banner Adı" Component="Name" style="width: 100%"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@Banner.Name" Name="Name"/>
+                    <RadzenRequiredValidator Component="Name" Text="Banner Adı Girmelisiniz"/>
+                </div>
+            </div>
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Sıra" Component="Order" style="width: 100%"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@Banner.Order" Min="1" Name="Order"/>
+                    <RadzenRequiredValidator Component="Order" Text="Banner Sırası Girmelisiniz"/>
+                </div>
+            </div>
+                 <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Banner Başlangıç Süresi (ms)" Component="AutoStartTime" style="width: 100%"/>
+
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric Placeholder="Örnek 1000 ile 10000 arası ms türünden sayı giriniz." style="display: block; width: 100%" @bind-Value="@Banner.AutoStartTime" Min="1" Name="AutoStartTime"/>
+                <RadzenRequiredValidator Component="AutoStartTime" Text="Banner Başlangıç Süresi Girmelisiniz"/>
+
+            </div>
+              </div>
+              <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Banner Geçiş Süresi (ms)" Component="ReplayTime" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric Placeholder="Örnek 1000 ile 10000 arası ms türünden sayı giriniz." style="display: block; width: 100%" @bind-Value="@Banner.ReplayTime" Min="1" Name="ReplayTime"/>
+                <RadzenRequiredValidator Component="AutoStartTime" Text="Banner Geçiş Süresi Girmelisiniz"/>
+
+            </div>
+              </div>
+
+            <div style="margin-top:1rem; margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Banner AutoPlay" Component="AutoLoop" style="width: 100%"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenCheckBox @bind-Value="@Banner.AutoLoop"/>
+                </div>
+            </div>
+
+            <div style="margin-top:1rem; margin-bottom: 1rem" class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Durum" Component="Length" style="width: 100%"/>
+                </div>
+                <div class="col-md-9">
+                    <RadzenCheckBox @bind-Value="@Status"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

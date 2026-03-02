@@ -1,0 +1,41 @@
+@page "/upsert-groupcode"
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+
+@attribute [Authorize]
+
+<PageTitle>Grup Kodu</PageTitle>
+
+<PageTitle>Kategori Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    
+    <RadzenTemplateForm TItem="ProductGroupCodeUpsertDto" Data="@productGroupCodeUpsert" Visible="@(productGroupCodeUpsert != null)" Submit="@FormSubmit">
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Grup Kodu" Component="OemCode" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@productGroupCodeUpsert.OemCode" Name="OemCode" />
+                <RadzenRequiredValidator Component="OemCode" Text="Grop Kodu Girmelisiniz" />
+            </div>
+        </div>
+   
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Durum" Component="Status" style="width: 100%" />
+            </div>
+            <div class="col-md-3">
+                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat"  />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+
+
+

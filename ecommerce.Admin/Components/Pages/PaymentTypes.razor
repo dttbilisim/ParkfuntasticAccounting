@@ -1,0 +1,58 @@
+@page "/payment-types"
+@using ecommerce.Admin.Domain.Dtos.PaymentTypeDto
+@using ecommerce.Admin.Components.Layout
+@using Radzen
+@using Radzen.Blazor
+@layout MainLayout
+
+<PageTitle>Ödeme Tipleri</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Ödeme Tipleri</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Ödeme Tipi" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+
+            <AdminDataGrid @ref="grid" 
+                            LoadData="@LoadData" 
+                            Data="@paymentTypes" 
+                            Count="@count" 
+                            TItem="PaymentTypeListDto" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="PaymentTypeListDto" Property="Id" Title="#" Width="70px" TextAlign="TextAlign.Center"/>
+                    <RadzenDataGridColumn TItem="PaymentTypeListDto" Property="Name" Title="Ödeme Tipi Adı" />
+                    <RadzenDataGridColumn TItem="PaymentTypeListDto" Property="IsActive" Title="Aktif" Width="80px" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+                         <Template Context="data">
+                            <RadzenCheckBox @bind-Value="data.IsActive" ReadOnly="true"/>
+                         </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PaymentTypeListDto" Title="İşlemler" TextAlign="TextAlign.Center" Width="100px" Filterable="false" Sortable="false">
+                        <Template Context="paymentType">
+                             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(paymentType))" @onclick:stopPropagation="true" class="me-1"/>
+                             <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => DeleteRow(paymentType))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

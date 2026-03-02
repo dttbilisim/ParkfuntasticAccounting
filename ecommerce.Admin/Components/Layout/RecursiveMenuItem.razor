@@ -1,0 +1,25 @@
+@using ecommerce.Core.Entities.Admin
+
+<RadzenPanelMenuItem Text="@Menu.Name" 
+                     Icon="@Menu.Icon" 
+                     Path="@(HasChildren ? null : Menu.Path)" 
+                     Expanded="false"
+                     Class="@($"menu-level-{Level}")">
+    @if (HasChildren)
+    {
+        @foreach (var child in Menu.InverseParent.OrderBy(x => x.Id))
+        {
+            <RecursiveMenuItem Menu="@child" Level="@(Level + 1)" />
+        }
+    }
+</RadzenPanelMenuItem>
+
+@code {
+    [Parameter]
+    public Menu Menu { get; set; } = default!;
+    
+    [Parameter]
+    public int Level { get; set; } = 0;
+
+    private bool HasChildren => Menu.InverseParent != null && Menu.InverseParent.Count > 0;
+}

@@ -1,0 +1,88 @@
+@page "/advertisements"
+@using ecommerce.Admin.Domain.Dtos.SellerItemDto
+@using ecommerce.Core.Models
+@using Radzen
+@using Radzen.Blazor
+
+<style>
+    .page-header { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .page-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: #333; }
+    .filter-panel { background: #fff; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .modern-grid-table { border-radius: 12px; overflow: hidden; border: 1px solid #eee !important; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .rz-cell-data { font-size: 0.9rem; }
+    
+    .search-container { position: relative; display: flex; align-items: center; }
+    .search-clear-btn { position: absolute; right: 10px; cursor: pointer; color: #999; display: flex; align-items: center; justify-content: center; }
+    .search-clear-btn:hover { color: #666; }
+
+    .oem-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 130px; }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <div class="d-flex align-items-center">
+            <RadzenIcon Icon="campaign" Style="font-size: 2rem; color: var(--rz-primary); margin-right: 1rem;" />
+            <h3 class="page-title">İlanlar (Advertisements)</h3>
+        </div>
+        <div>
+             <RadzenButton Text="İlan Ekle" Icon="add_circle" ButtonStyle="ButtonStyle.Success" Click="@(() => OpenUpsertModal(null))" />
+        </div>
+    </div>
+
+    <div class="filter-panel">
+        <div class="row align-items-end gx-3">
+            <div class="col-md-4">
+                <RadzenLabel Text="Arama" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                <div class="search-container">
+                    <RadzenTextBox Value="@searchText" Placeholder="Ürün adı, barkod veya satıcı..." class="w-100" 
+                                   @oninput="@(args => searchText = args.Value?.ToString() ?? "")"
+                                   @onkeydown="@HandleKeyDown" Change="@OnSearch" style="padding-right: 35px;" />
+                    @if (!string.IsNullOrEmpty(searchText))
+                    {
+                        <div class="search-clear-btn" @onclick="@ClearSearch">
+                            <RadzenIcon Icon="close" Style="font-size: 1.2rem;" />
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-md-3">
+                <RadzenLabel Text="Satıcı" Style="font-size: 0.85rem; font-weight: 600; color: #666;" />
+                <RadzenDropDown TValue="int?" Data="@sellers" TextProperty="Name" ValueProperty="Id" @bind-Value="@selectedSellerId" 
+                                Placeholder="Satıcı Seçiniz..." class="w-100" AllowClear="true" Change="@OnSellerChange" 
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </div>
+            <div class="col-md-2">
+                <RadzenButton Text="Filtrele" Icon="search" ButtonStyle="ButtonStyle.Primary" Click="@OnSearch" class="w-100" />
+            </div>
+        </div>
+    </div>
+
+    <AdminDataGrid @ref="grid" IsLoading="@isLoading" Count="@count" Data="@sellerItems" LoadData="@LoadData"
+                    TItem="SellerItemListDto" AllowPaging="true" PageSize="10" AllowSorting="true" 
+                    SelectionMode="DataGridSelectionMode.Single" class="modern-grid-table" RowClick="@OnRowClick">
+        <Columns>
+            <RadzenDataGridColumn TItem="SellerItemListDto" Property="Oem" Title="OEM" Width="150px">
+                <Template Context="item">
+                    <span class="oem-text" title="@item.Oem">@item.Oem</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="SellerItemListDto" Property="ProductName" Title="Ürün Adı" />
+            <RadzenDataGridColumn TItem="SellerItemListDto" Property="SellerName" Title="Satıcı" Width="200px" />
+            <RadzenDataGridColumn TItem="SellerItemListDto" Property="Stock" Title="Stok" Width="100px" TextAlign="TextAlign.Right">
+                <Template Context="item">
+                    @item.Stock.ToString("N2") @item.Unit
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="SellerItemListDto" Property="SalePrice" Title="Satış Fiyatı" Width="150px" TextAlign="TextAlign.Right">
+                <Template Context="item">
+                    <span style="font-weight: 600; color: var(--rz-primary);">@item.SalePrice.ToString("N2") @item.Currency</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="SellerItemListDto" Property="CreatedDate" Title="Tarih" Width="150px">
+                <Template Context="item">
+                    @item.CreatedDate.ToString("dd.MM.yyyy HH:mm")
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </AdminDataGrid>
+</div>

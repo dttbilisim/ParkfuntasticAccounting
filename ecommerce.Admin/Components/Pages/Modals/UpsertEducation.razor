@@ -1,0 +1,198 @@
+@using ecommerce.Admin.Domain.Dtos.EducationDto
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+@inject IStringLocalizer<Culture_TR> Loc
+<PageTitle>Ekle/Düzenle</PageTitle>
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Kayıt Edilemedi!</RadzenAlert>
+
+
+    <RadzenTemplateForm TItem="EducationUpsertDto" Data="@educationUpsert" Visible="@(educationUpsert != null)" Submit="@FormSubmit">
+        <RadzenTabs TabPosition="TabPosition.Top" class="w-100" RenderMode="TabRenderMode.Client" Change="TabChange">
+            <Tabs>
+                <RadzenTabsItem Text="İçerik Bilgileri">
+                    <RadzenFieldset Text="İçerik Bilgileri">
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Eğitim Tipi" Component="Banner" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDropDown style="display: block; width: 100%" Data="@(Enum.GetValues<EducationCategoryType>())" @bind-Value="@educationUpsert.EducationCategoryType" Change="@EducationCategoryTypeChange" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Kategori Adı" Component="Banner" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDropDownDataGrid Data="@category" TextProperty="Name" ValueProperty="Id" Change="@BannerItemTypeChange" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@educationUpsert.CategoryId" Name="CategoryId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowVirtualization="true" AllowClear="true" AllowFiltering="true">
+
+                                    <Template Context="data">
+                                        <p style="white-space:pre-wrap;cursor:pointer">@data.Name</p>
+                                    </Template>
+
+                                </RadzenDropDownDataGrid>
+                                <RadzenNumericRangeValidator Min="1" Max="10000" Component="CategoryId" Text="Kategori Seçmelisiniz" />
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Sırası" Component="Order" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenNumeric style="display: block; width: 100%" Min="1" @bind-Value="@educationUpsert.Order" Name="Order"/>
+                                <RadzenRequiredValidator Component="Order" Text="Sıra Girmelisiniz"/>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Adı" Component="Title" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@educationUpsert.Name" Name="Title"/>
+                                <RadzenRequiredValidator Component="Title" Text="Adı Girmelisiniz"/>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Kısa Açıklama" Component="Description" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@educationUpsert.SubText" Name="Kısa Açıklama"/>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Yayınlayan" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@educationUpsert.PubliserName" Name="PubliserName" />
+                                <RadzenRequiredValidator Component="PubliserName" Text="Yayınlayan İsmi Girmelisiniz" />
+                            </div>
+                        </div>
+
+                        @*<div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Link"  style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@educationUpsert.ButtonUrl" Name="Url"/>
+                                <RadzenRequiredValidator Component="Url" Text="Banner için url Girmelisiniz"/>
+                            </div>
+                        </div>*@
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Button Adı" Component="ButtonName" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@educationUpsert.ButtonText" Name="ButtonName"/>
+                                <RadzenRequiredValidator Component="ButtonName" Text="Button adı girmelisiniz." />
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Başlangıç Bitiş Tarihi" Component="ButtonName" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDatePicker @bind-Value="@educationUpsert.StartDate" ShowTime="false" DateFormat="dd/MM/yyyy" AllowClear="false"/>- <RadzenDatePicker @bind-Value="@educationUpsert.EndDate" ShowTime="false" DateFormat="dd/MM/yyyy" AllowClear="false"/>
+                            </div>
+                        </div>
+
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Durum" Component="Status" style="width: 100%"/>
+                            </div>
+                            <div class="col-md-3">
+                                <RadzenCheckBox TValue="bool" @bind-Value="@Status" Name="Status"/>
+                            </div>
+                        </div>
+
+                        @if (educationUpsert.EducationCategoryType == EducationCategoryType.PresentationArticleAndTrends)
+                        {
+                            <div style="margin-bottom: 1rem" class="row">
+                                <div class="col-md-3">
+                                    <RadzenLabel Text="Slider" Component="Slider" style="width: 100%"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <RadzenCheckBox TValue="bool" @bind-Value="@educationUpsert.IsSlider" Name="Status"/>
+                                </div>
+                            </div>
+                        }
+                        
+                    </RadzenFieldset>
+
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="İçerik Detayı">
+                    @if (educationUpsert.EducationCategoryType == EducationCategoryType.PresentationArticleAndTrends)
+                    {
+                        <div style="margin-bottom: 1rem" class="row">
+                        <RadzenHtmlEditor @bind-Value="@educationUpsert.Description" Name="Content" style="height: 300px; width: 100%">
+                            <RadzenHtmlEditorUndo/>
+                            <RadzenHtmlEditorRedo/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorBold/>
+                            <RadzenHtmlEditorItalic/>
+                            <RadzenHtmlEditorUnderline/>
+                            <RadzenHtmlEditorStrikeThrough/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorAlignLeft/>
+                            <RadzenHtmlEditorAlignCenter/>
+                            <RadzenHtmlEditorAlignRight/>
+                            <RadzenHtmlEditorJustify/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorIndent/>
+                            <RadzenHtmlEditorOutdent/>
+                            <RadzenHtmlEditorUnorderedList/>
+                            <RadzenHtmlEditorOrderedList/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorColor/>
+                            <RadzenHtmlEditorBackground/>
+                            <RadzenHtmlEditorRemoveFormat/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorSubscript/>
+                            <RadzenHtmlEditorSuperscript/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorLink/>
+                            <RadzenHtmlEditorUnlink/>
+                            <RadzenHtmlEditorImage/>
+                            <RadzenHtmlEditorFontName/>
+                            <RadzenHtmlEditorFontSize/>
+                            <RadzenHtmlEditorFormatBlock/>
+                            <RadzenHtmlEditorSeparator/>
+                            <RadzenHtmlEditorSource/>
+                        </RadzenHtmlEditor>
+                    </div>                        
+                    }
+
+                    <div style="margin-bottom: 1rem" class="row">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Dosya" Component="File" style="width: 100%"/>
+                        </div>
+                        <div class="col-md-9">
+                            <InputFile OnChange="@(e => SaveImageFile(e.File))" class="mb-2" accept="image/jpg,image/png,image/gif,image/jpeg,video/mp4" />
+                            <RadzenImage Style="width: 75px;height: 75px" Path="@FileHelper.GetFileUrl(educationUpsert.ImageUrl)" Visible="@(educationUpsert.ImageUrl != null)" class="img-fluid" />
+                            <RadzenTextBox Name="ImageUrl" @bind-Value="@educationUpsert.ImageUrl" hidden />
+                            <RadzenRequiredValidator Component="ImageUrl" Text="Dosya yüklemelisiniz" />
+                        </div>
+                    </div>
+
+                </RadzenTabsItem>
+
+            </Tabs>
+        </RadzenTabs>
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" Disabled="@IsSaveButtonDisabled"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick"/>
+            </div>
+        </div>
+
+    </RadzenTemplateForm>
+
+</div>

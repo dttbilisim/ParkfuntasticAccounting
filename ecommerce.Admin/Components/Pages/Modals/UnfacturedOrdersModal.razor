@@ -1,0 +1,163 @@
+@using ecommerce.Admin.Domain.Dtos.OrderDto
+@using ecommerce.Admin.Domain.ViewModels
+@using Radzen
+@using Radzen.Blazor
+
+<div class="d-flex flex-column h-100">
+
+
+
+    @if (orders == null)
+    {
+        <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1" style="min-height: 300px;">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <span class="text-muted">Siparişler yükleniyor...</span>
+        </div>
+    }
+    else if (!orders.Any())
+    {
+        <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1 text-center text-muted" style="min-height: 300px;">
+            <i class="fas fa-receipt fa-3x mb-3 text-secondary opacity-50"></i>
+            <h6 class="fw-bold">Faturalanmamış Sipariş Yok</h6>
+            <small>Şu anda faturalanmayı bekleyen yeni bir sipariş bulunmamaktadır.</small>
+        </div>
+    }
+    else
+    {
+        <div class="flex-grow-1 overflow-hidden border rounded bg-white shadow-sm" style="overflow-x: auto !important;">
+            <RadzenDataGrid @ref="dataGrid"
+                            Data="@orders"
+                            @bind-Value=@selectedOrders
+                            TItem="UnfacturedOrderViewModel"
+                            AllowPaging="true"
+                            PageSize="10"
+                            AllowSorting="true"
+                            Density="Density.Compact"
+                            FilterMode="FilterMode.Advanced"
+                            AllowFiltering="true"
+                            SelectionMode="DataGridSelectionMode.Multiple"
+                            ExpandMode="DataGridExpandMode.Single"
+                            RowExpand="@(args => OnRowExpand(args))"
+                            class="table-hover"
+                            RowSelect="@OnRowSelect">
+                <Template Context="order">
+                    @* Master-Detail: Sipariş ürün detayları *@
+                    <div class="p-3" style="background-color: #f8f9fa; overflow-x: auto;">
+                        @if (order.Items != null && order.Items.Any())
+                        {
+                            <h6 class="fw-bold mb-2"><i class="fas fa-box-open me-1"></i> Sipariş Ürünleri (@order.Items.Count adet)</h6>
+                            <table class="table table-sm table-bordered table-striped mb-0" style="font-size: 0.82rem; table-layout: fixed; width: 100%;">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 32px;">#</th>
+                                        <th>Ürün Adı</th>
+                                        <th style="width: 55px;" class="text-center">Adet</th>
+                                        <th style="width: 95px;" class="text-end">Fiyat</th>
+                                        <th style="width: 80px;" class="text-end">İskonto</th>
+                                        <th style="width: 100px;" class="text-end">Toplam</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{ var siraNo = 0; }
+                                    @foreach (var item in order.Items)
+                                    {
+                                        siraNo++;
+                                        <tr>
+                                            <td class="text-muted">@siraNo</td>
+                                            <td class="fw-semibold" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="@item.ProductName">@item.ProductName</td>
+                                            <td class="text-center">@item.Quantity</td>
+                                            <td class="text-end">@item.Price.ToString("N2") ₺</td>
+                                            <td class="text-end text-danger">@((item.DiscountAmount ?? 0).ToString("N2")) ₺</td>
+                                            <td class="text-end fw-bold text-success">@item.TotalPrice.ToString("N2") ₺</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-warning">
+                                        <td colspan="5" class="text-end fw-bold">Genel Toplam:</td>
+                                        <td class="text-end fw-bold text-success">@order.Items.Sum(i => i.TotalPrice).ToString("N2") ₺</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="text-muted text-center py-2">
+                                <i class="fas fa-info-circle me-1"></i> Bu siparişe ait ürün detayı bulunamadı.
+                            </div>
+                        }
+                    </div>
+                </Template>
+                <Columns>
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Width="40px" Sortable="false" Filterable="false">
+                        <HeaderTemplate>
+                        </HeaderTemplate>
+                        <Template Context="data">
+                            <RadzenCheckBox Value="@(selectedOrders != null && selectedOrders.Contains(data))"
+                                            TValue="bool" Change="@(args => OnRowCheckboxChange(data, args))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="OrderNumber" Title="SİPARİŞ NO" Width="120px">
+                        <Template Context="order">
+                            <span class="fw-bold text-dark">#@order.OrderNumber</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="CreatedDate" Title="TARİH" Width="120px">
+                        <Template Context="order">
+                            <small class="text-muted">@order.CreatedDate.ToString("dd.MM.yyyy HH:mm")</small>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="CustomerName" Title="MÜŞTERİ (CARİ)" MinWidth="140px">
+                        <Template Context="order">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle me-2 bg-light text-primary small fw-bold" style="width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; flex-shrink:0;">
+                                    @order.CustomerName.Substring(0, 1).ToUpper()
+                                </div>
+                                <span class="text-truncate fw-bold" title="@order.CustomerName" style="max-width: 140px;">@order.CustomerName</span>
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="BuyerName" Title="ALICI" MinWidth="130px">
+                        <Template Context="order">
+                            <span class="text-secondary text-truncate" title="@order.BuyerName" style="max-width: 130px; display: inline-block;">@order.BuyerName</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="OrderStatusType" Title="DURUM" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="order">
+                            <RadzenBadge BadgeStyle="@GetStatusBadgeStyle(order.OrderStatusType)" Text="@GetStatusText(order.OrderStatusType)" Class="text-uppercase small px-2 py-1" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="ItemCount" Title="ÜRÜN" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="order">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@($"{order.ItemCount}")" Class="small" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="GrandTotal" Title="TUTAR" Width="110px" TextAlign="TextAlign.Right">
+                        <Template Context="order">
+                            <strong class="text-success">@order.GrandTotal.ToString("N2") ₺</strong>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    }
+
+    <div class="modal-footer border-0 px-0 pb-0 pt-3 d-flex justify-content-between">
+        <div class="text-muted small">
+            @if(selectedOrders != null && selectedOrders.Any())
+            {
+                <span>@selectedOrders.Count adet sipariş seçildi. Toplam Tutar: <strong>@SelectedTotal.ToString("N2") ₺</strong></span>
+            }
+        </div>
+        <div class="d-flex gap-2">
+            <RadzenButton Text="Kapat" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Class="px-4" />
+            <RadzenButton Text="Seçilenleri Faturaya Aktar" Icon="receipt" Click="@TransferSelectedOrders" ButtonStyle="ButtonStyle.Success" Disabled="@(selectedOrders == null || !selectedOrders.Any())" />
+        </div>
+    </div>
+</div>

@@ -1,0 +1,8 @@
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/Components/Pages/ProductSearch.razor(321,69): error CS0173: Type of conditional expression cannot be determined because there is no implicit conversion between 'int' and '<null>' [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+/Users/sezgin/Repos/ecommerce/ecommerce.Admin/obj/Debug/net9.0/Microsoft.CodeAnalysis.Razor.Compiler/Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator/Components_Pages_ProductSearch_razor.g.cs(1939,146): error CS1662: Cannot convert lambda expression to intended delegate type because some of the return types in the block are not implicitly convertible to the delegate return type [/Users/sezgin/Repos/ecommerce/ecommerce.Admin/ecommerce.Admin.csproj]
+
+Build FAILED.
+    1742 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:16.52

@@ -1,0 +1,58 @@
+@page "/popups"
+@using ecommerce.Admin.Domain.Dtos.PopupDto
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Core.Utils
+@using ecommerce.Core.Extensions
+@layout MainLayout
+
+<PageTitle>Popuplar</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Popuplar</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Popup Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="DataGrid" 
+                            LoadData="@LoadData" 
+                            Data="@Popups.Data" 
+                            Count="@Popups.DataCount" 
+                            TItem="PopupListDto" 
+                            AllowFiltering="true" 
+                            FilterMode="FilterMode.Advanced" 
+                            AllowPaging="true" 
+                            AllowSorting="true" 
+                            PageSize="10" 
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="PopupListDto" Property="Id" Title="#" Width="70px" TextAlign="TextAlign.Center"/>
+                    <RadzenDataGridColumn TItem="PopupListDto" Property="Name" Title="Popup Adı" Width="200px"/>
+                    <RadzenDataGridColumn TItem="PopupListDto" Property="Description" Title="Açıklama" Width="300px"/>
+                    <RadzenDataGridColumn TItem="PopupListDto" Property="Status" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                         <Template Context="data">
+                             <RadzenBadge BadgeStyle="@(data.Status == (int)EntityStatus.Active ? BadgeStyle.Success : BadgeStyle.Secondary)" Text="@(((EntityStatus)data.Status).GetDisplayName())" />
+                         </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PopupListDto" Title="İşlemler" TextAlign="TextAlign.Center" Width="100px" Filterable="false" Sortable="false">
+                        <Template Context="popup">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(popup))" @onclick:stopPropagation="true" class="me-1"/>
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => GridDeleteButtonClick(popup))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

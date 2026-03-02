@@ -1,0 +1,47 @@
+@page "/couriers"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.CourierDto
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+
+<PageTitle>Kuryeler</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0 text-gray-800">Kuryeler</h1>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="Grid"
+                           TItem="CourierListDto"
+                           Data="@Items"
+                           Count="@Count"
+                           LoadData="@LoadData"
+                           AllowPaging="true"
+                           PageSize="25"
+                           AllowSorting="true"
+                           PagerHorizontalAlign="HorizontalAlign.Left"
+                           ShowPagingSummary="true"
+                           EmptyText="Kurye bulunamadı.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CourierListDto" Property="Id" Title="Id" Width="70px" />
+                    <RadzenDataGridColumn TItem="CourierListDto" Property="UserName" Title="Ad Soyad" Width="180px" />
+                    <RadzenDataGridColumn TItem="CourierListDto" Property="Email" Title="E-posta" Width="200px" />
+                    <RadzenDataGridColumn TItem="CourierListDto" Property="Phone" Title="Telefon" Width="130px" />
+                    <RadzenDataGridColumn TItem="CourierListDto" Property="StatusName" Title="Durum" Width="100px" />
+                    <RadzenDataGridColumn TItem="CourierListDto" Property="ServiceAreaCount" Title="Hizmet bölgesi" Width="110px" TextAlign="TextAlign.Center" />
+                    <RadzenDataGridColumn TItem="CourierListDto" Property="CreatedDate" Title="Kayıt tarihi" Width="120px" FormatString="{0:dd.MM.yyyy}" />
+                    <RadzenDataGridColumn TItem="CourierListDto" Title="İşlem" Filterable="false" Sortable="false" Width="240px" TextAlign="TextAlign.Center">
+                        <Template Context="ctx">
+                            <RadzenButton Icon="car" Text="Araçlar" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" Click="@(() => OpenVehicles(ctx))" @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="map" Text="Hizmet bölgeleri" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="@(() => OpenServiceAreas(ctx))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

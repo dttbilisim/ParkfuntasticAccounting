@@ -1,0 +1,43 @@
+@namespace ecommerce.Admin.Components.Pages.Plasiyer.Modals
+@using ecommerce.Admin.Domain.Dtos.InvoiceDto
+
+<div class="plasiyer-modal-container">
+    @if (IsLoading)
+    {
+        <div class="modal-loading-overlay">
+            <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        </div>
+    }
+
+    @if (Invoices == null && !IsLoading)
+    {
+        <div class="modal-empty-state">
+            <RadzenIcon Icon="receipt_long" Style="font-size: 3rem; color: var(--rz-text-disabled-color);" />
+            <RadzenText TextStyle="TextStyle.H6" Style="color: var(--rz-text-secondary-color);">Fatura bilgisi bulunamadı.</RadzenText>
+        </div>
+    }
+    else
+    {
+        <RadzenDataGrid Data="@Invoices" TItem="InvoiceListDto" AllowPaging="true" PageSize="10" 
+                        AllowFiltering="true" FilterMode="FilterMode.SimpleWithMenu" AllowSorting="true"
+                        EmptyText="Fatura bulunamadı." class="plasiyer-grid">
+            <Columns>
+                <RadzenDataGridColumn TItem="InvoiceListDto" Property="InvoiceNo" Title="Fatura No" Width="140px">
+                    <Template Context="invoice">
+                        <span class="fw-bold text-primary">@invoice.InvoiceNo</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="InvoiceListDto" Property="InvoiceDate" Title="Tarih" Width="150px">
+                    <Template Context="invoice">
+                        <span class="text-secondary">@invoice.InvoiceDate.ToString("dd.MM.yyyy")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="InvoiceListDto" Property="GeneralTotal" Title="Toplam" Width="130px" TextAlign="TextAlign.Right">
+                    <Template Context="invoice">
+                        <span class="fw-bold">@invoice.GeneralTotal.ToString("C2")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    }
+</div>

@@ -1,0 +1,260 @@
+@using ecommerce.Admin.Domain.Dtos.SalesPersonDto;
+@using ecommerce.Admin.Domain.Dtos.Customer
+@using ecommerce.Admin.Domain.Dtos.RegionDto
+@using ecommerce.Admin.Domain.Dtos.MonthDto
+@using ecommerce.Admin.Domain.Dtos.CustomerWorkPlanDto
+@attribute [Authorize]
+
+
+
+
+    <RadzenTemplateForm TItem="SalesPersonUpsertDto" Data="@salesPerson" Visible="@(salesPerson != null)" Submit="@((SalesPersonUpsertDto args) => FormSubmit(args))">
+        <div class="modal-content-body">
+            <RadzenTabs RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="Plasiyer Bilgileri">
+                        <!-- Content continues... -->
+
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Plasiyer Adı" Component="FirstName" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@salesPerson.FirstName" Name="FirstName" />
+                                <RadzenRequiredValidator Component="FirstName" Text="Plasiyer Adı Girmelisiniz" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Plasiyer Soyadı" Component="LastName" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@salesPerson.LastName" Name="LastName" />
+                                <RadzenRequiredValidator Component="LastName" Text="Plasiyer Soyadı Girmelisiniz" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text=" Telefon" Component="Phone" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@salesPerson.Phone" Name="Phone" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Cep Telefonu" Component="MobilePhone" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@salesPerson.MobilePhone" Name="MobilePhone" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Email Adresi" Component="Email" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@salesPerson.Email" Name="Email" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="İl" Component="CityId" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDropDown style="display: block; width: 100%" Name="CityId" Data="@Cities" TextProperty="Name" ValueProperty="Id"
+                                                @bind-Value="@salesPerson.CityId" Change="@OnCityChange" AllowClear="true" Placeholder="Seçiniz..." 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="İlçe" Component="TownId" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenDropDown style="display: block; width: 100%" Name="TownId" Data="@Towns" TextProperty="Name" ValueProperty="Id"
+                                                @bind-Value="@salesPerson.TownId" AllowClear="true" Placeholder="Seçiniz..." Disabled="@(salesPerson.CityId == null)" 
+                                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Adres" Component="Address" style="width: 100%" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextArea style="display: block; width: 100%" @bind-Value="@salesPerson.Address" Name="Address" Rows="3" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem" class="row">
+                            <div class="col-md-3">
+                                <RadzenLabel Text="Satış ve Tahsilatlar Sms Altsın mı?" Component="SmsPermission" style="width: 100%" />
+                            </div>
+                            <div class="col-md-3">
+                                <RadzenCheckBox TValue="bool" @bind-Value="@SmsPermission" Name="SmsPermission" />
+                            </div>
+                        </div>
+                    </RadzenTabsItem>
+
+                <RadzenTabsItem Text="Şube Yetkileri">
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <RadzenLabel Text="Şirket" Component="SelectedBranchCorporationId" />
+                            <RadzenDropDown Name="SelectedBranchCorporationId"
+                                            Data="@Corporations"
+                                            TextProperty="Name"
+                                            ValueProperty="Id"
+                                            @bind-Value="SelectedBranchCorporationId"
+                                            Change="@OnBranchCorporationChange"
+                                            AllowClear="true"
+                                            Placeholder="Şirket seçiniz"
+                                            Style="width:100%"
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </div>
+                        <div class="col-md-4">
+                            <RadzenLabel Text="Şube" Component="SelectedBranchId" />
+                            <RadzenDropDown Name="SelectedBranchId"
+                                            Data="@FilteredBranches"
+                                            TextProperty="Name"
+                                            ValueProperty="Id"
+                                            @bind-Value="SelectedBranchId"
+                                            AllowClear="true"
+                                            Placeholder="Şube seçiniz"
+                                            Disabled="@(!SelectedBranchCorporationId.HasValue)"
+                                            Style="width:100%"
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </div>
+                         <div class="col-md-3 d-flex align-items-end gap-2">
+                             <div class="d-flex flex-column align-items-center">
+                                 <RadzenLabel Text="Varsayılan" Component="SelectedBranchIsDefault" style="font-size: 0.8rem;" />
+                                 <RadzenCheckBox TValue="bool" @bind-Value="@SelectedBranchIsDefault" Name="SelectedBranchIsDefault" />
+                            </div>
+                             <RadzenButton Icon="add" ButtonStyle="ButtonStyle.Success" Click="@AddBranch" Text="Ekle" />
+                        </div>
+                    </div>
+                    
+                    <RadzenDataGrid @ref="branchesGrid" Data="@salesPerson.Branches" TItem="SalesPersonBranchUpsertDto" AllowPaging="true" PageSize="5">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="SalesPersonBranchUpsertDto" Property="CorporationName" Title="Şirket" />
+                            <RadzenDataGridColumn TItem="SalesPersonBranchUpsertDto" Property="BranchName" Title="Şube" />
+                            <RadzenDataGridColumn TItem="SalesPersonBranchUpsertDto" Property="IsDefault" Title="Varsayılan">
+                                <Template Context="data">
+                                    <RadzenCheckBox TValue="bool" Value="@data.IsDefault" Disabled="true" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="SalesPersonBranchUpsertDto" Context="branch" Filterable="false" Sortable="false" Width="100px" Title="İşlemler">
+                                <Template>
+                                    <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Click="@(() => DeleteBranch(branch))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="Cari Bağlantıları" Disabled="@(Id == null)">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <RadzenLabel Text="Bölge" Component="SelectedRegionId" />
+                            <RadzenDropDown Name="SelectedRegionId"
+                                            Data="@Regions"
+                                            TextProperty="Name"
+                                            ValueProperty="Id"
+                                            @bind-Value="SelectedRegionId"
+                                            AllowClear="true"
+                                            Placeholder="Bölge seçiniz"
+                                            Style="width:100%"
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <RadzenButton Text="Bölgedeki Carileri Aktar" Icon="file_download_done" ButtonStyle="ButtonStyle.Primary" Click="@AssignRegionCustomers" Disabled="@(Id == null)" />
+                        </div>
+                    </div>
+
+                    <RadzenDataGrid Data="@AssignedCustomers" TItem="CustomerListDto" AllowPaging="true" PageSize="10" AllowSorting="true">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="CustomerListDto" Property="Code" Title="Cari Kodu" />
+                            <RadzenDataGridColumn TItem="CustomerListDto" Property="Name" Title="Cari Adı" />
+                            <RadzenDataGridColumn TItem="CustomerListDto" Property="RegionName" Title="Bölge" />
+                            <RadzenDataGridColumn TItem="CustomerListDto" Property="CityName" Title="İl" />
+                            <RadzenDataGridColumn TItem="CustomerListDto" Property="Phone" Title="Telefon" />
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="Cari Çalışma Planı" Disabled="@(Id == null)">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <RadzenLabel Text="Cari" Component="SelectedWorkPlanCustomerId" />
+                            <RadzenDropDown Name="SelectedWorkPlanCustomerId"
+                                            Data="@AssignedCustomers"
+                                            TextProperty="Name"
+                                            ValueProperty="Id"
+                                            @bind-Value="SelectedWorkPlanCustomerId"
+                                            AllowClear="true"
+                                            Placeholder="Cari seçiniz"
+                                            Style="width:100%"
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Gün" Component="SelectedWorkPlanDayOfWeek" />
+                            <RadzenDropDown Name="SelectedWorkPlanDayOfWeek"
+                                            Data="@GetDayOfWeekOptions()"
+                                            TextProperty="Text"
+                                            ValueProperty="Value"
+                                            @bind-Value="SelectedWorkPlanDayOfWeek"
+                                            AllowClear="true"
+                                            Placeholder="Gün seçiniz"
+                                            Style="width:100%"
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Ay" Component="SelectedWorkPlanMonthId" />
+                            <RadzenDropDown Name="SelectedWorkPlanMonthId"
+                                            Data="@Months"
+                                            TextProperty="Name"
+                                            ValueProperty="Id"
+                                            @bind-Value="SelectedWorkPlanMonthId"
+                                            AllowClear="true"
+                                            Placeholder="Ay seçiniz"
+                                            Style="width:100%"
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <RadzenButton Text="Ekle" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="@AddWorkPlan" Disabled="@(Id == null)" Style="width:100%" />
+                        </div>
+                    </div>
+
+                    <RadzenDataGrid Data="@WorkPlans" TItem="CustomerWorkPlanListDto" AllowPaging="true" PageSize="10" AllowSorting="true">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="CustomerWorkPlanListDto" Property="CustomerCode" Title="Cari Kodu" />
+                            <RadzenDataGridColumn TItem="CustomerWorkPlanListDto" Property="CustomerName" Title="Cari Adı" />
+                            <RadzenDataGridColumn TItem="CustomerWorkPlanListDto" Property="DayName" Title="Gün" />
+                            <RadzenDataGridColumn TItem="CustomerWorkPlanListDto" Property="MonthName" Title="Ay" />
+                            <RadzenDataGridColumn TItem="CustomerWorkPlanListDto" Property="CreatedDate" Title="Oluşturulma Tarihi" FormatString="{0:dd.MM.yyyy}" />
+                            <RadzenDataGridColumn TItem="CustomerWorkPlanListDto" Context="workPlan" Filterable="false" Sortable="false" Width="100px" Title="İşlemler">
+                                <Template>
+                                    <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Click="@(async () => await DeleteWorkPlan(workPlan.Id))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+        </div>
+        <div class="modal-sticky-footer d-flex justify-content-end gap-2">
+            <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(null))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" Disabled="@IsSaveButtonDisabled" />
+        </div>
+    </RadzenTemplateForm>
+
+
+ 

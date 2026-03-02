@@ -1,0 +1,27 @@
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).
+
+CheckoutService Params Keys: clientid, oid, pan, cardHolderName, Ecom_Payment_Card_ExpDate_Month, Ecom_Payment_Card_ExpDate_Year, cv2, cardType, okUrl, failUrl, islemtipi, rnd, currency, storetype, lang, BillToName, BillToCompany, email, tel, Email, Tel, amount, taksit, hash
+Action: Wrapping Parameters in Form (Fallback).

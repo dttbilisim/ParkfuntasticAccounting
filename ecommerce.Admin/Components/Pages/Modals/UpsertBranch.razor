@@ -1,0 +1,105 @@
+@using ecommerce.Admin.Domain.Dtos.HierarchicalDto
+@using ecommerce.Admin.Services.Interfaces
+@inject IBranchService BranchService
+@inject ICorporationService CorporationService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<div class="modal-wrapper">
+    <div class="modal-header-modern">
+        <h5 class="modal-title-modern">@(model?.Id > 0 ? "Şube Düzenle" : "Yeni Şube Ekle")</h5>
+        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" Click="@((args) => DialogService.Close(false))" Size="ButtonSize.Small" />
+    </div>
+
+    <RadzenTemplateForm TItem="BranchUpsertDto" Data="@model" Submit="@HandleSubmit">
+        <div class="modal-content-body">
+            <div class="tab-content-wrapper">
+                <RadzenStack Gap="1rem">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Bağlı Şirket" Component="CorpId" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="model.CorporationId" Data="@corporations" TextProperty="Name" ValueProperty="Id" class="w-100 form-control-modern" Name="CorpId" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                            <RadzenRequiredValidator Component="CorpId" Text="Şirket seçimi zorunludur" DefaultValue="0" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Şube Adı" Component="BranchName" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox @bind-Value="model.Name" class="w-100 form-control-modern" Name="BranchName" />
+                            <RadzenRequiredValidator Component="BranchName" Text="Şube adı zorunludur" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Şube Kodu" Component="BranchCode" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox @bind-Value="model.Code" class="w-100 form-control-modern" Name="BranchCode" />
+                            <RadzenRequiredValidator Component="BranchCode" Text="Şube kodu zorunludur" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Şehir" Component="CityId" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="model.CityId" Data="@cities" TextProperty="Name" ValueProperty="Id" class="w-100 form-control-modern" Name="CityId" Change="@OnCityChange" AllowClear="true" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="İlçe" Component="TownId" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="model.TownId" Data="@towns" TextProperty="Name" ValueProperty="Id" class="w-100 form-control-modern" Name="TownId" Disabled="@(model.CityId == null || model.CityId == 0)" AllowClear="true" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Telefon" Component="PhoneNumber" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox @bind-Value="model.PhoneNumber" class="w-100 form-control-modern" Name="PhoneNumber" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Start">
+                        <RadzenColumn Size="12" SizeMD="4" class="rz-pt-2">
+                            <RadzenLabel Text="Adres" Component="Address" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextArea @bind-Value="model.Address" class="w-100 form-control-modern" Rows="3" Name="Address" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Aktif" Component="IsActive" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenCheckBox @bind-Value="model.IsActive" TValue="bool" Name="IsActive" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </div>
+        </div>
+
+        <div class="modal-sticky-footer">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" />
+            <RadzenButton Click="@((args) => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" Text="İptal" Icon="cancel" />
+        </div>
+    </RadzenTemplateForm>
+</div>
+

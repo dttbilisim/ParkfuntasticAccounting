@@ -1,0 +1,49 @@
+﻿@page "/upsert-companycargo"
+@using ecommerce.Admin.Domain.Dtos.CompanyCargoDto;
+@using Blazored.FluentValidation
+@attribute [Authorize]
+
+<PageTitle>Şirket Kargo Ekle/Düzenle</PageTitle>
+
+<div class="col-md-12">
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Şirket Kargo Kayıt Edilemedi!</RadzenAlert>
+
+    <RadzenTemplateForm TItem="CompanyCargoUpsertDto" Data="@CompanyCargo" Visible="@(CompanyCargo != null)" Submit="@FormSubmit" OnInvalidSubmit="ShowErrors">
+
+        <FluentValidationValidator @ref="_fluentValidationValidator" />
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Kargo" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenDropDownDataGrid Data="@Cargoes" TextProperty="Name" ValueProperty="Id" Placeholder="Seçiniz" style="display: block; width: 100%" @bind-Value="@CompanyCargo.CargoId" Name="CargoId" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Min. Sepet Tutar"  style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenNumeric Placeholder="Min. Sepet Tutar" style="display: block; width: 100%" @bind-Value="@CompanyCargo.MinBasketAmount" Name="CompanyCargo" Format="c" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Varsayılan Kargo" style="width: 100%" />
+            </div>
+            <div class="col-md-9">
+                <RadzenCheckBox @bind-Value="@CompanyCargo.IsDefault" Name="CompanyCargo.IsDefault" />
+            </div>
+        </div>
+ 
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>

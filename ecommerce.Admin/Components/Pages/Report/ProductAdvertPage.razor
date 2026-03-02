@@ -1,0 +1,44 @@
+@page "/report-product-advert"
+@using ecommerce.Admin.Domain.Dtos.ReportDto
+@using ecommerce.Admin.Components.Shared
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Ürün İlan Raporu </PageTitle>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Ürün İlan Raporu</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="cloud_download" Text="Raporu Çalıştır" Click="@(args => CallReport())" Variant="Variant.Flat" class="mt-2" Style="background-color:green" />
+            @if (showExcelButton)
+            {
+                <RadzenButton Icon="cloud_download" Text="Excel olarak indir" id="ExcelButton" Click="@(args => ExcelExportClick())" download Variant="Variant.Flat" class="mt-2" Style="background-color:red" />
+            }
+        </div>
+    </div>
+
+    <!-- No filters shown in original code, so skipping filter card -->
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px"  AllowPaging="true"  PagerAlwaysVisible=true PageSize=20 AllowFilterDateInput=true TItem="ProductAdvertDto"  LoadData="@LoadData" Count="@count" Data="@data"  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ProductAdvertDto" Property="ProductName" Title="Ürün Adı" Width="100px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductAdvertDto" Property="Barcode" Title="Barkod" Width="50px"></RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="ProductAdvertDto" Property="AdvertCount" Title="İlan Sayısı" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn FormatString="{0:n2}"  TItem="ProductAdvertDto" Property="AvgPrice" Title="Ortalama Fiyat" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn FormatString="{0:n2}" TItem="ProductAdvertDto" Property="MaxPrice" Title="Yüksek Fiyat" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn FormatString="{0:n2}" TItem="ProductAdvertDto" Property="MinPrice" Title="Düşük Fiyat" Width="50px"></RadzenDataGridColumn>
+                     <RadzenDataGridColumn FormatString="{0:n2}" TItem="ProductAdvertDto" Property="RetailPrice" Title="PSF" Width="50px"></RadzenDataGridColumn>
+    
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+@code {
+    public bool showExcelButton = false;
+    
+}

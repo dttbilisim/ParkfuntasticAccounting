@@ -1,0 +1,54 @@
+@layout LoginLayout
+@page "/login"
+@attribute [AllowAnonymous]
+
+<PageTitle>Yedeksen Yönetici Girişi</PageTitle>
+
+<div class="d-flex flex-column align-items-center mb-4">
+    <div style="width: 60px; height: 5px; background-color: var(--rz-primary); border-radius: 10px; margin-bottom: 20px;"></div>
+    <RadzenText Text="Yönetici Girişi" TextStyle="TextStyle.H5" style="font-weight: 700; color: var(--rz-text-title);" TagName="TagName.H2" />
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <RadzenTemplateForm Action="@($"account/login?redirectUrl={redirectUrl}")" Data="@("login")" Method="post">
+            <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible" class="mb-4" Style="border-radius: 15px;">@error</RadzenAlert>
+            <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Info" Visible="@infoVisible" class="mb-4" Style="border-radius: 15px;">@info</RadzenAlert>
+            
+            <div class="mb-4">
+                <RadzenLabel Text="Kullanıcı Adı" class="d-block mb-2 ms-2" Style="font-weight: 600; font-size: 0.9rem; color: var(--rz-text-secondary);" />
+                <RadzenTextBox name="userName" class="w-100" Style="border-radius: 50px; padding: 10px 20px; border: 1px solid #e5e7eb; background-color: #f9fafb;" Placeholder="Kullanıcı adınızı giriniz" />
+            </div>
+            
+            <div class="mb-5">
+                <RadzenLabel Text="Şifre" class="d-block mb-2 ms-2" Style="font-weight: 600; font-size: 0.9rem; color: var(--rz-text-secondary);" />
+                <RadzenPassword name="password" class="w-100" Style="border-radius: 50px; padding: 10px 20px; border: 1px solid #e5e7eb; background-color: #f9fafb;" Placeholder="••••••••" />
+            </div>
+            
+            <input type="hidden" name="redirectUrl" value="@redirectUrl" />
+            
+            <style>
+                .btn-premium {
+                    background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-dark) 100%) !important;
+                    border: none !important;
+                    transition: all 0.3s ease !important;
+                    box-shadow: 0 4px 15px rgba(var(--rz-primary-rgb), 0.4) !important;
+                }
+                .btn-premium:hover {
+                    background: linear-gradient(135deg, var(--rz-primary-light) 0%, var(--rz-primary) 100%) !important;
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(var(--rz-primary-rgb), 0.6) !important;
+                }
+                .input-pill:focus-within {
+                    border-color: var(--rz-primary) !important;
+                    box-shadow: 0 0 0 3px rgba(var(--rz-primary-rgb), 0.2) !important;
+                }
+            </style>
+
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Giriş Yap" IsBusy="@isBusy" Click="@(() => isBusy = true)" 
+                          class="w-100 btn-premium" 
+                          Style="border-radius: 50px; padding: 12px 0; font-weight: 700; font-size: 1.1rem; text-transform: none; letter-spacing: 0.5px;" 
+                          ButtonStyle="ButtonStyle.Primary" />
+        </RadzenTemplateForm>
+    </div>
+</div>

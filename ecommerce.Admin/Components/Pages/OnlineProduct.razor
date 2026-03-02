@@ -1,0 +1,48 @@
+@page "/online-product"
+@using ecommerce.Admin.Domain.Dtos.ProductDto;
+@using ecommerce.Core.Entities
+@using ecommerce.Core.Utils;
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Product Online</PageTitle>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Ürün Arama Online <small class="text-muted ms-2">@count</small></h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="cloud_download" Text="Excel olarak indir"  Click="@(args => ExcelExportClick())" download Variant="Variant.Flat" class="mt-2" Style="background-color:green" />
+        </div>
+    </div>
+
+    <RadzenProgressBar ProgressBarStyle="ProgressBarStyle.Info" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="height:5px;" Visible="@IsShowLoadingBar"/>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true" 
+                        AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true
+                            TItem="ProductOnlineDto"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@searchResponses"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            FilterMode="FilterMode.Simple">
+
+                <Columns>
+
+                    <RadzenDataGridColumn TItem="ProductOnlineDto" Property="Name" Title="Ürün Adı" Width="250px"/>
+                    <RadzenDataGridColumn TItem="ProductOnlineDto" Property="Brand" Title="Marka" Width="80px"/>
+                    <RadzenDataGridColumn TItem="ProductOnlineDto" Property="Barcodes"  Title="Barkod" Width="400px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductOnlineDto" Property="Psf" FormatString="₺{0:n2}" Title="PSF" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductOnlineDto" Property="MinPrice" FormatString="₺{0:n2}" Title="Min.Fiyat" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="ProductOnlineDto" Property="MaxPrice" FormatString="₺{0:n2}" Title="Max.Fiyat" Width="50px"></RadzenDataGridColumn>
+
+
+
+
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

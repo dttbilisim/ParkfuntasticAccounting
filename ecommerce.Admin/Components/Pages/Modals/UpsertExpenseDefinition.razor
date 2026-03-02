@@ -1,0 +1,75 @@
+@using ecommerce.Admin.Domain.Dtos.ExpenseDto
+@using ecommerce.Core.Extensions
+@using ecommerce.Core.Utils
+@attribute [Authorize]
+
+<PageTitle>Gider Tanımı</PageTitle>
+<div class="col-md-12">
+    <RadzenTemplateForm TItem="ExpenseDefinitionUpsertDto" Data="@expense" Visible="@(expense != null)" Submit="@FormSubmit">
+
+        @if (IsMainOperation)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-4">
+                    <RadzenLabel Text="İşlem Tipi" Component="OperationType" style="width: 100%" />
+                </div>
+                <div class="col-md-8">
+                    <RadzenDropDown TValue="ExpenseOperationType"
+                                    Data="@OperationTypeOptions"
+                                    Value="@expense.OperationType"
+                                    ValueChanged="@OperationTypeChanged"
+                                    Name="OperationType"
+                                    Style="width:100%"
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                        <Template Context="item">
+                            @((item as ExpenseOperationType?)?.GetDisplayName() ?? item?.ToString())
+                        </Template>
+                        <ValueTemplate Context="item">
+                            @((item as ExpenseOperationType?)?.GetDisplayName() ?? item?.ToString())
+                        </ValueTemplate>
+                    </RadzenDropDown>
+                </div>
+            </div>
+        }
+
+        @if (!IsMainOperation)
+        {
+            <div style="margin-bottom: 1rem" class="row">
+                <div class="col-md-4">
+                    <RadzenLabel Text="Ana İşlem" Component="ParentId" style="width: 100%" />
+                </div>
+                <div class="col-md-8">
+                    <RadzenDropDown TValue="int?" Name="ParentId"
+                                    Data="@MainOptions"
+                                    TextProperty="Name"
+                                    ValueProperty="Id"
+                                    @bind-Value="@expense.ParentId"
+                                    AllowClear="false"
+                                    Placeholder="Ana işlem seçiniz..."
+                                    Style="width:100%"
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    <RadzenRequiredValidator Component="ParentId" Text="Ana işlem seçmelisiniz" />
+                </div>
+            </div>
+        }
+
+        <div style="margin-bottom: 1rem" class="row">
+            <div class="col-md-4">
+                <RadzenLabel Text="Ad" Component="Name" style="width: 100%" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@expense.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="Ad girmelisiniz" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col d-flex justify-content-end" style="margin-top: 1rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Kaydet" Style="margin-right: 0.5rem" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Vazgeç" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
+
+

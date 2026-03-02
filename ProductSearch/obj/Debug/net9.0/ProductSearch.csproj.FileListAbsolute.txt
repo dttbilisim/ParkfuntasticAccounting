@@ -1,0 +1,13 @@
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/bin/Debug/net9.0/ProductSearch.deps.json
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/bin/Debug/net9.0/ProductSearch.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/bin/Debug/net9.0/ProductSearch.pdb
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.csproj.AssemblyReference.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.GeneratedMSBuildEditorConfig.editorconfig
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.AssemblyInfoInputs.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.AssemblyInfo.cs
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.csproj.CoreCompileInputs.cache
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.sourcelink.json
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/refint/ProductSearch.dll
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ProductSearch.pdb
+/Users/efeeskin/Desktop/DTT/ECommerce/Untitled/ecommerce/ProductSearch/obj/Debug/net9.0/ref/ProductSearch.dll

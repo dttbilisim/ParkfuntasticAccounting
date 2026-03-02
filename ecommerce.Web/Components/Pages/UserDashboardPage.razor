@@ -1,0 +1,855 @@
+@page "/user-dashboard"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using ecommerce.Core.Entities.Authentication
+@using ecommerce.Core.Entities
+@using ecommerce.Core.Utils
+@using ecommerce.Domain.Shared.Dtos.Product
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<section class="user-dashboard-section section-b-space">
+<div class="container-fluid-lg">
+<div class="row">
+<div class="col-xxl-3 col-lg-4">
+    <div class="dashboard-left-sidebar">
+        <div class="close-button d-flex d-lg-none">
+            <button class="close-sidebar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="profile-box">
+            <div class="cover-image">
+                <img src="../assets/images/inner-page/cover-img.jpg" class="img-fluid blur-up lazyload"
+                     alt="">
+            </div>
+
+            <div class="profile-contain">
+                <div class="profile-image">
+                    <div class="position-relative">
+                        <img src="../assets/images/inner-page/user/1.jpg"
+                             class="blur-up lazyload update_img" alt="">
+                        <div class="cover-icon">
+                            <i class="fa-solid fa-pen">
+                                <input type="file" onchange="readURL(this,0)">
+                            </i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-name">
+                    <h3>@User.FullName</h3>
+                    <h6 class="text-content">@User.Email</h6>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-pills user-nav-pills" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-dashboard-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-dashboard" type="button">
+                    <i class="fa-solid fa-house"></i>
+                    @lang["Profile.Dashboard"]
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-order-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-order" type="button">
+                    <i class="fa-solid fa-bag-shopping"></i>@lang["Profile.Order"]
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-wishlist-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-wishlist" type="button">
+                    <i class="fa-solid fa-heart"></i>
+                    @lang["Profile.Wishlist"]
+                </button>
+            </li>
+          
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-address-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-address" type="button" role="tab">
+                    <i class="fa-solid fa-map-location-dot"></i>@lang["Profile.Address"]
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-garage-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-garage" type="button" role="tab">
+                    <i class="fa-solid fa-truck"></i>
+                    @lang["Profile.Garage"]
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-profile" type="button" role="tab">
+                    <i class="fa-solid fa-user"></i>
+                    @lang["Profile.Profile"]
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-password-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-password" type="button" role="tab">
+                    <i class="fa-solid fa-lock"></i> @lang["Profile.ChangePassword"]
+                </button>
+            </li>
+     
+        </ul>
+    </div>
+</div>
+
+<div class="col-xxl-9 col-lg-8">
+<div class="dashboard-right-sidebar">
+<div class="tab-content" id="pills-tabContent">
+<div class="tab-pane fade @(IsFavoriteTabActive ? string.Empty : "show active")" id="pills-dashboard" role="tabpanel">
+    <div class="dashboard-home">
+        <div class="title">
+            <h2>@lang["DashboardTitle"]</h2>
+            <span class="title-leaf">
+                <svg class="icon-width bg-gray">
+                    <use xlink:href="../assets/svg/leaf.svg#leaf"></use>
+                </svg>
+            </span>
+        </div>
+
+        <div class="dashboard-user-name">
+            @{
+                var helloMarkup = (MarkupString)string.Format(
+                    lang["HelloUser"],
+                    $"<b class=\"text-title\">{User.FullName}</b>"
+                );
+            }
+            <h6 class="text-content">@helloMarkup</h6>
+            <p class="text-content">@lang["DashboardIntro"]</p>
+        </div>
+
+        <div class="total-box">
+            <div class="row g-sm-4 g-3">
+                <div class="col-xxl-4 col-lg-6 col-md-4 col-sm-6">
+                    <div class="total-contain">
+                        <img src="../assets/images/svg/order.svg" class="img-1 blur-up lazyload" alt="">
+                        <img src="../assets/images/svg/order.svg" class="blur-up lazyload" alt="">
+                        <div class="total-detail">
+                            <h5>@lang["TotalOrder"]</h5>
+                            <h3>@TotalOrdersCount</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xxl-4 col-lg-6 col-md-4 col-sm-6">
+                    <div class="total-contain">
+                        <img src="../assets/images/svg/pending.svg" class="img-1 blur-up lazyload" alt="">
+                        <img src="../assets/images/svg/pending.svg" class="blur-up lazyload" alt="">
+                        <div class="total-detail">
+                            <h5>@lang["TotalPendingOrder"]</h5>
+                            <h3>@PendingOrdersCount</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xxl-4 col-lg-6 col-md-4 col-sm-6">
+                    <div class="total-contain">
+                        <img src="../assets/images/svg/wishlist.svg" class="img-1 blur-up lazyload" alt="">
+                        <img src="../assets/images/svg/wishlist.svg" class="blur-up lazyload" alt="">
+                        <div class="total-detail">
+                            <h5>@lang["TotalWishlist"]</h5>
+                            
+                            <h3>@TotalFavoritesCount</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-title">
+            <h3>@lang["AccountInformationTitle"]</h3>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-xxl-6">
+                <div class="dashboard-content-title">
+                    <h4>
+                        @lang["ContactInformation"]
+                       
+                    </h4>
+                </div>
+                <div class="dashboard-detail">
+                    <h6 class="text-content">@User.FullName</h6>
+                    <h6 class="text-content">@User.Email</h6>
+                </div>
+            </div>
+
+            <div class="col-xxl-6">
+                <div class="dashboard-content-title">
+                    <h4>
+                        @lang["Newsletters"]
+                    </h4>
+                </div>
+                <div class="dashboard-detail">
+                    <h6 class="text-content">@lang["NewsletterNone"]</h6>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="dashboard-content-title">
+                    <h4>
+                        @lang["AddressBook"]
+                    
+                    </h4>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-xxl-6">
+                        <div class="dashboard-detail">
+                            <h6 class="text-content">@lang["DefaultBillingAddress"]</h6>
+                            <h6 class="text-content">@lang["NoDefaultBillingAddress"]</h6>
+                              
+                        </div>
+                    </div>
+
+                    <div class="col-xxl-6">
+                        <div class="dashboard-detail">
+                            <h6 class="text-content">@lang["DefaultShippingAddress"]</h6>
+                            <h6 class="text-content">@lang["NoDefaultShippingAddress"]</h6>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@* // Wishlist *@
+<div class="tab-pane fade @(IsFavoriteTabActive ? "show active" : string.Empty)" id="pills-wishlist" role="tabpanel">
+    <div class="dashboard-wishlist">
+        <div class="title">
+            <h2>@lang["Profile.Wishlist"]</h2>
+            <span class="title-leaf title-leaf-gray">
+                <svg class="icon-width bg-gray">
+                    <use xlink:href="../assets/svg/leaf.svg#leaf"></use>
+                </svg>
+            </span>
+        </div>
+      
+     
+            <div class="row g-sm-4 g-3">
+                @if (FavoriteProducts != null && FavoriteProducts.Any())
+                {
+                    <ProductComponent FavoriteProducts="@FavoriteProducts" CartResult="@CartResult"/>
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <p class="text-muted">@lang["NoFavorite"].</p>
+                    </div>
+                }
+            </div>
+            @if (TotalPages > 1)
+            {
+                <PagingComponent TItem="ProductElasticDto"
+                                 CurrentPage="@CurrentPage"
+                                 TotalPages="@TotalPages"
+                                 OnPageChanged="OnPageChanged" />
+            }
+        
+    </div>
+</div>
+    @* // Sipariş *@
+<div class="tab-pane fade" id="pills-order" role="tabpanel">
+    <div class="order-dashboard">
+        <!-- Tabs -->
+        <div class="order-status-tabs">
+            <button class="order-tab @(CurrentStatus == OrderStatusType.OrderNew ? "active" : "")" 
+                    @onclick="() => FilterOrdersByStatus(OrderStatusType.OrderNew)">
+                <i class="fas fa-clock"></i>
+                Yeni Siparişler
+                <span class="order-tab-count">@GetOrderCountByStatus(OrderStatusType.OrderNew)</span>
+            </button>
+            <button class="order-tab @(CurrentStatus == OrderStatusType.OrderPrepare ? "active" : "")" 
+                    @onclick="() => FilterOrdersByStatus(OrderStatusType.OrderPrepare)">
+                <i class="ri-loader-4-line"></i>
+                <span>Hazırlanıyor</span>
+                <span class="order-tab-count">@GetOrderCountByStatus(OrderStatusType.OrderPrepare)</span>
+            </button>
+            <button class="order-tab @(CurrentStatus == OrderStatusType.OrderinCargo ? "active" : "")" 
+                    @onclick="() => FilterOrdersByStatus(OrderStatusType.OrderinCargo)">
+                <i class="ri-truck-line"></i>
+                <span>Kargoda</span>
+                <span class="order-tab-count">@GetOrderCountByStatus(OrderStatusType.OrderinCargo)</span>
+            </button>
+            <button class="order-tab @(CurrentStatus == OrderStatusType.OrderSuccess ? "active" : "")" 
+                    @onclick="() => FilterOrdersByStatus(OrderStatusType.OrderSuccess)">
+                <i class="ri-checkbox-circle-line"></i>
+                <span>Teslim</span>
+                <span class="order-tab-count">@GetOrderCountByStatus(OrderStatusType.OrderSuccess)</span>
+            </button>
+            <button class="order-tab @(CurrentStatus == OrderStatusType.OrderCanceled ? "active" : "")" 
+                    @onclick="() => FilterOrdersByStatus(OrderStatusType.OrderCanceled)">
+                <i class="ri-close-circle-line"></i>
+                <span>İptal</span>
+                <span class="order-tab-count">@GetOrderCountByStatus(OrderStatusType.OrderCanceled)</span>
+            </button>
+            <button class="order-tab @(CurrentStatus == OrderStatusType.OrderProblem ? "active" : "")" 
+                    @onclick="() => FilterOrdersByStatus(OrderStatusType.OrderProblem)">
+                <i class="ri-error-warning-line"></i>
+                <span>Sorunlu</span>
+                <span class="order-tab-count">@GetOrderCountByStatus(OrderStatusType.OrderProblem)</span>
+            </button>
+        </div>
+
+        @if (IsLoadingOrders)
+        {
+            <div class="d-flex justify-content-center p-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+            </div>
+        }
+        else if (DisplayedOrders != null && DisplayedOrders.Any())
+        {
+            <div class="order-list" id="orderListContainer">
+                @foreach (var order in DisplayedOrders)
+                {
+                    <div class="order-card" @key="@order.Id">
+                        <!-- Ultra-Compact Header -->
+                        <div class="order-header">
+                            <div class="order-info-inline">
+                                <span class="order-number">#@order.OrderNumber</span>
+                                <span class="order-seller-inline">
+                                    <i class="ri-store-2-fill"></i>@order.SellerName
+                                </span>
+                                <span class="order-date-inline">
+                                    <i class="ri-calendar-line"></i>@order.CreatedDate.ToString("dd MMM HH:mm")
+                                </span>
+                            </div>
+                            <div class="order-actions-inline">
+                                <span class="total-compact">₺@order.GrandTotal.ToString("N2")</span>
+                                <div class="btn-view-items-compact no-click">
+                                    <i class="ri-eye-line"></i>@order.Items.Count
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modern Footer as Accordion -->
+                        <div class="order-footer-modern">
+                            <!-- Kargo & Teslimat Accordion -->
+                            @if (!string.IsNullOrEmpty(order.CargoName))
+                            {
+                                <div class="footer-section accordion-section">
+                                    <div class="section-title clickable" @onclick="() => ToggleCargoSection(order.Id)">
+                                        <div>
+                                            <i class="ri-shopping-basket-2-line"></i>
+                                            Ürünler ve Kargo Teslimat (@order.Items.Count Ürün)
+                                        </div>
+                                        <i class="@(IsCargoExpanded(order.Id) ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line")"></i>
+                                    </div>
+                                    <div class="section-content @(IsCargoExpanded(order.Id) ? "expanded" : "collapsed")">
+                                        <div class="order-card-senior mt-2">
+                                            <!-- True Compact Header -->
+                                            <div class="order-header-senior">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="order-no-badge">#@order.OrderNumber</div>
+                                                    <div class="order-meta-info">@order.CreatedDate.ToString("dd.MM.yyyy HH:mm")</div>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(order.PaymentId))
+                                                {
+                                                    <span class="tx-ref-badge">Ref: @order.PaymentId</span>
+                                                }
+                                            </div>
+
+                                            <!-- Vertical Compact Product List -->
+                                            <div class="order-products-list">
+                                                @foreach (var item in order.Items)
+                                                {
+                                                    <div class="product-item-row" @key="@item.Id">
+                                                        <div class="product-thumb">
+                                                            <img src="@GetProductImageUrl(item.ProductImage, item.ProductFileGuid)" alt="@item.ProductName">
+                                                        </div>
+                                                        <div class="product-info-senior">
+                                                            <div class="product-name-senior">@item.ProductName</div>
+                                                            <div class="product-price-qty">
+                                                                <span class="qty-tag">@item.Quantity Adet</span>
+                                                                <span class="price-val-senior">
+                                                                    @if (item.DiscountAmount > 0)
+                                                                    {
+                                                                        <span class="text-muted text-decoration-line-through me-1" style="font-size: 0.7rem; font-weight: 400;">₺@((item.Price + (item.DiscountAmount.Value / item.Quantity)).ToString("N2"))</span>
+                                                                    }
+                                                                    ₺@item.Price.ToString("N2")
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            @if (!string.IsNullOrEmpty(item.CargoTrackNumber))
+                                                            {
+                                                                <div class="mt-1" style="font-size: 0.68rem; color: #0d9488;">
+                                                                    <i class="ri-truck-line"></i>
+                                                                    @if (!string.IsNullOrEmpty(item.CargoTrackUrl))
+                                                                    {
+                                                                        <a href="@item.CargoTrackUrl" target="_blank" style="color: inherit; text-decoration: underline;">Takip (@item.CargoTrackNumber)</a>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>Takip: @item.CargoTrackNumber</span>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- Vertical Stacked Footer -->
+                                            <div class="order-footer-senior">
+                                                <div class="delivery-compact-box">
+                                                    <div class="fw-bold mb-1" style="font-size: 0.7rem; color: #0d9488; text-transform: uppercase;">Teslimat Bilgileri</div>
+                                                    @if (order.DeliveryAddress != null)
+                                                    {
+                                                        <div style="font-size: 0.75rem; line-height: 1.3;">
+                                                            <span class="fw-bold">@order.DeliveryAddress.FullName</span> - 
+                                                            <span class="text-muted">@order.DeliveryAddress.Address, @order.DeliveryAddress.Town?.Name / @order.DeliveryAddress.City?.Name</span>
+                                                        </div>
+                                                    }
+                                                    
+                                                    <div class="d-flex align-items-center flex-wrap gap-1 mt-1">
+                                                        @if (order.Bank != null)
+                                                        {
+                                                            <span class="modern-badge">@order.Bank.Name</span>
+                                                        }
+                                                        @if (order.Installment.HasValue && order.Installment > 1)
+                                                        {
+                                                            <span class="modern-badge">@order.Installment Taksit</span>
+                                                        }
+                                                        <span class="modern-badge">@(string.IsNullOrEmpty(order.CargoName) ? "Sendeo" : order.CargoName)</span>
+                                                        
+                                                        @if (order.OrderStatusType == OrderStatusType.OrderNew)
+                                                        {
+                                                            <button class="btn btn-link p-0 text-danger ms-2" @onclick="() => CancelPayment(order)" style="font-size: 0.68rem; text-decoration: none;">İptal Et</button>
+                                                        }
+                                                    </div>
+                                                    
+                                                    @if (order.DeliveryAddress != null)
+                                                    {
+                                                        <div class="multi-cargo-alert">
+                                                            <i class="ri-information-line"></i> Çoklu paket teslimatı yapılabilir.
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                                <!-- Final Receipt Totals -->
+                                                <div class="senior-invoice-summary">
+                                                    <div class="invoice-summary-line">
+                                                        <span>Ara Toplam</span>
+                                                        <span>₺@order.ProductTotal.ToString("N2")</span>
+                                                    </div>
+                                                    
+                                                    @{
+                                                        var calculatedDiff = (order.ProductTotal + order.CargoPrice) - order.GrandTotal;
+                                                        var itemLevelDiscounts = order.Items.Sum(x => x.DiscountAmount ?? 0);
+                                                        // Garantili indirim tespiti: Backend property OR kalemler toplami OR matematiksel fark
+                                                        var finalDisplayDiscount = (order.DiscountTotal > 0) ? order.DiscountTotal.Value : 
+                                                                                  (itemLevelDiscounts > 0 ? itemLevelDiscounts : 
+                                                                                  (calculatedDiff > 0.05m ? calculatedDiff : 0));
+                                                    }
+                                                    
+                                                    @if (finalDisplayDiscount > 0)
+                                                    {
+                                                        <div class="invoice-summary-line discount">
+                                                            <span>İndirim</span>
+                                                            <span>-₺@finalDisplayDiscount.ToString("N2")</span>
+                                                        </div>
+                                                    }
+
+                                                    <div class="invoice-summary-line">
+                                                        <span>Kargo</span>
+                                                        <span>₺@order.CargoPrice.ToString("N2")</span>
+                                                    </div>
+
+                                                    <div class="invoice-summary-line grand-total">
+                                                        <span>GENEL TOPLAM</span>
+                                                        <span>₺@order.GrandTotal.ToString("N2")</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @* Auto-load Trigger *@
+                @if (OrderHistory.GetAllOrders().Count < OrderHistory.TotalCount)
+                {
+                    <div class="load-more-observer" id="loadMoreObserver"></div>
+                    
+                    @if (IsLoadingMoreOrders)
+                    {
+                        <div class="loading-orders-container">
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                <div class="order-skeleton">
+                                    <div class="skeleton-header">
+                                        <div class="skeleton-line" style="width: 150px;"></div>
+                                        <div class="skeleton-line" style="width: 100px;"></div>
+                                    </div>
+                                    <div class="skeleton-body">
+                                        <div class="skeleton-line" style="width: 80%;"></div>
+                                        <div class="skeleton-line" style="width: 60%;"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center p-5">
+                <div class="mb-3">
+                    <i class="ri-shopping-bag-3-line" style="font-size: 3rem; color: #ddd;"></i>
+                </div>
+                <h5 class="text-muted">Sipariş bulunamadı</h5>
+                <p class="text-muted small">Bu kategoride henüz bir siparişiniz yok.</p>
+            </div>
+        }
+    </div>
+</div>
+    @* // Adres *@
+<div class="tab-pane fade " id="pills-address" role="tabpanel">
+    <div class="dashboard-address">
+        <div class="title title-flex">
+            <div>
+                <h2>@lang["MyAddressBook"]</h2>
+                <span class="title-leaf">
+                    <svg class="icon-width bg-gray">
+                        <use xlink:href="/assets/svg/leaf.svg#leaf"></use>
+                    </svg>
+                </span>
+            </div>
+
+            <button class="btn theme-bg-color text-white btn-sm fw-bold mt-lg-0 mt-3"
+                    @onclick="() => EditModalOpen(new UserAddress { UserId = User.Id })">
+                <i class="fa-solid fa-plus me-2"></i> @lang["AddNewAddress"]
+            </button>
+        </div>
+
+        <div class="row g-sm-4 g-3">
+            @if (AddressList != null && AddressList.Any())
+            {
+                @foreach (var address in AddressList)
+                {
+                    <div class="col-xxl-4 col-xl-6 col-lg-12 col-md-6 col-sm-6" @key="@address.Id">
+                        <div class="address-card card shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div class="form-check mt-1">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="selectedAddress" 
+                                               checked="@address.IsDefault"
+                                               @onclick="() => SetDefaultAddress(address.Id)" />
+                                    </div>
+                                    <span class="badge rounded-pill bg-light text-dark fw-semibold">@address.FullName</span>
+                                </div>
+                                <div class="address-card-title fw-bold text-dark mb-1">@address.AddressName</div>
+                                <div class="address-card-row text-muted small mb-1"><span class="fw-semibold me-1">@lang["AdressPhone"]:</span>@address.PhoneNumber</div>
+                                <div class="address-card-row text-muted small"><span class="fw-semibold me-1">@lang["AddressTable"]:</span>@address.Address</div>
+                                <div class="address-card-row text-muted small"><span class="fw-semibold me-1">@lang["AdressCity"]:</span>@address.City?.Name</div>
+                                <div class="address-card-row text-muted small"><span class="fw-semibold me-1">@lang["AdressTown"]:</span>@address.Town?.Name</div>
+                            </div>
+                            <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
+                                <div class="d-flex gap-3 justify-content-end">
+                                    <button class="address-icon-btn btn-edit" title="@lang["AdressEdit"]" @onclick="() => EditModalOpen(address)">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button class="address-icon-btn btn-delete" title="@lang["AddressDelete"]" @onclick="() => DeleteAddress(address.Id)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center">
+                    <p class="text-muted">@lang["NoAddressFound"]</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="tab-pane fade" id="pills-garage" role="tabpanel">
+    <div class="dashboard-address">
+        <div class="title d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div class="d-flex align-items-center">
+                <h2>@lang["MyGarage"]</h2>
+                <span class="title-leaf ms-2">
+                    <svg class="icon-width bg-gray">
+                        <use xlink:href="/assets/svg/leaf.svg#leaf"></use>
+                    </svg>
+                </span>
+            </div>
+
+            <button class="btn theme-bg-color text-white btn-sm fw-bold btn-add-new-car"
+                    @onclick="() => EditCarOpen(new UserCars { UserId = User.Id })">
+                <i class="fa-solid fa-plus"></i> <span>@lang["AddNewCar"]</span>
+            </button>
+        </div>
+
+        <div class="row g-sm-4 g-3">
+            @if (UserCarList != null && UserCarList.Any())
+            {
+                @foreach (var car in UserCarList)
+                {
+                    <div class="col-xxl-4 col-xl-6 col-lg-12 col-md-6" @key="@car.Id">
+                        <div class="garage-card card shadow-sm h-100">
+                            <div class="garage-media">
+                                @if (CarPreviewImages.TryGetValue(car.Id, out var imageUrl) && !string.IsNullOrEmpty(imageUrl) && imageUrl.StartsWith("http"))
+                                {
+
+                                    <img class="garage-cover" src="@imageUrl" alt="@car.DotManufacturer?.Name @car.DotBaseModel?.Name @lang["Car.VehicleImage"]" />
+                                }
+                                else
+                                {
+                                    <div class="garage-cover placeholder d-flex align-items-center justify-content-center">
+                                        <i class="fa-solid fa-car-side"></i>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(car.DotManufacturer?.LogoUrl))
+                                {
+                                    <div class="garage-brand-logo">
+                                        <img src="@car.DotManufacturer.LogoUrl" alt="@car.DotManufacturer.Name" />
+                                    </div>
+                                }
+                                <div class="garage-plate">@(car.PlateNumber ?? "-")</div>
+                            </div>
+                            <div class="card-body p-1">
+                                <div class="garage-title mb-1">@car.DotManufacturer?.Name @car.DotBaseModel?.Name</div>
+                                <div class="garage-specs">
+                                    <div class="spec"><span>@lang["Garage.Model"]</span><strong>@car.DotSubModel?.Name</strong></div>
+                                    <div class="spec"><span>@lang["Car.BodyType"]</span><strong>@car.DotCarBodyOption?.Name</strong></div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 pt-0 pb-2 px-2">
+                                    <div class="garage-actions-container">
+                                        <div class="d-flex gap-2">
+                                            <button class="garage-action-btn edit" title="@lang["GarageEdit"]" @onclick="() => EditCarOpen(car)">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button class="garage-action-btn delete" title="@lang["GarageDelete"]" @onclick="() => DeleteCar(car.Id)">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <a href="/product-search?manufacturerkey=@car.DotManufacturerKey&modelkey=@car.DotBaseModelKey&submodelkey=@car.DotSubModelKey" class="garage-action-btn detail with-text flex-grow-1 justify-content-center" title="@lang["GarageDetail"]">
+                                            <i class="fa-solid fa-circle-info"></i> <span>@lang["Garage.CompatibleParts"]</span>
+                                        </a>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center">
+                    <p class="text-muted">@lang["NoCarFound"]</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+    @* // Profil Ayarları *@
+<div class="tab-pane fade show" id="pills-profile" role="tabpanel">
+    <div class="dashboard-profile">
+        <div class="title mb-4">
+            <h2>@lang["Profile.Title"]</h2>
+            <span class="title-leaf">
+                <svg class="icon-width bg-gray">
+                    <use xlink:href="../assets/svg/leaf.svg#leaf"></use>
+                </svg>
+            </span>
+        </div>
+
+        <div class="dashboard-bg-box p-4 mt-4">
+            <div class="dashboard-title mb-4">
+                <h3>@lang["Profile.Information"]</h3>
+            </div>
+            <div class="privacy-settings mb-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="privacy-box p-3 border rounded-3 h-100">
+                            <div class="d-flex align-items-center">
+                                <h6 class="mb-0">@lang["Profile.Privacy.PublicTitle"]</h6>
+                                <div class="form-check form-switch ms-auto">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="togglePublic">
+                                    <label class="form-check-label" for="togglePublic"></label>
+                                </div>
+                            </div>
+                            <small class="text-muted">@lang["Profile.Privacy.PublicDesc"]</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="privacy-box p-3 border rounded-3 h-100">
+                            <div class="d-flex align-items-center">
+                                <h6 class="mb-0">@lang["Profile.Privacy.SavedOnlyTitle"]</h6>
+                                <div class="form-check form-switch ms-auto">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="toggleSavedOnly">
+                                    <label class="form-check-label" for="toggleSavedOnly"></label>
+                                </div>
+                            </div>
+                            <small class="text-muted">@lang["Profile.Privacy.SavedOnlyDesc"]</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <RadzenTemplateForm TItem="User" Data="@User" Submit="@SaveProfile">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">@lang["ProfileFirstName"]</label>
+                        <input type="text" class="form-control" name="FirstName" placeholder="@lang["ProfileFirstName"]" @bind="User.FirstName" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">@lang["ProfileLastname"]</label>
+                        <input type="text" class="form-control" name="LastName" placeholder="@lang["ProfileLastname"]" @bind="User.LastName" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">@lang["ProfileBirthday"]</label>
+                        <input type="date" class="form-control" name="BirthDate" @bind="User.BirthDate" @bind:format="yyyy-MM-dd" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">@lang["ProfilePhoneNumber"]</label>
+                        <input type="tel" class="form-control" name="PhoneNumber" placeholder="@lang["ProfilePhoneNumber"]" @bind="User.PhoneNumber" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">@lang["Profile.Email"]</label>
+                        <input type="email" class="form-control" value="@User.Email" disabled readonly />
+                    </div>
+
+                    @if (User.WebUserType == WebUserType.B2B)
+                    {
+                        <div class="col-md-6">
+                            <label class="form-label">@lang["CompanyName"]</label>
+                            <input type="text" class="form-control" name="CompanyName" placeholder="@lang["CompanyName"]" @bind="User.CompanyName" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">@lang["VatOffice"]</label>
+                            <input type="text" class="form-control" name="VatOffice" placeholder="@lang["VatOffice"]" @bind="User.VatOffice" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">@lang["VatNumber"]</label>
+                            <input type="text" class="form-control" name="VatNumber" placeholder="@lang["VatNumber"]" @bind="User.VatNumber" required />
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button class="btn theme-bg-color btn-md fw-bold mt-4 text-white" tabindex="0" type="submit">
+                        @lang["Profile.Save"]
+                    </button>
+                </div>
+            </RadzenTemplateForm>
+
+            @* <div class="dashboard-title mb-4 mt-5"> *@
+            @*     <h3>@lang["Profile.AccountSettings"]</h3> *@
+            @* </div> *@
+            @* <div class="privacy-box mb-3 p-3 border rounded-3"> *@
+            @*     <div class="d-flex align-items-center"> *@
+            @*         <h6 class="mb-0">@lang["Profile.DeletePermanentTitle"]</h6> *@
+            @*         <div class="form-check form-switch ms-auto"> *@
+            @*             <input class="form-check-input" type="checkbox" role="switch" id="toggleDeletePermanent"> *@
+            @*             <label class="form-check-label" for="toggleDeletePermanent"></label> *@
+            @*         </div> *@
+            @*     </div> *@
+            @*     <small class="text-muted">@lang["Profile.DeletePermanentDesc"]</small> *@
+            @*     <div class="mt-3"> *@
+            @*         <button class="btn btn-danger btn-sm" tabindex="0"> *@
+            @*             @lang["Profile.DeleteButton"] *@
+            @*         </button> *@
+            @*     </div> *@
+            @* </div> *@
+            @* <div class="privacy-box mb-3 p-3 border rounded-3"> *@
+            @*     <div class="d-flex align-items-center"> *@
+            @*         <h6 class="mb-0">@lang["Profile.DisableTemporaryTitle"]</h6> *@
+            @*         <div class="form-check form-switch ms-auto"> *@
+            @*             <input class="form-check-input" type="checkbox" role="switch" id="toggleDeleteTemporary"> *@
+            @*             <label class="form-check-label" for="toggleDeleteTemporary"></label> *@
+            @*         </div> *@
+            @*     </div> *@
+            @*     <small class="text-muted">@lang["Profile.DisableTemporaryDesc"]</small> *@
+            @* </div> *@
+            @* *@
+        </div>
+    </div>
+</div>
+
+    @* // Şifre değiştirme *@
+
+<div class="tab-pane fade" id="pills-password" role="tabpanel">
+        <div class="dashboard-download">
+            <div class="dashboard-title mb-4">
+                <h2>@lang["ChangePassword"]</h2>
+                <span class="title-leaf">
+                <svg class="icon-width bg-gray">
+                    <use xlink:href="../assets/svg/leaf.svg#leaf"></use>
+                </svg>
+            </span>
+            </div>
+        
+
+            <div class="dashboard-bg-box p-4 shadow-sm rounded-3" style="max-width: 800px; margin: auto;">
+                <RadzenTemplateForm TItem="object" Data="@this" Submit="@ChangePassword">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="mb-2">
+                                <label class="form-label">@lang["CurrentPassword"]</label>
+                                <input type="password"
+                                       class="form-control"
+                                       name="CurrentPassword"
+                                       placeholder="@lang["CurrentPassword"]"
+                                       @bind="CurrentPassword" required />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-2">
+                                <label class="form-label">@lang["NewPassword"]</label>
+                                <input type="password"
+                                       class="form-control"
+                                       name="NewPassword"
+                                       placeholder="@lang["NewPassword"]"
+                                       @bind="NewPassword" required />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-2">
+                                <label class="form-label">@lang["ConfirmPassword"]</label>
+                                <input type="password"
+                                       class="form-control"
+                                       name="ConfirmPassword"
+                                       placeholder="@lang["ConfirmPassword"]"
+                                       @bind="ConfirmPassword" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-4">
+                        <button class="btn theme-bg-color btn-md fw-bold mt-4 text-white" tabindex="0" type="submit">
+                            @lang["ChangePassword"]
+                        </button>
+                    </div>
+                </RadzenTemplateForm>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+    </div>
+</div>
+</div>
+</section>
+
+
+ 
+

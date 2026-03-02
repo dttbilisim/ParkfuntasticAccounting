@@ -1,0 +1,83 @@
+@page "/warehouses/{WarehouseId:int}/shelves"
+@using ecommerce.Admin.Components.Layout
+@using ecommerce.Admin.Domain.Dtos.WarehouseShelfDto
+@using ecommerce.Admin.Resources
+@using ecommerce.Core.Utils
+@using Microsoft.AspNetCore.Authorization
+@layout MainLayout
+
+<PageTitle>Raf Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenButton Icon="arrow_back" Click="@GoBack" Variant="Variant.Text" ButtonStyle="ButtonStyle.Dark" />
+                <h1 class="h3 mb-0 text-gray-800">Raf Yönetimi</h1>
+            </RadzenStack>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Raf Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Icon="playlist_add" Text="Toplu Raf Oluştur" Click="@BatchCreateClick" ButtonStyle="ButtonStyle.Secondary" class="ms-2" />
+            <RadzenButton Icon="delete" Text="Seçilenleri Sil" Click="@BatchDeleteClick" ButtonStyle="ButtonStyle.Danger" class="ms-2" Visible="@(selectedShelves != null && selectedShelves.Any())" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid"
+                            AllowFiltering="true"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            FilterMode="FilterMode.Advanced"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            TItem="WarehouseShelfListDto"
+                            LoadData="@LoadData"
+                            Count="@count"
+                            Data="@shelves"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            SelectionMode="DataGridSelectionMode.Multiple"
+                            @bind-Value=@selectedShelves
+                            RowSelect="@EditRow">
+                <Columns>
+                    <RadzenDataGridColumn TItem="WarehouseShelfListDto" Width="60px" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">
+                        <HeaderTemplate>
+                            <RadzenCheckBox TriState="false" TValue="bool" Value="@(shelves != null && shelves.Any(i => selectedShelves != null && selectedShelves.Contains(i)))"
+                                            Change="@(args => selectedShelves = args ? shelves.ToList() : null)" />
+                        </HeaderTemplate>
+                        <Template Context="data">
+                            <RadzenCheckBox TriState="false" Value="@(selectedShelves != null && selectedShelves.Contains(data))"
+                                            TValue="bool" Change="@(args => { if(!args) { selectedShelves.Remove(data); } else { if (selectedShelves == null) { selectedShelves = new List<WarehouseShelfListDto>(); } selectedShelves.Add(data); } })" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="WarehouseShelfListDto" Property="Id" Title="ID" Width="80px" />
+                    <RadzenDataGridColumn TItem="WarehouseShelfListDto" Property="Code" Title="Raf Kodu" Width="150px" />
+                    <RadzenDataGridColumn TItem="WarehouseShelfListDto" Property="Description" Title="Açıklama" />
+                    <RadzenDataGridColumn TItem="WarehouseShelfListDto" Property="WarehouseName" Title="Depo" Width="150px" />
+                    <RadzenDataGridColumn TItem="WarehouseShelfListDto" Property="Status" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="item">
+                            @if (item.Status == 1)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Aktif" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="Pasif" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="WarehouseShelfListDto" Title="İşlem" Filterable="false" Sortable="false" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="item">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@((args) => EditRow(item))" @onclick:stopPropagation="true" class="me-1" />
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(args => GridDeleteButtonClick(args, item))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

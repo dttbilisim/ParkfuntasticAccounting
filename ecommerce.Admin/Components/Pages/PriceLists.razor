@@ -1,0 +1,99 @@
+@page "/pricelists"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.PriceListDto
+@using Radzen
+@using Radzen.Blazor
+@attribute [Authorize]
+@inject IStringLocalizer<Culture_TR> Loc
+
+<PageTitle>Genel Fiyat Listesi</PageTitle>
+
+@using ecommerce.Admin.Components.Layout
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Genel Fiyat Listesi</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Fiyat Listesi Ekle" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid"
+                            TItem="PriceListListDto"
+                            LoadData="@LoadData"
+                            Data="@priceLists"
+                            Count="@count"
+                            AllowFiltering="true"
+                            FilterMode="FilterMode.Advanced"
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            AllowFilterDateInput="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            RowSelect="@OnRowSelect"
+                            CellRender="@RowRender"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="PriceListListDto" Property="Id" Title="ID" Width="60px" />
+                    <RadzenDataGridColumn TItem="PriceListListDto" Property="Code" Title="Liste Kodu" Width="140px" />
+                    <RadzenDataGridColumn TItem="PriceListListDto" Property="Name" Title="Liste Adı" />
+                    <RadzenDataGridColumn TItem="PriceListListDto" Property="StartDate" Title="Başlangıç Tarihi" Width="150px" FormatString="{0:dd.MM.yyyy}" />
+                    <RadzenDataGridColumn TItem="PriceListListDto" Property="ItemCount" Title="Ürün Sayısı" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="priceList">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@priceList.ItemCount.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PriceListListDto" Property="IsActive" Title="Durum" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="priceList">
+                            <RadzenBadge BadgeStyle="@(priceList.IsActive ? BadgeStyle.Success : BadgeStyle.Light)" Text="@(priceList.IsActive ? "Aktif" : "Pasif")" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="PriceListListDto" Property="CreatedDate" Title="Oluşturulma Tarihi" Width="160px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="PriceListListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="priceList">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall" Shade="Shade.Dark" Variant="Variant.Flat"
+                                          Click=@(args => GridDeleteButtonClick(args, priceList)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>
+
+@* @if (selectedPriceList != null) *@
+@* { *@
+@*     <RadzenCard class="mt-3"> *@
+@*         <RadzenText Text="@($"{selectedPriceList.Code} - {selectedPriceList.Name} / Detay Ürünler")" *@
+@*                     TextStyle="TextStyle.H6" *@
+@*                     class="mb-2" /> *@
+@* *@
+@*         <RadzenDataGrid Data="@detailItems" *@
+@*                         TItem="PriceListItemUpsertDto" *@
+@*                         AllowPaging="true" *@
+@*                         PageSize="50" *@
+@*                         AllowSorting="true" *@
+@*                         Density="Density.Compact" *@
+@*                         GridLines="DataGridGridLines.Horizontal"> *@
+@*             <Columns> *@
+@*                 <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Title="Sıra" Width="60px"> *@
+@*                     <Template Context="item"> *@
+@*                         @(detailItems.IndexOf(item) + 1) *@
+@*                     </Template> *@
+@*                 </RadzenDataGridColumn> *@
+@*                 <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Property="ProductCode" Title="Stok Kodu" Width="140px" /> *@
+@*                 <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Property="ProductName" Title="Stok Adı" /> *@
+@*                 <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Property="PurchasePrice" Title="Alış Fiyatı" Width="140px" FormatString="{0:N2}" TextAlign="TextAlign.Right" /> *@
+@*                 <RadzenDataGridColumn TItem="PriceListItemUpsertDto" Property="SalePrice" Title="Satış Fiyatı" Width="140px" FormatString="{0:N2}" TextAlign="TextAlign.Right" /> *@
+@*             </Columns> *@
+@*         </RadzenDataGrid> *@
+@*     </RadzenCard> *@
+@* } *@

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+        <HintPath>..\..\..\..\..\..\usr\local\share\dotnet\x64\shared\Microsoft.AspNetCore.App\9.0.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Options">
+        <HintPath>..\..\..\..\..\..\usr\local\share\dotnet\x64\shared\Microsoft.AspNetCore.App\9.0.0\Microsoft.Extensions.Options.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Common\ecommerce.Core\ecommerce.Core.csproj" />
+      <ProjectReference Include="..\Common\ecommerce.Domain.Shared\ecommerce.Domain.Shared.csproj" />
+      <ProjectReference Include="..\Common\ecommerce.EFCore\ecommerce.EFCore.csproj" />
+      <ProjectReference Include="..\ecommerce.Admin.Services\ecommerce.Admin.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,530 @@
+@using ecommerce.Admin.Services.Interfaces
+@using ecommerce.Web.Domain.Dtos.Cart
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject ICartStateService CartStateService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ecommerce.Core.Identity.CurrentUser CurrentUser
+@inject ecommerce.Web.Domain.Services.Abstract.ICartService CartService
+@inject Radzen.NotificationService NotificationService
+@inject Radzen.DialogService DialogService
+@inject Radzen.TooltipService TooltipService
+@inject ecommerce.Admin.Services.AuthenticationService Security
+
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+<div class="header-cart-dropdown @(IsOpen ? "show" : "")">
+    <!-- Backdrop for closing -->
+    <div class="cart-backdrop" style="z-index: 2000;" @onclick="Close"></div>
+
+    <div class="cart-panel" style="z-index: 2001;" @onclick="@(() => {})" @onclick:stopPropagation="true">
+        <div class="cart-head">
+            <h5>
+                Sepetim (@(GetTotalItemCount()))
+                @if (isRefreshing)
+                {
+                    <span class="spinner-border spinner-border-sm ms-2 text-muted" role="status"></span>
+                }
+            </h5>
+            <div class="cart-head-actions">
+                @if (CartStateService.CurrentCart != null && CartStateService.CurrentCart.TotalItems > 0)
+                {
+                    <button type="button" 
+                            class="btn-clear-cart" 
+                            @onclick="ClearAllCart"
+                            @onclick:stopPropagation="true"
+                            disabled="@isUpdating"
+                            title="Sepeti Temizle"
+                            aria-label="Sepeti Temizle">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                }
+                <button type="button" class="btn-close" @onclick="Close" aria-label="Close">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <ul class="cart-list">
+            @if (Security.User?.SalesPersonId.HasValue == true && !Security.SelectedCustomerId.HasValue)
+            {
+                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted opacity-75">
+                    <div style="background: #e2e8f0; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <i class="fa-solid fa-user-check fs-2 text-secondary"></i>
+                    </div>
+                    <h6 class="text-dark fw-bold">Lütfen Cari Seçin</h6>
+                    <p class="small">Sepet işlemleri için bir cari seçmelisiniz.</p>
+                </div>
+            }
+            else if (CartStateService.CurrentCart?.Sellers != null && CartStateService.CurrentCart.Sellers.Any())
+            {
+                @foreach (var seller in CartStateService.CurrentCart.Sellers)
+                {
+                    // Initialize expanded state if not present (default closed)
+                    if (!_sellerExpandedState.ContainsKey(seller.SellerId))
+                    {
+                        _sellerExpandedState[seller.SellerId] = false;
+                    }
+                    var isExpanded = _sellerExpandedState[seller.SellerId];
+
+                    <li class="cart-seller-header" @onclick="() => ToggleSeller(seller.SellerId)" 
+                        style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; border-left: 4px solid #0e947a; margin-bottom: 2px;">
+                        <div class="seller-info" style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-store" style="color: #0e947a; font-size: 1.1rem;"></i>
+                            <span class="seller-name" style="font-weight: 700; font-size: 1rem; color: #2d3748;">@seller.SellerName</span>
+                        </div>
+                        
+                        <!-- Center: Total Price -->
+                        <div class="seller-total-center" style="font-weight: 800; color: #0e947a; background-color: #e6fffa; padding: 4px 12px; border-radius: 6px; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                             @seller.OrderTotal.ToString("C2")
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                             <!-- Removed price from right side -->
+                             <i class="fa-solid @(isExpanded ? "fa-angle-up" : "fa-angle-down")" style="font-size: 1rem; color: #718096;"></i>
+                        </div>
+                    </li>
+                    
+                    @if (isExpanded)
+                    {
+                        @foreach (var item in seller.Items)
+                        {
+                            var isItemUpdating = updatingItems.Contains(item.ProductSellerItemId);
+                            <li class="drop-cart" @key="@($"{item.Id}-{item.ProductSellerItemId}")">
+                                <div class="img">
+                                    @if(!string.IsNullOrEmpty(item.PictureUrl))
+                                    {
+                                         var cdnBase = Configuration["Cdn:BaseUrl"] ?? "";
+                                         var imageUrl = item.PictureUrl.StartsWith("http") ? item.PictureUrl : $"{cdnBase}/ProductImages/{item.PictureUrl}";
+                                         <img src="@imageUrl" 
+                                              alt="@item.ProductName"
+                                              onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                         <div class="cart-image-placeholder" style="display: none;">
+                                             <i class="fa-solid fa-image"></i>
+                                         </div>
+                                    }
+                                    else
+                                    {
+                                         <div class="cart-image-placeholder">
+                                             <i class="fa-solid fa-image"></i>
+                                         </div>
+                                    }
+                                </div>
+                                <div class="drop-contain">
+                                    @{
+                                        var cartProductNameId = $"cart-product-name-{item.Id}-{item.ProductSellerItemId}";
+                                    }
+                                    <h6 @ref="@(_elementReferences[cartProductNameId])"
+                                        @onmouseenter="@(() => ShowTooltip(cartProductNameId, item.ProductName))"
+                                        @onmouseleave="@(() => HideTooltip())"
+                                        style="cursor: pointer;">@item.ProductName</h6>
+                                    <div class="meta">
+                                        <!-- Web-Style Quantity Controls in Drawer -->
+                                        <div class="quantity-controls" style="position: relative; z-index: 10;">
+                                            <button type="button" class="qty-btn minus" 
+                                                    disabled="@isItemUpdating"
+                                                    @onclick="@(async () => await UpdateQtyDifference(item, -1))"
+                                                    @onclick:stopPropagation="true"
+                                                    style="pointer-events: auto; cursor: pointer;">
+                                                <i class="fa-solid fa-minus" style="pointer-events: none;"></i>
+                                            </button>
+                                            
+                                            <input type="number" 
+                                                   value="@item.Quantity" 
+                                                   disabled="@isItemUpdating"
+                                                   @onchange="@((ChangeEventArgs e) => UpdateQuantity(item, e))"
+                                                   min="1" 
+                                                   style="pointer-events: auto;" />
+                                                
+                                            <button type="button" class="qty-btn plus" 
+                                                    disabled="@isItemUpdating"
+                                                    @onclick="@(async () => await UpdateQtyDifference(item, 1))"
+                                                    @onclick:stopPropagation="true"
+                                                    style="pointer-events: auto; cursor: pointer;">
+                                                <i class="fa-solid fa-plus" style="pointer-events: none;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    @if (item.IsPerfectCompatibility)
+                                    {
+                                        <div class="cart-compatibility-badge text-success small mt-1">
+                                            <i class="fa-solid fa-check-circle"></i> Tam Uyum
+                                        </div>
+                                    }
+                                </div>
+                                <div class="drop-price">@item.Total.ToString("C2")</div>
+                                
+                                <button type="button" class="item-remove-btn" 
+                                        disabled="@isItemUpdating"
+                                        @onclick="@(async () => await RemoveItem(item.Id, item.ProductSellerItemId))"
+                                        @onclick:stopPropagation="true">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </li>
+                        }
+                        
+                        <!-- Seller Footer -->
+                        <li class="cart-seller-footer">
+                            <div class="seller-footer-content">
+                                <span class="seller-footer-label">Toplam</span>
+                                <span class="seller-footer-total">@seller.OrderTotal.ToString("C2")</span>
+                            </div>
+                        </li>
+                    }
+                }
+            }
+            else
+            {
+                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted opacity-75">
+                    <div style="background: #e2e8f0; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <i class="fa-solid fa-cart-shopping fs-2 text-secondary"></i>
+                    </div>
+                    <h6 class="text-dark fw-bold">Sepetiniz Boş</h6>
+                    <p class="small">Ürün eklemek için ürünleri inceleyebilirsiniz.</p>
+                </div>
+            }
+        </ul>
+
+        @if (CartStateService.CurrentCart != null && CartStateService.CurrentCart.TotalItems > 0)
+        {
+            <div class="cart-foot" style="position: relative;">
+                @if (isUpdating)
+                {
+                    <div class="cart-loading-overlay">
+                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                        <span class="ms-2 small">Güncelleniyor...</span>
+                    </div>
+                }
+                
+                <div class="cart-total-row">
+                    <span class="label">Ara Toplam</span>
+                    <span class="value @(isUpdating ? "text-muted" : "")">@CartStateService.CurrentCart.SubTotal.ToString("C2")</span>
+                </div>
+                
+                @if(CartStateService.CurrentCart.CargoPrice > 0)
+                {
+                     <div class="cart-total-row">
+                        <span class="label">Kargo Ücreti</span>
+                        <span class="value @(isUpdating ? "text-muted" : "")">@CartStateService.CurrentCart.CargoPrice.ToString("C2")</span>
+                    </div>
+                }
+
+                @if(CartStateService.CurrentCart.OrderTotalDiscount > 0)
+                {
+                    <div class="cart-total-row">
+                        <span class="label">İndirim</span>
+                        <span class="value text-danger @(isUpdating ? "opacity-50" : "")">-@CartStateService.CurrentCart.OrderTotalDiscount.ToString("C2")</span>
+                    </div>
+                }
+                
+                <div class="cart-total-row grand-total">
+                    <span class="label">Genel Toplam</span>
+                    <span class="value @(isUpdating ? "text-muted" : "")">@CartStateService.CurrentCart.OrderTotal.ToString("C2")</span>
+                </div>
+
+                <div class="cart-actions">
+                    <a href="/admin-checkout" class="btn-b2b btn-b2b-primary w-100 @(isUpdating ? "disabled" : "")" @onclick="Close">
+                        <i class="fa-solid fa-check-circle me-2"></i>Siparişi Tamamla
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    
+    private bool isRefreshing = false;
+    private bool isUpdating = false;
+    private HashSet<int> updatingItems = new();
+    
+    // Dictionary to store Expanded state for each seller
+    private Dictionary<int, bool> _sellerExpandedState = new();
+
+    // Dictionary to store ElementReferences by ID for tooltips
+    private Dictionary<string, ElementReference> _elementReferences = new();
+
+    protected override void OnInitialized()
+    {
+        CartStateService.OnChange += OnCartStateChanged;
+    }
+    
+    private void OnCartStateChanged()
+    {
+        isRefreshing = false;
+        isUpdating = false;
+        updatingItems.Clear();
+        // Optionally keep state or clear it. If clear, all accordions close on update.
+        // _sellerExpandedState.Clear(); // Uncomment to close on update
+        InvokeAsync(StateHasChanged);
+    }
+    
+    private void ToggleSeller(int sellerId)
+    {
+        if (!_sellerExpandedState.ContainsKey(sellerId))
+        {
+            _sellerExpandedState[sellerId] = false;
+        }
+        
+        _sellerExpandedState[sellerId] = !_sellerExpandedState[sellerId];
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        CartStateService.OnChange -= OnCartStateChanged;
+    }
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task UpdateQtyDifference(ecommerce.Web.Domain.Dtos.Cart.CartItemDto item, int diff)
+    {
+        var newQty = item.Quantity + diff;
+        
+        if (newQty <= 0)
+        {
+            await RemoveItem(item.Id, item.ProductSellerItemId);
+            return;
+        }
+        
+        var e = new ChangeEventArgs { Value = newQty };
+        await UpdateQuantity(item, e);
+    }
+
+    private async Task UpdateQuantity(ecommerce.Web.Domain.Dtos.Cart.CartItemDto item, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newQty) && newQty > 0)
+        {
+            if (newQty == item.Quantity) return;
+            
+            var delta = newQty - item.Quantity;
+            if (delta == 0) return;
+
+            // Mark as updating
+            updatingItems.Add(item.ProductSellerItemId);
+            isUpdating = true;
+            StateHasChanged();
+
+            try
+            {
+                var req = new ecommerce.Web.Domain.Dtos.Cart.CartItemUpsertDto 
+                { 
+                    ProductSellerItemId = item.ProductSellerItemId, 
+                    Quantity = delta,
+                    CustomerId = Security?.SelectedCustomerId
+                };
+                
+                var result = await CartService.CreateCartItem(req);
+                
+                if (result.Ok && result.Result != null)
+                {
+                    // Use returned cart directly instead of RefreshCart (avoids cache issues)
+                    CartStateService.SetCart(result.Result);
+                    StateHasChanged();
+                    
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Güncellendi",
+                        Detail = "Sepet güncellendi.",
+                        Duration = 2000
+                    });
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Hata",
+                        Detail = result.Metadata?.Message ?? "Miktar güncellenemedi.",
+                        Duration = 4000
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Hata",
+                    Detail = ex.Message,
+                    Duration = 4000
+                });
+            }
+            finally
+            {
+                updatingItems.Remove(item.ProductSellerItemId);
+                isUpdating = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task RemoveItem(int itemId, int? productSellerItemId = null)
+    {
+        if (productSellerItemId.HasValue)
+        {
+            updatingItems.Add(productSellerItemId.Value);
+        }
+        isUpdating = true;
+        StateHasChanged();
+        
+        try
+        {
+            var res = await CartService.CartItemRemove(itemId);
+            if(res.Ok && res.Result != null)
+            {
+                // Use returned cart directly instead of RefreshCart (avoids cache issues)
+                CartStateService.SetCart(res.Result);
+                StateHasChanged();
+                
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "Silindi",
+                    Detail = "Ürün sepetten kaldırıldı.",
+                    Duration = 2000
+                });
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Hata",
+                    Detail = res.Metadata?.Message ?? "Ürün silinemedi.",
+                    Duration = 4000
+                });
+            }
+        }
+        catch(Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Hata",
+                Detail = ex.Message,
+                Duration = 4000
+            });
+        }
+        finally
+        {
+            if (productSellerItemId.HasValue)
+            {
+                updatingItems.Remove(productSellerItemId.Value);
+            }
+            isUpdating = false;
+            StateHasChanged();
+        }
+    }
+
+    private int GetTotalItemCount()
+    {
+        // Plasiyer with no customer selected -> Show 0
+        if (Security.User?.SalesPersonId.HasValue == true && !Security.SelectedCustomerId.HasValue)
+        {
+            return 0;
+        }
+
+        if (CartStateService?.CurrentCart == null)
+            return 0;
+        
+        // Use CartCount (unique product count) like CartPage.razor does
+        return CartStateService.CurrentCart.CartCount > 0 
+            ? CartStateService.CurrentCart.CartCount 
+            : 0;
+
+    }
+
+    protected void ShowTooltip(string elementId, string text)
+    {
+        if (!string.IsNullOrEmpty(text) && !string.IsNullOrEmpty(elementId) && _elementReferences.TryGetValue(elementId, out var elementRef))
+        {
+            TooltipService.Open(elementRef, text, new Radzen.TooltipOptions 
+            { 
+                Duration = 0,
+                Style = "background-color: #0e947a !important; background: #0e947a !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 0.875rem !important;"
+            });
+        }
+    }
+
+    protected void HideTooltip()
+    {
+        TooltipService.Close();
+    }
+
+    private async Task ClearAllCart()
+    {
+        if (CartStateService?.CurrentCart == null || CartStateService.CurrentCart.TotalItems == 0)
+            return;
+
+        var confirmed = await DialogService.Confirm(
+            "Sepeti Temizle",
+            "Sepetinizdeki tüm ürünler silinecektir. Emin misiniz?",
+            new Radzen.ConfirmOptions
+            {
+                OkButtonText = "Evet, Temizle",
+                CancelButtonText = "İptal"
+            }
+        );
+
+        if (!confirmed.HasValue || !confirmed.Value)
+            return;
+
+        isUpdating = true;
+        isRefreshing = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await CartService.ClearCart();
+            
+            if (result.Ok && result.Result != null)
+            {
+                CartStateService.SetCart(result.Result);
+                StateHasChanged();
+                
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Sepet Temizlendi",
+                    Detail = "Sepetinizdeki tüm ürünler kaldırıldı.",
+                    Duration = 3000
+                });
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Hata",
+                    Detail = result.Metadata?.Message ?? "Sepet temizlenemedi.",
+                    Duration = 4000
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Hata",
+                Detail = ex.Message,
+                Duration = 4000
+            });
+        }
+        finally
+        {
+            isUpdating = false;
+            isRefreshing = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,108 @@
+@using ecommerce.Web.Domain.Dtos.Order
+@inject IConfiguration Config
+
+<div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="ri-shopping-bag-3-line me-2"></i>
+                Sipariş #@Order?.OrderNumber - Ürünler
+            </h5>
+            <button type="button" class="modal-close-btn" @onclick="CloseModal">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div class="modal-body modal-body-scrollable">
+            @if (Order != null && Order.Items != null && Order.Items.Any())
+            {
+                <div class="order-items-list">
+                    @foreach (var item in Order.Items)
+                    {
+                        <div class="modal-order-item">
+                            <div class="modal-item-image">
+                                @if (!string.IsNullOrEmpty(item.ProductImage))
+                                {
+                                    <img src="@GetProductImageUrl(item.ProductImage)" alt="@item.ProductName" />
+                                }
+                                else
+                                {
+                                    <div class="placeholder-image">
+                                        <i class="ri-image-line"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="modal-item-details">
+                                <a href="/product-detail?productId=@item.ProductId&brandId=@item.BrandId" class="modal-item-name" @onclick="CloseModal">
+                                    @item.ProductName
+                                </a>
+                                <div class="modal-item-meta">
+                                    <span class="quantity">
+                                        <i class="ri-stack-line me-1"></i>
+                                        @item.Quantity Adet
+                                    </span>
+                                    <span class="price">
+                                        <i class="ri-price-tag-3-line me-1"></i>
+                                        @item.Price.ToString("C2", new System.Globalization.CultureInfo("tr-TR"))
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-items text-center py-5">
+                    <i class="ri-inbox-line" style="font-size: 3rem; color: #94a3b8;"></i>
+                    <p class="mt-3 text-muted">Bu siparişte ürün bulunamadı.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Fixed Footer with Totals -->
+        <div class="modal-footer modal-footer-fixed">
+            <div class="footer-price-summary">
+                <div class="footer-price-row">
+                    <span class="footer-label">Ara Toplam:</span>
+                    <span class="footer-value">₺@Order?.ProductTotal.ToString("N2")</span>
+                </div>
+                @if (Order?.DiscountTotal.HasValue == true && Order.DiscountTotal > 0)
+                {
+                    <div class="footer-price-row discount">
+                        <span class="footer-label">İndirim:</span>
+                        <span class="footer-value">-₺@Order.DiscountTotal.Value.ToString("N2")</span>
+                    </div>
+                }
+                <div class="footer-price-row">
+                    <span class="footer-label">Kargo:</span>
+                    @if (Order?.CargoPrice == 0)
+                    {
+                        <span class="footer-value free">Ücretsiz</span>
+                    }
+                    else
+                    {
+                        <span class="footer-value">₺@Order?.CargoPrice.ToString("N2")</span>
+                    }
+                </div>
+                <div class="footer-price-row total">
+                    <span class="footer-label">Genel Toplam:</span>
+                    <span class="footer-value">₺@Order?.GrandTotal.ToString("N2")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public OrderDto Order { get; set; }
+    [Parameter] public Func<string, string> GetProductImageUrl { get; set; }
+
+    private void CloseModal()
+    {
+        ModalInstance?.CloseAsync();
+    }
+}

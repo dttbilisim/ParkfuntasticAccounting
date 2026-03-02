@@ -1,0 +1,153 @@
+@using ecommerce.Core.Extensions
+@using ecommerce.Core.Rules
+@using ecommerce.Core.Rules.Fields
+@using ecommerce.Admin.Domain.Dtos.RulesDto
+@using System.Globalization
+@using ecommerce.Core.Helpers
+@inherits OwningComponentBase
+@{
+    #pragma warning disable CS8669
+}
+<RadzenCard class="rz-px-3 rz-pt-1 rz-pb-3">
+    <RadzenTemplateForm TItem="RuleUpsertDto" Data="@Expression">
+        <RadzenFluentValidator @ref="RuleFluentValidator" Validator="@RuleValidator"/>
+
+        <RadzenRow>
+            <RadzenColumn SizeMD="4">
+                <RadzenFormField Text="Alan" Variant="Variant.Outlined" class="w-100">
+                    <ChildContent>
+                        <RadzenDropDown Data="@FieldScopeDefinition.Fields" @bind-Value="@Expression.Field" Change="@FieldChanged" TextProperty="DisplayName" ValueProperty="Name" AllowClear="true" 
+                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenText Text="@RuleFluentValidator.GetValidationMessage(r => r.Field)" class="@RuleFluentValidator.GetErrorCssClass()"/>
+                    </Helper>
+                </RadzenFormField>
+            </RadzenColumn>
+            @if (Expression.FieldDefinition != null)
+            {
+                <RadzenColumn SizeMD="3">
+                    <RadzenFormField Text="İşlem" Variant="Variant.Outlined" class="w-100">
+                        <ChildContent>
+                            <RadzenDropDown Data="@(RuleOperatorMapping.GetOperators(Expression.FieldDefinition.Type))" @bind-Value="@Expression.Operator" Change="@OperatorChanged" AllowClear="true" 
+                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenText Text="@RuleFluentValidator.GetValidationMessage(r => r.Operator)" class="@RuleFluentValidator.GetErrorCssClass()"/>
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+
+                <RadzenColumn SizeMD="5">
+                    @if (Expression.Operator.HasValue && !RuleOperatorMapping.GetOperators(RuleExpressionOperatorType.Null).Contains(Expression.Operator.Value))
+                    {
+                        var type = TypeHelper.StripNullable(Expression.FieldDefinition.Type);
+
+                        if (TypeHelper.IsEnumerable(type, out var innerType, false))
+                        {
+                            type = innerType;
+                        }
+
+                        var simplifiedType = TypeHelper.GetSimplifiedName(type);
+
+                        <RadzenFormField Text="Değer" Variant="Variant.Outlined" class="w-100">
+                            <ChildContent>
+                                @if (Expression.FieldDefinition.SelectList != null)
+                                {
+                                    var isMultiple = Expression.FieldDefinition.SelectList.Multiple || RuleOperatorMapping.GetOperators(RuleExpressionOperatorType.Array).Contains(Expression.Operator.Value);
+
+                                    @if (isMultiple)
+                                    {
+                                        <RadzenDropDown TValue="IEnumerable<string>" Value="@Expression.Values" ValueChanged="@(o => SelectListValueChanged(o, true))" Multiple="true" Chips="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" VirtualizationOverscanCount="10" AllowVirtualization="true" MaxSelectedLabels="3" AllowClear="true" AllowSelectAll="false" Data="@SelectListData" Count="SelectListDataCount" LoadData="@LoadSelectListData" TextProperty="@nameof(FieldDefinitionValueSelectListOption.Text)" ValueProperty="@nameof(FieldDefinitionValueSelectListOption.Value)" class="w-100"/>
+                                    }
+                                    else
+                                    {
+                                        <RadzenDropDown TValue="string" Value="@Expression.Value" ValueChanged="@(o => SelectListValueChanged(o, false))" Multiple="false" Chips="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" VirtualizationOverscanCount="10" AllowVirtualization="true" MaxSelectedLabels="3" AllowClear="true" AllowSelectAll="false" Data="@SelectListData" Count="SelectListDataCount" LoadData="@LoadSelectListData" TextProperty="@nameof(FieldDefinitionValueSelectListOption.Text)" ValueProperty="@nameof(FieldDefinitionValueSelectListOption.Value)" class="w-100"/>
+                                    }
+                                }
+                                else if (new[] { typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan), typeof(DateOnly), typeof(TimeOnly) }.Contains(type))
+                                {
+                                    var currentValue = RuleDateTimeExpression.TryParse(Expression.Value, out var ruleDateTimeExpression) ? ruleDateTimeExpression : null;
+
+                                    <RadzenStack Gap="2px" class="rz-p-2">
+                                        <RadzenFormField Text="Tarih" Variant="Variant.Text" class="w-100">
+                                            @if (type == typeof(TimeSpan) || type == typeof(TimeOnly))
+                                            {
+                                                <RadzenDatePicker TValue="DateTime?" Value="@(currentValue?.Date)" ValueChanged="@(d => Expression.Value = d.HasValue ? new RuleDateTimeExpression(d.Value) : null)" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" AllowClear="true"/>
+                                            }
+                                            else
+                                            {
+                                                <RadzenDatePicker TValue="DateTime?" Value="@(currentValue?.Date)" ValueChanged="@(d => Expression.Value = d.HasValue ? new RuleDateTimeExpression(d.Value) : null)" ShowTime="@(type != typeof(DateOnly))" DateFormat="@(type == typeof(DateOnly) ? "d" : "g")" AllowClear="true"/>
+                                            }
+                                        </RadzenFormField>
+                                        <span class="text-center">veya</span>
+                                        <RadzenLabel Text="Zaman ifadesi" class="w-100 rz-form-field-label rz-text-truncate position-static"/>
+                                        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px">
+                                            <RadzenNumeric TValue="int?" Value="@(currentValue?.Factor)" ValueChanged="@(d => Expression.Value = d.HasValue ? new RuleDateTimeExpression(d.Value, currentValue?.Interval ?? RuleDateTimeExpressionUnit.Hour) : null)" class="w-100"/>
+                                            <RadzenDropDown TValue="RuleDateTimeExpressionUnit?" Data="@(Enum.GetValues<RuleDateTimeExpressionUnit>())" Value="@(currentValue?.Interval)" ValueChanged="@(d => Expression.Value = d.HasValue ? new RuleDateTimeExpression(currentValue?.Factor ?? 0, d.Value) : null)" AllowClear="true" class="w-100" 
+                                                            AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                }
+                                else if (type == typeof(bool))
+                                {
+                                    <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" class="pt-2">
+                                        <RadzenSwitch Value="@(FieldValueDictionary.ChangeTypeAs<bool>(Expression.Value))" ValueChanged="@(o => Expression.Value = Convert.ToString(o, CultureInfo.InvariantCulture))"/>
+                                        <RadzenLabel Text="@(FieldValueDictionary.ChangeTypeAs<bool>(Expression.Value) ? "Evet" : "Hayır")"/>
+                                    </RadzenStack>
+                                }
+                                else if (type.IsEnum)
+                                {
+                                    var enumValuesAsStrings = Enum.GetValues(type).Cast<object>().Select(x => x.ToString()).ToList();
+                                    <RadzenDropDown TValue="string" Data="@enumValuesAsStrings" Value="@Expression.Value" ValueChanged="@(o => Expression.Value = o)" AllowClear="true" 
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                }
+                                else if (simplifiedType == "string")
+                                {
+                                    <RadzenTextBox @bind-Value="@Expression.Value"/>
+                                }
+                                else if (simplifiedType == "number")
+                                {
+                                    <RadzenNumeric TValue="double" Value="@(FieldValueDictionary.ChangeTypeAs<double>(Expression.Value))" ValueChanged="@(o => Expression.Value = Convert.ToString(FieldValueDictionary.ChangeType(o, type), CultureInfo.InvariantCulture))"/>
+                                }
+                            </ChildContent>
+                            <Helper>
+                                <RadzenText Text="@RuleFluentValidator.GetValidationMessage(r => r.Value)" class="@RuleFluentValidator.GetErrorCssClass()"/>
+                            </Helper>
+                        </RadzenFormField>
+
+                        if (Expression.FieldDefinition.SelectList == null && RuleOperatorMapping.GetOperators(RuleExpressionOperatorType.Array).Contains(Expression.Operator.Value))
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenFormField Text="Değerler" class="w-100 overflow-hidden">
+                                    <ChildContent>
+                                        <RadzenDropDown Data="@Expression.Values" TValue="List<string>" Value="@(Expression.Values)" ValueChanged="@(v => Expression.Values = v.ToList())" Multiple="true" AllowSelectAll="false" MaxSelectedLabels="3" 
+                                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                                            <Template Context="option">
+                                                @(type.IsEnum ? (FieldValueDictionary.ChangeType(option, type) as Enum)?.GetDisplayName() : option)
+                                            </Template>
+                                            <ValueTemplate Context="option">
+                                                @(type.IsEnum ? (FieldValueDictionary.ChangeType(option, type) as Enum)?.GetDisplayName() : option)
+                                            </ValueTemplate>
+                                        </RadzenDropDown>
+                                    </ChildContent>
+                                    <Helper>
+                                        <RadzenText Text="@RuleFluentValidator.GetValidationMessage(r => r.Values)" class="@RuleFluentValidator.GetErrorCssClass()"/>
+                                    </Helper>
+                                </RadzenFormField>
+                                <RadzenButton Icon="add" ButtonStyle="ButtonStyle.Secondary" Click="@AddArrayValue" Size="ButtonSize.Small"/>
+                            </RadzenStack>
+                        }
+                    }
+                </RadzenColumn>
+            }
+        </RadzenRow>
+    </RadzenTemplateForm>
+
+    @if (OnDelete.HasDelegate)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" class="rz-mt-2">
+            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Click="@RemoveExpression" Size="ButtonSize.Small" Text="Sil"/>
+        </RadzenStack>
+    }
+</RadzenCard>

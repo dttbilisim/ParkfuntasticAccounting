@@ -1,0 +1,44 @@
+﻿@page "/membership-list"
+@layout MainLayout
+@inject IStringLocalizer<Culture_TR> Loc
+@using ecommerce.Admin.Domain.Dtos.MembershipDto
+
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Onay Bekleyen Kullanıcı Listesi</h1>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="radzenDataGrid" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.SimpleWithMenu" AllowPaging="true" AllowSorting="true" PagerAlwaysVisible=true PageSize=25 AllowFilterDateInput=true TItem="MembershipListDto" RowSelect="@EditRow" LoadData="@LoadData" Count="@count" Data="@memberships" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                <Columns>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="Id" Title="Id" Width="20px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="GlnNumber" Title="GLN Numarası" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="CompanyWorkingType" Title="Çalışma Tipi" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="UserType" Title="Kullanıcı Tipi" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="FirstName" Title="Adı" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="LastName" Title="Soyadı" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="AccountName" Title="Hesap Adı" Width="70px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="EmailAddress" Title="Email Adresi" Width="50px"></RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="MembershipListDto" Property="SendMailEnum" Title="Mail Gönderildimi" Width="50px"></RadzenDataGridColumn>
+
+
+
+                    <RadzenDataGridColumn TItem="MembershipListDto" Title="Aksiyon" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="membership">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                        Shade="Shade.Dark" Variant="Variant.Flat"
+                                        Click=@(args => GridDeleteButtonClick(args, membership)) @onclick:stopPropagation="true" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="done" Size="ButtonSize.ExtraSmall"
+                                        Shade="Shade.Dark" Variant="Variant.Flat"
+                                        Click=@(args => GridDoneButtonClick(args, membership)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

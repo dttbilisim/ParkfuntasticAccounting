@@ -1,0 +1,59 @@
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+@if (isLoading)
+{
+    <div class="central-loader-overlay @(isLoading ? "active" : "")" style="opacity: @(opacity)">
+        <div class="premium-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <div class="loader-text">İşlem devam ediyor...</div>
+    </div>
+}
+
+@code {
+    private bool isLoading;
+    private double opacity = 0;
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += HandleLocationChanged;
+    }
+
+    private async void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        await StartLoading();
+    }
+
+    private async Task StartLoading()
+    {
+        isLoading = true;
+        opacity = 0;
+        await InvokeAsync(StateHasChanged);
+        
+        // Smooth fade in
+        await Task.Delay(10);
+        opacity = 1;
+        await InvokeAsync(StateHasChanged);
+
+        // Artificial delay for "Premium" feel and to allow UI to settle
+        await Task.Delay(600);
+        
+        await CompleteLoading();
+    }
+
+    private async Task CompleteLoading()
+    {
+        opacity = 0;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(300); // Wait for fade out
+        isLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+    }
+}

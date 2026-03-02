@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Dtos\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="PuppeteerSharp" Version="20.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Common\ecommerce.Core\ecommerce.Core.csproj" />
+      <ProjectReference Include="..\Common\ecommerce.Domain.Shared\ecommerce.Domain.Shared.csproj" />
+      <ProjectReference Include="..\Common\ecommerce.EFCore\ecommerce.EFCore.csproj" />
+    </ItemGroup>
+
+</Project>

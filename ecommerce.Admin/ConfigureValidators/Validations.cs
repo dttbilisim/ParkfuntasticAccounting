@@ -32,7 +32,7 @@ namespace ecommerce.Admin.ConfigureValidators
             {
                 RuleFor(x => x.Name).NotNull().WithMessage("Ürün Adı-Boş Geçilemez.");
                 
-                // Ürün ekleme ekranını sadeleştirmek için ebat / ağırlık / kart limit alanlarını opsiyonel yaptık.
+                // Admin ürün tanımı sadeleştirme: Ebat/ağırlık/sunum alanları ürün eklemeden kaldırıldı. Validation yorum satırında. DB'den kaldırılmadı.
                 // RuleFor(x => x.CartMinValue).NotNull().WithMessage("Kart Min. Değer-Boş Geçilemez.");
                 // RuleFor(x => x.Weight).NotNull().WithMessage("Ağırlık-Boş Geçilemez.");
                 // RuleFor(x => x.Width).NotNull().WithMessage("Genişlik-Boş Geçilemez.");

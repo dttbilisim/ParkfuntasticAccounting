@@ -21,7 +21,9 @@ namespace ecommerce.Admin.Services.Concreate
             get
             {
                 var user = _currentUser.Principal ?? _httpContextAccessor.HttpContext?.User;
-                return user != null && (user.IsInRole("Admin"));
+                if (user == null) return false;
+                return user.IsInRole("Admin") || user.IsInRole("SuperAdmin") || 
+                       user.IsInRole("MainRoot") || user.IsInRole("Administrator");
             }
         }
 

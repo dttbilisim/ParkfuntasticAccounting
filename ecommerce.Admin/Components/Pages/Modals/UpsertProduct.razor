@@ -161,31 +161,7 @@
                 <span style="color: red;font-size: 10px;">Ürünün stok takibi yapılmasını istiyorsanız işaretleyiniz.</span>
             </div>
         </div>
-    </RadzenFieldset>
-</RadzenTabsItem>
-
-<RadzenTabsItem Text="Ebat / Ağırlık / Sunum">
-    <RadzenFieldset Text="Ebat / Ağırlık / Sunum">
-        @*                        <div style="margin-bottom: 1rem" class="row">
-                        <div class="col-md-3">
-                        <RadzenLabel Text="Min. Kart Değeri (*)" Component="CartMinValue" style="width: 100%" />
-                        </div>
-                        <div class="col-md-9">
-                        <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.CartMinValue" Name="CartMinValue" Min="0" ShowUpDown="false" />
-
-                        </div>
-                        </div>*@
-
-        @*                        <div style="margin-bottom: 1rem" class="row">
-                        <div class="col-md-3">
-                        <RadzenLabel Text="Max. Kart Değeri (*)" Component="CartMaxValue" style="width: 100%" />
-                        </div>
-                        <div class="col-md-9">
-                        <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.CartMaxValue" Name="CartMaxValue" Min="0" ShowUpDown="false" />
-
-                        </div>
-                        </div>*@
-
+        @* Admin ürün tanımı sadeleştirme: Ebat/Ağırlık/Sunum alanları ana sekmeye taşındı, sadece Ağırlık gösteriliyor. *@
         <div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
                 <RadzenLabel Text="Ağırlık (gr)" Component="Weight" style="width: 100%"/>
@@ -194,34 +170,20 @@
                 <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Weight" Name="Weight" Min="0" ShowUpDown="false"/>
             </div>
         </div>
+    </RadzenFieldset>
+</RadzenTabsItem>
 
-        @* Ebat bilgilerini (genişlik / uzunluk / yükseklik) ürün ekleme ekranından kaldırdık; ihtiyaç olursa kolayca geri açılabilir. *@
-        @*<div style="margin-bottom: 1rem" class="row">
-            <div class="col-md-3">
-                <RadzenLabel Text="Genişlik (cm)*" Component="Width" style="width: 100%"/>
-            </div>
-            <div class="col-md-9">
-                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Width" Name="Width" Min="0" ShowUpDown="false"/>
-            </div>
-        </div>
-
+@* Admin ürün tanımı sadeleştirme: Ebat/Ağırlık/Sunum sekmesi kaldırıldı; ebat, sunum pdf, tv reklamı alanları yorum satırında. DB'den kaldırılmadı. *@
+@*<RadzenTabsItem Text="Ebat / Ağırlık / Sunum">
+    <RadzenFieldset Text="Ebat / Ağırlık / Sunum">
         <div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
-                <RadzenLabel Text="Uzunluk (cm)*" Component="Length" style="width: 100%"/>
+                <RadzenLabel Text="Ağırlık (gr)" Component="Weight" style="width: 100%"/>
             </div>
             <div class="col-md-9">
-                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Length" Name="Length" Min="0" ShowUpDown="false"/>
+                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Weight" Name="Weight" Min="0" ShowUpDown="false"/>
             </div>
         </div>
-
-        <div style="margin-bottom: 1rem" class="row">
-            <div class="col-md-3">
-                <RadzenLabel Text="Yükseklik (cm)*" Component="Height" style="width: 100%"/>
-            </div>
-            <div class="col-md-9">
-                <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Height" Name="Height" Min="0" ShowUpDown="false"/>
-            </div>
-        </div>*@
         <div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
                 <RadzenLabel Text="Ürün Pdf" Component="productDocument1" style="width: 100%"/>
@@ -235,16 +197,10 @@
             <div class="col-md-3">
                 <RadzenLabel Text="Sunum (Pdf)" Component="productDocument2" style="width: 100%"/>
             </div>
-
             <div class="col-md-9">
-
-                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@product.DocumentUrl2" Name="productDocument2" >
-
-                </RadzenTextBox>
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@product.DocumentUrl2" Name="productDocument2" />
                 <InputFile OnChange="@(async (InputFileChangeEventArgs e) => await LoadFiles(e, "productDocument2"))" class="mb-2" accept="application/pdf" />
-
             </div>
-
         </div>
         <div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
@@ -254,10 +210,8 @@
                 <RadzenTextBox style="display: block; width: 100%" @bind-Value="@product.VideoUrl" Name="productVideo"/>
             </div>
         </div>
-
-
     </RadzenFieldset>
-</RadzenTabsItem>
+</RadzenTabsItem>*@
 
 <RadzenTabsItem Text="Fiyat/Maliyet">
     <RadzenFieldset Text="Ürün Vergi Bilgileri">

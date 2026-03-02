@@ -346,11 +346,11 @@ namespace ecommerce.Admin.Domain.Concreate{
                         .Include(p => p.ProductUnits)
                         .Where(s => s.Status != (int) EntityStatus.Deleted
                              && (
-                                 !isGlobalAdmin ? 
+                                 isGlobalAdmin ? true : // Global Admin sees all
                                  (
-                                     (!s.BranchId.HasValue || s.BranchId == 0) || // Global Items
-                                     allowedBranchIds.Contains(s.BranchId.Value) // User's Allowed Branches
-                                 ) : true // Global Admin sees all
+                                     (!s.BranchId.HasValue || s.BranchId == 0) || // Global Items (BranchId null/0)
+                                     (s.BranchId.HasValue && allowedBranchIds.Contains(s.BranchId.Value)) // User's Allowed Branches
+                                 )
                             )
                              && (
                                  currentBranchId > 0 ? 

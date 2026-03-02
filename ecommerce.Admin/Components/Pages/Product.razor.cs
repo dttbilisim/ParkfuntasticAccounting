@@ -29,6 +29,7 @@ namespace ecommerce.Admin.Components.Pages{
         [Inject] public IJSRuntime _JsRuntime{get;set;}
 
         int count;
+        protected bool isLoading;
         protected List<ProductListDto> products = new();
         protected List<BrandListDto> brands = new();
         protected List<ProductTypeListDto> productTypes = new();
@@ -38,6 +39,13 @@ namespace ecommerce.Admin.Components.Pages{
         public string GeneratedFilter{get;set;}
         public string SearchText { get; set; }
         [Inject] protected AuthenticationService Security{get;set;}
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await radzenDataGrid.Reload();
+            }
+        }
         protected async Task AddButtonClick(MouseEventArgs args){
             await DialogService.OpenAsync<UpsertProduct>("Ürün Ekle/Düzenle", null, new DialogOptions(){Width = "1200px"});
             await radzenDataGrid.Reload();
@@ -157,22 +165,46 @@ namespace ecommerce.Admin.Components.Pages{
             }
         }
         public async Task LoadData(LoadDataArgs args){
-            if(!string.IsNullOrEmpty(GeneratedFilter)){
-                args.Filter = string.IsNullOrEmpty(args.Filter) ? GeneratedFilter : args.Filter + " and " + GeneratedFilter;
-            }
-            var orderfilter = args.OrderBy.Replace("np", "") == "" ? "Id desc" : args.OrderBy.Replace("np", "");
-            args.Filter = args.Filter.Replace("np", "");
-            pager = new PageSetting(args.Filter, orderfilter, args.Skip, args.Top);
-            pager.Search = SearchText; // Apply smart search
-            var productResponse = await Service.GetProducts(pager);
-            if(productResponse.Ok && productResponse.Result != null && productResponse.Result.Data != null){
-                products = productResponse.Result.Data;
-                count = productResponse.Result.DataCount;
-            } else
-                if(productResponse.Exception != null){
-                    NotificationService.Notify(NotificationSeverity.Error, productResponse.GetMetadataMessages());
+            isLoading = true;
+            try
+            {
+                var filter = args.Filter ?? "";
+                var orderBy = args.OrderBy ?? "";
+                if(!string.IsNullOrEmpty(GeneratedFilter)){
+                    filter = string.IsNullOrEmpty(filter) ? GeneratedFilter : filter + " and " + GeneratedFilter;
                 }
-            StateHasChanged();
+                var orderfilter = orderBy.Replace("np", "").Trim() == "" ? "Id desc" : orderBy.Replace("np", "");
+                filter = filter.Replace("np", "");
+                pager = new PageSetting(filter, orderfilter, args.Skip ?? 0, args.Top ?? 25);
+                pager.Search = SearchText;
+                var productResponse = await Service.GetProducts(pager);
+                if(productResponse.Ok && productResponse.Result != null && productResponse.Result.Data != null){
+                    products = productResponse.Result.Data;
+                    count = productResponse.Result.DataCount;
+                } else {
+                    products = new List<ProductListDto>();
+                    count = 0;
+                    if(productResponse.Exception != null || !productResponse.Ok){
+                        var msg = productResponse.GetMetadataMessages();
+                        if(!string.IsNullOrEmpty(msg))
+                            NotificationService.Notify(NotificationSeverity.Error, "Ürünler yüklenemedi", msg);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                products = new List<ProductListDto>();
+                count = 0;
+                NotificationService.Notify(NotificationSeverity.Error, "Ürünler yüklenemedi", 
+                    ex.Message.Contains("tax") || ex.Message.Contains("Tax") 
+                        ? "Vergi (Tax) tablosu bulunamadı. Lütfen scripts/create_tax_table.sql dosyasını çalıştırın." 
+                        : ex.Message);
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
         }
         void RowRender(RowRenderEventArgs<ProductListDto> args){
             if(args.Data.IsCustomerCreated == true){

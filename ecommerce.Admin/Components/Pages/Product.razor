@@ -1,4 +1,4 @@
-﻿@page "/products"
+@page "/products"
 @using ecommerce.Admin.Domain.Dtos.ProductDto;
 @using ecommerce.Core.Utils;
 @layout MainLayout
@@ -55,9 +55,9 @@
                             PagerHorizontalAlign="HorizontalAlign.Left"
                             ShowPagingSummary="true"
                             LogicalFilterOperator="LogicalFilterOperator.Or"
-                            SelectionMode="DataGridSelectionMode.Single">
+                            SelectionMode="DataGridSelectionMode.Single"
+                            IsLoading="@isLoading">
                 <Columns>
-                    <RadzenProgressBar ProgressBarStyle="ProgressBarStyle.Success" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="height:5px;" />
                     <RadzenDataGridColumn TItem="ProductListDto" Property="Id" Title="Id" Width="70px" TextAlign="TextAlign.Center"></RadzenDataGridColumn>                 
                     <RadzenDataGridColumn TItem="ProductListDto" Property="Name" Title="Ürün Adı">
                         <Template Context="product">

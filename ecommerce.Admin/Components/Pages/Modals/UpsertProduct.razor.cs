@@ -89,7 +89,8 @@ namespace ecommerce.Admin.Components.Pages.Modals
         protected List<ProductSellerItemListDto> productSellerItems = new();
         protected List<ProductStockListDto> productStocks = new();
         protected List<ProductUnitListDto> productUnits = new();
-        protected List<ProductCompatibleVehicleDto> compatibleVehicles = new();
+        // Admin ürün tanımı sadeleştirme: Araç uyumlulukları ürün eklemeden kaldırıldı (yorum satırı). DB'den kaldırılmadı.
+        // protected List<ProductCompatibleVehicleDto> compatibleVehicles = new();
         protected List<TierListDto> tiers = new();
         protected List<UnitListDto> units = new();
         protected RadzenDataGrid<ProductActiveArticleListDto>? radzenDataGridActiveArticle;
@@ -98,7 +99,8 @@ namespace ecommerce.Admin.Components.Pages.Modals
         protected RadzenDataGrid<ProductSellerItemListDto>? radzenDataGridProductSellerItems;
         protected RadzenDataGrid<ProductStockListDto>? radzenDataGridProductStock;
         protected RadzenDataGrid<ProductUnitListDto>? radzenDataGridProductUnit;
-        protected RadzenDataGrid<ProductCompatibleVehicleDto>? radzenDataGridCompatibleVehicles;
+        // Admin ürün tanımı sadeleştirme: Araç uyumlulukları ürün eklemeden kaldırıldı (yorum satırı).
+        // protected RadzenDataGrid<ProductCompatibleVehicleDto>? radzenDataGridCompatibleVehicles;
         private FluentValidationValidator? _fluentValidationValidator;
         public bool Status { get; set; } = true;
         public string BaseUrl { get; set; } = "";
@@ -198,12 +200,14 @@ namespace ecommerce.Admin.Components.Pages.Modals
                 if (submitRs.Ok)
                 {
                     if (Id.HasValue)
+                    {
+                        NotificationService.Notify(NotificationSeverity.Success, "Başarılı", "Ürün güncellendi.");
                         DialogService.Close(product);
+                    }
                     else
                     {
-                        isShowSaveThenProductPanels = true;
-                        Id = submitRs.Result;
-                        IsProductSaved = false;
+                        NotificationService.Notify(NotificationSeverity.Success, "Başarılı", "Ürün başarıyla eklendi.");
+                        DialogService.Close(submitRs.Result);
                     }
                 }
                 else
@@ -457,19 +461,20 @@ namespace ecommerce.Admin.Components.Pages.Modals
             StateHasChanged();
         }
 
-        private async Task LoadCompatibleVehicles(int productId)
-        {
-            var response = await Service.GetCompatibleVehicles(productId);
-            if (response.Ok && response.Result != null)
-            {
-                compatibleVehicles = response.Result;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, response.GetMetadataMessages());
-            }
-            StateHasChanged();
-        }
+        // Admin ürün tanımı sadeleştirme: Araç uyumlulukları ürün eklemeden kaldırıldı (yorum satırı). DB'den kaldırılmadı.
+        // private async Task LoadCompatibleVehicles(int productId)
+        // {
+        //     var response = await Service.GetCompatibleVehicles(productId);
+        //     if (response.Ok && response.Result != null)
+        //     {
+        //         compatibleVehicles = response.Result;
+        //     }
+        //     else
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Error, response.GetMetadataMessages());
+        //     }
+        //     StateHasChanged();
+        // }
 
         #endregion
 

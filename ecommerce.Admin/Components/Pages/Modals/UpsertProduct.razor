@@ -164,8 +164,8 @@
     </RadzenFieldset>
 </RadzenTabsItem>
 
-<RadzenTabsItem Text="Ebat/Ağırlık / Sunum">
-    <RadzenFieldset Text="Ebat/Ağırlık / Sunum">
+<RadzenTabsItem Text="Ebat / Ağırlık / Sunum">
+    <RadzenFieldset Text="Ebat / Ağırlık / Sunum">
         @*                        <div style="margin-bottom: 1rem" class="row">
                         <div class="col-md-3">
                         <RadzenLabel Text="Min. Kart Değeri (*)" Component="CartMinValue" style="width: 100%" />
@@ -188,20 +188,20 @@
 
         <div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
-                <RadzenLabel Text="Ağırlık (gr)*" Component="Weight" style="width: 100%"/>
+                <RadzenLabel Text="Ağırlık (gr)" Component="Weight" style="width: 100%"/>
             </div>
             <div class="col-md-9">
                 <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Weight" Name="Weight" Min="0" ShowUpDown="false"/>
             </div>
         </div>
 
-        <div style="margin-bottom: 1rem" class="row">
+        @* Ebat bilgilerini (genişlik / uzunluk / yükseklik) ürün ekleme ekranından kaldırdık; ihtiyaç olursa kolayca geri açılabilir. *@
+        @*<div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
                 <RadzenLabel Text="Genişlik (cm)*" Component="Width" style="width: 100%"/>
             </div>
             <div class="col-md-9">
                 <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Width" Name="Width" Min="0" ShowUpDown="false"/>
-
             </div>
         </div>
 
@@ -211,7 +211,6 @@
             </div>
             <div class="col-md-9">
                 <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Length" Name="Length" Min="0" ShowUpDown="false"/>
-
             </div>
         </div>
 
@@ -221,9 +220,8 @@
             </div>
             <div class="col-md-9">
                 <RadzenNumeric style="display: block; width: 100%" @bind-Value="@product.Height" Name="Height" Min="0" ShowUpDown="false"/>
-
             </div>
-        </div>
+        </div>*@
         <div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
                 <RadzenLabel Text="Ürün Pdf" Component="productDocument1" style="width: 100%"/>
@@ -433,7 +431,8 @@
 </RadzenTabsItem>
 
 
-<RadzenTabsItem Text="Grup & Oem Bilgileri">
+@* Admin ürün tanımı sadeleştirme: Grup & OEM bilgileri sekmesini geçici olarak kaldırdık. *@
+@*<RadzenTabsItem Text="Grup & Oem Bilgileri">
 
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Medium" AlertStyle="AlertStyle.Warning" Visible="@IsProductSaved">Önce ürün kaydetmelisiniz!</RadzenAlert>
 
@@ -471,7 +470,7 @@
         </Columns>
     </RadzenDataGrid>
 
-</RadzenTabsItem>
+</RadzenTabsItem>*@
 
 <RadzenTabsItem Text="Görsel Bilgileri">
 
@@ -629,7 +628,8 @@
     </RadzenDataGrid>
 </RadzenTabsItem>
 
-<RadzenTabsItem Text="Uyumlu Araçlar">
+@* Admin ürün tanımı sadeleştirme: Uyumlu araçlar sekmesi geçici olarak kaldırıldı. *@
+@*<RadzenTabsItem Text="Uyumlu Araçlar">
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Medium" AlertStyle="AlertStyle.Warning" Visible="@IsProductSaved">Önce ürün kaydetmelisiniz!</RadzenAlert>
 
     <RadzenDataGrid @ref="radzenDataGridCompatibleVehicles"
@@ -655,7 +655,7 @@
             <RadzenDataGridColumn TItem="ProductCompatibleVehicleDto" Title="Parça No" Property="PartNumber" Width="150px" />
         </Columns>
     </RadzenDataGrid>
-</RadzenTabsItem>
+</RadzenTabsItem>*@
 @if(productAdvertList != null){
     <RadzenTabsItem Text="İlan Bilgileri">
 

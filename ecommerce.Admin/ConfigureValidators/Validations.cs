@@ -31,12 +31,13 @@ namespace ecommerce.Admin.ConfigureValidators
             public ProductUpsertDtoDtoValidator()
             {
                 RuleFor(x => x.Name).NotNull().WithMessage("Ürün Adı-Boş Geçilemez.");
-
-                RuleFor(x => x.CartMinValue).NotNull().WithMessage("Kart Min. Değer-Boş Geçilemez.");
-                RuleFor(x => x.Weight).NotNull().WithMessage("Ağırlık-Boş Geçilemez.");
-                RuleFor(x => x.Width).NotNull().WithMessage("Genişlik-Boş Geçilemez.");
-                RuleFor(x => x.Length).NotNull().WithMessage("Uzunluk-Boş Geçilemez.");
-                RuleFor(x => x.Height).NotNull().WithMessage("Yükseklik-Boş Geçilemez.");
+                
+                // Ürün ekleme ekranını sadeleştirmek için ebat / ağırlık / kart limit alanlarını opsiyonel yaptık.
+                // RuleFor(x => x.CartMinValue).NotNull().WithMessage("Kart Min. Değer-Boş Geçilemez.");
+                // RuleFor(x => x.Weight).NotNull().WithMessage("Ağırlık-Boş Geçilemez.");
+                // RuleFor(x => x.Width).NotNull().WithMessage("Genişlik-Boş Geçilemez.");
+                // RuleFor(x => x.Length).NotNull().WithMessage("Uzunluk-Boş Geçilemez.");
+                // RuleFor(x => x.Height).NotNull().WithMessage("Yükseklik-Boş Geçilemez.");
                 RuleFor(x => x.BrandId).NotNull().WithMessage("Marka-Boş Geçilemez.");
                 RuleFor(x => x.TaxId).NotNull().WithMessage("Vergi-Boş Geçilemez.");
 

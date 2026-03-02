@@ -158,9 +158,10 @@ namespace ecommerce.Admin.Components.Pages.Modals
                 var sellerItemsTask = LoadProductSellerItems(Id.Value);
                 var stockTask = LoadProductStocks(Id.Value);
                 var productUnitsTask = LoadProductUnits(Id.Value);
-                var compatibleVehiclesTask = LoadCompatibleVehicles(Id.Value);
+                // Admin ürün tanımı sadeleştirme kapsamında araç uyumlulukları yüklenmiyor.
+                // var compatibleVehiclesTask = LoadCompatibleVehicles(Id.Value);
                 
-                await Task.WhenAll(productTask, activeArticleTask, imagesTask, categoriesTask2, tiersTask2, groupCodeTask, advertTask, stockTask, sellerItemsTask, productUnitsTask, compatibleVehiclesTask);
+                await Task.WhenAll(productTask, activeArticleTask, imagesTask, categoriesTask2, tiersTask2, groupCodeTask, advertTask, stockTask, sellerItemsTask, productUnitsTask);
                 
                 var productSingleRs = await productTask;
                 if (productSingleRs.Ok && productSingleRs.Result != null)

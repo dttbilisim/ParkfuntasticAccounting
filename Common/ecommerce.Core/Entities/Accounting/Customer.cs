@@ -77,7 +77,7 @@ namespace ecommerce.Core.Entities.Accounting
         public CustomerWorkingTypeEnum CustomerWorkingType { get; set; } = CustomerWorkingTypeEnum.Pesin;
 
         public bool TransferNewYear { get; set; } = true;
-        
+
         public virtual ICollection<CustomerBranch> CustomerBranches { get; set; } = new List<CustomerBranch>();
     }
 

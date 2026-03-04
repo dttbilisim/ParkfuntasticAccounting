@@ -12,7 +12,9 @@ namespace ecommerce.Admin.Services.Interfaces
             PageSetting pager,
             int? cashRegisterId = null,
             CashRegisterMovementType? movementType = null,
+            CashRegisterMovementProcessType? processType = null,
             int? customerId = null,
+            EntityStatusForFilter? status = null,
             DateTime? startDate = null,
             DateTime? endDate = null);
 

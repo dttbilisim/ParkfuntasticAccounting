@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ecommerce.Core.Entities.Authentication;
 
 namespace ecommerce.Admin.Domain.Dtos.Identity;

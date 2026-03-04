@@ -16,6 +16,9 @@ namespace ecommerce.Admin.Components.Pages
 {
     public partial class CashRegisterMovements
     {
+        [Parameter, SupplyParameterFromQuery(Name = "processType")]
+        public string? ProcessTypeQuery { get; set; }
+
         [Inject] protected ICashRegisterMovementService MovementService { get; set; } = null!;
         [Inject] protected ICashRegisterService CashRegisterService { get; set; } = null!;
         [Inject] protected ICustomerService CustomerService { get; set; } = null!;
@@ -29,6 +32,8 @@ namespace ecommerce.Admin.Components.Pages
         protected RadzenDataGrid<CashRegisterMovementListDto>? Grid;
         protected int? FilterCashRegisterId { get; set; }
         protected CashRegisterMovementType? FilterMovementType { get; set; }
+        protected CashRegisterMovementProcessType? FilterProcessType { get; set; }
+        protected EntityStatusForFilter? FilterStatus { get; set; }
         protected int? FilterCustomerId { get; set; }
         protected DateTime? FilterStartDate { get; set; }
         protected DateTime? FilterEndDate { get; set; }
@@ -42,6 +47,20 @@ namespace ecommerce.Admin.Components.Pages
         {
             new SelectItemDto<CashRegisterMovementType?> { Text = "Kasa Girişi", Value = CashRegisterMovementType.In },
             new SelectItemDto<CashRegisterMovementType?> { Text = "Kasa Çıkışı", Value = CashRegisterMovementType.Out }
+        };
+
+        protected List<SelectItemDto<CashRegisterMovementProcessType?>> ProcessTypeOptions { get; set; } = new()
+        {
+            new SelectItemDto<CashRegisterMovementProcessType?> { Text = "Kasa İşlemi", Value = CashRegisterMovementProcessType.KS },
+            new SelectItemDto<CashRegisterMovementProcessType?> { Text = "Virman", Value = CashRegisterMovementProcessType.VR },
+            new SelectItemDto<CashRegisterMovementProcessType?> { Text = "Tahsilat", Value = CashRegisterMovementProcessType.TH },
+            new SelectItemDto<CashRegisterMovementProcessType?> { Text = "Perakende Satış", Value = CashRegisterMovementProcessType.PS }
+        };
+
+        protected List<SelectItemDto<EntityStatusForFilter?>> StatusOptions { get; set; } = new()
+        {
+            new SelectItemDto<EntityStatusForFilter?> { Text = "Aktif", Value = EntityStatusForFilter.Active },
+            new SelectItemDto<EntityStatusForFilter?> { Text = "Pasif", Value = EntityStatusForFilter.Passive }
         };
 
         /// <summary>Kasaya göre grupla (varsayılan açık).</summary>
@@ -91,18 +110,19 @@ namespace ecommerce.Admin.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            // Sıralı yükleme: Aynı DbContext üzerinde eşzamanlı komut (NpgsqlOperationInProgressException) önlenir
             await LoadCashRegistersAsync();
             await LoadCustomersAsync();
+
+            if (!string.IsNullOrEmpty(ProcessTypeQuery) && Enum.TryParse<CashRegisterMovementProcessType>(ProcessTypeQuery, true, out var pt))
+                FilterProcessType = pt;
+
+            // Grid verisini de burada başlat; OnAfterRenderAsync'te overlap riski vardır
+            _initialLoadDone = true;
+            await LoadData(new LoadDataArgs { Skip = 0, Top = 25 });
         }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (!_initialLoadDone)
-            {
-                _initialLoadDone = true;
-                await LoadData(new LoadDataArgs { Skip = 0, Top = 25 });
-            }
-        }
+        protected override Task OnAfterRenderAsync(bool firstRender) => Task.CompletedTask;
 
         private async Task LoadCashRegistersAsync()
         {
@@ -149,7 +169,9 @@ namespace ecommerce.Admin.Components.Pages
                     _pager,
                     cashRegisterId: FilterCashRegisterId,
                     movementType: FilterMovementType,
+                    processType: FilterProcessType,
                     customerId: FilterCustomerId,
+                    status: FilterStatus,
                     startDate: FilterStartDate,
                     endDate: FilterEndDate);
 
@@ -200,6 +222,8 @@ namespace ecommerce.Admin.Components.Pages
         {
             FilterCashRegisterId = null;
             FilterMovementType = null;
+            FilterProcessType = null;
+            FilterStatus = null;
             FilterCustomerId = null;
             FilterStartDate = null;
             FilterEndDate = null;
@@ -244,6 +268,22 @@ namespace ecommerce.Admin.Components.Pages
 
         protected async Task EditRow(CashRegisterMovementListDto item)
         {
+            if (item.ProcessType == CashRegisterMovementProcessType.TH)
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Bilgi", "Tahsilat işlemleri Tahsilat Makbuzu ekranından düzenlenir.");
+                return;
+            }
+            if (item.ProcessType == CashRegisterMovementProcessType.PS)
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Bilgi", "Perakende satış hareketleri düzenlenemez.");
+                return;
+            }
+            if (item.ProcessType == CashRegisterMovementProcessType.VR)
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Bilgi", "Virman işlemleri düzenlenemez.");
+                return;
+            }
+
             var result = await DialogService.OpenAsync<Modals.UpsertCashRegisterMovement>("Kasa Hareketi Düzenle",
                 new Dictionary<string, object> { { "Id", item.Id } },
                 new DialogOptions { Width = "520px", Resizable = true, Draggable = true });
@@ -253,6 +293,12 @@ namespace ecommerce.Admin.Components.Pages
 
         protected async Task DeleteRow(CashRegisterMovementListDto item)
         {
+            if (item.ProcessType == CashRegisterMovementProcessType.TH || item.ProcessType == CashRegisterMovementProcessType.PS)
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Bilgi", "Tahsilat ve perakende satış hareketleri silinemez.");
+                return;
+            }
+
             var confirm = await DialogService.Confirm(
                 $"#{item.Id} numaralı kasa hareketini silmek istediğinize emin misiniz?",
                 "Silme Onayı",

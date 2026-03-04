@@ -4,12 +4,12 @@
 @using ecommerce.Core.Utils
 @attribute [Authorize]
 
-<PageTitle>Kasa Hareketlerim</PageTitle>
+<PageTitle>@(FilterProcessType == CashRegisterMovementProcessType.TH ? "Tahsilat Listesi" : "Kasa Hareketlerim")</PageTitle>
 
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
-            <h1 class="h3 mb-0 text-gray-800">Kasa Hareketlerim</h1>
+            <h1 class="h3 mb-0 text-gray-800">@(FilterProcessType == CashRegisterMovementProcessType.TH ? "Tahsilat Listesi" : "Kasa Hareketlerim")</h1>
         </div>
         <div class="col text-end">
             <RadzenButton Icon="account_balance_wallet" Text="Kasa Bakiyeleri" Click="@OpenBalanceModal" ButtonStyle="ButtonStyle.Secondary" class="me-2" />
@@ -39,6 +39,22 @@
                             AllowClear="true"
                             Style="min-width: 160px;"
                             Change="@(async _ => await ApplyFilter())" />
+            <RadzenDropDown @bind-Value="FilterProcessType"
+                            Data="ProcessTypeOptions"
+                            TextProperty="Text"
+                            ValueProperty="Value"
+                            Placeholder="İşlem Türü"
+                            AllowClear="true"
+                            Style="min-width: 150px;"
+                            Change="@(async _ => await ApplyFilter())" />
+            <RadzenDropDown @bind-Value="FilterStatus"
+                            Data="StatusOptions"
+                            TextProperty="Text"
+                            ValueProperty="Value"
+                            Placeholder="Durum"
+                            AllowClear="true"
+                            Style="min-width: 120px;"
+                            Change="@(async _ => await ApplyFilter())" />
             <RadzenDropDown @bind-Value="FilterCustomerId"
                             Data="CustomerList"
                             TextProperty="DisplayName"
@@ -63,7 +79,7 @@
                 <RadzenCheckBox @bind-Value="GroupByKasa" Change="@(async (bool _) => await ApplyFilter())" />
                 <span class="small">Kasaya göre grupla</span>
             </label>
-            @if (FilterCashRegisterId.HasValue || FilterMovementType.HasValue || FilterCustomerId.HasValue || FilterStartDate.HasValue || FilterEndDate.HasValue)
+            @if (FilterCashRegisterId.HasValue || FilterMovementType.HasValue || FilterProcessType.HasValue || FilterStatus.HasValue || FilterCustomerId.HasValue || FilterStartDate.HasValue || FilterEndDate.HasValue)
             {
                 <RadzenButton Text="Temizle" ButtonStyle="ButtonStyle.Light" Icon="close" Click="ClearFilter" />
             }
@@ -103,8 +119,20 @@
                 </GroupHeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="Id" Title="Id" Width="70px" />
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="TransCode" Title="Evrak No" Width="110px">
+                        <Template Context="ctx">
+                            @(ctx.TransCode ?? "-")
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="TransactionDate" Title="Tarih" Width="120px" FormatString="{0:dd.MM.yyyy HH:mm}" />
                     <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="CashRegisterName" Title="Kasa" Width="140px" />
+                    <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Property="ProcessTypeName" Title="İşlem Türü" Width="120px">
+                        <Template Context="ctx">
+                            <span class="badge @(ctx.ProcessType == CashRegisterMovementProcessType.KS ? "bg-primary" : ctx.ProcessType == CashRegisterMovementProcessType.VR ? "bg-info" : ctx.ProcessType == CashRegisterMovementProcessType.TH ? "bg-success" : "bg-secondary")">
+                                @ctx.ProcessTypeName
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="CashRegisterMovementListDto" Title="Tip" Width="110px">
                         <Template Context="ctx">
                             <span class="badge @(ctx.MovementType == CashRegisterMovementType.In ? "bg-success" : "bg-danger")">

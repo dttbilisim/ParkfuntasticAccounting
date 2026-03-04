@@ -15,6 +15,8 @@ namespace ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
 
         public int? CustomerId { get; set; }
 
+        public int? SalesPersonId { get; set; }
+
         public int? PaymentTypeId { get; set; }
 
         [Required(ErrorMessage = "Döviz seçimi zorunludur")]

@@ -117,10 +117,10 @@ namespace ecommerce.Admin.Domain.Concreate{
                     var isGlobalAdmin = _tenantProvider.IsGlobalAdmin;
                     var currentBranchId = _tenantProvider.GetCurrentBranchId();
 
-                    var product = await repository.GetFirstOrDefaultAsync(
-                        predicate: f => f.Id == productId 
-                            && (isGlobalAdmin ? (currentBranchId == 0 || f.BranchId == currentBranchId) : true), 
-                        ignoreQueryFilters: true);
+                    var product = await context.DbContext.Product
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(f => f.Id == productId 
+                            && (isGlobalAdmin ? (currentBranchId == 0 || f.BranchId == currentBranchId) : true));
                     
                     if (product != null && !isGlobalAdmin)
                     {

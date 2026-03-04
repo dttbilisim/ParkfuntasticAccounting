@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using ecommerce.Core.Entities;
 using ecommerce.Core.Entities.Accounting;

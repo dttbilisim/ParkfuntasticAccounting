@@ -35,6 +35,11 @@ namespace ecommerce.Core.Entities{
         /// </summary>
         public int? BranchId { get; set; }
 
+        /// <summary>
+        /// PcPos transfer batch ID - Bu siparişin hangi transfer batch'inden geldiğini tutar.
+        /// </summary>
+        public int? OrderTransferId { get; set; }
+
         
         [Obsolete("Use OrderItems.CargoTrackNumber instead - cargo is now tracked per item")]
         public string ? CargoTrackNumber{get;set;}

@@ -224,7 +224,10 @@ public class PaymentCollectionService : IPaymentCollectionService
                         var branchId = _tenantProvider.IsMultiTenantEnabled ? _tenantProvider.GetCurrentBranchId() : (int?)null;
                         var receiptResult = await _collectionReceiptService.CreateReceiptAsync(createdTxId, request.CustomerId, salesPersonId, branchId, userId);
                         if (receiptResult.Ok && !string.IsNullOrEmpty(receiptResult.Result))
+                        {
                             _logger.LogInformation("Tahsilat makbuzu oluşturuldu. MakbuzNo: {MakbuzNo}, TransactionId: {TransactionId}", receiptResult.Result, createdTxId);
+                            await CreateTahsilatCashRegisterMovementAsync(request.CashRegisterId!.Value, request.CustomerId, salesPersonId, orderAmount > 0 ? orderAmount : request.Amount / request.OrderIds!.Count, receiptResult.Result, createdTxId, branchId ?? 0, userId);
+                        }
                     }
                 }
             }
@@ -265,7 +268,10 @@ public class PaymentCollectionService : IPaymentCollectionService
                     var branchId = _tenantProvider.IsMultiTenantEnabled ? _tenantProvider.GetCurrentBranchId() : (int?)null;
                     var receiptResult = await _collectionReceiptService.CreateReceiptAsync(createdTxId, request.CustomerId, salesPersonId, branchId, userId);
                     if (receiptResult.Ok && !string.IsNullOrEmpty(receiptResult.Result))
+                    {
                         _logger.LogInformation("Tahsilat makbuzu oluşturuldu. MakbuzNo: {MakbuzNo}, TransactionId: {TransactionId}", receiptResult.Result, createdTxId);
+                        await CreateTahsilatCashRegisterMovementAsync(request.CashRegisterId!.Value, request.CustomerId, salesPersonId, request.Amount, receiptResult.Result, createdTxId, branchId ?? 0, userId);
+                    }
                 }
             }
 
@@ -517,6 +523,55 @@ public class PaymentCollectionService : IPaymentCollectionService
     }
 
     #region Private Yardımcı Metodlar
+
+    /// <summary>
+    /// Tahsilat (TH) işlemi için CashRegisterMovement kaydı oluşturur.
+    /// Dokümana göre: tCashTransaction tablosuna "TH" satırı atılmalı.
+    /// </summary>
+    private async Task CreateTahsilatCashRegisterMovementAsync(int cashRegisterId, int customerId, int salesPersonId, decimal amount, string transCode, int customerAccountTransactionId, int branchId, int userId)
+    {
+        try
+        {
+            var cashRegister = await _context.GetRepository<CashRegister>()
+                .GetAll(predicate: x => x.Id == cashRegisterId, include: q => q.Include(x => x.Currency))
+                .FirstOrDefaultAsync();
+
+            if (cashRegister == null)
+            {
+                _logger.LogWarning("Tahsilat için kasa bulunamadı. CashRegisterId: {CashRegisterId}", cashRegisterId);
+                return;
+            }
+
+            var movement = new CashRegisterMovement
+            {
+                CashRegisterId = cashRegisterId,
+                MovementType = CashRegisterMovementType.In,
+                ProcessType = CashRegisterMovementProcessType.TH,
+                TransCode = transCode,
+                CustomerId = customerId,
+                SalesPersonId = salesPersonId,
+                CustomerAccountTransactionId = customerAccountTransactionId,
+                PaymentTypeId = null,
+                CurrencyId = cashRegister.CurrencyId,
+                Amount = amount,
+                TransactionDate = DateTime.Now,
+                Description = $"Tahsilat makbuzu — {transCode}",
+                BranchId = branchId,
+                Status = (int)EntityStatus.Active,
+                CreatedDate = DateTime.Now,
+                CreatedId = userId
+            };
+
+            _context.GetRepository<CashRegisterMovement>().Insert(movement);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Tahsilat kasa hareketi oluşturuldu. ProcessType=TH, TransCode={TransCode}, Amount={Amount}", transCode, amount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Tahsilat kasa hareketi oluşturulurken hata. CustomerId: {CustomerId}, Amount: {Amount}", customerId, amount);
+        }
+    }
 
     /// <summary>
     /// Ödeme isteğinin temel validasyonunu yapar

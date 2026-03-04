@@ -123,6 +123,11 @@ namespace ecommerce.Core.Entities.Accounting
         [ForeignKey(nameof(OrderId))]
         public virtual Orders? Order { get; set; }
 
+        /// <summary>
+        /// PcPos transfer durumu - Bu ödemenin transfer edilip edilmediğini işaretler.
+        /// </summary>
+        public bool IsTrans { get; set; } = false;
+
         // Navigation property for invoice items
         public ICollection<InvoiceItem> Items { get; set; } = new List<InvoiceItem>();
     }

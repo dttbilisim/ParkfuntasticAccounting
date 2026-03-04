@@ -22,6 +22,7 @@ namespace ecommerce.Admin.Services.Concreate
         private readonly ecommerce.Admin.Domain.Services.IPermissionService _permissionService;
         private readonly ILogger<CashRegisterMovementService> _logger;
         private const string MENU_NAME = "cash-register-movements";
+        private const string MENU_REPORT = "cash-register-report";
 
         public CashRegisterMovementService(
             IUnitOfWork<ApplicationDbContext> context,
@@ -41,7 +42,9 @@ namespace ecommerce.Admin.Services.Concreate
             PageSetting pager,
             int? cashRegisterId = null,
             CashRegisterMovementType? movementType = null,
+            CashRegisterMovementProcessType? processType = null,
             int? customerId = null,
+            EntityStatusForFilter? status = null,
             DateTime? startDate = null,
             DateTime? endDate = null)
         {
@@ -61,7 +64,12 @@ namespace ecommerce.Admin.Services.Concreate
                 var query = _context.DbContext.CashRegisterMovements
                     .AsNoTracking()
                     .IgnoreQueryFilters()
-                    .Where(x => x.Status == (int)EntityStatus.Active);
+                    .Where(x => x.Status != (int)EntityStatus.Deleted);
+
+                if (status.HasValue)
+                    query = query.Where(x => x.Status == (int)status.Value);
+                else
+                    query = query.Where(x => x.Status == (int)EntityStatus.Active); // Varsayılan: sadece aktif
 
                 query = _roleFilter.ApplyFilter(query, _context.DbContext);
 
@@ -69,6 +77,8 @@ namespace ecommerce.Admin.Services.Concreate
                     query = query.Where(x => x.CashRegisterId == cashRegisterId.Value);
                 if (movementType.HasValue)
                     query = query.Where(x => x.MovementType == movementType.Value);
+                if (processType.HasValue)
+                    query = query.Where(x => x.ProcessType == processType.Value);
                 if (customerId.HasValue && customerId.Value > 0)
                     query = query.Where(x => x.CustomerId == customerId.Value);
                 if (startDate.HasValue)
@@ -79,6 +89,7 @@ namespace ecommerce.Admin.Services.Concreate
                 query = query
                     .Include(x => x.CashRegister)
                     .Include(x => x.Customer)
+                    .Include(x => x.SalesPerson)
                     .Include(x => x.PaymentType)
                     .Include(x => x.Currency);
 
@@ -100,15 +111,21 @@ namespace ecommerce.Admin.Services.Concreate
                     CashRegisterName = x.CashRegister?.Name ?? "",
                     MovementType = x.MovementType,
                     MovementTypeName = x.MovementType.GetDisplayName(),
+                    ProcessType = x.ProcessType,
+                    ProcessTypeName = x.ProcessType.GetDisplayName(),
+                    TransCode = x.TransCode,
                     CustomerId = x.CustomerId,
                     CustomerName = x.Customer?.Name,
+                    SalesPersonId = x.SalesPersonId,
+                    SalesPersonName = x.SalesPerson != null ? $"{x.SalesPerson.FirstName} {x.SalesPerson.LastName}".Trim() : null,
                     PaymentTypeId = x.PaymentTypeId,
                     PaymentTypeName = x.PaymentType?.Name,
                     CurrencyId = x.CurrencyId,
                     CurrencyCode = x.Currency?.CurrencyCode ?? "",
                     Amount = x.Amount,
                     TransactionDate = x.TransactionDate,
-                    Description = x.Description
+                    Description = x.Description,
+                    Status = x.Status
                 }).ToList();
 
                 result.Result = new Paging<List<CashRegisterMovementListDto>>
@@ -165,6 +182,7 @@ namespace ecommerce.Admin.Services.Concreate
                     CashRegisterId = entity.CashRegisterId,
                     MovementType = entity.MovementType,
                     CustomerId = entity.CustomerId,
+                    SalesPersonId = entity.SalesPersonId,
                     PaymentTypeId = entity.PaymentTypeId,
                     CurrencyId = entity.CurrencyId,
                     Amount = entity.Amount,
@@ -193,10 +211,15 @@ namespace ecommerce.Admin.Services.Concreate
                 }
 
                 var branchId = _tenantProvider.GetCurrentBranchId();
+                var transCode = await GetNextCashTransCodeAsync(branchId);
+
                 var entity = new CashRegisterMovement
                 {
                     CashRegisterId = model.Dto.CashRegisterId,
                     MovementType = model.Dto.MovementType,
+                    ProcessType = CashRegisterMovementProcessType.KS,
+                    TransCode = transCode,
+                    SalesPersonId = model.Dto.SalesPersonId,
                     CustomerId = model.Dto.CustomerId,
                     PaymentTypeId = model.Dto.PaymentTypeId,
                     CurrencyId = model.Dto.CurrencyId,
@@ -261,9 +284,16 @@ namespace ecommerce.Admin.Services.Concreate
                     return result;
                 }
 
+                if (entity.ProcessType != CashRegisterMovementProcessType.KS)
+                {
+                    result.AddError("Sadece kasa işlemi (KS) türündeki hareketler düzenlenebilir. Tahsilat ve perakende satış hareketleri ilgili ekranlardan düzenlenir.");
+                    return result;
+                }
+
                 entity.CashRegisterId = dto.CashRegisterId;
                 entity.MovementType = dto.MovementType;
                 entity.CustomerId = dto.CustomerId;
+                entity.SalesPersonId = dto.SalesPersonId;
                 entity.PaymentTypeId = dto.PaymentTypeId;
                 entity.CurrencyId = dto.CurrencyId;
                 entity.Amount = dto.Amount;
@@ -313,6 +343,12 @@ namespace ecommerce.Admin.Services.Concreate
                 if (!await _roleFilter.CanAccessBranchAsync(entity.BranchId, _context.DbContext))
                 {
                     result.AddError("Bu kayıt için şube yetkiniz bulunmamaktadır.");
+                    return result;
+                }
+
+                if (entity.ProcessType == CashRegisterMovementProcessType.TH || entity.ProcessType == CashRegisterMovementProcessType.PS)
+                {
+                    result.AddError("Tahsilat ve perakende satış hareketleri silinemez. Pasife almak için ilgili ekranları kullanın.");
                     return result;
                 }
 
@@ -388,6 +424,8 @@ namespace ecommerce.Admin.Services.Concreate
                 {
                     CashRegisterId = dto.SourceCashRegisterId,
                     MovementType = CashRegisterMovementType.Out,
+                    ProcessType = CashRegisterMovementProcessType.VR,
+                    TransCode = null,
                     CustomerId = null,
                     PaymentTypeId = null,
                     CurrencyId = dto.CurrencyId,
@@ -404,6 +442,8 @@ namespace ecommerce.Admin.Services.Concreate
                 {
                     CashRegisterId = dto.TargetCashRegisterId,
                     MovementType = CashRegisterMovementType.In,
+                    ProcessType = CashRegisterMovementProcessType.VR,
+                    TransCode = null,
                     CustomerId = null,
                     PaymentTypeId = null,
                     CurrencyId = dto.CurrencyId,
@@ -416,6 +456,9 @@ namespace ecommerce.Admin.Services.Concreate
                     CreatedId = model.UserId
                 };
 
+                // Doküman: Virman işlemi atomik olmalı — süreç yarıda kesilirse paranın kaybolma/havadan
+                // para yaratılma riski olmasın. EF SaveChangesAsync tek DB transaction ile her iki satırı
+                // aynı anda commit eder.
                 var repo = _context.GetRepository<CashRegisterMovement>();
                 repo.Insert(outMovement);
                 repo.Insert(inMovement);
@@ -444,7 +487,7 @@ namespace ecommerce.Admin.Services.Concreate
 
             try
             {
-                if (!await _permissionService.CanView(MENU_NAME))
+                if (!await _permissionService.CanView(MENU_NAME) && !await _permissionService.CanView(MENU_REPORT))
                 {
                     result.AddError("Bu sayfayı görüntüleme yetkiniz bulunmamaktadır.");
                     return result;
@@ -507,6 +550,20 @@ namespace ecommerce.Admin.Services.Concreate
             }
 
             return result;
+        }
+
+        /// <summary>Kasa işlemi (KS) için evrak numarası üretir: CS-{yıl}-{sıra}</summary>
+        private async Task<string> GetNextCashTransCodeAsync(int branchId)
+        {
+            var year = DateTime.Now.Year;
+            var count = await _context.DbContext.CashRegisterMovements
+                .IgnoreQueryFilters()
+                .Where(x => x.ProcessType == CashRegisterMovementProcessType.KS
+                    && x.TransactionDate.Year == year
+                    && (x.BranchId == branchId || branchId == 0))
+                .CountAsync();
+            var seq = count + 1;
+            return $"CS-{year}-{seq:D5}";
         }
     }
 }

@@ -7,7 +7,7 @@ namespace ecommerce.Admin.Domain.Dtos.Customer
     {
         public int Id { get; set; }
         public int CorporationId { get; set; }
-        public string CorporationName { get; set; }
+        public string CorporationName { get; set; } = null!;
         public string Code { get; set; } = null!;
         public string Name { get; set; } = null!;
         public CustomerType Type { get; set; }

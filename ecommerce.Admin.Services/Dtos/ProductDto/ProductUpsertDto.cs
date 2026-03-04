@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.Configuration.Annotations;
 using ecommerce.Core.Entities;
 namespace ecommerce.Admin.Domain.Dtos.ProductDto

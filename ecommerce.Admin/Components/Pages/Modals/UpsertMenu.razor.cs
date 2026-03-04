@@ -32,7 +32,9 @@ public partial class UpsertMenu
         var allMenusResponse = await MenuService.GetAllMenus();
         if (allMenusResponse.Ok && allMenusResponse.Result != null)
         {
-            AvailableParentMenus = allMenusResponse.Result;
+            AvailableParentMenus = allMenusResponse.Result
+                .DistinctBy(m => m.Id)
+                .ToList();
             
             // If editing, exclude self and descendants from parent dropdown
             if (Id.HasValue)
@@ -41,11 +43,13 @@ public partial class UpsertMenu
             }
         }
         
-        // Load Roles
+        // Load Roles - DistinctBy ensures unique keys for RadzenDropDown (avoids "duplicate key" render error)
         var rolesResponse = await RoleService.GetAllRoles();
-         if (rolesResponse.Ok && rolesResponse.Result != null)
+        if (rolesResponse.Ok && rolesResponse.Result != null)
         {
-            AvailableRoles = rolesResponse.Result;
+            AvailableRoles = rolesResponse.Result
+                .DistinctBy(r => r.Id)
+                .ToList();
         }
         
         if (Id.HasValue)

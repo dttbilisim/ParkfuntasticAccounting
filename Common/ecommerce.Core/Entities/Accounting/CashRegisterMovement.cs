@@ -20,10 +20,27 @@ namespace ecommerce.Core.Entities.Accounting
         /// <summary>Kasa girişi veya kasa çıkışı</summary>
         public CashRegisterMovementType MovementType { get; set; }
 
+        /// <summary>İşlem türü: KS=Kasa İşlemi, VR=Virman, TH=Tahsilat, PS=Perakende Satış</summary>
+        public CashRegisterMovementProcessType ProcessType { get; set; } = CashRegisterMovementProcessType.KS;
+
+        /// <summary>Evrak / Makbuz numarası (örn. CS0001)</summary>
+        [MaxLength(50)]
+        public string? TransCode { get; set; }
+
+        /// <summary>Plasiyer (satış temsilcisi) — opsiyonel</summary>
+        public int? SalesPersonId { get; set; }
+        [ForeignKey(nameof(SalesPersonId))]
+        public virtual SalesPerson? SalesPerson { get; set; }
+
         /// <summary>Cari (opsiyonel — giriş/çıkışta cari seçilebilir)</summary>
         public int? CustomerId { get; set; }
         [ForeignKey(nameof(CustomerId))]
         public virtual Customer? Customer { get; set; }
+
+        /// <summary>Tahsilat hareketlerinde ilgili cari hesap hareketi (CustomerAccountTransaction)</summary>
+        public int? CustomerAccountTransactionId { get; set; }
+        [ForeignKey(nameof(CustomerAccountTransactionId))]
+        public virtual CustomerAccountTransaction? CustomerAccountTransaction { get; set; }
 
         /// <summary>Ödeme tipi (tablo: PaymentType)</summary>
         public int? PaymentTypeId { get; set; }

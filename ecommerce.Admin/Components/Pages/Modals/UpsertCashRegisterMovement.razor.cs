@@ -2,6 +2,7 @@ using ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto;
 using ecommerce.Admin.Domain.Dtos.CashRegisterDto;
 using ecommerce.Admin.Domain.Dtos.CurrencyDto;
 using ecommerce.Admin.Domain.Dtos.Customer;
+using ecommerce.Admin.Domain.Dtos.SalesPersonDto;
 using ecommerce.Admin.Domain.Interfaces;
 using ecommerce.Admin.Services;
 using ecommerce.Admin.Services.Dtos;
@@ -25,6 +26,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
         [Inject] public ICashRegisterMovementService MovementService { get; set; } = null!;
         [Inject] public ICashRegisterService CashRegisterService { get; set; } = null!;
         [Inject] public ICustomerService CustomerService { get; set; } = null!;
+        [Inject] public ISalesPersonService SalesPersonService { get; set; } = null!;
         [Inject] public IPaymentTypeService PaymentTypeService { get; set; } = null!;
         [Inject] public ICurrencyAdminService CurrencyService { get; set; } = null!;
 
@@ -33,6 +35,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
 
         protected List<CashRegisterListDto> CashRegisterList { get; set; } = new();
         protected List<CustomerListDto> CustomerList { get; set; } = new();
+        protected List<SalesPersonListDto> SalesPersonList { get; set; } = new();
         protected List<SelectItemDto<int?>> PaymentTypeOptions { get; set; } = new();
         protected List<SelectItemDto<int?>> FilteredPaymentTypeOptions => GetFilteredPaymentTypes();
         protected List<SelectItemDto<int?>> CurrencyOptions { get; set; } = new();
@@ -77,6 +80,10 @@ namespace ecommerce.Admin.Components.Pages.Modals
             var customerRes = await CustomerService.GetPagedCustomers(customerPager);
             if (customerRes.Ok && customerRes.Result?.Data != null)
                 CustomerList = customerRes.Result.Data;
+
+            var salesPersonRes = await SalesPersonService.GetSalesPersons();
+            if (salesPersonRes.Ok && salesPersonRes.Result != null)
+                SalesPersonList = salesPersonRes.Result;
 
             var paymentRes = await PaymentTypeService.GetAllPaymentTypes();
             if (paymentRes.Ok && paymentRes.Result != null)

@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,16 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "ecommerce.EP");
+        // dotnet ef: startup project (ecommerce.Admin) veya solution root'tan çalışır
+        var currentDir = Directory.GetCurrentDirectory();
+        var candidates = new[]
+        {
+            Path.Combine(currentDir, "ecommerce.Admin"),
+            Path.Combine(currentDir, "..", "ecommerce.Admin"),
+            Path.Combine(currentDir, "ecommerce.EP"),
+            Path.Combine(currentDir, "..", "ecommerce.EP"),
+        };
+        var basePath = candidates.FirstOrDefault(Directory.Exists) ?? currentDir;
         var config = new ConfigurationBuilder()
             .SetBasePath(basePath)
             .AddJsonFile("appsettings.json", optional: true)

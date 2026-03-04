@@ -76,20 +76,36 @@ else
                 </div>
 
                 <div class="cash-movement-modal__section">
-                    <span class="cash-movement-modal__section-title">Cari</span>
-                    <div class="cash-movement-modal__field cash-movement-modal__field--full">
-                        <RadzenLabel Text="Cari ara veya seçin (opsiyonel)" Component="CustomerId" class="small" />
-                        <RadzenDropDown Name="CustomerId"
-                                        @bind-Value="@Model.CustomerId"
-                                        Data="@CustomerList"
-                                        TextProperty="DisplayName"
-                                        ValueProperty="Id"
-                                        AllowClear="true"
-                                        AllowFiltering="true"
-                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        Style="width:100%"
-                                        Placeholder="Cari adı veya kodu ile arayın..." />
+                    <span class="cash-movement-modal__section-title">Cari & Plasiyer</span>
+                    <div class="cash-movement-modal__row">
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="Cari (opsiyonel)" Component="CustomerId" class="small" />
+                            <RadzenDropDown Name="CustomerId"
+                                            @bind-Value="@Model.CustomerId"
+                                            Data="@CustomerList"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="Id"
+                                            AllowClear="true"
+                                            AllowFiltering="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            Style="width:100%"
+                                            Placeholder="Cari ara..." />
+                        </div>
+                        <div class="cash-movement-modal__field">
+                            <RadzenLabel Text="Plasiyer (opsiyonel)" Component="SalesPersonId" class="small" />
+                            <RadzenDropDown Name="SalesPersonId"
+                                            @bind-Value="@Model.SalesPersonId"
+                                            Data="@SalesPersonList"
+                                            TextProperty="FullName"
+                                            ValueProperty="Id"
+                                            AllowClear="true"
+                                            AllowFiltering="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            Style="width:100%"
+                                            Placeholder="Plasiyer seçin..." />
+                        </div>
                     </div>
                 </div>
 

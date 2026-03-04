@@ -183,7 +183,9 @@ namespace ecommerce.Admin.Components.Pages.Modals
                 }
             }
             else
+            {
                 IsProductSaved = true;
+            }
 
             IsShowLoadingBar = false;
         }

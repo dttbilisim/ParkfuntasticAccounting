@@ -9,8 +9,13 @@ namespace ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
         public string CashRegisterName { get; set; } = string.Empty;
         public CashRegisterMovementType MovementType { get; set; }
         public string MovementTypeName { get; set; } = string.Empty;
+        public CashRegisterMovementProcessType ProcessType { get; set; }
+        public string ProcessTypeName { get; set; } = string.Empty;
+        public string? TransCode { get; set; }
         public int? CustomerId { get; set; }
         public string? CustomerName { get; set; }
+        public int? SalesPersonId { get; set; }
+        public string? SalesPersonName { get; set; }
         public int? PaymentTypeId { get; set; }
         public string? PaymentTypeName { get; set; }
         public int CurrencyId { get; set; }
@@ -18,5 +23,6 @@ namespace ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
         public decimal Amount { get; set; }
         public DateTime TransactionDate { get; set; }
         public string? Description { get; set; }
+        public int Status { get; set; }
     }
 }

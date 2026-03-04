@@ -599,6 +599,21 @@ namespace ecommerce.Core.Utils{
     }
 
     /// <summary>
+    /// Kasa hareketi işlem türü (ProcessType)
+    /// </summary>
+    public enum CashRegisterMovementProcessType : byte
+    {
+        [Display(Description = "Kasa İşlemi")]
+        KS = 1,
+        [Display(Description = "Virman")]
+        VR = 2,
+        [Display(Description = "Tahsilat")]
+        TH = 3,
+        [Display(Description = "Perakende Satış")]
+        PS = 4
+    }
+
+    /// <summary>
     /// Çek durumu: Portföyde, Tahsil edildi, Reddedildi, İade
     /// </summary>
     public enum CheckStatus : byte

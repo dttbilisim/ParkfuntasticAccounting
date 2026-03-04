@@ -1,4 +1,4 @@
-﻿using ecommerce.Admin.Domain.Dtos.HierarchicalDto;
+using ecommerce.Admin.Domain.Dtos.HierarchicalDto;
 
 namespace ecommerce.Admin.Domain.Dtos.Identity;
 

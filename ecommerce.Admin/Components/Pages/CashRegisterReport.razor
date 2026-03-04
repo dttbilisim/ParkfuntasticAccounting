@@ -1,0 +1,113 @@
+@page "/cash-register-report"
+@layout MainLayout
+@using ecommerce.Admin.Domain.Dtos.CashRegisterMovementDto
+@using ecommerce.Admin.Services.Interfaces
+@using ecommerce.Core.Utils.ResultSet
+@attribute [Authorize]
+
+<PageTitle>Kasa Raporu</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0 text-gray-800">Kasa Raporu</h1>
+        </div>
+        <div class="col text-end">
+            <RadzenButton Icon="account_balance_wallet" Text="Kasa Hareketleri" Click="@GoToMovements" ButtonStyle="ButtonStyle.Secondary" />
+        </div>
+    </div>
+
+    <RadzenCard class="mb-4 shadow-sm">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            <RadzenDatePicker @bind-Value="StartDate"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Başlangıç"
+                              Style="min-width: 150px;" />
+            <RadzenDatePicker @bind-Value="EndDate"
+                              DateFormat="dd.MM.yyyy"
+                              Placeholder="Bitiş"
+                              Style="min-width: 150px;" />
+            <RadzenButton Text="Yükle" ButtonStyle="ButtonStyle.Primary" Icon="refresh" Click="LoadData" />
+        </div>
+    </RadzenCard>
+
+    <div class="row g-3">
+        @if (BalanceSummaries != null && BalanceSummaries.Any())
+        {
+            @foreach (var s in BalanceSummaries)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">@s.CashRegisterName</span>
+                            <span class="badge bg-secondary">@s.CurrencyCode</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">Açılış</span>
+                                <span>@s.OpeningBalance.ToString("N2")</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom text-success">
+                                <span class="text-muted">Toplam Giriş</span>
+                                <span>+ @s.TotalIn.ToString("N2")</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom text-danger">
+                                <span class="text-muted">Toplam Çıkış</span>
+                                <span>- @s.TotalOut.ToString("N2")</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 mt-2 fw-semibold @(s.CurrentBalance >= 0 ? "text-success" : "text-danger")">
+                                <span>Güncel Bakiye</span>
+                                <span>@s.CurrentBalance.ToString("N2") @s.CurrencyCode</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info mb-0">Kasa bakiye özeti bulunamadı. Tarih filtresi uygulayıp tekrar deneyin.</div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject] protected ICashRegisterMovementService MovementService { get; set; } = null!;
+    [Inject] protected NavigationManager Navigation { get; set; } = null!;
+    [Inject] protected NotificationService NotificationService { get; set; } = null!;
+
+    protected List<CashRegisterBalanceSummaryDto>? BalanceSummaries { get; set; }
+    protected DateTime? StartDate { get; set; }
+    protected DateTime? EndDate { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected async Task LoadData()
+    {
+        try
+        {
+            var res = await MovementService.GetBalanceSummary(
+                cashRegisterId: null,
+                startDate: StartDate,
+                endDate: EndDate);
+            BalanceSummaries = res.Ok && res.Result != null ? res.Result : new List<CashRegisterBalanceSummaryDto>();
+            if (!res.Ok)
+                NotificationService.Notify(NotificationSeverity.Error, res.GetMetadataMessages());
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Hata", ex.Message);
+            BalanceSummaries = new List<CashRegisterBalanceSummaryDto>();
+        }
+    }
+
+    protected void GoToMovements()
+    {
+        Navigation.NavigateTo("/cash-register-movements");
+    }
+}

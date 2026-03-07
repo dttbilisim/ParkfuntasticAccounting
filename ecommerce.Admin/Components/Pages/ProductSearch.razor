@@ -315,7 +315,7 @@
                                 }
                             </div>
 
-                            <!-- 5. Vehicle Filters (Accordion) -->
+                            @* 5. Vehicle Filters (Accordion) - şimdilik devre dışı
                             <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
                                 <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isVehiclesExpanded = !isVehiclesExpanded" style="cursor: pointer;">
                                     <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-car me-2 text-success"></i>Araç Filtreleri</label>
@@ -345,6 +345,7 @@
                                     </div>
                                 }
                             </div>
+                            *@
 
                          </div>
                          <div class="card-footer bg-white border-top p-3">
@@ -413,51 +414,19 @@
                             <div class="spinner-border text-success" role="status">
                                 <span class="visually-hidden">Yükleniyor...</span>
                             </div>
-                            @if (isLoadingVin)
-                            {
-                                <p class="mt-3 text-muted fw-bold">Araçlar Yükleniyor...</p>
-                            }
-                            else
-                            {
-                                <p class="mt-3 text-muted fw-bold">Ürünler Hazırlanıyor...</p>
-                            }
+                            @* @if (isLoadingVin) { <p class="mt-3 text-muted fw-bold">Araçlar Yükleniyor...</p> } else *@
+                            <p class="mt-3 text-muted fw-bold">Ürünler Hazırlanıyor...</p>
                         </div>
                     }
                     else if (!isLoading && (searchResult == null || searchResult.DataCount == 0 || searchResult.Data == null || !searchResult.Data.Any()))
                     {
-                         @if (currentVinVehicle != null)
-                         {
-                             <div class="py-5 text-center bg-white rounded-5 shadow-sm border border-success border-opacity-25">
-                                 <div class="mb-4 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 80px; height: 80px;">
-                                     <i class="fa-solid fa-car fa-2x"></i>
-                                 </div>
-                                 <h4 class="fw-bold text-dark mb-1">Araç Tespit Edildi</h4>
-                                 <h5 class="text-success fw-bold mb-3">@currentVinVehicle.ManufacturerName @currentVinVehicle.BaseModelName (@currentVinVehicle.ModelYear)</h5>
-                                 
-                                 <div class="d-inline-block bg-light px-3 py-1 rounded-pill mb-4 border">
-                                     <span class="text-muted small me-2">Şasi No:</span>
-                                     <span class="code-mono fw-bold text-dark">@currentVinVehicle.Wmi@currentVinVehicle.VdsCode...</span>
-                                 </div>
-                                 
-                                 <p class="text-muted mb-4 px-4" style="max-width: 600px; margin: 0 auto;">
-                                     Aracınız başarıyla tespit edildi ancak sistemimizde bu araç için kayıtlı ürün/parça bulunamadı.
-                                 </p>
-                                 
-                                 <div class="d-flex justify-content-center gap-2">
-                                     <button class="btn btn-outline-secondary rounded-pill px-4" @onclick="ClearAllFilters">Filtreleri Sıfırla</button>
-                                     <button class="btn btn-outline-primary rounded-pill px-4" @onclick="OpenVehicleMatchModal">Aracı Değiştir</button>
-                                 </div>
-                             </div>
-                         }
-                         else
-                         {
+                         @* Araç tespit edildi boş durumu - şimdilik devre dışı (currentVinVehicle) *@
                              <div class="py-5 text-center bg-white rounded-5 shadow-sm">
                                  <img src="/images/empty-search.svg" class="mb-4" style="height: 150px; opacity: 0.5;" />
                                  <h4 class="fw-bold text-dark">Sonuç Bulunamadı</h4>
                                  <p class="text-muted">Farklı bir arama yapmayı veya filtreleri temizlemeyi deneyin.</p>
                                  <button class="btn btn-success rounded-pill px-4" @onclick="ClearAllFilters">Filtreleri Sıfırla</button>
                              </div>
-                         }
                     }
                     else
                     {
@@ -706,6 +675,7 @@
                                         </RadzenDataGridColumn>
 
 
+                                        @* ARAÇ kolonu - şimdilik devre dışı
                                         <RadzenDataGridColumn TItem="SellerProductViewModel" Title="ARAÇ" Width="60px" Sortable="false" TextAlign="TextAlign.Center">
                                             <Template Context="p">
                                                 @if (p.SubModelsJson != null && p.SubModelsJson.Any())
@@ -717,6 +687,7 @@
                                                 else { <span class="text-muted opacity-25">-</span> }
                                             </Template>
                                         </RadzenDataGridColumn>
+                                        *@
                                     </Columns>
                                 </AdminDataGrid>
                             </div>
@@ -1030,8 +1001,8 @@
     }
 </div>
 
-@* VEHICLE MATCH MODAL *@
-@if (isVehicleMatchModalOpen)
+@* VEHICLE MATCH MODAL - şimdilik devre dışı *@
+@if (false && isVehicleMatchModalOpen)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055; overflow-x: hidden; overflow-y: hidden;">
         <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -1732,8 +1703,8 @@
     }
 }
 
-<!-- Şasi Araç Seçim Modal -->
-@if (isVinVehicleSelectionModalOpen)
+@* Şasi Araç Seçim Modal - şimdilik devre dışı *@
+@if (false && isVinVehicleSelectionModalOpen)
 {
     <div class="modal fade show d-block d-flex align-items-center justify-content-center" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 2000;" @onclick="CloseVinVehicleSelectionModal">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable my-0" @onclick:stopPropagation="true" style="max-height: 90vh;">

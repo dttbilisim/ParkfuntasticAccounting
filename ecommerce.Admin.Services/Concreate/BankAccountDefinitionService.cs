@@ -68,6 +68,8 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 from b in bankJoin.DefaultIfEmpty()
                 join c in _dbContext.Currencies on ba.CurrencyId equals c.Id into currencyJoin
                 from c in currencyJoin.DefaultIfEmpty()
+                join pt in _dbContext.PaymentTypes on ba.PaymentTypeId equals pt.Id into ptJoin
+                from pt in ptJoin.DefaultIfEmpty()
                 where ba.Status != (int)EntityStatus.Deleted
                 select new
                 {
@@ -76,7 +78,7 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                     BankName = ba.BankName,
                     BankNameFromJoin = b != null ? b.Name : null,
                     SystemCode = ba.SystemCode,
-                    PaymentType = ba.PaymentType,
+                    PaymentTypeName = pt != null ? pt.Name : null,
                     CurrencyId = ba.CurrencyId,
                     CurrencyName = c != null ? c.CurrencyName : null,
                     AccountCode = ba.AccountCode,
@@ -95,7 +97,7 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 BankId = x.BankId,
                 BankName = !string.IsNullOrEmpty(x.BankName) ? x.BankName : x.BankNameFromJoin,
                 SystemCode = x.SystemCode,
-                PaymentType = x.PaymentType.GetDisplayName(),
+                PaymentType = x.PaymentTypeName ?? "",
                 CurrencyId = x.CurrencyId,
                 CurrencyName = x.CurrencyName,
                 AccountCode = x.AccountCode,
@@ -118,6 +120,75 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
         }
 
         return response;
+    }
+
+    public async Task<IActionResult<List<BankAccountListDto>>> GetBankAccountsByPaymentTypeIds(IEnumerable<int> paymentTypeIds)
+    {
+        var rs = new IActionResult<List<BankAccountListDto>> { Result = new List<BankAccountListDto>() };
+        try
+        {
+            var ids = paymentTypeIds?.ToList() ?? new List<int>();
+            if (ids.Count == 0)
+                return rs;
+
+            var queryBase = _dbContext.BankAccounts.AsQueryable();
+            queryBase = _roleFilter.ApplyFilter(queryBase, _dbContext);
+
+            var query =
+                from ba in queryBase
+                join b in _dbContext.Banks on ba.BankId equals b.Id into bankJoin
+                from b in bankJoin.DefaultIfEmpty()
+                join c in _dbContext.Currencies on ba.CurrencyId equals c.Id into currencyJoin
+                from c in currencyJoin.DefaultIfEmpty()
+                join pt in _dbContext.PaymentTypes on ba.PaymentTypeId equals pt.Id into ptJoin
+                from pt in ptJoin.DefaultIfEmpty()
+                where ba.Status != (int)EntityStatus.Deleted
+                    && ba.Active
+                    && ba.PaymentTypeId != null
+                    && ids.Contains(ba.PaymentTypeId.Value)
+                select new
+                {
+                    Id = ba.Id,
+                    BankId = ba.BankId,
+                    BankName = ba.BankName,
+                    BankNameFromJoin = b != null ? b.Name : null,
+                    SystemCode = ba.SystemCode,
+                    PaymentTypeName = pt != null ? pt.Name : null,
+                    CurrencyId = ba.CurrencyId,
+                    CurrencyName = c != null ? c.CurrencyName : null,
+                    AccountCode = ba.AccountCode,
+                    AccountName = ba.AccountName,
+                    City = ba.City,
+                    BranchName = ba.BranchName,
+                    Iban = ba.Iban,
+                    Active = ba.Active
+                };
+
+            var list = await query.ToListAsync();
+            rs.Result = list.Select(x => new BankAccountListDto
+            {
+                Id = x.Id,
+                BankId = x.BankId,
+                BankName = !string.IsNullOrEmpty(x.BankName) ? x.BankName : x.BankNameFromJoin,
+                SystemCode = x.SystemCode,
+                PaymentType = x.PaymentTypeName ?? "",
+                CurrencyId = x.CurrencyId,
+                CurrencyName = x.CurrencyName,
+                AccountCode = x.AccountCode,
+                AccountName = x.AccountName,
+                City = x.City,
+                BranchName = x.BranchName,
+                Iban = x.Iban,
+                Active = x.Active
+            }).ToList();
+
+            return rs;
+        }
+        catch (Exception ex)
+        {
+            rs.AddSystemError(ex.ToString());
+            return rs;
+        }
     }
 
     public async Task<IActionResult<BankAccountUpsertDto>> GetBankAccountById(int id)
@@ -167,7 +238,7 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 Id = entity.Id,
                 BankId = entity.BankId,
                 SystemCode = entity.SystemCode,
-                PaymentType = entity.PaymentType,
+                PaymentTypeId = entity.PaymentTypeId,
                 CurrencyId = entity.CurrencyId,
                 AccountCode = entity.AccountCode,
                 AccountName = entity.AccountName,
@@ -217,7 +288,7 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 {
                     BankId = dto.BankId,
                     SystemCode = dto.SystemCode,
-                    PaymentType = dto.PaymentType,
+                    PaymentTypeId = dto.PaymentTypeId,
                     CurrencyId = dto.CurrencyId,
                     AccountCode = dto.AccountCode,
                     AccountName = dto.AccountName,
@@ -272,7 +343,7 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
 
                 entity.BankId = dto.BankId;
                 entity.SystemCode = dto.SystemCode;
-                entity.PaymentType = dto.PaymentType;
+                entity.PaymentTypeId = dto.PaymentTypeId;
                 entity.CurrencyId = dto.CurrencyId;
                 entity.AccountCode = dto.AccountCode;
                 entity.AccountName = dto.AccountName;

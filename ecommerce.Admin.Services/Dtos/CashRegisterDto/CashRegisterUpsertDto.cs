@@ -13,9 +13,6 @@ namespace ecommerce.Admin.Domain.Dtos.CashRegisterDto
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(20)]
-        public string? Code { get; set; }
-
         [Required(ErrorMessage = "Döviz seçimi zorunludur")]
         public int CurrencyId { get; set; }
 
@@ -26,6 +23,8 @@ namespace ecommerce.Admin.Domain.Dtos.CashRegisterDto
 
         public bool IsDefault { get; set; }
         public int? PaymentTypeId { get; set; }
+        /// <summary>Ödeme tipi 3 veya 4 seçildiğinde zorunlu - banka hesabı.</summary>
+        public int? BankAccountId { get; set; }
         public int CorporationId { get; set; }
         public int BranchId { get; set; }
     }

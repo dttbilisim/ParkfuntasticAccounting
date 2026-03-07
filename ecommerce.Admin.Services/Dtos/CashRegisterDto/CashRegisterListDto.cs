@@ -8,8 +8,9 @@ namespace ecommerce.Admin.Domain.Dtos.CashRegisterDto
     public class CashRegisterListDto
     {
         public int Id { get; set; }
+        public int BranchId { get; set; }
+        public string? BranchName { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string? Code { get; set; }
         public int CurrencyId { get; set; }
         public string? CurrencyCode { get; set; }
         public decimal OpeningBalance { get; set; }

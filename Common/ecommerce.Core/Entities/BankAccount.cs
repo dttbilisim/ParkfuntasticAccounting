@@ -20,9 +20,12 @@ public class BankAccount : AuditableEntity<int>
     [MaxLength(50)]
     public string? SystemCode { get; set; }
 
-    public ecommerce.Core.Utils.BankPaymentType PaymentType { get; set; } = ecommerce.Core.Utils.BankPaymentType.Nakit;
+    public int? PaymentTypeId { get; set; }
 
     public int? CurrencyId { get; set; }
+
+    [ForeignKey(nameof(PaymentTypeId))]
+    public ecommerce.Core.Entities.Accounting.PaymentType? PaymentType { get; set; }
 
     [Required]
     [MaxLength(50)]

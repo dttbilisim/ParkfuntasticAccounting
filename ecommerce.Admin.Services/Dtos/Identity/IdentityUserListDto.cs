@@ -20,4 +20,9 @@ public class IdentityUserListDto
 
     public List<IdentityRoleListDto> Roles { get; set; } = new();
     public string FullName => $"{FirstName} {LastName}".Trim();
+    public bool IsPcPosUser { get; set; }
+    public string? CompanyCode { get; set; }
+    public string? CaseIds { get; set; }
+    public bool IsEdit { get; set; }
+    public int? UserType { get; set; }
 }

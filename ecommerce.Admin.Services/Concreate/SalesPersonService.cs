@@ -3,6 +3,7 @@ using ecommerce.Admin.Domain.Dtos.SalesPersonDto;
 using ecommerce.Admin.Domain.Dtos.Customer;
 using ecommerce.Admin.Domain.Dtos.MonthDto;
 using ecommerce.Admin.Domain.Dtos.CustomerWorkPlanDto;
+// using ecommerce.Admin.Domain.Dtos.Plasiyer; // Plasiyer rota devre dışı
 using ecommerce.Admin.Domain.Interfaces;
 using ecommerce.EFCore.Context;
 using ecommerce.Admin.EFCore.UnitOfWork;
@@ -757,6 +758,24 @@ namespace ecommerce.Admin.Domain.Concreate
                 return response;
             }
         }
+
+        // Plasiyer rota - şimdilik devre dışı
+        // public Task<IActionResult<List<PlasiyerRotaCustomerDto>>> GetPlasiyerRotaList(int salesPersonId)
+        // {
+        //     var response = new IActionResult<List<PlasiyerRotaCustomerDto>> { Result = new List<PlasiyerRotaCustomerDto>() };
+        //     return Task.FromResult(response);
+        // }
+        // public Task<IActionResult<List<PlasiyerCustomerVisitDto>>> GetCustomerVisitDetails(int customerId, int salesPersonId)
+        // {
+        //     var response = new IActionResult<List<PlasiyerCustomerVisitDto>> { Result = new List<PlasiyerCustomerVisitDto>() };
+        //     return Task.FromResult(response);
+        // }
+        // public Task<IActionResult<Empty>> SaveCustomerVisit(int customerId, int salesPersonId, string visitNote)
+        // {
+        //     var response = new IActionResult<Empty> { Result = new Empty() };
+        //     response.AddError("Plasiyer rota özelliği şu an devre dışıdır.");
+        //     return Task.FromResult(response);
+        // }
     }
 }
  

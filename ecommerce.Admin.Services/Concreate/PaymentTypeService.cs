@@ -83,7 +83,8 @@ public class PaymentTypeService : IPaymentTypeService
             // Re-reading original: It was manually checking AllowBranchIds.
             // We should use _roleFilter.
             
-            IQueryable<ecommerce.Core.Entities.Accounting.PaymentType> q = _repository.GetAll(ignoreQueryFilters: true);
+            IQueryable<ecommerce.Core.Entities.Accounting.PaymentType> q = _repository.GetAll(ignoreQueryFilters: true)
+                .Include(x => x.Currency);
             q = _roleFilter.ApplyFilter(q, _context.DbContext);
             
             var entities = await q.ToListAsync(); // ToPagedResultAsync/MakeDataQueryable handles paging usually, but here it returns IQueryable content.
@@ -196,6 +197,7 @@ public class PaymentTypeService : IPaymentTypeService
             }
 
             IQueryable<ecommerce.Core.Entities.Accounting.PaymentType> query = _repository.GetAll(ignoreQueryFilters: true)
+                .Include(x => x.Currency)
                 .Where(x => x.Id == id);
             
             query = _roleFilter.ApplyFilter(query, _context.DbContext);

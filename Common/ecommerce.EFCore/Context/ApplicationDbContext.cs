@@ -206,6 +206,12 @@ namespace ecommerce.EFCore.Context
         public DbSet<Unit> Units { get; set; }
         public DbSet<ProductUnit> ProductUnits { get; set; }
 
+        // PcPos Transfer
+        public DbSet<ProductBranch> ProductBranches { get; set; }
+        public DbSet<SaleOptions> SaleOptions { get; set; }
+        public DbSet<ProductSaleItems> ProductSaleItems { get; set; }
+        public DbSet<VersionApp> VersionApps { get; set; }
+
         // DAT Integration Entities
         public DbSet<DotVehicleType> DotVehicleTypes { get; set; }
         public DbSet<DotVehicleData> DotVehicleData { get; set; }
@@ -564,6 +570,27 @@ namespace ecommerce.EFCore.Context
             builder.Entity<ProductStock>()
                 .HasIndex(x => new { x.ProductId, x.WarehouseShelfId })
                 .IsUnique();
+
+            // PcPos Transfer: ProductBranch unique
+            builder.Entity<ProductBranch>()
+                .HasIndex(x => new { x.ProductId, x.BranchId })
+                .IsUnique();
+
+            // PcPos Transfer: VersionApp tablo adı
+            builder.Entity<VersionApp>()
+                .ToTable("VersionApp");
+
+            // PcPos Transfer: ProductSaleItems relationships
+            builder.Entity<ProductSaleItems>()
+                .HasOne(x => x.RefProduct)
+                .WithMany(p => p.ProductSaleItemsAsRef)
+                .HasForeignKey(x => x.RefProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<ProductSaleItems>()
+                .HasOne(x => x.Product)
+                .WithMany(p => p.ProductSaleItemsAsComponent)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Performance Indexes
             builder.Entity<CartItem>()

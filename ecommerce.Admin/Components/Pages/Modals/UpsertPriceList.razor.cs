@@ -52,7 +52,6 @@ namespace ecommerce.Admin.Components.Pages.Modals
                                        !string.IsNullOrWhiteSpace(PriceList.Name) &&
                                        PriceList.CorporationId > 0 &&
                                        PriceList.BranchId > 0 &&
-                                       PriceList.WarehouseId > 0 &&
                                        PriceList.CurrencyId.HasValue;
 
         protected override async Task OnInitializedAsync()
@@ -107,7 +106,9 @@ namespace ecommerce.Admin.Components.Pages.Modals
 
             if (customerRs.Ok && customerRs.Result?.Data != null)
             {
+                // RadzenDropDown benzersiz Value gerektirir — aynı Id’li cariler tekilleştirilir
                 CustomerOptions = customerRs.Result.Data
+                    .DistinctBy(c => c.Id)
                     .Select(c => new ecommerce.Admin.Services.Dtos.SelectItemDto<int?> { Text = $"{c.Code} - {c.Name}", Value = c.Id })
                     .ToList();
             }
@@ -399,11 +400,6 @@ namespace ecommerce.Admin.Components.Pages.Modals
                 if (!args.BranchId.HasValue || args.BranchId.Value <= 0)
                 {
                     NotificationService.Notify(NotificationSeverity.Warning, "Şube seçimi zorunludur.");
-                    return;
-                }
-                if (!args.WarehouseId.HasValue || args.WarehouseId.Value <= 0)
-                {
-                    NotificationService.Notify(NotificationSeverity.Warning, "Depo seçimi zorunludur.");
                     return;
                 }
                 if (!args.CurrencyId.HasValue || args.CurrencyId.Value <= 0)

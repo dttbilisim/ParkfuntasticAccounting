@@ -150,6 +150,24 @@ namespace ecommerce.Admin.Domain.Concreate{
                     var mappedCat = _mapper.Map<ProductUpsertDto>(product);
                     if (mappedCat != null)
                     {
+                        // Paket ürün ise ProductSaleItems yükle
+                        if (product.IsPackageProduct)
+                        {
+                            var saleItems = await context.DbContext.ProductSaleItems
+                                .AsNoTracking()
+                                .Where(x => x.RefProductId == productId)
+                                .Include(x => x.Product)
+                                .Include(x => x.Product!.Tax)
+                                .ToListAsync();
+                            mappedCat.PackageProductItems = saleItems.Select(s => new PackageProductItemDto
+                            {
+                                ProductId = s.ProductId,
+                                ProductName = s.Product?.Name ?? "",
+                                Price = s.Price,
+                                TaxRate = s.Product?.Tax?.TaxRate ?? 0
+                            }).ToList();
+                            mappedCat.PackageProductIdList = mappedCat.PackageProductItems.Select(x => x.ProductId).ToList();
+                        }
                         response.Result = mappedCat;
                     }
                     else
@@ -406,8 +424,12 @@ namespace ecommerce.Admin.Domain.Concreate{
                             .ToList();
                     }
 
-                    var query = repository.GetAll(predicate: null, disableTracking: true, ignoreQueryFilters: true)
-                        .AsNoTracking()
+                    var query = repository.GetAll(
+                            predicate: null,
+                            orderBy: null,
+                            include: q => q.Include(p => p.Brand).Include(p => p.Tax),
+                            disableTracking: true,
+                            ignoreQueryFilters: true)
                         .Where(x => x.Status != (int)EntityStatus.Deleted
                              && (
                                  !isGlobalAdmin ? 
@@ -482,6 +504,7 @@ namespace ecommerce.Admin.Domain.Concreate{
                              (!x.BranchId.HasValue || x.BranchId == 0 || x.BranchId == currentBranchId)
                              : true
                          ),
+                    include: x => x.Include(p => p.Tax),
                     ignoreQueryFilters: true);
                 var mappedEntites = _mapper.Map<List<ProductListDto>>(products);
                 if(mappedEntites == null) return response;
@@ -518,6 +541,7 @@ namespace ecommerce.Admin.Domain.Concreate{
                                 isGlobalAdmin ? (currentBranchId == 0 || x.BranchId == currentBranchId) :
                                 (allowedBranchIds.Contains(x.BranchId ?? 0) && (currentBranchId == 0 || x.BranchId == currentBranchId))
                         ),
+                    include: x => x.Include(p => p.Tax),
                     ignoreQueryFilters: true);
                 var mappedEntites = _mapper.Map<List<ProductListDto>>(products);
                 if(mappedEntites != null){
@@ -560,29 +584,26 @@ namespace ecommerce.Admin.Domain.Concreate{
         public async Task<IActionResult<List<ProductAdvertListDto>>> GetProductAdvertListById(int productId){
             IActionResult<List<ProductAdvertListDto>> response = new(){Result = new()};
             try{
-                
-                // using (var scope = _serviceScopeFactory.CreateScope())
-                // {
-                    // var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var dbContext = _context.DbContext;
-                    var advertList = await dbContext.ProductSellerItems
-                        .AsNoTracking()
-                        .Include(x => x.Company)
-                        .Where(x => x.ProductId == productId)
-                        .ToListAsync();
-                    if(advertList != null){
-                        response.Result = new List<ProductAdvertListDto>(advertList.Select(s => new ProductAdvertListDto{
-                                     AccountName = s.Company.AccountName == null ? s.Company.FirstName + " " + s.Company.LastName : s.Company.AccountName,
-                                     Price = s.Price,
-                                     Stock = s.Stock,
-                                     ExprationDate = s.ExprationDate,
-                                     Status = s.Status == 1 ? "Aktif" : "Pasif"
-                                 }
-                             )
-                         );
-                         return response;
-                    }
-                // }
+                // Ayrı scope kullan: GetProductById ile paralel çalışırken Npgsql "command already in progress" hatasını önler
+                using var scope = _serviceScopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<IUnitOfWork<ApplicationDbContext>>().DbContext;
+                var advertList = await dbContext.ProductSellerItems
+                    .AsNoTracking()
+                    .Include(x => x.Company)
+                    .Where(x => x.ProductId == productId)
+                    .ToListAsync();
+                if(advertList != null){
+                    response.Result = new List<ProductAdvertListDto>(advertList.Select(s => new ProductAdvertListDto{
+                                 AccountName = s.Company.AccountName == null ? s.Company.FirstName + " " + s.Company.LastName : s.Company.AccountName,
+                                 Price = s.Price,
+                                 Stock = s.Stock,
+                                 ExprationDate = s.ExprationDate,
+                                 Status = s.Status == 1 ? "Aktif" : "Pasif"
+                             }
+                         )
+                     );
+                     return response;
+                }
             } catch(Exception ex){
                 _logger.LogError("GetProductAdvertListById Exception " + ex.ToString());
                 response.AddSystemError(ex.ToString());
@@ -864,6 +885,49 @@ namespace ecommerce.Admin.Domain.Concreate{
                             existingDefaultUnit.ModifiedDate = DateTime.Now;
                             existingDefaultUnit.ModifiedId = model.UserId;
                             _context.DbContext.ProductUnits.Update(existingDefaultUnit);
+                        }
+                    }
+
+                    // Paket ürün: ProductSaleItems kaydet
+                    if (dto.IsPackageProduct && dto.PackageProductItems != null && dto.PackageProductItems.Count > 0)
+                    {
+                        var existingSaleItems = await _context.DbContext.ProductSaleItems
+                            .Where(x => x.RefProductId == targetProductId)
+                            .ToListAsync();
+                        _context.DbContext.ProductSaleItems.RemoveRange(existingSaleItems);
+                        foreach (var item in dto.PackageProductItems)
+                        {
+                            await _context.DbContext.ProductSaleItems.AddAsync(new ProductSaleItems
+                            {
+                                RefProductId = targetProductId,
+                                ProductId = item.ProductId,
+                                Price = item.Price
+                            });
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+                    else if (dto.IsPackageProduct)
+                    {
+                        // Paket ürün ama liste boş - mevcut kayıtları sil
+                        var existingSaleItems = await _context.DbContext.ProductSaleItems
+                            .Where(x => x.RefProductId == targetProductId)
+                            .ToListAsync();
+                        if (existingSaleItems.Count > 0)
+                        {
+                            _context.DbContext.ProductSaleItems.RemoveRange(existingSaleItems);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        // Paket ürün işareti kaldırıldı - mevcut ProductSaleItems temizle
+                        var existingSaleItems = await _context.DbContext.ProductSaleItems
+                            .Where(x => x.RefProductId == targetProductId)
+                            .ToListAsync();
+                        if (existingSaleItems.Count > 0)
+                        {
+                            _context.DbContext.ProductSaleItems.RemoveRange(existingSaleItems);
+                            await _context.SaveChangesAsync();
                         }
                     }
 

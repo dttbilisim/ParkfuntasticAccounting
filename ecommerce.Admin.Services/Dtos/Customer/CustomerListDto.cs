@@ -20,6 +20,11 @@ namespace ecommerce.Admin.Domain.Dtos.Customer
         public decimal RiskLimit { get; set; }
         public CustomerWorkingTypeEnum CustomerWorkingType { get; set; }
         public int PaymentDue { get; set; }
+        public bool IsPcPos { get; set; }
+        public bool IsCredit { get; set; }
+        public bool IsVatExcluded { get; set; }
+        public bool IsCurrentPricesUpdatable { get; set; }
+        public bool IsStreetAgency { get; set; }
         public string DisplayName => $"[{Code}] {Name}";
     }
 }

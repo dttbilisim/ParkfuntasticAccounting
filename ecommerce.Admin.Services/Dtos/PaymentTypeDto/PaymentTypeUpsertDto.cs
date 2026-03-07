@@ -10,4 +10,9 @@ public class PaymentTypeUpsertDto
     public bool IsCash { get; set; }
     public bool IsCreditCard { get; set; }
     public bool IsActive { get; set; } = true;
+    public int? Type { get; set; }
+    public int? CurrencyId { get; set; }
+    public bool IsPcPos { get; set; }
+    [MaxLength(50)]
+    public string? CompanyCode { get; set; }
 }

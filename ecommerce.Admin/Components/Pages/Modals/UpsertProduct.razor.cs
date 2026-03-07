@@ -93,6 +93,10 @@ namespace ecommerce.Admin.Components.Pages.Modals
         // protected List<ProductCompatibleVehicleDto> compatibleVehicles = new();
         protected List<TierListDto> tiers = new();
         protected List<UnitListDto> units = new();
+        protected List<ProductListDto> availableProductsForPackage = new();
+        protected List<ProductListDto> packageProductSearchResults = new();
+        protected List<ProductListDto> lastPackageSearchResults = new(); // Seçim anında Data temizlenebilir, yedek kullan
+        protected string packageProductSearchText = "";
         protected RadzenDataGrid<ProductActiveArticleListDto>? radzenDataGridActiveArticle;
         protected RadzenDataGrid<ProductImageListDto>? radzenDataGridProductImage;
         protected RadzenDataGrid<ProductAdvertListDto>? radzenDataGridProductAdvert;
@@ -116,8 +120,9 @@ namespace ecommerce.Admin.Components.Pages.Modals
             var productTypeTask = ProductTypeService.GetProductTypes();
             var tierTask = TierService.GetTiers();
             var unitTask = UnitService.GetUnits();
+            var productsTask = Service.GetProducts();
             
-            await Task.WhenAll(categoriesTask, brandsTask, taxesTask, productTypeTask, tierTask, unitTask);
+            await Task.WhenAll(categoriesTask, brandsTask, taxesTask, productTypeTask, tierTask, unitTask, productsTask);
             
             var categoriesResponse = await categoriesTask;
             var brandsResponse = await brandsTask;
@@ -143,6 +148,15 @@ namespace ecommerce.Admin.Components.Pages.Modals
                     // Varsa ilk birimi seç
                     product.UnitId = units.FirstOrDefault()?.Id;
                 }
+            }
+
+            var productsResponse = await productsTask;
+            if (productsResponse.Ok && productsResponse.Result != null)
+            {
+                // Paket ürün seçimi için: düzenlemede kendi ürünü hariç
+                availableProductsForPackage = Id.HasValue
+                    ? productsResponse.Result.Where(p => p.Id != Id.Value).ToList()
+                    : productsResponse.Result;
             }
             
             if (Id.HasValue)
@@ -173,6 +187,15 @@ namespace ecommerce.Admin.Components.Pages.Modals
                         ? false
                         : true;
                     if (product.Status == EntityStatus.Deleted.GetHashCode()) IsSaveButtonDisabled = true;
+                    // Paket ürün ID listesini parse et
+                    if (!string.IsNullOrWhiteSpace(product.PackageProductIds))
+                    {
+                        product.PackageProductIdList = product.PackageProductIds
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                            .Where(s => int.TryParse(s, out _))
+                            .Select(int.Parse)
+                            .ToList();
+                    }
                 }
                 else
                     NotificationService.Notify(NotificationSeverity.Error, productSingleRs.GetMetadataMessages());
@@ -197,6 +220,10 @@ namespace ecommerce.Admin.Components.Pages.Modals
             {
                 product.Id = Id;
                 product.StatusBool = Status;
+                // Paket ürün: PackageProductItems'dan PackageProductIds'i senkronize et (geriye dönük uyumluluk)
+                product.PackageProductIds = product.IsPackageProduct && (product.PackageProductItems?.Count ?? 0) > 0
+                    ? string.Join(",", product.PackageProductItems.Select(x => x.ProductId))
+                    : null;
                 var submitRs = await Service.UpsertProduct(new Core.Helpers.AuditWrapDto<ProductUpsertDto>()
                     { UserId = Security.User.Id, Dto = product });
                 if (submitRs.Ok)
@@ -782,6 +809,110 @@ namespace ecommerce.Admin.Components.Pages.Modals
         {
             DialogService.Close(null);
         }
+
+        #region Paket Ürün
+
+        protected async Task LoadPackageProductSearch(LoadDataArgs args)
+        {
+            var filter = args.Filter?.Trim();
+            if (string.IsNullOrWhiteSpace(filter))
+            {
+                packageProductSearchResults = new List<ProductListDto>();
+                StateHasChanged();
+                return;
+            }
+            var result = await Service.SearchProducts(filter);
+            if (result.Ok && result.Result != null)
+            {
+                var usedIds = product.PackageProductItems?
+                    .Where(x => x.ProductId > 0)
+                    .Select(x => x.ProductId)
+                    .ToHashSet() ?? new HashSet<int>();
+                var list = result.Result
+                    .Where(p => !usedIds.Contains(p.Id) && (Id == null || p.Id != Id.Value))
+                    .ToList();
+                packageProductSearchResults = list;
+                lastPackageSearchResults = list; // Seçim anında kullanılacak yedek
+            }
+            else
+            {
+                packageProductSearchResults = new List<ProductListDto>();
+                if (!result.Ok && !string.IsNullOrEmpty(result.GetMetadataMessages()))
+                    NotificationService.Notify(NotificationSeverity.Warning, "Arama", result.GetMetadataMessages());
+            }
+            StateHasChanged();
+        }
+
+        protected async Task AddPackageProductFromSearch()
+        {
+            var value = packageProductSearchText?.Trim();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Uyarı", "Lütfen önce ürün arayıp listeden seçin.");
+                return;
+            }
+
+            ProductListDto? p = null;
+            var searchIn = lastPackageSearchResults.Count > 0 ? lastPackageSearchResults : packageProductSearchResults;
+            p = searchIn.FirstOrDefault(x =>
+                x.IdStr == value ||
+                x.Id.ToString() == value ||
+                (x.Name?.Equals(value, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.Barcode?.Equals(value, StringComparison.OrdinalIgnoreCase) ?? false));
+
+            if (p == null && int.TryParse(value, out var productId) && productId > 0)
+            {
+                var productRs = await Service.GetProductById(productId);
+                if (productRs.Ok && productRs.Result != null)
+                {
+                    var taxRate = productRs.Result.TaxId.HasValue && productRs.Result.TaxId > 0
+                        ? (int)(taxes.FirstOrDefault(t => t.Id == productRs.Result.TaxId)?.TaxRate ?? 0)
+                        : 0;
+                    p = new ProductListDto
+                    {
+                        Id = productRs.Result.Id ?? 0,
+                        Name = productRs.Result.Name,
+                        Barcode = productRs.Result.Barcode,
+                        Price = productRs.Result.Price ?? 0,
+                        Kdv = taxRate
+                    };
+                }
+            }
+
+            if (p == null)
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Ürün bulunamadı", "Lütfen listeden bir ürün seçin.");
+                return;
+            }
+
+            product.PackageProductItems ??= new List<PackageProductItemDto>();
+            if (product.PackageProductItems.Any(x => x.ProductId == p.Id))
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Uyarı", "Bu ürün zaten listede.");
+                return;
+            }
+
+            var newList = product.PackageProductItems.ToList();
+            newList.Add(new PackageProductItemDto
+            {
+                ProductId = p.Id,
+                ProductName = p.Name ?? "",
+                Price = p.Price,
+                TaxRate = p.Kdv ?? 0
+            });
+            product.PackageProductItems = newList;
+            packageProductSearchText = "";
+            StateHasChanged();
+        }
+
+
+        protected void RemovePackageProductItem(PackageProductItemDto item)
+        {
+            product.PackageProductItems?.Remove(item);
+            StateHasChanged();
+        }
+
+        #endregion
 
         protected async Task TabChange(int index)
         {

@@ -136,6 +136,35 @@ namespace ecommerce.Admin.Domain.Concreate
             }
         }
 
+        public async Task<IActionResult<List<PcPosListDto>>> GetPcPosForUserAssignment()
+        {
+            var response = new IActionResult<List<PcPosListDto>> { Result = new List<PcPosListDto>() };
+            try
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var ctx = scope.ServiceProvider.GetRequiredService<IUnitOfWork<ApplicationDbContext>>();
+                var repo = ctx.GetRepository<PcPosDefinition>();
+
+                // Kullanıcı ataması için role filter uygulanmıyor - tüm aktif PcPos tanımları gösterilir
+                var query = repo.GetAll(
+                    predicate: x => x.Status == (int)EntityStatus.Active,
+                    disableTracking: true,
+                    include: i => i.Include(x => x.PaymentType),
+                    ignoreQueryFilters: true);
+
+                var items = await query.OrderBy(x => x.Name).ToListAsync();
+                var mapped = _mapper.Map<List<PcPosListDto>>(items);
+                if (mapped?.Count > 0) response.Result = mapped;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetPcPosForUserAssignment Exception " + ex.ToString());
+                response.AddSystemError(ex.ToString());
+                return response;
+            }
+        }
+
         public async Task<IActionResult<PcPosUpsertDto>> GetPcPosById(int id)
         {
             var response = new IActionResult<PcPosUpsertDto> { Result = new() };

@@ -59,5 +59,20 @@ namespace ecommerce.Core.Entities.Authentication {
         public string? ResetEmailToken { get; set; }
         public DateTime? ResetEmailTokenExpireDate { get; set; }
         public string? FileDocumenturl { get; set; }
+
+        /// <summary>PcPos kullanıcısı mı? (Bu kullanıcı PcPos kasalarına erişebilir)</summary>
+        public bool IsPcPosUser { get; set; }
+        /// <summary>PcPos transfer: Şirket kodu</summary>
+        [MaxLength(50)]
+        public string? CompanyCode { get; set; }
+        /// <summary>PcPos transfer: Kasa ID'leri (virgülle ayrılmış)</summary>
+        [MaxLength(500)]
+        public string? CaseIds { get; set; }
+        /// <summary>PcPos transfer: Düzenleme yetkisi</summary>
+        public bool IsEdit { get; set; }
+        /// <summary>PcPos transfer: Kullanıcı tipi (2 = POS kullanıcısı)</summary>
+        public int? UserType { get; set; }
+        /// <summary>PcPos transfer: Kullanıcı aktif mi</summary>
+        public bool IsActive { get; set; } = true;
     }
 }

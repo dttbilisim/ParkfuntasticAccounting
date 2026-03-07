@@ -24,6 +24,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
         [Inject] public ICorporationService CorporationService { get; set; } = default!;
         [Inject] public IBranchService BranchService { get; set; } = default!;
         [Inject] public IPaymentTypeService PaymentTypeService { get; set; } = default!;
+        [Inject] public IBankAccountDefinitionService BankAccountService { get; set; } = default!;
 
         protected CashRegisterUpsertDto CashRegister = new();
         protected List<CurrencyListDto> Currencies = new();
@@ -31,7 +32,12 @@ namespace ecommerce.Admin.Components.Pages.Modals
         protected List<CorporationListDto> Corporations = new();
         protected List<BranchListDto> Branches = new();
         protected List<SelectItemDto<int?>> PaymentTypeOptions = new();
+        protected List<ecommerce.Domain.Shared.Dtos.Bank.BankAccountDto.BankAccountListDto> BankAccountOptions = new();
         protected bool IsLoading = true;
+
+        /// <summary>Ödeme tipi 3 veya 4 seçildiğinde banka hesabı dropdown gösterilir.</summary>
+        private static readonly int[] BankPaymentTypeIds = { 3, 4 };
+        protected bool ShowBankAccountDropdown => CashRegister.PaymentTypeId.HasValue && BankPaymentTypeIds.Contains(CashRegister.PaymentTypeId.Value);
 
         protected override async Task OnInitializedAsync()
         {
@@ -76,6 +82,10 @@ namespace ecommerce.Admin.Components.Pages.Modals
                         {
                             await LoadBranches(CashRegister.CorporationId);
                         }
+                        if (ShowBankAccountDropdown)
+                        {
+                            await LoadBankAccountsByPaymentType();
+                        }
                     }
                     else
                     {
@@ -114,6 +124,37 @@ namespace ecommerce.Admin.Components.Pages.Modals
             else
             {
                 Branches = new List<BranchListDto>();
+            }
+        }
+
+        protected async Task OnPaymentTypeChange(object value)
+        {
+            CashRegister.BankAccountId = null;
+            if (ShowBankAccountDropdown)
+            {
+                await LoadBankAccountsByPaymentType();
+            }
+            else
+            {
+                BankAccountOptions = new List<ecommerce.Domain.Shared.Dtos.Bank.BankAccountDto.BankAccountListDto>();
+            }
+        }
+
+        private async Task LoadBankAccountsByPaymentType()
+        {
+            if (!CashRegister.PaymentTypeId.HasValue || !BankPaymentTypeIds.Contains(CashRegister.PaymentTypeId.Value))
+            {
+                BankAccountOptions = new List<ecommerce.Domain.Shared.Dtos.Bank.BankAccountDto.BankAccountListDto>();
+                return;
+            }
+            var result = await BankAccountService.GetBankAccountsByPaymentTypeIds(BankPaymentTypeIds);
+            if (result.Ok && result.Result != null)
+            {
+                BankAccountOptions = result.Result;
+            }
+            else
+            {
+                BankAccountOptions = new List<ecommerce.Domain.Shared.Dtos.Bank.BankAccountDto.BankAccountListDto>();
             }
         }
 

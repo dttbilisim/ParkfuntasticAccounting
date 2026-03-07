@@ -2,6 +2,7 @@ using ecommerce.Admin.Domain.Dtos.SalesPersonDto;
 using ecommerce.Admin.Domain.Dtos.Customer;
 using ecommerce.Admin.Domain.Dtos.MonthDto;
 using ecommerce.Admin.Domain.Dtos.CustomerWorkPlanDto;
+// using ecommerce.Admin.Domain.Dtos.Plasiyer; // Plasiyer rota devre dışı
 using ecommerce.Core.Helpers;
 using ecommerce.Core.Models;
 using ecommerce.Core.Utils.ResultSet;
@@ -23,5 +24,9 @@ namespace ecommerce.Admin.Domain.Interfaces
         Task<IActionResult<List<CustomerWorkPlanListDto>>> GetWorkPlansBySalesPerson(int salesPersonId);
         Task<IActionResult<Empty>> UpsertWorkPlan(AuditWrapDto<CustomerWorkPlanUpsertDto> model);
         Task<IActionResult<Empty>> DeleteWorkPlan(AuditWrapDto<CustomerWorkPlanDeleteDto> model);
+        // Plasiyer rota - şimdilik devre dışı
+        // Task<IActionResult<List<PlasiyerRotaCustomerDto>>> GetPlasiyerRotaList(int salesPersonId);
+        // Task<IActionResult<List<PlasiyerCustomerVisitDto>>> GetCustomerVisitDetails(int customerId, int salesPersonId);
+        // Task<IActionResult<Empty>> SaveCustomerVisit(int customerId, int salesPersonId, string visitNote);
     }
 }

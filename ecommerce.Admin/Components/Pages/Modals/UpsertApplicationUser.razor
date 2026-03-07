@@ -85,6 +85,38 @@
                             </RadzenDropDown>
                         </ChildContent>
                     </RadzenFormField>
+
+                    <!-- PcPos Kullanıcısı -->
+                    <RadzenCard class="rz-p-3" Variant="Variant.Outlined">
+                        <RadzenStack Gap="1rem">
+                            <RadzenRow>
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                        <RadzenSwitch @bind-Value="@EditingEntity.IsPcPosUser" Name="IsPcPosUser" />
+                                        <RadzenLabel Text="PcPos kullanıcısı (kasa erişimi)" />
+                                    </RadzenStack>
+                                </RadzenColumn>
+                            </RadzenRow>
+                            @if (EditingEntity.IsPcPosUser)
+                            {
+                                <RadzenFormField Text="PcPos Tanımları" Variant="Variant.Outlined" class="w-100">
+                                    <ChildContent>
+                                        <RadzenDropDown @bind-Value="@SelectedPcPosIds" Data="@PcPosDefinitions" Multiple="true" 
+                                                        TextProperty="Name" ValueProperty="Id" 
+                                                        class="w-100" Placeholder="PcPos tanımı seçiniz..."
+                                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                    </ChildContent>
+                                    <Helper>
+                                        <RadzenLabel Text="Bu kullanıcının erişebileceği PcPos tanımlarını (kasaları) seçin" TextStyle="TextStyle.Caption" />
+                                    </Helper>
+                                </RadzenFormField>
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                    <RadzenSwitch @bind-Value="@EditingEntity.IsEdit" Name="IsEdit" />
+                                    <RadzenLabel Text="Kasiyer fiyat güncelleme yetkisi" />
+                                </RadzenStack>
+                            }
+                        </RadzenStack>
+                    </RadzenCard>
                 </RadzenStack>
 
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-4">

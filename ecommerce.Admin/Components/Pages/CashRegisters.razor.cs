@@ -34,6 +34,12 @@ namespace ecommerce.Admin.Components.Pages
             }
         }
 
+        protected async Task OnRowClick(DataGridRowMouseEventArgs<CashRegisterListDto> args)
+        {
+            if (args?.Data == null) return;
+            await EditRow(args.Data);
+        }
+
         protected async Task EditRow(CashRegisterListDto args)
         {
             var result = await DialogService.OpenAsync<UpsertCashRegister>("Kasa Düzenle",

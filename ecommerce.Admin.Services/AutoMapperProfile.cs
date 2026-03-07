@@ -65,6 +65,13 @@ public class AutoMapperProfile : Profile
         CreatePcPosMappings();
         CreateSearchSynonymMappings();
         CreateSellerItemMappings();
+        CreateSaleOptionsMappings();
+    }
+
+    private void CreateSaleOptionsMappings()
+    {
+        CreateMap<SaleOptions, ecommerce.Admin.Domain.Dtos.SaleOptionsDto.SaleOptionsListDto>();
+        CreateMap<SaleOptions, ecommerce.Admin.Domain.Dtos.SaleOptionsDto.SaleOptionsUpsertDto>().ReverseMap();
     }
 
     private void CreateWarehouseMappings()
@@ -247,7 +254,8 @@ public class AutoMapperProfile : Profile
 
     private void CreateProductMappings()
     {
-        CreateMap<Product, ProductListDto>();
+        CreateMap<Product, ProductListDto>()
+            .ForMember(dest => dest.Kdv, opt => opt.MapFrom(src => src.Tax != null ? src.Tax.TaxRate : (int?)null));
         CreateMap<ProductOnline, ProductOnlineDto>();
 
         CreateProjection<Product, ProductListForProjectionDto>()
@@ -358,7 +366,8 @@ public class AutoMapperProfile : Profile
 
     private void CreatePaymentTypeMappings()
     {
-        CreateMap<ecommerce.Core.Entities.Accounting.PaymentType, PaymentTypeListDto>();
+        CreateMap<ecommerce.Core.Entities.Accounting.PaymentType, PaymentTypeListDto>()
+            .ForMember(d => d.CurrencyName, opt => opt.MapFrom(s => s.Currency != null ? s.Currency.CurrencyCode : null));
         CreateMap<ecommerce.Core.Entities.Accounting.PaymentType, PaymentTypeUpsertDto>().ReverseMap();
     }
 
@@ -366,7 +375,8 @@ public class AutoMapperProfile : Profile
     {
         CreateMap<CashRegister, ecommerce.Admin.Domain.Dtos.CashRegisterDto.CashRegisterListDto>()
             .ForMember(d => d.CurrencyCode, opt => opt.MapFrom(s => s.Currency != null ? s.Currency.CurrencyCode : null))
-            .ForMember(d => d.PaymentTypeName, opt => opt.MapFrom(s => s.PaymentType != null ? s.PaymentType.Name : null));
+            .ForMember(d => d.PaymentTypeName, opt => opt.MapFrom(s => s.PaymentType != null ? s.PaymentType.Name : null))
+            .ForMember(d => d.BranchName, opt => opt.Ignore());
 
         CreateMap<CashRegister, ecommerce.Admin.Domain.Dtos.CashRegisterDto.CashRegisterUpsertDto>().ReverseMap();
     }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ecommerce.Admin.Components.Layout;
 using ecommerce.Admin.CustomComponents.Modals;
 using ecommerce.Admin.Domain.Dtos.Identity;
@@ -30,6 +30,7 @@ public partial class UpsertApplicationUser
     [Inject] private IUserBranchService UserBranchService { get; set; }
     [Inject] private ICorporationService CorporationService { get; set; }
     [Inject] private IBranchService BranchService { get; set; }
+    [Inject] private ecommerce.Admin.Domain.Interfaces.IPcPosService PcPosService { get; set; }
     
     [Parameter] public int? Id { get; set; }
     
@@ -93,6 +94,13 @@ public partial class UpsertApplicationUser
         {
             AllBranches = branchResponse.Result;
         }
+
+        // Load PcPos definitions for CaseIds (kullanıcı ataması için - CanView kontrolü yok)
+        var pcPosResponse = await PcPosService.GetPcPosForUserAssignment();
+        if (pcPosResponse.Ok && pcPosResponse.Result != null)
+        {
+            PcPosDefinitions = pcPosResponse.Result;
+        }
         
         if (Id.HasValue)
         {
@@ -104,8 +112,16 @@ public partial class UpsertApplicationUser
                 return;
             }
             EditingEntity = response.Result;
-            
 
+            // Parse CaseIds to SelectedPcPosIds (PcPos tanım ID'leri, virgülle ayrılmış)
+            if (!string.IsNullOrWhiteSpace(EditingEntity.CaseIds))
+            {
+                SelectedPcPosIds = EditingEntity.CaseIds
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Where(s => int.TryParse(s, out _))
+                    .Select(int.Parse)
+                    .ToList();
+            }
 
             // Load user's branch assignments
             var userBranchesResponse = await UserBranchService.GetUserBranches(Id.Value);
@@ -127,6 +143,22 @@ public partial class UpsertApplicationUser
     private async Task FormSubmit()
     {
         Saving = true;
+        
+        // PcPos: Seçilen PcPos tanımlarını CaseIds'e yaz, UserType=2 otomatik
+        if (EditingEntity.IsPcPosUser)
+        {
+            EditingEntity.UserType = 2; // POS kullanıcısı
+            EditingEntity.CaseIds = SelectedPcPosIds != null && SelectedPcPosIds.Any()
+                ? string.Join(",", SelectedPcPosIds)
+                : null;
+        }
+        else
+        {
+            EditingEntity.CaseIds = null;
+            EditingEntity.CompanyCode = null;
+            EditingEntity.IsEdit = false;
+            EditingEntity.UserType = null;
+        }
         
         // Check if new user before upsert
         bool isNewUser = !EditingEntity.Id.HasValue || EditingEntity.Id.Value == 0;
@@ -188,6 +220,8 @@ public partial class UpsertApplicationUser
 
     private int? SelectedBranchId { get; set; }
     private bool SavingBranches { get; set; }
+    private List<ecommerce.Admin.Domain.Dtos.PcPosDto.PcPosListDto> PcPosDefinitions { get; set; } = new();
+    private List<int> SelectedPcPosIds { get; set; } = new();
 
     private void AddBranch()
     {

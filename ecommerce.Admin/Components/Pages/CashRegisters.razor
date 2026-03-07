@@ -28,7 +28,8 @@
                             PagerHorizontalAlign="HorizontalAlign.Left"
                             ShowPagingSummary="true"
                             TItem="CashRegisterListDto"
-                            RowSelect="@EditRow"
+                            DataKeyProperty="Id"
+                            RowClick="@OnRowClick"
                             LoadData="@LoadData"
                             Count="@count"
                             Data="@cashRegisters"
@@ -37,7 +38,6 @@
                             SelectionMode="DataGridSelectionMode.Single">
                 <Columns>
                     <RadzenDataGridColumn TItem="CashRegisterListDto" Property="Id" Title="ID" Width="80px" />
-                    <RadzenDataGridColumn TItem="CashRegisterListDto" Property="Code" Title="Kasa Kodu" Width="150px" />
                     <RadzenDataGridColumn TItem="CashRegisterListDto" Property="Name" Title="Kasa Adı" />
                     <RadzenDataGridColumn TItem="CashRegisterListDto" Property="CurrencyCode" Title="Döviz" Width="100px" />
                     <RadzenDataGridColumn TItem="CashRegisterListDto" Property="OpeningBalance" Title="Açılış Bakiyesi" Width="150px">

@@ -61,6 +61,11 @@ namespace ecommerce.Admin.Domain.Dtos.Customer
         public CustomerWorkingTypeEnum CustomerWorkingType { get; set; } = CustomerWorkingTypeEnum.Pesin;
         public bool AllowCashSale { get; set; } = true;
         public bool TransferNewYear { get; set; } = true;
+        public bool IsPcPos { get; set; }
+        public bool IsCredit { get; set; }
+        public bool IsVatExcluded { get; set; }
+        public bool IsCurrentPricesUpdatable { get; set; }
+        public bool IsStreetAgency { get; set; }
         public List<CustomerBranchUpsertDto> Branches { get; set; } = new();
     }
 }

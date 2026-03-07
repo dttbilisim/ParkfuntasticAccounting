@@ -16,7 +16,7 @@ namespace ecommerce.Admin.Domain.Dtos.PcPosDto
 
         public int CorporationId { get; set; }
         public int BranchId { get; set; }
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
         public int? PaymentTypeId { get; set; }
     }
 }

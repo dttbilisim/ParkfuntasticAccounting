@@ -11,6 +11,19 @@ public class CurrencyService(HttpClient _httpClient, IUnitOfWork<ApplicationDbCo
         var xml = await _httpClient.GetStringAsync(url);
         var xDoc = XDocument.Parse(xml);
         var list = new List<Currency>();
+
+        // TCMB tüm kurları TL cinsinden verir, TRY referans para birimi olduğu için XML'de yer almaz.
+        // Türk Lirasını listenin başına manuel ekliyoruz (kur = 1).
+        list.Add(new Currency
+        {
+            CurrencyCode = "TRY",
+            CurrencyName = "Türk Lirası",
+            ForexBuying = 1m,
+            ForexSelling = 1m,
+            BanknoteBuying = 1m,
+            BanknoteSelling = 1m,
+        });
+
         foreach(var currency in xDoc.Descendants("Currency")){
             var rate = new Currency{
                 CurrencyCode = currency.Attribute("CurrencyCode")?.Value ?? "",

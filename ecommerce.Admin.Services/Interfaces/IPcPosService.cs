@@ -9,6 +9,8 @@ namespace ecommerce.Admin.Domain.Interfaces
     {
         public Task<IActionResult<Paging<IQueryable<PcPosListDto>>>> GetPcPos(PageSetting pager);
         public Task<IActionResult<List<PcPosListDto>>> GetPcPos();
+        /// <summary>Kullanıcı ataması için PcPos listesi (CanView kontrolü yok - dropdown için)</summary>
+        public Task<IActionResult<List<PcPosListDto>>> GetPcPosForUserAssignment();
         public Task<IActionResult<Empty>> UpsertPcPos(AuditWrapDto<PcPosUpsertDto> model);
         public Task<IActionResult<Empty>> DeletePcPos(AuditWrapDto<PcPosDeleteDto> model);
         public Task<IActionResult<PcPosUpsertDto>> GetPcPosById(int id);

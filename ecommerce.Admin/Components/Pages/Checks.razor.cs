@@ -92,7 +92,7 @@ namespace ecommerce.Admin.Components.Pages
                 var pager = new PageSetting(null, null, 0, 500);
                 var response = await CustomerService.GetPagedCustomers(pager);
                 if (response.Ok && response.Result?.Data != null)
-                    CustomerList = response.Result.Data;
+                    CustomerList = response.Result.Data.DistinctBy(c => c.Id).ToList();
                 else
                     CustomerList = new List<CustomerListDto>();
             }

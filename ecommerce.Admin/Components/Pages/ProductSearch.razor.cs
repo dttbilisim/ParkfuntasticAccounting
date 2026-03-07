@@ -844,37 +844,11 @@ namespace ecommerce.Admin.Components.Pages
                 Logger.LogInformation("[VIN-DEBUG] Trimmed search: '{TrimmedSearch}', Length: {Length}", 
                     trimmedSearch, trimmedSearch.Length);
                 
-                // VIN kontrolü: 17 karakter, sadece harf/rakam (I, O, Q dahil edilebilir - fix için), tire/boşluk YOK
-                // Fix: Kullanıcılar I, O, Q karakterlerini yanlışlıkla girebilir (1, 0 yerine). Regex'i esnetiyoruz.
-                var isVinMatch = trimmedSearch.Length >= 15 && trimmedSearch.Length <= 17 && 
-                                System.Text.RegularExpressions.Regex.IsMatch(trimmedSearch, @"^[A-Z0-9]{15,17}$") &&
-                                !trimmedSearch.Contains("-") && // Tire varsa OEM kodudur
-                                !trimmedSearch.Contains(" "); // Boşluk varsa OEM kodudur
-                
-                Logger.LogInformation("[VIN-DEBUG] VIN regex match: {IsMatch}", isVinMatch);
-                
-                if (isVinMatch)
-                {
-                    // Auto-correct common typos: I->1, O->0, Q->0
-                    var correctedVin = trimmedSearch
-                        .Replace('I', '1')
-                        .Replace('O', '0')
-                        .Replace('Q', '0');
-                        
-                    if (correctedVin != trimmedSearch)
-                    {
-                        Logger.LogInformation("[VIN-DEBUG] VIN düzeltildi: {Old} -> {New}", trimmedSearch, correctedVin);
-                        trimmedSearch = correctedVin;
-                        searchText = correctedVin; // UI'ı da güncelle
-                    }
-
-                    Logger.LogInformation("[VIN-DEBUG] VIN numarası tespit edildi - HandleVinSearch çağrılıyor");
-                    // VIN numarası tespit edildi - VIN decode işlemi yap
-                    await HandleVinSearch(trimmedSearch);
-                    return;
-                }
-
-                Logger.LogInformation("[VIN-DEBUG] Normal arama yapılıyor (VIN değil)");
+                // VIN/araç arama - şimdilik devre dışı (normal arama yapılacak)
+                // var isVinMatch = trimmedSearch.Length >= 15 && trimmedSearch.Length <= 17 && 
+                //                 System.Text.RegularExpressions.Regex.IsMatch(trimmedSearch, @"^[A-Z0-9]{15,17}$") &&
+                //                 !trimmedSearch.Contains("-") && !trimmedSearch.Contains(" ");
+                // if (isVinMatch) { await HandleVinSearch(trimmedSearch); return; }
                 
                 // Reset vehicle context
                 selectedManufacturerName = null;
@@ -3166,8 +3140,9 @@ namespace ecommerce.Admin.Components.Pages
             if (string.IsNullOrWhiteSpace(searchText))
                 return "b2b-search-input flex-grow-1";
 
-            if (IsVinNumber(searchText))
-                return "b2b-search-input flex-grow-1 vin-detected";
+            // VIN tespiti - şimdilik devre dışı
+            // if (IsVinNumber(searchText))
+            //     return "b2b-search-input flex-grow-1 vin-detected";
 
             return "b2b-search-input flex-grow-1";
         }

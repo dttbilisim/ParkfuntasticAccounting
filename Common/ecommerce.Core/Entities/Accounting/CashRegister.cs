@@ -14,9 +14,6 @@ namespace ecommerce.Core.Entities.Accounting
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(20)]
-        public string? Code { get; set; }
-
         public int CurrencyId { get; set; }
         public virtual Currency Currency { get; set; } = null!;
 
@@ -30,5 +27,10 @@ namespace ecommerce.Core.Entities.Accounting
         public int? PaymentTypeId { get; set; }
         [ForeignKey(nameof(PaymentTypeId))]
         public virtual PaymentType? PaymentType { get; set; }
+
+        /// <summary>Ödeme tipi 3 veya 4 (Havale/EFT, Çek) seçildiğinde bağlanacak banka hesabı.</summary>
+        public int? BankAccountId { get; set; }
+        [ForeignKey(nameof(BankAccountId))]
+        public virtual ecommerce.Core.Entities.BankAccount? BankAccount { get; set; }
     }
 }

@@ -113,7 +113,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
             {
                 pcpos.CorporationId = corpId;
                 pcpos.BranchId = 0; // Reset Branch
-                pcpos.WarehouseId = 0; // Reset Warehouse
+                pcpos.WarehouseId = null; // Reset Warehouse
                 await LoadBranches(corpId);
                 branches = branches ?? new List<BranchListDto>();
                 warehouses = new List<WarehouseListDto>(); // Clear warehouses
@@ -125,7 +125,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
              if (value is int branchId)
             {
                 pcpos.BranchId = branchId;
-                pcpos.WarehouseId = 0; // Reset Warehouse
+                pcpos.WarehouseId = null; // Reset Warehouse
                 await LoadWarehouses(branchId);
                 warehouses = warehouses ?? new List<WarehouseListDto>();
             }

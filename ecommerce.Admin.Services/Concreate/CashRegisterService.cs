@@ -102,8 +102,22 @@ namespace ecommerce.Admin.Services.Concreate
                 query = _roleFilter.ApplyFilter(query, scopedUow.DbContext);
 
                 var entities = await query.ToListAsync();
-
                 rs.Result = _mapper.Map<List<CashRegisterListDto>>(entities);
+
+                // BranchName doldur (Branch FK yok, manuel lookup)
+                var branchIds = entities.Select(x => x.BranchId).Distinct().ToList();
+                if (branchIds.Count > 0)
+                {
+                    var branchRepo = scopedUow.GetRepository<Branch>();
+                    var branches = await branchRepo.GetAll(true).Where(b => branchIds.Contains(b.Id)).Select(b => new { b.Id, b.Name }).ToListAsync();
+                    // Aynı BranchId birden fazla satırda gelebilir (query filter vb.) — tekilleştir
+                    var branchDict = branches.GroupBy(b => b.Id).ToDictionary(g => g.Key, g => g.First().Name);
+                    foreach (var dto in rs.Result)
+                    {
+                        if (branchDict.TryGetValue(dto.BranchId, out var name))
+                            dto.BranchName = name;
+                    }
+                }
                 return rs;
             }
             catch (Exception ex)
@@ -167,6 +181,13 @@ namespace ecommerce.Admin.Services.Concreate
                         item.IsDefault = false;
                         scopedRepo.Update(item);
                     }
+                }
+
+                // Ödeme tipi 3 veya 4 (Havale/EFT, Çek) seçildiğinde banka hesabı zorunlu
+                if (dto.PaymentTypeId is 3 or 4 && (!dto.BankAccountId.HasValue || dto.BankAccountId == 0))
+                {
+                    rs.AddError("Ödeme tipi Havale/EFT veya Çek seçildiğinde banka hesabı seçimi zorunludur.");
+                    return rs;
                 }
 
                 if (!dto.Id.HasValue || dto.Id == 0)

@@ -79,7 +79,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
             var customerPager = new PageSetting(null, null, 0, 500);
             var customerRes = await CustomerService.GetPagedCustomers(customerPager);
             if (customerRes.Ok && customerRes.Result?.Data != null)
-                CustomerList = customerRes.Result.Data;
+                CustomerList = customerRes.Result.Data.DistinctBy(c => c.Id).ToList();
 
             var salesPersonRes = await SalesPersonService.GetSalesPersons();
             if (salesPersonRes.Ok && salesPersonRes.Result != null)

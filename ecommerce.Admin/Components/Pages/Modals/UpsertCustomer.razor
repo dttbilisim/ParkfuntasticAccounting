@@ -114,6 +114,29 @@ else
                                      <RadzenLabel Text="Yeni Yıla Devret" Component="TransferNewYear" class="ms-2 mb-0" style="cursor: pointer" />
                                 </div>
 
+                                <hr class="my-3" />
+                                <RadzenText TextStyle="TextStyle.Subtitle2" class="mb-2">PcPos Transfer</RadzenText>
+                                <div class="col-md-6 d-flex align-items-center mt-2">
+                                     <RadzenCheckBox @bind-Value=@Customer.IsPcPos Name="IsPcPos" TValue="bool" />
+                                     <RadzenLabel Text="PcPos Aktif" Component="IsPcPos" class="ms-2 mb-0" style="cursor: pointer" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center mt-2">
+                                     <RadzenCheckBox @bind-Value=@Customer.IsCredit Name="IsCredit" TValue="bool" />
+                                     <RadzenLabel Text="Kredi Verilebilir" Component="IsCredit" class="ms-2 mb-0" style="cursor: pointer" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center mt-2">
+                                     <RadzenCheckBox @bind-Value=@Customer.IsVatExcluded Name="IsVatExcluded" TValue="bool" />
+                                     <RadzenLabel Text="KDV Hariç" Component="IsVatExcluded" class="ms-2 mb-0" style="cursor: pointer" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center mt-2">
+                                     <RadzenCheckBox @bind-Value=@Customer.IsCurrentPricesUpdatable Name="IsCurrentPricesUpdatable" TValue="bool" />
+                                     <RadzenLabel Text="Güncel Fiyatlar Güncellenebilir" Component="IsCurrentPricesUpdatable" class="ms-2 mb-0" style="cursor: pointer" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center mt-2">
+                                     <RadzenCheckBox @bind-Value=@Customer.IsStreetAgency Name="IsStreetAgency" TValue="bool" />
+                                     <RadzenLabel Text="Sokak Acentası" Component="IsStreetAgency" class="ms-2 mb-0" style="cursor: pointer" />
+                                </div>
+
                             </div>
                         </div>
                     </RadzenTabsItem>

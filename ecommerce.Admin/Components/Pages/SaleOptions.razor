@@ -1,0 +1,52 @@
+@page "/sale-options"
+@using ecommerce.Admin.Domain.Dtos.SaleOptionsDto
+@using ecommerce.Admin.Components.Layout
+@attribute [Authorize]
+@layout MainLayout
+
+<PageTitle>Satış Seçenekleri (PcPos)</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1 class="h3 mb-0 text-gray-800">Satış Seçenekleri (PcPos)</h1>
+        </div>
+        <div class="col-6 text-end">
+            <RadzenButton Icon="add" Text="Yeni Satış Seçeneği" Click="@AddButtonClick" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <AdminDataGrid @ref="grid"
+                            LoadData="@LoadData"
+                            Data="@saleOptions"
+                            Count="@count"
+                            TItem="SaleOptionsListDto"
+                            AllowFiltering="true"
+                            FilterMode="FilterMode.Advanced"
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            PageSize="10"
+                            AllowColumnResize="true"
+                            AllowAlternatingRows="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            ShowPagingSummary="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            LogicalFilterOperator="LogicalFilterOperator.Or"
+                            SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="SaleOptionsListDto" Property="Id" Title="#" Width="70px" TextAlign="TextAlign.Center"/>
+                    <RadzenDataGridColumn TItem="SaleOptionsListDto" Property="Name" Title="Ad" />
+                    <RadzenDataGridColumn TItem="SaleOptionsListDto" Property="CreatedDate" Title="Oluşturulma" Width="160px" FormatString="{0:dd.MM.yyyy HH:mm}" />
+                    <RadzenDataGridColumn TItem="SaleOptionsListDto" Title="İşlemler" TextAlign="TextAlign.Center" Width="100px" Filterable="false" Sortable="false">
+                        <Template Context="item">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => EditRow(item))" @onclick:stopPropagation="true" class="me-1"/>
+                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => DeleteRow(item))" @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </AdminDataGrid>
+        </div>
+    </div>
+</div>

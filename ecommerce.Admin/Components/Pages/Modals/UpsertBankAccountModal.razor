@@ -69,21 +69,17 @@ else
                                     <RadzenTextBox Name="CardNumber" @bind-Value="@model.CardNumber" class="w-100 form-control-modern" />
                                 </div>
                                 <div class="col-md-4">
-                                    <RadzenLabel Text="Ödeme Tipi" Component="PaymentType" />
-                                    <RadzenDropDown Name="PaymentType"
+                                    <RadzenLabel Text="Ödeme Tipi" Component="PaymentTypeId" />
+                                    <RadzenDropDown Name="PaymentTypeId"
                                                     Data="@PaymentTypeOptions"
-                                                    @bind-Value="@model.PaymentType"
-                                                    TValue="BankPaymentType"
+                                                    TextProperty="Name"
+                                                    ValueProperty="Id"
+                                                    @bind-Value="@model.PaymentTypeId"
+                                                    TValue="int?"
                                                     class="w-100 form-control-modern"
-                                                    AllowClear="false" 
-                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
-                                        <Template Context="item">
-                                            @((item as BankPaymentType?)?.GetDisplayName() ?? item?.ToString())
-                                        </Template>
-                                        <ValueTemplate Context="item">
-                                            @((item as BankPaymentType?)?.GetDisplayName() ?? item?.ToString())
-                                        </ValueTemplate>
-                                    </RadzenDropDown>
+                                                    AllowClear="true"
+                                                    Placeholder="Seçiniz..."
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
                                 </div>
                             </div>
 

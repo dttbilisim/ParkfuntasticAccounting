@@ -61,6 +61,7 @@ namespace ecommerce.Admin.Services.Concreate
                     return result;
                 }
 
+                // IgnoreQueryFilters: Global BranchId filtresi eklenen kayıtları gizliyordu — listelemede tüm yetkili kayıtlar görünsün
                 var query = _context.DbContext.CashRegisterMovements
                     .AsNoTracking()
                     .IgnoreQueryFilters()
@@ -71,7 +72,10 @@ namespace ecommerce.Admin.Services.Concreate
                 else
                     query = query.Where(x => x.Status == (int)EntityStatus.Active); // Varsayılan: sadece aktif
 
-                query = _roleFilter.ApplyFilter(query, _context.DbContext);
+                // BranchId: Kendi şuben + global (BranchId=0). Admin/B2BAdmin veya şube seçilmemişse tümü
+                var branchId = _tenantProvider.GetCurrentBranchId();
+                if (!_tenantProvider.IsGlobalAdmin && !_tenantProvider.IsB2BAdmin && branchId > 0)
+                    query = query.Where(x => x.BranchId == branchId || x.BranchId == 0);
 
                 if (cashRegisterId.HasValue && cashRegisterId.Value > 0)
                     query = query.Where(x => x.CashRegisterId == cashRegisterId.Value);
@@ -528,7 +532,9 @@ namespace ecommerce.Admin.Services.Concreate
                 {
                     var inOutQuery = movementQuery.Where(x => x.CashRegisterId == cr.Id && x.CurrencyId == cr.CurrencyId);
                     var totalIn = await inOutQuery.Where(x => x.MovementType == CashRegisterMovementType.In).SumAsync(x => x.Amount);
-                    var totalOut = await inOutQuery.Where(x => x.MovementType == CashRegisterMovementType.Out).SumAsync(x => x.Amount);
+                    var totalOutRaw = await inOutQuery.Where(x => x.MovementType == CashRegisterMovementType.Out).SumAsync(x => x.Amount);
+                    // Çıkış negatif saklanıyorsa mutlak değer; bakiye = Açılış + Giriş - Çıkış
+                    var totalOut = Math.Abs(totalOutRaw);
 
                     summaries.Add(new CashRegisterBalanceSummaryDto
                     {

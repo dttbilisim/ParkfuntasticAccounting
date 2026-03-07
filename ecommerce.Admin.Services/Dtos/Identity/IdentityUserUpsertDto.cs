@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using ecommerce.Admin.Domain.Dtos.HierarchicalDto;
 
 namespace ecommerce.Admin.Domain.Dtos.Identity;
@@ -27,4 +28,12 @@ public class IdentityUserUpsertDto
     public int? SalesPersonId { get; set; }
 
     public List<UserBranchUpsertDto> Branches { get; set; } = new();
+    /// <summary>PcPos kullanıcısı mı?</summary>
+    public bool IsPcPosUser { get; set; }
+    [MaxLength(50)]
+    public string? CompanyCode { get; set; }
+    [MaxLength(500)]
+    public string? CaseIds { get; set; }
+    public bool IsEdit { get; set; }
+    public int? UserType { get; set; }
 }

@@ -129,6 +129,7 @@ namespace ecommerce.Admin.AppStart{
             builder.Services.AddScoped<IExpenseDefinitionService, ExpenseDefinitionService>();
             builder.Services.AddScoped<IUnitService, UnitService>();
             builder.Services.AddScoped<IProductUnitService, ProductUnitService>();
+            builder.Services.AddScoped<ISaleOptionsService, SaleOptionsService>();
             builder.Services.AddScoped<IPcPosService, PcPosService>();
             builder.Services.AddScoped<ISalesPersonService, SalesPersonService>();
             builder.Services.AddScoped<IRegionService, RegionService>();

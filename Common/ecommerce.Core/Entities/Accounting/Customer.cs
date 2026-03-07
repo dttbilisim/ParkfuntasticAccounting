@@ -78,6 +78,20 @@ namespace ecommerce.Core.Entities.Accounting
 
         public bool TransferNewYear { get; set; } = true;
 
+        /// <summary>PcPos transfer: Cari POS'ta aktif mi?</summary>
+        public bool IsPcPos { get; set; }
+        /// <summary>PcPos transfer: Kredi verilebilir mi?</summary>
+        public bool IsCredit { get; set; }
+        /// <summary>PcPos transfer: KDV hariç mi?</summary>
+        public bool IsVatExcluded { get; set; }
+        /// <summary>PcPos transfer: Güncel fiyatlar güncellenebilir mi?</summary>
+        public bool IsCurrentPricesUpdatable { get; set; }
+        /// <summary>PcPos transfer: Sokak acentası mı?</summary>
+        public bool IsStreetAgency { get; set; }
+        /// <summary>PcPos transfer: Şirket kodu (filtreleme için)</summary>
+        [MaxLength(50)]
+        public string? CompanyCode { get; set; }
+
         public virtual ICollection<CustomerBranch> CustomerBranches { get; set; } = new List<CustomerBranch>();
     }
 

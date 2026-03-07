@@ -27,10 +27,9 @@
                     <RadzenRequiredValidator Component="Branch" Text="Şube seçmelisiniz" DefaultValue="0" />
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="4">
-                    <RadzenLabel Text="Depo" Component="Warehouse" />
-                    <RadzenDropDown @bind-Value="pcpos.WarehouseId" Data="@warehouses" TextProperty="Name" ValueProperty="Id" Style="width: 100%; display: block;" Name="Warehouse" Placeholder="Depo Seçiniz" Disabled="@(pcpos.BranchId == 0)" 
+                    <RadzenLabel Text="Depo (opsiyonel)" Component="Warehouse" />
+                    <RadzenDropDown @bind-Value="pcpos.WarehouseId" Data="@warehouses" TextProperty="Name" ValueProperty="Id" Style="width: 100%; display: block;" Name="Warehouse" Placeholder="Depo Seçiniz (opsiyonel)" Disabled="@(pcpos.BranchId == 0)" AllowClear="true"
                                     AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
-                    <RadzenRequiredValidator Component="Warehouse" Text="Depo seçmelisiniz" DefaultValue="0" />
                 </RadzenColumn>
             </RadzenRow>
             

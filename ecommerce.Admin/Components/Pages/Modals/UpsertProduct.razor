@@ -161,6 +161,16 @@
                 <span style="color: red;font-size: 10px;">Ürünün stok takibi yapılmasını istiyorsanız işaretleyiniz.</span>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="Paket Ürün mü?" Component="IsPackageProduct" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenCheckBox TValue="bool" @bind-Value="@product.IsPackageProduct" Name="IsPackageProduct"/>
+                <span style="color: #666;font-size: 10px;">İşaretli ise bu ürün paket ürün olup, Other alanından içindeki ürünleri seçebilirsiniz.</span>
+            </div>
+        </div>
+        @* Paket ürün bileşenleri artık "Paket Ürünler" tab'ında yönetiliyor *@
         @* Admin ürün tanımı sadeleştirme: Ebat/Ağırlık/Sunum alanları ana sekmeye taşındı, sadece Ağırlık gösteriliyor. *@
         <div style="margin-bottom: 1rem" class="row">
             <div class="col-md-3">
@@ -284,6 +294,68 @@
         }
     </RadzenFieldset>
 </RadzenTabsItem>
+
+@if (product.IsPackageProduct)
+{
+<RadzenTabsItem Text="Paket Ürünler">
+    <RadzenFieldset Text="Paket İçeriği - Ürünler ve Fiyatları">
+        <p class="text-muted small mb-2">Ürün adı veya barkod ile arayın, listeden seçtiğinizde pakete eklenir. KDV oranı ürünün vergi bilgisinden otomatik gelir.</p>
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <RadzenLabel Text="Ürün Ara ve Ekle" />
+                <RadzenAutoComplete TValue="string"
+                    @bind-Value="@packageProductSearchText"
+                    Data="@packageProductSearchResults"
+                    TextProperty="Name"
+                    ValueProperty="IdStr"
+                    MinLength="1"
+                    LoadData="@LoadPackageProductSearch"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    Placeholder="Ürün adı veya barkod yazın, seçip Ekle'ye tıklayın..."
+                    class="w-100">
+                    <Template Context="p">
+                        <div class="d-flex justify-content-between py-1" style="font-size: 0.9rem;">
+                            <span>@((p as ProductListDto)?.Name)</span>
+                            <small class="text-muted">@((p as ProductListDto)?.Barcode)</small>
+                        </div>
+                    </Template>
+                </RadzenAutoComplete>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <RadzenButton Text="Ekle" Icon="add" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
+                    Click="@AddPackageProductFromSearch" class="w-100" />
+            </div>
+        </div>
+        <RadzenDataGrid AllowFiltering="false"
+                        AllowColumnResize="true"
+                        AllowAlternatingRows="false"
+                        AllowSorting="false"
+                        AllowPaging="false"
+                        Data="@(product.PackageProductItems ?? new List<PackageProductItemDto>())"
+                        TItem="PackageProductItemDto"
+                        ColumnWidth="200px">
+            <Columns>
+                <RadzenDataGridColumn TItem="PackageProductItemDto" Title="Ürün" Width="300px" Property="ProductName"/>
+                <RadzenDataGridColumn TItem="PackageProductItemDto" Title="Fiyat" Width="150px">
+                    <Template Context="item">
+                        <RadzenNumeric Format="c" style="display: block; width: 100%" 
+                            Value="@item.Price" ValueChanged="@((decimal? val) => item.Price = val ?? 0)" 
+                            Min="0" ShowUpDown="false"/>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="PackageProductItemDto" Title="KDV %" Width="80px" Property="TaxRate"/>
+                <RadzenDataGridColumn TItem="PackageProductItemDto" Title="" Width="60px" TextAlign="TextAlign.Center">
+                    <Template Context="item">
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.ExtraSmall"
+                                      Shade="Shade.Dark" Variant="Variant.Flat"
+                                      Click="@(() => RemovePackageProductItem(item))" @onclick:stopPropagation="true"/>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenFieldset>
+</RadzenTabsItem>
+}
 
 @if (false)
 {

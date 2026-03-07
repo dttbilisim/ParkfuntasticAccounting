@@ -1,0 +1,28 @@
+@using ecommerce.Admin.Domain.Dtos.SaleOptionsDto
+@using Radzen
+@using Radzen.Blazor
+
+@if (Model == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <RadzenTemplateForm Data="@Model" Submit="@(async (SaleOptionsUpsertDto args) => { await FormSubmit(args); })">
+        <div class="modal-content-body">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <RadzenLabel Text="Satış Seçeneği Adı" Component="Name" />
+                    <RadzenTextBox Name="Name" @bind-Value="@Model.Name" class="w-100 form-control-modern" Placeholder="Örn: Perakende, Toptan..." />
+                    <RadzenRequiredValidator Component="Name" Text="Ad alanı zorunludur" Popup="true" Style="position: absolute" />
+                </div>
+            </div>
+        </div>
+        <div class="modal-sticky-footer d-flex justify-content-end gap-2">
+            <RadzenButton Text="Vazgeç" Click="@(() => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Kaydet" ButtonStyle="ButtonStyle.Primary" Icon="save" IsBusy="@Saving" />
+        </div>
+    </RadzenTemplateForm>
+}

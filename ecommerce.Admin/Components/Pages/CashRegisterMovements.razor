@@ -91,6 +91,7 @@
             <AdminDataGrid @ref="Grid"
                            TItem="CashRegisterMovementListDto"
                            Data="@Items"
+                           DataKeyProperty="Id"
                            Count="@Count"
                            LoadData="@LoadData"
                            AllowPaging="true"

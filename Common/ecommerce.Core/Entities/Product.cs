@@ -34,6 +34,10 @@ namespace ecommerce.Core.Entities
         [ForeignKey("ProductTypeId")]
         public ProductType? ProductType { get; set; } = null!;
 
+        /// <summary>PcPos transfer: Ana kategori (tProduct.CatID)</summary>
+        public int? CategoryId { get; set; }
+        [ForeignKey(nameof(CategoryId))]
+        public Category? Category { get; set; }
 
         public decimal Price{get;set;} = 0;
         public decimal? CostPrice { get; set; }
@@ -48,6 +52,16 @@ namespace ecommerce.Core.Entities
 
         public bool IsGift{get;set;} = false;
         public bool IsStockFollow { get; set; } = true;
+
+        /// <summary>PcPos transfer: POS durumu</summary>
+        public int? StatusPcPos { get; set; }
+        /// <summary>PcPos transfer: Satış durumu</summary>
+        public int? StatusSales { get; set; }
+
+        /// <summary>Paket ürün mü? İşaretli ise PackageProductIds'deki ürünler paketin içeriğidir.</summary>
+        public bool IsPackageProduct { get; set; }
+        /// <summary>Paket ürün ise içindeki ürün ID'leri (virgülle ayrılmış, örn: "1,2,3")</summary>
+        public string? PackageProductIds { get; set; }
         
         public virtual List<ProductCategories> Categories { get; set; } = null!;
         
@@ -59,6 +73,13 @@ namespace ecommerce.Core.Entities
         public ICollection<ProductTier> ProductTiers { get; set; } = new List<ProductTier>();
         
         public ICollection<ProductUnit> ProductUnits { get; set; } = new List<ProductUnit>();
+
+        /// <summary>PcPos transfer: Ürün-şube eşlemesi</summary>
+        public ICollection<ProductBranch> ProductBranches { get; set; } = new List<ProductBranch>();
+        /// <summary>PcPos transfer: Paket ürün bileşenleri (bu ürün paket ise)</summary>
+        public ICollection<ProductSaleItems> ProductSaleItemsAsRef { get; set; } = new List<ProductSaleItems>();
+        /// <summary>PcPos transfer: Bu ürün bir paketin bileşeni ise</summary>
+        public ICollection<ProductSaleItems> ProductSaleItemsAsComponent { get; set; } = new List<ProductSaleItems>();
     }
 }
 

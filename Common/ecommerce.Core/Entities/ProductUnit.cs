@@ -20,5 +20,8 @@ namespace ecommerce.Core.Entities
         public decimal UnitValue { get; set; } = 1; // Birim dönüşüm değeri (örn: 1 koli = 12 adet)
         public bool IsDefault { get; set; }
         public int BranchId { get; set; }
+        /// <summary>PcPos transfer: Şirket kodu</summary>
+        [MaxLength(50)]
+        public string? CompanyCode { get; set; }
     }
 }

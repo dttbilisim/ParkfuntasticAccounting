@@ -49,6 +49,17 @@ namespace ecommerce.Admin.Domain.Dtos.ProductDto
         public List<int>? CategoryIds { get; set; }
         public int? UnitId { get; set; }
         public List<int>? UnitIds { get; set; }
+
+        /// <summary>Paket ürün mü?</summary>
+        public bool IsPackageProduct { get; set; }
+        /// <summary>Paket ürün ise içindeki ürün ID'leri (virgülle ayrılmış)</summary>
+        public string? PackageProductIds { get; set; }
+        /// <summary>UI için: Paketteki ürün ID listesi (PackageProductIds'den parse edilir)</summary>
+        [Ignore]
+        public List<int> PackageProductIdList { get; set; } = new();
+        /// <summary>Paket ürün ise: ürünler ve fiyatları (ProductSaleItems)</summary>
+        [Ignore]
+        public List<PackageProductItemDto> PackageProductItems { get; set; } = new();
     }
  
 }

@@ -19,7 +19,7 @@ public class CollectPaymentRequestDto
     /// <summary>Ödeme tutarı</summary>
     public decimal Amount { get; set; }
 
-    /// <summary>Nakit ödeme için kasa ID (zorunlu)</summary>
+    /// <summary>Kasa ID — Nakit için zorunlu (PaymentTypeId=1), Kart için zorunlu (PaymentTypeId=2). Kasa tanımlarından doğru kasa seçilmelidir.</summary>
     public int? CashRegisterId { get; set; }
 
     /// <summary>Sanal POS için kart bilgileri</summary>

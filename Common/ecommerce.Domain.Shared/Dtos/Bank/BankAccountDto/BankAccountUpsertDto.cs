@@ -1,5 +1,3 @@
-using ecommerce.Core.Utils;
-
 namespace ecommerce.Domain.Shared.Dtos.Bank.BankAccountDto;
 
 public class BankAccountUpsertDto
@@ -7,7 +5,7 @@ public class BankAccountUpsertDto
     public int Id { get; set; }
     public int? BankId { get; set; }
     public string? SystemCode { get; set; }
-    public BankPaymentType PaymentType { get; set; } = BankPaymentType.Nakit;
+    public int? PaymentTypeId { get; set; }
     public int? CurrencyId { get; set; }
     public string AccountCode { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;

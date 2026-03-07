@@ -7,7 +7,7 @@ public class PcPosDefinition : AuditableEntity<int>
 {
     public string Name { get; set; } = null!;
     public int BranchId { get; set; }
-    public int WarehouseId { get; set; }
+    public int? WarehouseId { get; set; }
     
     public int? PaymentTypeId { get; set; }
     [ForeignKey(nameof(PaymentTypeId))]

@@ -206,10 +206,6 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Code")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnOrder(101);
@@ -252,10 +248,15 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int?>("PaymentTypeId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("BankAccountId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BankAccountId");
 
                     b.HasIndex("CurrencyId");
 
@@ -527,6 +528,10 @@ namespace ecommerce.EFCore.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("CompanyCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<int>("CorporationId")
                         .HasColumnType("integer");
 
@@ -560,6 +565,21 @@ namespace ecommerce.EFCore.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsCredit")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsCurrentPricesUpdatable")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPcPos")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsStreetAgency")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsVatExcluded")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Mobile")
@@ -1134,11 +1154,18 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("CompanyCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnOrder(101);
 
                     b.Property<int>("CreatedId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CurrencyId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("DeletedDate")
@@ -1157,6 +1184,9 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<bool>("IsCreditCard")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsPcPos")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnOrder(102);
@@ -1172,7 +1202,12 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("Type")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
 
                     b.ToTable("PaymentTypes");
                 });
@@ -1681,8 +1716,16 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("CaseIds")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<int?>("CityId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("CompanyCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("CompanyId")
                         .HasColumnType("integer");
@@ -1706,6 +1749,15 @@ namespace ecommerce.EFCore.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsEdit")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPcPosUser")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastLoginDate")
                         .HasColumnType("timestamp with time zone");
@@ -1769,6 +1821,9 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<int?>("UserType")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2112,7 +2167,7 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int?>("ModifiedId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("PaymentType")
+                    b.Property<int?>("PaymentTypeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Status")
@@ -2127,6 +2182,8 @@ namespace ecommerce.EFCore.Migrations
                     b.HasIndex("BankId");
 
                     b.HasIndex("CurrencyId");
+
+                    b.HasIndex("PaymentTypeId");
 
                     b.ToTable("BankAccounts");
                 });
@@ -7797,7 +7854,7 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<int>("WarehouseId")
+                    b.Property<int?>("WarehouseId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -8076,6 +8133,9 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<decimal>("CartMinValue")
                         .HasColumnType("numeric");
 
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal?>("CostPrice")
                         .HasColumnType("numeric");
 
@@ -8146,6 +8206,12 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("StatusPcPos")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("StatusSales")
+                        .HasColumnType("integer");
+
                     b.Property<int>("TaxId")
                         .HasColumnType("integer");
 
@@ -8164,6 +8230,8 @@ namespace ecommerce.EFCore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("ProductTypeId");
 
@@ -8316,6 +8384,30 @@ namespace ecommerce.EFCore.Migrations
                         .IsUnique();
 
                     b.ToTable("ProductBasbugs");
+                });
+
+            modelBuilder.Entity("ecommerce.Core.Entities.ProductBranch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("ProductId", "BranchId")
+                        .IsUnique();
+
+                    b.ToTable("ProductBranches");
                 });
 
             modelBuilder.Entity("ecommerce.Core.Entities.ProductCategories", b =>
@@ -9053,6 +9145,37 @@ namespace ecommerce.EFCore.Migrations
                     b.ToTable("ProductRemars");
                 });
 
+            modelBuilder.Entity("ecommerce.Core.Entities.ProductSaleItems", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CurrencyId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RefProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("RefProductId");
+
+                    b.ToTable("ProductSaleItems");
+                });
+
             modelBuilder.Entity("ecommerce.Core.Entities.ProductSellerItem", b =>
                 {
                     b.Property<int>("Id")
@@ -9356,6 +9479,10 @@ namespace ecommerce.EFCore.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("CompanyCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnOrder(101);
@@ -9524,6 +9651,48 @@ namespace ecommerce.EFCore.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("RoleMenus");
+                });
+
+            modelBuilder.Entity("ecommerce.Core.Entities.SaleOptions", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnOrder(101);
+
+                    b.Property<int>("CreatedId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnOrder(103);
+
+                    b.Property<int?>("DeletedId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnOrder(102);
+
+                    b.Property<int?>("ModifiedId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SaleOptions");
                 });
 
             modelBuilder.Entity("ecommerce.Core.Entities.SalesPerson", b =>
@@ -10672,6 +10841,23 @@ namespace ecommerce.EFCore.Migrations
                     b.ToTable("UserPushTokens");
                 });
 
+            modelBuilder.Entity("ecommerce.Core.Entities.VersionApp", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PcPosVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VersionApp", (string)null);
+                });
+
             modelBuilder.Entity("ecommerce.Core.Entities.VinExternalScrapedData", b =>
                 {
                     b.Property<int>("Id")
@@ -11073,6 +11259,10 @@ namespace ecommerce.EFCore.Migrations
 
             modelBuilder.Entity("ecommerce.Core.Entities.Accounting.CashRegister", b =>
                 {
+                    b.HasOne("ecommerce.Core.Entities.BankAccount", "BankAccount")
+                        .WithMany()
+                        .HasForeignKey("BankAccountId");
+
                     b.HasOne("ecommerce.Core.Entities.Currency", "Currency")
                         .WithMany()
                         .HasForeignKey("CurrencyId")
@@ -11082,6 +11272,8 @@ namespace ecommerce.EFCore.Migrations
                     b.HasOne("ecommerce.Core.Entities.Accounting.PaymentType", "PaymentType")
                         .WithMany()
                         .HasForeignKey("PaymentTypeId");
+
+                    b.Navigation("BankAccount");
 
                     b.Navigation("Currency");
 
@@ -11369,6 +11561,15 @@ namespace ecommerce.EFCore.Migrations
                     b.Navigation("ProductUnit");
                 });
 
+            modelBuilder.Entity("ecommerce.Core.Entities.Accounting.PaymentType", b =>
+                {
+                    b.HasOne("ecommerce.Core.Entities.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId");
+
+                    b.Navigation("Currency");
+                });
+
             modelBuilder.Entity("ecommerce.Core.Entities.Accounting.PriceList", b =>
                 {
                     b.HasOne("ecommerce.Core.Entities.Currency", "Currency")
@@ -11553,9 +11754,15 @@ namespace ecommerce.EFCore.Migrations
                         .WithMany()
                         .HasForeignKey("CurrencyId");
 
+                    b.HasOne("ecommerce.Core.Entities.Accounting.PaymentType", "PaymentType")
+                        .WithMany()
+                        .HasForeignKey("PaymentTypeId");
+
                     b.Navigation("Bank");
 
                     b.Navigation("Currency");
+
+                    b.Navigation("PaymentType");
                 });
 
             modelBuilder.Entity("ecommerce.Core.Entities.BankAccountExpense", b =>
@@ -12497,6 +12704,10 @@ namespace ecommerce.EFCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ecommerce.Core.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("ecommerce.Core.Entities.ProductType", "ProductType")
                         .WithMany()
                         .HasForeignKey("ProductTypeId");
@@ -12508,6 +12719,8 @@ namespace ecommerce.EFCore.Migrations
                         .IsRequired();
 
                     b.Navigation("Brand");
+
+                    b.Navigation("Category");
 
                     b.Navigation("ProductType");
 
@@ -12539,6 +12752,25 @@ namespace ecommerce.EFCore.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("ScaleUnit");
+                });
+
+            modelBuilder.Entity("ecommerce.Core.Entities.ProductBranch", b =>
+                {
+                    b.HasOne("ecommerce.Core.Entities.Hierarchical.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecommerce.Core.Entities.Product", "Product")
+                        .WithMany("ProductBranches")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("ecommerce.Core.Entities.ProductCategories", b =>
@@ -12611,6 +12843,31 @@ namespace ecommerce.EFCore.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ecommerce.Core.Entities.ProductSaleItems", b =>
+                {
+                    b.HasOne("ecommerce.Core.Entities.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId");
+
+                    b.HasOne("ecommerce.Core.Entities.Product", "Product")
+                        .WithMany("ProductSaleItemsAsComponent")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ecommerce.Core.Entities.Product", "RefProduct")
+                        .WithMany("ProductSaleItemsAsRef")
+                        .HasForeignKey("RefProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("RefProduct");
                 });
 
             modelBuilder.Entity("ecommerce.Core.Entities.ProductSellerItem", b =>
@@ -13258,9 +13515,15 @@ namespace ecommerce.EFCore.Migrations
 
                     b.Navigation("MyFavorites");
 
+                    b.Navigation("ProductBranches");
+
                     b.Navigation("ProductGroupCodes");
 
                     b.Navigation("ProductImage");
+
+                    b.Navigation("ProductSaleItemsAsComponent");
+
+                    b.Navigation("ProductSaleItemsAsRef");
 
                     b.Navigation("ProductTiers");
 

@@ -5,10 +5,12 @@ using ecommerce.Admin.Services;
 using ecommerce.Admin.Services.Dtos;
 using ecommerce.Admin.Services.Interfaces;
 using ecommerce.Core.Helpers;
+using ecommerce.Core.Identity;
 using ecommerce.Core.Models;
 using ecommerce.Core.Utils;
 using ecommerce.Core.Utils.ResultSet;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Radzen;
 using Radzen.Blazor;
 
@@ -22,6 +24,8 @@ namespace ecommerce.Admin.Components.Pages
         [Inject] protected ICashRegisterMovementService MovementService { get; set; } = null!;
         [Inject] protected ICashRegisterService CashRegisterService { get; set; } = null!;
         [Inject] protected ICustomerService CustomerService { get; set; } = null!;
+        [Inject] protected IServiceScopeFactory ScopeFactory { get; set; } = null!;
+        [Inject] protected CurrentUser CurrentUser { get; set; } = null!;
         [Inject] protected DialogService DialogService { get; set; } = null!;
         [Inject] protected NotificationService NotificationService { get; set; } = null!;
         [Inject] protected AuthenticationService Security { get; set; } = null!;
@@ -67,6 +71,7 @@ namespace ecommerce.Admin.Components.Pages
         protected bool GroupByKasa { get; set; } = true;
 
         /// <summary>Mevcut sayfa verisine göre kasa bazlı alt toplamlar (grup başlığında gösterilir).</summary>
+        /// <remarks>Giriş/çıkış tutarları işaretli olabilir; bakiye = Giriş - |Çıkış| ile hesaplanır.</remarks>
         protected IReadOnlyDictionary<string, (decimal TotalIn, decimal TotalOut, decimal Balance)> GroupTotalsByKasa
         {
             get
@@ -76,11 +81,15 @@ namespace ecommerce.Admin.Components.Pages
                     .GroupBy(x => x.CashRegisterName)
                     .ToDictionary(
                         g => g.Key,
-                        g => (
-                            g.Where(x => x.MovementType == CashRegisterMovementType.In).Sum(x => x.Amount),
-                            g.Where(x => x.MovementType == CashRegisterMovementType.Out).Sum(x => x.Amount),
-                            g.Where(x => x.MovementType == CashRegisterMovementType.In).Sum(x => x.Amount) - g.Where(x => x.MovementType == CashRegisterMovementType.Out).Sum(x => x.Amount)
-                        ));
+                        g =>
+                        {
+                            var totalIn = g.Where(x => x.MovementType == CashRegisterMovementType.In).Sum(x => x.Amount);
+                            var totalOutRaw = g.Where(x => x.MovementType == CashRegisterMovementType.Out).Sum(x => x.Amount);
+                            // Çıkış negatif saklanıyorsa mutlak değer al; bakiye = Giriş - Çıkış (çıkış pozitif olarak düşülür)
+                            var totalOutAbs = Math.Abs(totalOutRaw);
+                            var balance = totalIn - totalOutAbs;
+                            return (totalIn, totalOutRaw, balance);
+                        });
             }
         }
 
@@ -124,12 +133,25 @@ namespace ecommerce.Admin.Components.Pages
 
         protected override Task OnAfterRenderAsync(bool firstRender) => Task.CompletedTask;
 
+        private void SeedScopeWithCurrentUser(IServiceProvider childScopeSp)
+        {
+            var principal = CurrentUser.Principal;
+            if (principal != null)
+            {
+                var scopedUser = childScopeSp.GetRequiredService<CurrentUser>();
+                scopedUser.SetUser(principal);
+            }
+        }
+
         private async Task LoadCashRegistersAsync()
         {
             CashRegistersLoading = true;
             try
             {
-                var res = await CashRegisterService.GetCashRegisters();
+                using var scope = ScopeFactory.CreateScope();
+                SeedScopeWithCurrentUser(scope.ServiceProvider);
+                var svc = scope.ServiceProvider.GetRequiredService<ICashRegisterService>();
+                var res = await svc.GetCashRegisters();
                 if (res.Ok && res.Result != null)
                     CashRegisterList = res.Result;
                 else
@@ -146,10 +168,13 @@ namespace ecommerce.Admin.Components.Pages
             CustomersLoading = true;
             try
             {
+                using var scope = ScopeFactory.CreateScope();
+                SeedScopeWithCurrentUser(scope.ServiceProvider);
+                var svc = scope.ServiceProvider.GetRequiredService<ICustomerService>();
                 var pager = new PageSetting(null, null, 0, 500);
-                var response = await CustomerService.GetPagedCustomers(pager);
+                var response = await svc.GetPagedCustomers(pager);
                 if (response.Ok && response.Result?.Data != null)
-                    CustomerList = response.Result.Data;
+                    CustomerList = response.Result.Data.DistinctBy(c => c.Id).ToList();
                 else
                     CustomerList = new List<CustomerListDto>();
             }
@@ -165,7 +190,11 @@ namespace ecommerce.Admin.Components.Pages
             {
                 _pager = new PageSetting(args.Filter, args.OrderBy, args.Skip, args.Top ?? 25);
 
-                var response = await MovementService.GetPaged(
+                using var scope = ScopeFactory.CreateScope();
+                SeedScopeWithCurrentUser(scope.ServiceProvider);
+                var movementSvc = scope.ServiceProvider.GetRequiredService<ICashRegisterMovementService>();
+
+                var response = await movementSvc.GetPaged(
                     _pager,
                     cashRegisterId: FilterCashRegisterId,
                     movementType: FilterMovementType,
@@ -195,7 +224,7 @@ namespace ecommerce.Admin.Components.Pages
                         Grid.Groups.Add(new GroupDescriptor { Property = "CashRegisterName", Title = "Kasa" });
                 }
 
-                var balanceRes = await MovementService.GetBalanceSummary(
+                var balanceRes = await movementSvc.GetBalanceSummary(
                     cashRegisterId: FilterCashRegisterId,
                     startDate: FilterStartDate,
                     endDate: FilterEndDate);

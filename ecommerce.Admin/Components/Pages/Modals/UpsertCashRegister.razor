@@ -34,10 +34,6 @@ else
                     <RadzenTextBox Name="CRName" @bind-Value="@CashRegister.Name" Style="width:100%" />
                     <RadzenRequiredValidator Component="CRName" Text="Kasa adı zorunludur" />
                 </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenLabel Text="Kasa Kodu" Component="CRCode" />
-                    <RadzenTextBox Name="CRCode" @bind-Value="@CashRegister.Code" Style="width:100%" />
-                </RadzenColumn>
             </RadzenRow>
 
             <RadzenRow AlignItems="AlignItems.Center">
@@ -60,9 +56,27 @@ else
                                     TextProperty="Text" 
                                     ValueProperty="Value" 
                                     Style="width:100%" 
-                                    Placeholder="Seçiniz..." />
+                                    Placeholder="Seçiniz..."
+                                    Change="@OnPaymentTypeChange" />
                     <RadzenRequiredValidator Component="PaymentTypeId" Text="Ödeme tipi seçimi zorunludur" />
                 </RadzenColumn>
+                @if (ShowBankAccountDropdown)
+                {
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenLabel Text="Banka Hesabı" Component="BankAccountId" />
+                        <RadzenDropDown Name="BankAccountId"
+                                        Data="@BankAccountOptions"
+                                        TextProperty="AccountName"
+                                        ValueProperty="Id"
+                                        @bind-Value="@CashRegister.BankAccountId"
+                                        TValue="int?"
+                                        Style="width:100%"
+                                        Placeholder="Banka seçiniz..."
+                                        AllowClear="true"
+                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                        <RadzenRequiredValidator Component="BankAccountId" Text="Banka hesabı seçimi zorunludur" />
+                    </RadzenColumn>
+                }
             </RadzenRow>
 
             <RadzenRow AlignItems="AlignItems.Center">

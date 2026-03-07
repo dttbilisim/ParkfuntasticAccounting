@@ -154,6 +154,21 @@ public class PaymentCollectionService : IPaymentCollectionService
                 return result;
             }
 
+            // Kasa tanımlarından doğru kasa: Nakit için PaymentTypeId=1 olan kasa kullanılmalı (veresiye kasası değil)
+            var cashRegister = await _context.GetRepository<CashRegister>()
+                .GetAll(predicate: x => x.Id == request.CashRegisterId.Value, include: q => q.Include(x => x.PaymentType))
+                .FirstOrDefaultAsync();
+            if (cashRegister == null)
+            {
+                result.AddError("Seçilen kasa bulunamadı.");
+                return result;
+            }
+            if (cashRegister.PaymentTypeId != (int)BankPaymentType.Nakit)
+            {
+                result.AddError("Nakit tahsilat için nakit kasası (ödeme tipi: Nakit) seçilmelidir. Veresiye veya diğer kasa türleri kullanılamaz.");
+                return result;
+            }
+
             // Plasiyer-cari yetki kontrolü
             var isLinked = await _context.DbContext.CustomerPlasiyers
                 .AsNoTracking()
@@ -316,6 +331,26 @@ public class PaymentCollectionService : IPaymentCollectionService
             if (request.CardPayment == null || !request.CardPayment.BankId.HasValue)
             {
                 result.AddError("Kredi kartı ödemesi için banka ve kart bilgileri gereklidir.");
+                return result;
+            }
+
+            // Kredi kartı tahsilat için kasa ID zorunlu — kasa tanımlarından PaymentTypeId=2 (Kredi Kartı) olan kasa
+            if (!request.CashRegisterId.HasValue || request.CashRegisterId.Value <= 0)
+            {
+                result.AddError("Kredi kartı tahsilat için kasa seçimi zorunludur. Kasa tanımlarından kredi kartı kasası seçiniz.");
+                return result;
+            }
+            var cardCashRegister = await _context.GetRepository<CashRegister>()
+                .GetAll(predicate: x => x.Id == request.CashRegisterId.Value, include: q => q.Include(x => x.PaymentType))
+                .FirstOrDefaultAsync();
+            if (cardCashRegister == null)
+            {
+                result.AddError("Seçilen kasa bulunamadı.");
+                return result;
+            }
+            if (cardCashRegister.PaymentTypeId != (int)BankPaymentType.KrediKarti)
+            {
+                result.AddError("Kredi kartı tahsilat için kredi kartı kasası (ödeme tipi: Kredi Kartı) seçilmelidir. Nakit veya veresiye kasası kullanılamaz.");
                 return result;
             }
 
@@ -551,7 +586,7 @@ public class PaymentCollectionService : IPaymentCollectionService
                 CustomerId = customerId,
                 SalesPersonId = salesPersonId,
                 CustomerAccountTransactionId = customerAccountTransactionId,
-                PaymentTypeId = null,
+                PaymentTypeId = (int)BankPaymentType.Nakit, // Kasa tanımlarından gelen nakit kasası
                 CurrencyId = cashRegister.CurrencyId,
                 Amount = amount,
                 TransactionDate = DateTime.Now,

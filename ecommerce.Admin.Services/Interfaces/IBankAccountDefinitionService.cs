@@ -12,6 +12,7 @@ public interface IBankAccountDefinitionService
 {
     // Banka hesapları
     Task<IActionResult<Paging<List<BankAccountListDto>>>> GetBankAccounts(PageSetting pager);
+    Task<IActionResult<List<BankAccountListDto>>> GetBankAccountsByPaymentTypeIds(IEnumerable<int> paymentTypeIds);
     Task<IActionResult<BankAccountUpsertDto>> GetBankAccountById(int id);
     Task<IActionResult<Empty>> UpsertBankAccount(AuditWrapDto<BankAccountUpsertDto> model);
     Task<IActionResult<Empty>> DeleteBankAccount(AuditWrapDto<BankAccountDeleteDto> model);

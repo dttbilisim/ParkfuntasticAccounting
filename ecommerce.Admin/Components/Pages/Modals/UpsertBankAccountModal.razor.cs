@@ -1,3 +1,4 @@
+using ecommerce.Admin.Domain.Dtos.PaymentTypeDto;
 using ecommerce.Admin.Services;
 using ecommerce.Admin.Services.Interfaces;
 using ecommerce.Core.Helpers;
@@ -8,6 +9,7 @@ using ecommerce.Domain.Shared.Dtos.Bank.BankAccountExpenseDto;
 using ecommerce.Domain.Shared.Dtos.Bank.BankAccountInstallmentDto;
 using ecommerce.Admin.Domain.Dtos.ExpenseDto;
 using ecommerce.Admin.Domain.Dtos.CurrencyDto;
+using ecommerce.Admin.Domain.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -18,6 +20,7 @@ public class UpsertBankAccountModalBase : ComponentBase
     [Inject] protected IBankAccountDefinitionService BankAccountService { get; set; } = null!;
     [Inject] protected IExpenseDefinitionService ExpenseService { get; set; } = null!;
     [Inject] protected ICurrencyAdminService CurrencyService { get; set; } = null!;
+    [Inject] protected IPaymentTypeService PaymentTypeService { get; set; } = null!;
     [Inject] protected DialogService DialogService { get; set; } = null!;
     [Inject] protected NotificationService NotificationService { get; set; } = null!;
     [Inject] protected AuthenticationService AuthenticationService { get; set; } = null!;
@@ -42,14 +45,15 @@ public class UpsertBankAccountModalBase : ComponentBase
     // Currency
     protected List<CurrencyListDto> Currencies { get; set; } = new();
 
-    // Payment Type Options
-    protected List<BankPaymentType> PaymentTypeOptions { get; set; } = Enum.GetValues<BankPaymentType>().ToList();
+    // Payment Type Options (from PaymentType definitions)
+    protected List<PaymentTypeListDto> PaymentTypeOptions { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadModelAsync();
         await LoadMainExpensesAsync();
         await LoadCurrenciesAsync();
+        await LoadPaymentTypesAsync();
 
         if (model.Id > 0)
         {
@@ -92,6 +96,15 @@ public class UpsertBankAccountModalBase : ComponentBase
         else if (result != null)
         {
             NotificationService.Notify(NotificationSeverity.Error, result.GetMetadataMessages());
+        }
+    }
+
+    private async Task LoadPaymentTypesAsync()
+    {
+        var result = await PaymentTypeService.GetAllPaymentTypes();
+        if (result != null && result.Ok && result.Result != null)
+        {
+            PaymentTypeOptions = result.Result.Where(p => p.IsActive).ToList();
         }
     }
 

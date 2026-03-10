@@ -51,40 +51,25 @@ public partial class PlasiyerCustomers : ComponentBase
         {
             customers = new List<CustomerListDto>();
             NotificationService.Notify(NotificationSeverity.Info, "Arama", "Carileri listelemek için en az 2 karakter girin.");
-            await InvokeAsync(StateHasChanged);
             return;
         }
 
         isLoading = true;
-        StateHasChanged();
         try
         {
             var response = await SalesPersonService.GetCustomersOfSalesPerson(Security.User!.SalesPersonId!.Value, term);
-            await InvokeAsync(() =>
+            if (response.Ok)
             {
-                if (response.Ok)
-                {
-                    customers = response.Result ?? new List<CustomerListDto>();
-                }
-                else
-                {
-                    customers = new List<CustomerListDto>();
-                    NotificationService.Notify(NotificationSeverity.Error, "Hata", response.GetMetadataMessages() ?? "Müşteri listesi yüklenemedi.");
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            await InvokeAsync(() =>
+                customers = response.Result ?? new List<CustomerListDto>();
+            }
+            else
             {
-                customers = new List<CustomerListDto>();
-                NotificationService.Notify(NotificationSeverity.Error, "Hata", $"Arama sırasında hata: {ex.Message}");
-            });
+                NotificationService.Notify(NotificationSeverity.Error, "Hata", "Müşteri listesi yüklenemedi.");
+            }
         }
         finally
         {
             isLoading = false;
-            await InvokeAsync(StateHasChanged);
         }
     }
 

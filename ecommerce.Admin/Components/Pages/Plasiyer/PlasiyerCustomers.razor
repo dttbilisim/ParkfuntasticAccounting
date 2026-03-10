@@ -22,7 +22,7 @@
 
     <RadzenCard Variant="Variant.Flat">
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
-            <RadzenTextBox @bind-Value="@searchTerm" @bind-Value:event="oninput" Placeholder="Cari adı veya kodu ile ara..." 
+            <RadzenTextBox @bind-Value="@searchTerm" Placeholder="Cari adı veya kodu ile ara..." 
                            Style="min-width: 280px;" @onkeydown="@OnSearchKeyDown" />
             <RadzenButton Icon="search" Text="Ara" Click="@SearchCustomers" ButtonStyle="ButtonStyle.Primary" Disabled="@isLoading" />
         </RadzenStack>

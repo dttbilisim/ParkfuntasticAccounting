@@ -53,6 +53,11 @@ namespace ecommerce.Core.Entities
         public bool IsGift{get;set;} = false;
         public bool IsStockFollow { get; set; } = true;
 
+        /// <summary>Web/Plasiyer sipariş ekranında satılsın mı?</summary>
+        public bool IsSoldOnWeb { get; set; } = true;
+        /// <summary>PcPos'ta satılsın mı?</summary>
+        public bool IsSoldOnPcPos { get; set; } = true;
+
         /// <summary>PcPos transfer: POS durumu</summary>
         public int? StatusPcPos { get; set; }
         /// <summary>PcPos transfer: Satış durumu</summary>

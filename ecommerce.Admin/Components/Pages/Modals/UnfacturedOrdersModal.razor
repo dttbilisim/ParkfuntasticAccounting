@@ -1,5 +1,6 @@
 @using ecommerce.Admin.Domain.Dtos.OrderDto
 @using ecommerce.Admin.Domain.ViewModels
+@using ecommerce.Core.Helpers
 @using Radzen
 @using Radzen.Blazor
 
@@ -66,16 +67,16 @@
                                             <td class="text-muted">@siraNo</td>
                                             <td class="fw-semibold" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="@item.ProductName">@item.ProductName</td>
                                             <td class="text-center">@item.Quantity</td>
-                                            <td class="text-end">@item.Price.ToString("N2") ₺</td>
-                                            <td class="text-end text-danger">@((item.DiscountAmount ?? 0).ToString("N2")) ₺</td>
-                                            <td class="text-end fw-bold text-success">@item.TotalPrice.ToString("N2") ₺</td>
+                                            <td class="text-end">@CurrencyHelper.FormatPrice(item.Price)</td>
+                                            <td class="text-end text-danger">@CurrencyHelper.FormatPrice(item.DiscountAmount ?? 0)</td>
+                                            <td class="text-end fw-bold text-success">@CurrencyHelper.FormatPrice(item.TotalPrice)</td>
                                         </tr>
                                     }
                                 </tbody>
                                 <tfoot>
                                     <tr class="table-warning">
                                         <td colspan="5" class="text-end fw-bold">Genel Toplam:</td>
-                                        <td class="text-end fw-bold text-success">@order.Items.Sum(i => i.TotalPrice).ToString("N2") ₺</td>
+                                        <td class="text-end fw-bold text-success">@CurrencyHelper.FormatPrice(order.Items.Sum(i => i.TotalPrice))</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -140,7 +141,7 @@
 
                     <RadzenDataGridColumn TItem="UnfacturedOrderViewModel" Property="GrandTotal" Title="TUTAR" Width="110px" TextAlign="TextAlign.Right">
                         <Template Context="order">
-                            <strong class="text-success">@order.GrandTotal.ToString("N2") ₺</strong>
+                            <strong class="text-success">@CurrencyHelper.FormatPrice(order.GrandTotal)</strong>
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
@@ -152,7 +153,7 @@
         <div class="text-muted small">
             @if(selectedOrders != null && selectedOrders.Any())
             {
-                <span>@selectedOrders.Count adet sipariş seçildi. Toplam Tutar: <strong>@SelectedTotal.ToString("N2") ₺</strong></span>
+                <span>@selectedOrders.Count adet sipariş seçildi. Toplam Tutar: <strong>@CurrencyHelper.FormatPrice(SelectedTotal)</strong></span>
             }
         </div>
         <div class="d-flex gap-2">

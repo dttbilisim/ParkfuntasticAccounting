@@ -1,0 +1,135 @@
+@using ecommerce.Admin.Domain.Dtos.OrderDto
+@using ecommerce.Core.Utils
+@using ecommerce.Core.Helpers
+@using Radzen.Blazor
+
+@if (orderDetail != null)
+{
+    <div class="p-3">
+            @if (IsPlasiyer)
+            {
+                <div class="mb-3 p-3 bg-light rounded">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Sipariş Tarihi" />
+                            <RadzenDatePicker @bind-Value="@orderDetail.CreatedDate" DateFormat="dd/MM/yyyy" Style="width:100%" />
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Voucher" />
+                            <RadzenTextBox @bind-Value="@orderDetail.Voucher" Style="width:100%" />
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenLabel Text="Rehber / Acenta İsmi" />
+                            <RadzenTextBox @bind-Value="@orderDetail.GuideName" Style="width:100%" />
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead><tr><th>Ürün</th><th>Miktar</th><th>Fiyat</th><th>Toplam</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in orderDetail.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div>@item.ProductName</div>
+                                    @if (item.IsPackageProduct)
+                                    {
+                                        <div class="small text-muted mt-1">
+                                            @if (item.PackageProductItems != null && item.PackageProductItems.Any())
+                                            {
+                                                <div class="mb-1"><i class="fa-solid fa-boxes-stacked me-1"></i>Paket içeriği (her biri ayrı düzenlenebilir):</div>
+                                                <ul class="list-unstyled mb-0 ps-2" style="font-size: 0.8rem;">
+                                                    @foreach (var pkg in item.PackageProductItems)
+                                                    {
+                                                        <li class="d-flex align-items-center gap-1 mb-1 flex-wrap">
+                                                            <span class="flex-grow-1">@pkg.ProductName — @CurrencyHelper.FormatPrice(pkg.Price)</span>
+                                                            @if (IsPlasiyer)
+                                                            {
+                                                                <div class="d-flex align-items-center" style="gap: 2px;">
+                                                                    <button type="button" class="btn btn-sm p-0" style="width: 22px; height: 22px; font-size: 0.65rem;"
+                                                                            @onclick="@(() => DecreasePkgQty(pkg))">−</button>
+                                                                    <input type="number" class="form-control form-control-sm text-center" style="width: 36px; font-size: 0.7rem; padding: 0 2px;"
+                                                                           value="@pkg.Quantity" min="0"
+                                                                           @onchange="@((ChangeEventArgs ev) => OnPkgQtyChanged(pkg, ev))" />
+                                                                    <button type="button" class="btn btn-sm p-0" style="width: 22px; height: 22px; font-size: 0.65rem;"
+                                                                            @onclick="@(() => IncreasePkgQty(pkg))">+</button>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>× @pkg.Quantity</span>
+                                                            }
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            <div class="mt-1">
+                                                <i class="fa-solid fa-calendar-day me-1"></i>Sipariş Tarihi:
+                                                @if (IsPlasiyer)
+                                                {
+                                                    <RadzenDatePicker @bind-Value="@item.ShipmentDate" DateFormat="dd/MM/yyyy" Style="width:140px" />
+                                                }
+                                                else if (item.ShipmentDate.HasValue)
+                                                {
+                                                    <span>@item.ShipmentDate.Value.ToString("dd.MM.yyyy")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsPackageProduct)
+                                    {
+                                        <span>Adet: @item.Quantity</span>
+                                    }
+                                    else if (IsPlasiyer)
+                                    {
+                                        <div class="d-flex align-items-center gap-1">
+                                            <RadzenButton Icon="remove" Size="ButtonSize.Small" Click="@(() => DecreaseQty(item))" />
+                                            <RadzenNumeric @bind-Value="@item.Quantity" Min="1" Style="width:70px" />
+                                            <RadzenButton Icon="add" Size="ButtonSize.Small" Click="@(() => IncreaseQty(item))" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span>@item.Quantity</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (IsPlasiyer && !item.IsPackageProduct)
+                                    {
+                                        <RadzenNumeric @bind-Value="@item.Price" Min="0" Format="c" Style="width:100px" />
+                                    }
+                                    else
+                                    {
+                                        <span>@CurrencyHelper.FormatPrice(item.Price)</span>
+                                    }
+                                </td>
+                                <td>@CurrencyHelper.FormatPrice(GetItemTotal(item))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <RadzenButton Text="Kapat" Click="@Close" Variant="Variant.Flat" />
+                @if (IsPlasiyer)
+                {
+                    <RadzenButton Text="Güncelle" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Click="@OnUpdateOnly" IsBusy="@isUpdating" />
+                }
+            </div>
+    </div>
+}
+else if (isLoading)
+{
+    <div class="text-center py-4">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <p class="mt-2">Sipariş detayı yükleniyor...</p>
+    </div>
+}

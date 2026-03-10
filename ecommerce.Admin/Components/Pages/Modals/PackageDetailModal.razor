@@ -1,0 +1,342 @@
+@using ecommerce.Admin.Domain.Dtos.ProductDto
+@using ecommerce.Admin.Domain.Interfaces
+@using ecommerce.Web.Domain.Dtos.Cart
+@using ecommerce.Web.Domain.Services.Abstract
+@using Radzen
+@inject ecommerce.Admin.Domain.Interfaces.IProductService ProductService
+@inject ICartStateService CartStateService
+@inject ICartService CartService
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ecommerce.Admin.Services.AuthenticationService Security
+@implements IDisposable
+
+<div class="product-detail-modal-wrapper">
+    <div class="vehicle-modal-header p-4 border-bottom shadow-sm">
+        <div class="d-flex align-items-center justify-content-between w-100">
+            <div>
+                <h5 class="mb-1 fw-bold fs-4"><i class="fa-solid fa-boxes-stacked me-2"></i>Paket Ürün</h5>
+                <small class="text-white-50">@PackageName</small>
+            </div>
+            <button class="btn btn-sm btn-light rounded-circle shadow-sm" style="width: 32px; height: 32px;" @onclick="Close">
+                <i class="fa-solid fa-xmark text-success"></i>
+            </button>
+        </div>
+    </div>
+    <div class="vehicle-modal-body p-0 bg-white" style="max-height: 80vh; overflow-y: auto;">
+        <div class="p-3 bg-white">
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="text-muted mt-2 mb-0">Paket içeriği yükleniyor...</p>
+                </div>
+            }
+            else if (Items == null || !Items.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-box-open fs-1 opacity-25"></i>
+                    @if (!string.IsNullOrEmpty(loadError))
+                    {
+                        <p class="mt-2 mb-0 fw-semibold text-danger">@loadError</p>
+                        <p class="mt-1 mb-0 small">Ürün bulunamadı veya bu ürünü görüntüleme yetkiniz olmayabilir.</p>
+                    }
+                    else
+                    {
+                        <p class="mt-2 mb-0 fw-semibold">Paket içeriği tanımlanmamış.</p>
+                        <p class="mt-1 mb-0 small">Bu paket ürünün bileşenleri henüz eklenmemiş. Ürün düzenleme ekranından paket bileşenlerini (ProductSaleItems veya PackageProductIds) tanımlayabilirsiniz.</p>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="mb-3 pb-2 border-bottom">
+                    <div class="fw-bold mb-1" style="font-size: 1rem;">@PackageName</div>
+                    <div class="text-muted small">Paket ürün içeriği</div>
+                </div>
+
+                @foreach (var item in Items)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="fw-semibold mb-0" style="font-size: 0.9rem;">@item.ProductName</label>
+                            <span class="text-muted small">
+                                @item.Price.ToString("N2") @Currency
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn btn-sm btn-outline-success" style="width: 36px; height: 36px; padding: 0;"
+                                    @onclick="() => ChangeQuantity(item, -1)"
+                                    disabled="@(item.Quantity <= 0)">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <input type="number" class="form-control form-control-sm text-center" style="width: 70px;"
+                                   min="0" value="@item.Quantity"
+                                   @onchange="e => OnQuantityChanged(item, e)" />
+                            <button class="btn btn-sm btn-outline-success" style="width: 36px; height: 36px; padding: 0;"
+                                    @onclick="() => ChangeQuantity(item, 1)">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="fw-semibold mb-1 d-block">Ziyaret / Etkinlik Tarihi <span class="text-danger">*</span></label>
+                    <RadzenDatePicker @bind-Value="VisitDate" DateFormat="dd.MM.yyyy" Style="width: 100%;" Placeholder="Tarih seçin" AllowClear="false" />
+                    @if (!string.IsNullOrEmpty(visitDateError))
+                    {
+                        <small class="text-danger">@visitDateError</small>
+                    }
+                </div>
+                <div class="mb-3">
+                    <label class="fw-semibold mb-1 d-block">Voucher No <span class="text-muted small">(Ödeme sırasında girilebilir)</span></label>
+                    <input type="text" class="form-control" @bind="VoucherCode" @bind:event="oninput" placeholder="Voucher no" />
+                </div>
+                <div class="mb-3">
+                    <label class="fw-semibold mb-1 d-block">Rehber / Acenta İsmi <span class="text-muted small">(Ödeme sırasında girilebilir)</span></label>
+                    <input type="text" class="form-control" @bind="GuideNameText" @bind:event="oninput" placeholder="Rehber veya acenta adı" />
+                </div>
+
+                <div class="border-top pt-3 mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Toplam</span>
+                        <span class="fw-bold fs-5 text-success">@GetTotalPrice().ToString("N2") @Currency</span>
+                    </div>
+                </div>
+
+                <div class="border-top mt-3 pt-3">
+                    <button class="btn btn-success w-100" @onclick="async () => await AddToCart()" disabled="@(isAddingToCart || !CanAddToCart())">
+                        @if (isAddingToCart)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-cart-plus me-2"></i>
+                        }
+                        Sepete Ekle
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string PackageName { get; set; } = string.Empty;
+    [Parameter] public int RefProductId { get; set; }
+    [Parameter] public int SellerId { get; set; }
+    [Parameter] public int SellerItemId { get; set; }
+    [Parameter] public string Currency { get; set; } = "TL";
+
+    private List<PackageItemViewModel> Items { get; set; } = new();
+    private DateTime? VisitDate { get; set; }
+    private string? visitDateError;
+    private string VoucherCode { get; set; } = string.Empty;
+    private string GuideNameText { get; set; } = string.Empty;
+    private bool isLoading = true;
+    private bool isAddingToCart = false;
+    private string? loadError; // API hatası veya boş paket mesajı
+
+    private class PackageItemViewModel
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int Quantity { get; set; } = 1;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartStateService.OnChange += OnCartChanged;
+        await LoadPackageItemsAsync();
+    }
+
+    public void Dispose()
+    {
+        CartStateService.OnChange -= OnCartChanged;
+    }
+
+    private async void OnCartChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadPackageItemsAsync()
+    {
+        loadError = null;
+        if (RefProductId <= 0)
+        {
+            loadError = "Geçersiz ürün referansı.";
+            isLoading = false;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            var result = await ProductService.GetProductById(RefProductId);
+            if (!result.Ok)
+            {
+                loadError = result.Metadata?.Message ?? "Ürün bulunamadı veya erişim yetkiniz yok.";
+            }
+            else if (result.Result?.PackageProductItems != null && result.Result.PackageProductItems.Any())
+            {
+                Items = result.Result.PackageProductItems.Select(x => new PackageItemViewModel
+                {
+                    ProductId = x.ProductId,
+                    ProductName = x.ProductName,
+                    Price = x.Price,
+                    Quantity = 1
+                }).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Hata",
+                Detail = $"Paket içeriği yüklenirken hata: {ex.Message}",
+                Duration = 4000
+            });
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ChangeQuantity(PackageItemViewModel item, int delta)
+    {
+        var newValue = item.Quantity + delta;
+        if (newValue < 0) newValue = 0;
+        item.Quantity = newValue;
+        StateHasChanged();
+    }
+
+    private void OnQuantityChanged(PackageItemViewModel item, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value) && value >= 0)
+        {
+            item.Quantity = value;
+            StateHasChanged();
+        }
+    }
+
+    private decimal GetTotalPrice()
+    {
+        if (Items == null || !Items.Any()) return 0;
+        return Items.Sum(x => x.Price * x.Quantity);
+    }
+
+    private bool CanAddToCart()
+    {
+        if (Items == null || !Items.Any()) return false;
+        visitDateError = null;
+        if (!VisitDate.HasValue)
+        {
+            visitDateError = "Ziyaret tarihi zorunludur.";
+            return false;
+        }
+        return true;
+    }
+
+    private void Close()
+    {
+        DialogService.Close();
+    }
+
+    private async Task AddToCart()
+    {
+        if (!CanAddToCart() || isAddingToCart)
+        {
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        isAddingToCart = true;
+        StateHasChanged();
+
+        try
+        {
+            var currentCart = CartStateService.CurrentCart;
+            var currentQty = currentCart?.Sellers?
+                .SelectMany(s => s.Items)
+                .FirstOrDefault(i => i.ProductSellerItemId == SellerItemId)?.Quantity ?? 0;
+            var delta = 1 - currentQty;
+
+            if (delta <= 0)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "Zaten Sepette",
+                    Detail = "Bu paket ürün zaten sepette.",
+                    Duration = 2000
+                });
+                isAddingToCart = false;
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            var req = new CartItemUpsertDto
+            {
+                ProductSellerItemId = SellerItemId,
+                Quantity = delta,
+                CustomerId = Security?.SelectedCustomerId,
+                Voucher = string.IsNullOrWhiteSpace(VoucherCode) ? null : VoucherCode.Trim(),
+                GuideName = string.IsNullOrWhiteSpace(GuideNameText) ? null : GuideNameText.Trim(),
+                VisitDate = VisitDate!.Value,
+                PackageItemQuantities = Items.ToDictionary(x => x.ProductId, x => x.Quantity)
+            };
+
+            var result = await CartService.CreateCartItem(req);
+
+            if (result.Ok && result.Result != null)
+            {
+                CartStateService.SetCart(result.Result);
+                await InvokeAsync(StateHasChanged);
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Sepete Eklendi",
+                    Detail = "Paket ürün sepete eklendi.",
+                    Duration = 3000
+                });
+                Close();
+            }
+            else
+            {
+                var errMsg = result.Metadata?.Message ?? "Ürün sepete eklenemedi.";
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Sepet Hatası",
+                    Detail = errMsg,
+                    Duration = 4000
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Hata",
+                Detail = ex.Message,
+                Duration = 4000
+            });
+        }
+        finally
+        {
+            isAddingToCart = false;
+            StateHasChanged();
+        }
+    }
+
+}

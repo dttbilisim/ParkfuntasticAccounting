@@ -45,7 +45,7 @@
                             {
                                 @foreach (var o in Transaction.LinkedOrders)
                                 {
-                                    <a href="/orders" class="link">@o.OrderNumber</a>
+                                    <a href="/b2b/my-orders?search=@o.OrderNumber" class="link">@o.OrderNumber</a>
                                 }
                             }
                             else

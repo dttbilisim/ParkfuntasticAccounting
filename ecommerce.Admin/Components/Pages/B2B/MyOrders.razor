@@ -4,6 +4,7 @@
 @using ecommerce.Admin.Domain.Dtos.OrderDto
 @using ecommerce.Core.Utils
 @using ecommerce.Core.Entities
+@using ecommerce.Core.Helpers
 @using Radzen
 @using Radzen.Blazor
 @inject IStringLocalizer<Culture_TR> Loc
@@ -40,7 +41,7 @@
         
         <!-- Order Status Tabs -->
         <div class="order-status-tabs">
-            <button class="order-tab @(selectedStatusFilter == null && !isCargoFilterActive ? "active" : "")" 
+            <button class="order-tab @(selectedStatusFilter == null ? "active" : "")" 
                     @onclick="() => OnStatusFilterChanged(null)">
                 <span>Hepsi</span>
                 @if (GetTotalOrderCount() > 0)
@@ -50,24 +51,12 @@
             </button>
             @foreach (var badge in GetStatusCountBadges())
             {
-                @if (badge.IsCargoTrackFilter)
-                {
-                    <button class="order-tab @(isCargoFilterActive ? "active" : "")" 
-                            @onclick="OnCargoTrackFilterChanged">
-                        <i class="@badge.IconClass"></i>
-                        <span>@badge.Label</span>
-                        <span class="order-tab-count">@badge.Count</span>
-                    </button>
-                }
-                else
-                {
-                    <button class="order-tab @(selectedStatusFilter == badge.Status && !isCargoFilterActive ? "active" : "")" 
-                            @onclick="() => OnStatusFilterChanged(badge.Status)">
-                        <i class="@badge.IconClass"></i>
-                        <span>@badge.Label</span>
-                        <span class="order-tab-count">@badge.Count</span>
-                    </button>
-                }
+                <button class="order-tab @(selectedStatusFilter == badge.Status ? "active" : "")" 
+                        @onclick="() => OnStatusFilterChanged(badge.Status)">
+                    <i class="@badge.IconClass"></i>
+                    <span>@badge.Label</span>
+                    <span class="order-tab-count">@badge.Count</span>
+                </button>
             }
         </div>
         
@@ -177,39 +166,28 @@
                                                                                  style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;"
                                                                                  @onmouseenter="@(() => ShowTooltip(orderProductNameId, item.ProductName))"
                                                                                  @onmouseleave="@(() => HideTooltip())">@item.ProductName</div>
+                                                                            @if (GetIsPackageProduct(item))
+                                                                            {
+                                                                                <div class="small text-muted mt-1">
+                                                                                    @if (GetPackageProductItems(item).Any())
+                                                                                    {
+                                                                                        <div class="mb-1"><i class="fa-solid fa-boxes-stacked me-1"></i>Paket içeriği:</div>
+                                                                                        <ul class="list-unstyled mb-0 ps-2" style="font-size: 0.8rem;">
+                                                                                            @foreach (var pkg in GetPackageProductItems(item))
+                                                                                            {
+                                                                                                <li>@pkg.Name — × @pkg.Quantity</li>
+                                                                                            }
+                                                                                        </ul>
+                                                                                    }
+                                                                                    @if (item.ShipmentDate.HasValue)
+                                                                                    {
+                                                                                        <div class="mt-1"><i class="fa-solid fa-calendar-day me-1"></i>Sipariş Tarihi: @item.ShipmentDate.Value.ToString("dd.MM.yyyy")</div>
+                                                                                    }
+                                                                                </div>
+                                                                            }
                                                                             @if (!string.IsNullOrEmpty(item.SourceId))
                                                                             {
                                                                                 <small class="text-muted">Kaynak: @item.SourceId</small>
-                                                                            }
-                                                                            @if (order.Cargo != null)
-                                                                            {
-                                                                                <div class="mt-1">
-                                                                                    <small class="text-muted">
-                                                                                        <i class="fas fa-truck"></i> Kargo: <strong>@order.Cargo.Name</strong>
-                                                                                        @if (string.IsNullOrEmpty(item.CargoTrackUrl))
-                                                                                        {
-                                                                                            <span class="cargo-warning-badge ms-2">
-                                                                                                <i class="fas fa-exclamation-circle"></i> Henüz kargoya verilmemiş
-                                                                                            </span>
-                                                                                        }
-                                                                                    </small>
-                                                                                </div>
-                                                                            }
-                                                                            @if (!string.IsNullOrEmpty(item.CargoTrackUrl))
-                                                                            {
-                                                                                <div class="mt-1">
-                                                                                    <a href="@item.CargoTrackUrl" target="_blank" class="text-success small" @onclick:preventDefault="false">
-                                                                                        <i class="fas fa-external-link-alt"></i> Kargo Takip Linki
-                                                                                    </a>
-                                                                                </div>
-                                                                            }
-                                                                            else if (!string.IsNullOrEmpty(item.CargoTrackNumber))
-                                                                            {
-                                                                                <div class="mt-1">
-                                                                                    <small class="text-muted">
-                                                                                        <i class="fas fa-barcode"></i> Takip No: @item.CargoTrackNumber
-                                                                                    </small>
-                                                                                </div>
                                                                             }
                                                                         </div>
                                                                     </div>
@@ -219,16 +197,16 @@
                                                                     <div class="d-flex flex-column align-items-end">
                                                                         @if (item.OldPrice > 0 && item.OldPrice > item.Price)
                                                                         {
-                                                                            <span class="text-decoration-line-through text-muted small">₺@($"{item.OldPrice:N2}")</span>
+                                                                            <span class="text-decoration-line-through text-muted small">@CurrencyHelper.FormatPrice(item.OldPrice, order.Currency)</span>
                                                                         }
-                                                                        <span class="fw-bold">₺@($"{item.Price:N2}")</span>
+                                                                        <span class="fw-bold">@CurrencyHelper.FormatPrice(item.Price, order.Currency)</span>
                                                                         @if (item.DiscountAmount.HasValue && item.DiscountAmount.Value > 0)
                                                                         {
-                                                                            <span class="text-success small fw-bold">-₺@($"{item.DiscountAmount.Value:N2}") İndirim</span>
+                                                                            <span class="text-success small fw-bold">-@CurrencyHelper.FormatPrice(item.DiscountAmount.Value, order.Currency) İndirim</span>
                                                                         }
                                                                     </div>
                                                                 </td>
-                                                                <td class="text-end fw-bold">₺@($"{item.TotalPrice:N2}")</td>
+                                                                <td class="text-end fw-bold">@CurrencyHelper.FormatPrice(item.TotalPrice, order.Currency)</td>
                                                             </tr>
                                                         }
                                                     </tbody>
@@ -255,34 +233,6 @@
                                                             @GetPaymentStatusText(order)
                                                         </span>
                                                     </div>
-                                                    @if (order.ShipmentDate.HasValue)
-                                                    {
-                                                        <div class="mb-2">
-                                                            <strong>Kargoya Verilme:</strong> @($"{order.ShipmentDate.Value:dd.MM.yyyy}")
-                                                        </div>
-                                                    }
-                                                    @if (order.DeliveryDate.HasValue)
-                                                    {
-                                                        <div class="mb-2">
-                                                            <strong>Teslimat:</strong> @($"{order.DeliveryDate.Value:dd.MM.yyyy}")
-                                                        </div>
-                                                    }
-                                                    @if (!string.IsNullOrEmpty(order.CargoTrackNumber))
-                                                    {
-                                                        <div class="mb-2">
-                                                            <strong>Kargo Takip No:</strong> 
-                                                            @if (!string.IsNullOrEmpty(order.CargoTrackUrl))
-                                                            {
-                                                                <a href="@order.CargoTrackUrl" target="_blank" class="text-success">
-                                                                    @order.CargoTrackNumber <i class="fas fa-external-link-alt"></i>
-                                                                </a>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span>@order.CargoTrackNumber</span>
-                                                            }
-                                                        </div>
-                                                    }
                                                     @if (order.LinkedInvoices != null && order.LinkedInvoices.Any())
                                                     {
                                                         <div class="mb-2">
@@ -342,13 +292,13 @@
                                                 <div class="small">
                                                     <div class="d-flex justify-content-between mb-2">
                                                         <span>Ürün Toplamı:</span>
-                                                        <span>₺@($"{order.ProductTotal:N2}")</span>
+                                                        <span>@CurrencyHelper.FormatPrice(order.ProductTotal, order.Currency)</span>
                                                     </div>
                                                     @if (order.DiscountTotal.HasValue && order.DiscountTotal.Value > 0)
                                                     {
                                                         <div class="d-flex justify-content-between mb-2 text-success fw-bold">
                                                             <span>İndirim Toplamı:</span>
-                                                            <span>-₺@($"{order.DiscountTotal.Value:N2}")</span>
+                                                            <span>-@CurrencyHelper.FormatPrice(order.DiscountTotal.Value, order.Currency)</span>
                                                         </div>
                                                     }
                                                     else if (order.OrderItems != null && order.OrderItems.Any(item => item.DiscountAmount.HasValue && item.DiscountAmount.Value > 0))
@@ -360,48 +310,38 @@
                                                         {
                                                             <div class="d-flex justify-content-between mb-2 text-success fw-bold">
                                                                 <span>İndirim Toplamı:</span>
-                                                                <span>-₺@($"{totalItemDiscount:N2}")</span>
+                                                                <span>-@CurrencyHelper.FormatPrice(totalItemDiscount, order.Currency)</span>
                                                             </div>
                                                         }
                                                     }
-                                                    <div class="d-flex justify-content-between mb-2">
-                                                        <span>Kargo:</span>
-                                                        <span>₺@($"{order.CargoPrice:N2}")</span>
-                                                    </div>
                                                     <hr class="my-2" />
                                                     <div class="d-flex justify-content-between fw-bold order-summary-total">
                                                         <span>Toplam:</span>
-                                                        <span>₺@($"{order.GrandTotal:N2}")</span>
+                                                        <span>@CurrencyHelper.FormatPrice(order.GrandTotal, order.Currency)</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Delivery Address -->
-                                    @if (order.UserAddress != null)
-                                    {
-                                        <div class="delivery-address-card p-3 mb-3">
-                                            <h6 class="mb-3 section-header">
-                                                <i class="fas fa-map-marker-alt"></i> Teslimat Adresi
-                                            </h6>
-                                            <div class="small">
-                                                <div><strong>@order.UserAddress.FullName</strong></div>
-                                                <div>@order.UserAddress.Address</div>
-                                                @if (order.UserAddress.City != null && order.UserAddress.Town != null)
-                                                {
-                                                    <div>@order.UserAddress.City.Name / @order.UserAddress.Town.Name</div>
-                                                }
-                                                @if (!string.IsNullOrEmpty(order.UserAddress.PhoneNumber))
-                                                {
-                                                    <div><i class="fas fa-phone"></i> @order.UserAddress.PhoneNumber</div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-
                                     <!-- Action Buttons -->
-                                    <div class="d-flex gap-2 justify-content-end">
+                                    <div class="d-flex gap-2 justify-content-end align-items-center">
+                                        <a href="javascript:void(0)" 
+                                           class="rz-link me-auto" 
+                                           @onclick="@(() => OpenOrderDetailModal(order))"
+                                           style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                                            <i class="fas fa-eye"></i> Sipariş Detayı
+                                        </a>
+                                        @if (CanApproveOrder(order))
+                                        {
+                                            <RadzenButton Text="@(approvingOrderId == order.Id ? "Onaylanıyor..." : "Siparişi Onayla")" 
+                                                         Icon="@(approvingOrderId == order.Id ? "hourglass_empty" : "check_circle")"
+                                                         Click="@(() => ApproveOrder(order))" 
+                                                         Variant="Variant.Flat"
+                                                         ButtonStyle="ButtonStyle.Success"
+                                                         Disabled="@(isApproving && approvingOrderId == order.Id)"
+                                                         class="approve-order-button" />
+                                        }
                                         @if (CanCancelOrder(order))
                                         {
                                             <RadzenButton Text="@(cancellingOrderId == order.Id ? "İptal Ediliyor..." : "Siparişi İptal Et")" 

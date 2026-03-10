@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ecommerce.Admin.Services.Interfaces;
 using ecommerce.Admin.Services;
+using ecommerce.Core.Helpers;
 using ecommerce.Core.Models;
 using ecommerce.Core.Utils;
 using ecommerce.Core.Utils.ResultSet;
@@ -44,12 +45,10 @@ namespace ecommerce.Admin.Components.Pages
         [Inject] protected ISearchSynonymService SynonymService { get; set; } = default!;
         [Inject] protected ISearchAnalyticsService SearchAnalyticsService { get; set; } = default!;
         [Inject] protected ISearchFieldMatcherService FieldMatcherService { get; set; } = default!;
-        [Inject] protected ecommerce.Admin.Services.Interfaces.IVinService VinService { get; set; } = default!;
         [Inject] protected ILogger<ProductSearch> Logger { get; set; } = default!;
 
         protected string searchText = "";
         protected bool isLoading = false;
-        protected bool isLoadingVin = false; // VIN decode için özel loading flag
         protected bool showOnlyInStock = false;
         protected bool showOnlyWithImage = false;
         protected string activeTab = "products";
@@ -83,9 +82,6 @@ namespace ecommerce.Admin.Components.Pages
         protected HashSet<string> selectedManufacturerNames = new();
         protected HashSet<string> selectedBaseModelNames = new();
         protected HashSet<string> selectedSubModelNames = new();
-        protected List<string> selectedDatProcessNumbers = new();
-        protected List<string> selectedOemCodes = new();
-        
         // Vehicle filter states (keep separate from search text)
         protected string? selectedManufacturerName = null;
         protected string? selectedManufacturerKey = null;
@@ -120,10 +116,8 @@ namespace ecommerce.Admin.Components.Pages
         protected Dictionary<string, List<SubModelDto>> modalModelSubModelsCache = new();
         
         // [VIN-FIX] Persist ManufacturerKeys from VIN search to apply in grid filters
-        protected List<string> vinManufacturerKeys = new();
         
         // [VIN-FIX] Track currently selected VIN vehicle for fallback
-        protected ecommerce.Admin.Services.Dtos.VinDto.VinVehicleDto? currentVinVehicle;
 
         // Columnar Modal Filter Properties
         protected string modalManufacturerSearch = "";
@@ -172,7 +166,6 @@ namespace ecommerce.Admin.Components.Pages
         protected bool isModelLoading = false;
         protected bool isSubModelLoading = false;
         protected bool isDotPartLoading = false;
-        protected bool isCalculatingVinCounts = false;
 
         protected Paging<List<SellerProductViewModel>> searchResult = new() { Data = new List<SellerProductViewModel>() };
         protected List<BrandDto> brands = new();
@@ -481,7 +474,7 @@ namespace ecommerce.Admin.Components.Pages
         {
             var cart = CartStateService?.CurrentCart;
             var total = cart?.OrderTotal ?? 0m;
-            return total.ToString("C");
+            return CurrencyHelper.FormatPrice(total, cart?.Currency);
         }
 
         protected int GetCartItemCount()
@@ -530,7 +523,7 @@ namespace ecommerce.Admin.Components.Pages
 
         protected string GetPendingOrderTotal()
         {
-            return pendingOrderTotal.ToString("N2");
+            return CurrencyHelper.FormatPrice(pendingOrderTotal);
         }
 
         protected int GetTotalOrderCount()
@@ -540,7 +533,7 @@ namespace ecommerce.Admin.Components.Pages
 
         protected string GetTotalOrderAmount()
         {
-            return totalOrderAmount.ToString("N2");
+            return CurrencyHelper.FormatPrice(totalOrderAmount);
         }
 
         protected decimal GetBalance()
@@ -558,7 +551,7 @@ namespace ecommerce.Admin.Components.Pages
 
         protected string GetTotalInvoiceAmount()
         {
-            return totalInvoiceAmount.ToString("C");
+            return CurrencyHelper.FormatPrice(totalInvoiceAmount);
         }
 
         protected async Task LoadActiveDiscounts()
@@ -809,7 +802,6 @@ namespace ecommerce.Admin.Components.Pages
                     selectedSubModelName = null;
                     selectedSubModelKey = null;
                     selectedDotPartNames.Clear();
-                    selectedDatProcessNumbers.Clear();
                     
                     await SearchProducts();
                 }
@@ -856,7 +848,6 @@ namespace ecommerce.Admin.Components.Pages
                 selectedSubModelName = null;
                 selectedSubModelKey = null;
                 selectedDotPartNames.Clear();
-                selectedDatProcessNumbers.Clear();
 
                 await SearchProducts();
                 
@@ -870,506 +861,10 @@ namespace ecommerce.Admin.Components.Pages
             }
         }
 
-        // VIN Araç Seçim Modal State
-        protected bool isVinVehicleSelectionModalOpen = false;
-        protected List<ecommerce.Admin.Services.Dtos.VinDto.VinVehicleDto> vinMatchedVehicles = new();
-        protected Dictionary<string, int> vinVehicleProductCounts = new(); // Her araç için bulunan ürün sayısı (Key: ManufacturerKey_BaseModelKey)
-        protected string currentVinNumber = "";
-        protected string vinVehicleSearchText = ""; // Araç arama metni
-        
-
-
-        // Filtrelenmiş araç listesi
-        protected List<ecommerce.Admin.Services.Dtos.VinDto.VinVehicleDto> FilteredVinVehicles
-        {
-            get
-            {
-                var query = vinMatchedVehicles.AsEnumerable();
-
-                // 1. "Referansları olmayan araçlar gelmesin" - Filter out vehicles with absolutely no data
-                // [VIN-FIX] Allow FALLBACK_BRAND results even if they have no parts, to provide brand/year context.
-                query = query.Where(v => 
-                    (v.DatProcessNumbers != null && v.DatProcessNumbers.Any()) || 
-                    (v.OemParts != null && v.OemParts.Any()) ||
-                    v.MatchMethod == "FALLBACK_BRAND" ||
-                    v.MatchMethod == "UNIVERSAL_V11"
-                );
-
-                // 2. "Stokta olanları göster" filter
-                if (showOnlyInStock)
-                {
-                    query = query.Where(v => {
-                        // [VIN-FIX] Fallback models should stay visible even with stock filter
-                        if (v.MatchMethod == "FALLBACK_BRAND") return true;
-                        
-                        var vKey = $"{v.ManufacturerKey}_{v.BaseModelKey}_{v.Wmi}_{v.VdsCode}_{v.ModelYear}";
-                        return vinVehicleProductCounts.TryGetValue(vKey, out var count) && count > 0;
-                    });
-                }
-
-                // 3. Text Search
-                if (!string.IsNullOrWhiteSpace(vinVehicleSearchText))
-                {
-                    var searchLower = vinVehicleSearchText.ToLowerInvariant();
-                    query = query.Where(v => 
-                        (v.ManufacturerName?.ToLowerInvariant().Contains(searchLower) ?? false) ||
-                        (v.BaseModelName?.ToLowerInvariant().Contains(searchLower) ?? false) ||
-                        (v.Wmi?.ToLowerInvariant().Contains(searchLower) ?? false) ||
-                        (v.ModelYear.ToString().Contains(searchLower))
-                    );
-                }
-                
-                return query.ToList();
-            }
-        }
-
         protected async Task OnModalStockToggle(bool value)
         {
             showOnlyInStock = value;
             await InvokeAsync(StateHasChanged);
-        }
-
-        /// <summary>
-        /// VIN numarası ile arama işlemini gerçekleştirir
-        /// HER ZAMAN MODAL AÇILIR - Kullanıcı aracı seçer, sonra OEM kodları ile arama yapılır
-        /// </summary>
-        protected async Task HandleVinSearch(string vinNumber)
-        {
-            try
-            {
-                Logger.LogInformation("[VIN] HandleVinSearch başladı - VIN: {VIN}", vinNumber);
-                
-                // VIN decode için özel loading flag
-                isLoadingVin = true;
-                isLoading = true;
-                await InvokeAsync(StateHasChanged);
-                
-                // VIN decode et
-                var decodeResult = await VinService.DecodeVinAsync(vinNumber);
-
-                Logger.LogInformation("[VIN] DecodeVinAsync tamamlandı - Ok: {Ok}, IsSuccess: {IsSuccess}", 
-                    decodeResult.Ok, decodeResult.Result?.IsSuccess ?? false);
-
-                if (!decodeResult.Ok || decodeResult.Result == null || !decodeResult.Result.IsSuccess)
-                {
-                    Logger.LogWarning("[VIN] Decode başarısız - ErrorMessage: {Error}", 
-                        decodeResult.Result?.ErrorMessage ?? "null");
-                    
-                    NotificationService.Notify(
-                        NotificationSeverity.Warning, 
-                        "VIN Decode Hatası", 
-                        decodeResult.Result?.ErrorMessage ?? "VIN numarası decode edilemedi"
-                    );
-                    isLoadingVin = false;
-                    isLoading = false;
-                    await InvokeAsync(StateHasChanged);
-                    return;
-                }
-
-                var vinData = decodeResult.Result;
-
-                // VIN'den eşleşen araçlar bulunamadı
-                if (vinData.MatchedVehicles == null || !vinData.MatchedVehicles.Any())
-                {
-                    Logger.LogWarning("[VIN] Eşleşen araç bulunamadı - VIN: {VIN}", vinNumber);
-                    
-                    NotificationService.Notify(
-                        NotificationSeverity.Warning, 
-                        "Araç Bulunamadı", 
-                        $"VIN: {vinNumber} - Bu VIN numarası için araç bilgisi bulunamadı."
-                    );
-
-                    isLoadingVin = false;
-                    isLoading = false;
-                    await InvokeAsync(StateHasChanged);
-                    return;
-                }
-
-                Logger.LogInformation("[VIN] Eşleşen araç sayısı: {Count}", vinData.MatchedVehicles.Count);
-
-                // Modal açılacak - ürün sayısı hesaplama KALDIRILDI (performans için)
-                vinMatchedVehicles = vinData.MatchedVehicles;
-                currentVinNumber = vinNumber;
-                vinManufacturerKeys.Clear(); // [VIN-FIX] Clear previous keys
-                
-                isVinVehicleSelectionModalOpen = true;
-                isLoadingVin = false;
-                isLoading = false;
-                
-                Logger.LogInformation("[VIN] Modal açılıyor - isVinVehicleSelectionModalOpen: {IsOpen}", isVinVehicleSelectionModalOpen);
-                
-                await InvokeAsync(StateHasChanged);
-
-                // PERFORMANS: Ürün sayısı hesaplama ARKA PLANDA çalışsın (modal açıldıktan sonra)
-                // Fix: Race Condition önlemek için listenin kopyasını gönderiyoruz
-                var vehiclesForCount = vinMatchedVehicles.ToList();
-                _ = Task.Run(async () => {
-                    await CalculateProductCountsForVehicles(vehiclesForCount);
-                    await InvokeAsync(StateHasChanged);
-                });
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "[VIN] HandleVinSearch hatası - VIN: {VIN}", vinNumber);
-                NotificationService.Notify(
-                    NotificationSeverity.Error, 
-                    "VIN Arama Hatası", 
-                    $"VIN arama sırasında hata oluştu: {ex.Message}"
-                );
-                isLoadingVin = false;
-                isLoading = false;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-
-        /// <summary>
-        /// Seçilen VIN aracı için OEM kodları ile ürün araması yapar
-        /// </summary>
-        protected async Task ProcessSelectedVinVehicle(ecommerce.Admin.Services.Dtos.VinDto.VinVehicleDto vehicle, string vinNumber)
-        {
-            try
-            {
-                // [VIN-FIX] Ensure manufacturer keys are set from the SELECTED vehicle before processing
-                currentVinVehicle = vehicle; // Keep track of selected vehicle for restoration
-                if (!string.IsNullOrEmpty(vehicle.ManufacturerKey))
-                {
-                    vinManufacturerKeys = new List<string> { vehicle.ManufacturerKey };
-                }
-                else
-                {
-                    vinManufacturerKeys.Clear();
-                }
-                
-                // MODAL KAPAT - UI güncellemesi için
-                isVinVehicleSelectionModalOpen = false;
-                await InvokeAsync(StateHasChanged);
-
-                Logger.LogInformation("[VIN] Araç seçildi - {Manufacturer} {Model}, DatProcessNumbers: {DpnCount}, OemParts: {OemPartsCount}", 
-                    vehicle.ManufacturerName, vehicle.BaseModelName, vehicle.DatProcessNumbers?.Count ?? 0, vehicle.OemParts?.Count ?? 0);
-
-                // DatProcessNumbers'ı topla (PRIMARY - Öncelikli)
-                var datProcessNumbers = (vehicle.DatProcessNumbers ?? new List<string>())
-                    .Where(dpn => !string.IsNullOrWhiteSpace(dpn))
-                    .Select(dpn => dpn.Trim())
-                    .Distinct()
-                    .ToList();
-
-                // OEM Kodlarını topla (FALLBACK - Yedek)
-                var vehicleOemCodes = new List<string>();
-                if (vehicle.OemParts != null)
-                {
-                    foreach (var part in vehicle.OemParts)
-                    {
-                        if (string.IsNullOrWhiteSpace(part.Oem)) continue;
-                        
-                        var cleaned = part.Oem.Trim().ToUpperInvariant().Replace(" ", "").Replace("-", "");
-                        if (!string.IsNullOrEmpty(cleaned))
-                        {
-                            vehicleOemCodes.Add(cleaned);
-
-                            // Variation 1: Remove leading zeros (e.g., 00000123 -> 123)
-                            var noZeros = cleaned.TrimStart('0');
-                            if (!string.IsNullOrEmpty(noZeros) && noZeros != cleaned)
-                            {
-                                vehicleOemCodes.Add(noZeros);
-                            }
-                        }
-                    }
-                    vehicleOemCodes = vehicleOemCodes.Distinct().ToList();
-                }
-
-                    // [VIN-FIX] DatProcessNumbers ve OEM kodları bulunamadıysa uyar ama ARAÇ BİLGİSİNİ GÖSTER
-                if (!datProcessNumbers.Any() && !vehicleOemCodes.Any())
-                {
-                    Logger.LogWarning("[VIN] DatProcessNumbers ve OEM kodları bulunamadı - Araç: {Manufacturer} {Model}", 
-                        vehicle.ManufacturerName, vehicle.BaseModelName);
-                    
-                    // Araç filtrelerini ayarla
-                    selectedManufacturerName = vehicle.ManufacturerName;
-                    selectedBaseModelName = vehicle.BaseModelName;
-                    selectedSubModelName = null;
-                    selectedSubModelKey = null;
-
-                    // Input'u temizle
-                    searchText = "";
-                    
-                    // [VIN-FIX] Force a search with empty result but valid vehicle context
-                    // This triggers the "Vehicle Found" card in the UI
-                    searchResult = new Paging<List<SellerProductViewModel>> { Data = new List<SellerProductViewModel>(), DataCount = 0 };
-                    hasSearched = true;
-                    isLoading = false;
-                    await InvokeAsync(StateHasChanged);
-                    return;
-                }
-
-                // Hangi arama yöntemi kullanılacak?
-                string searchMethod = datProcessNumbers.Any() ? "DatProcessNumber" : "OEM Kodları";
-                int codeCount = datProcessNumbers.Any() ? datProcessNumbers.Count : vehicleOemCodes.Count;
-                
-                Logger.LogInformation("[VIN] {Method} ile arama yapılacak - {Count} kod bulundu", 
-                    searchMethod, codeCount);
-
-                // Araç filtrelerini ayarla ve diğer çakışabilecek filtreleri temizle
-        selectedCategoryIds.Clear();
-        selectedBrandIds.Clear();
-        selectedProductIds.Clear();
-        selectedDotPartNames.Clear();
-        minPrice = null;
-        maxPrice = null;
-
-        selectedManufacturerName = vehicle.ManufacturerName;
-        selectedManufacturerKey = vehicle.ManufacturerKey;
-        selectedBaseModelName = vehicle.BaseModelName;
-        selectedBaseModelKey = vehicle.BaseModelKey;
-                selectedSubModelName = null;
-                selectedSubModelKey = null;
-
-                // searchText'i temizle - kodlar filter içinde kullanılacak
-                searchText = "";
-                
-                // DatProcessNumbers ile arama yap (PRIMARY)
-                bool dpnSearchPerformed = false;
-                if (datProcessNumbers.Any())
-                {
-                    // Normalize to Uppercase for consistent searching
-                    var normalizedDpns = datProcessNumbers.Select(x => x.ToUpperInvariant()).ToList();
-                    await SearchProductsByDatProcessNumbers(normalizedDpns);
-                    dpnSearchPerformed = true;
-                }
-                
-                // Fallback to OEM Codes if DPN search yielded no results OR was not performed
-                if ((!dpnSearchPerformed || searchResult?.DataCount == 0) && vehicleOemCodes.Any())
-                {
-                    if (dpnSearchPerformed)
-                    {
-                        Logger.LogWarning("[VIN] DPN araması sonuçsuz kaldı, OEM kodları ile deneniyor. DPN Count: {DpnCount}, OEM Count: {OemCount}", 
-                            datProcessNumbers.Count, vehicleOemCodes.Count);
-                    }
-                    
-                    await SearchProductsByOemCodes(vehicleOemCodes);
-                }
-                else if (dpnSearchPerformed && searchResult?.DataCount == 0 && !vehicleOemCodes.Any())
-                {
-                     // DPN arandı, sonuç yok VE OEM kodu da yok -> Sonuç yok
-                }
-
-                // Recent search kaydet - Sadece VIN numarası (prefix yok)
-                var vinRecordCount = searchResult?.DataCount ?? 0;
-                _ = RecentSearchService.AddSearchTermAsync(vinNumber, vinRecordCount).ContinueWith(async _ => 
-                {
-                    await LoadRecentSearches();
-                    await InvokeAsync(StateHasChanged);
-                });
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "[VIN] ProcessSelectedVinVehicle hatası");
-                NotificationService.Notify(
-                    NotificationSeverity.Error, 
-                    "Araç İşleme Hatası", 
-                    $"Araç işlenirken hata oluştu: {ex.Message}"
-                );
-                
-                // Hata durumunda loading'i kapat
-                isLoading = false;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-
-        /// <summary>
-        /// VIN araç seçim modalından araç seçildiğinde çağrılır
-        /// </summary>
-        protected async Task OnVinVehicleSelected(ecommerce.Admin.Services.Dtos.VinDto.VinVehicleDto vehicle)
-        {
-            isVinVehicleSelectionModalOpen = false;
-            await InvokeAsync(StateHasChanged);
-            await ProcessSelectedVinVehicle(vehicle, currentVinNumber);
-        }
-
-        /// <summary>
-        /// Her araç için Elasticsearch'te bulunan ürün sayısını hesaplar
-        /// PERFORMANS: Tüm araçların kodlarını tek sorguda toplar
-        /// </summary>
-        protected async Task CalculateProductCountsForVehicles(List<ecommerce.Admin.Services.Dtos.VinDto.VinVehicleDto> vehicles)
-        {
-            try
-            {
-                isCalculatingVinCounts = true;
-                vinVehicleProductCounts.Clear();
-                
-                Logger.LogInformation("[VIN-COUNT] Ürün sayısı hesaplanıyor - Araç sayısı: {Count}", vehicles.Count);
-
-                if (vehicles == null || !vehicles.Any())
-                {
-                     Logger.LogWarning("[VIN-COUNT] Araç listesi BOŞ! Hesaplama yapılamıyor.");
-                     return;
-                }
-                
-                // Tüm araçların DatProcessNumbers'ını topla
-                var allDatProcessNumbers = vehicles
-                    .SelectMany(v => v.DatProcessNumbers ?? new List<string>())
-                    .Where(dpn => !string.IsNullOrWhiteSpace(dpn))
-                    .Distinct()
-                    .ToList();
-                
-                // Tüm araçların OEM kodlarını topla
-                var allOemCodes = vehicles
-                    .SelectMany(v => v.OemParts ?? new List<ecommerce.Admin.Services.Dtos.VinDto.VinOemPartDto>())
-                    .Where(p => !string.IsNullOrWhiteSpace(p.Oem))
-                    .Select(p => p.Oem.Trim().ToUpperInvariant().Replace(" ", "").Replace("-", ""))
-                    .Where(oem => !string.IsNullOrEmpty(oem))
-                    .Distinct()
-                    .ToList();
-                
-                // Tüm araçların üreticilerini topla
-                var allManufacturers = vehicles
-                    .Select(v => v.ManufacturerName)
-                    .Where(m => !string.IsNullOrWhiteSpace(m))
-                    .Distinct()
-                    .ToList();
-                
-                Logger.LogInformation("[VIN-COUNT] Toplam DPN: {DpnCount}, Toplam OEM: {OemCount}, Markalar: {Brands}", 
-                    allDatProcessNumbers.Count, allOemCodes.Count, string.Join(", ", allManufacturers));
-                
-                if (!allDatProcessNumbers.Any() && !allOemCodes.Any())
-                {
-                    Logger.LogWarning("[VIN-COUNT] Hiçbir araç için kod bulunamadı!");
-                    return;
-                }
-                
-                // TEK SORGU ile tüm ürünleri al - Üretici kısıtlaması EKLENDİ (alakasız muadilleri önlemek için)
-                
-                var vehicleManufacturerKeys = vehicles
-                    .Select(v => v.ManufacturerKey)
-                    .Where(k => !string.IsNullOrEmpty(k))
-                    .Distinct()
-                    .ToList();
-                
-                // [VIN-FIX] Persist to class field for Grid Search
-                vinManufacturerKeys = vehicleManufacturerKeys;
-
-                var filter = new SearchFilterReguestDto
-                {
-                    DatProcessNumbers = allDatProcessNumbers.Any() ? allDatProcessNumbers : null,
-                    OemCodes = !allDatProcessNumbers.Any() && allOemCodes.Any() ? allOemCodes : null,
-                    Page = 1,
-                    PageSize = 5000, // PERFORMANS: Yüksek limit (2500 -> 5000), tüm varyantların ürünlerini kapsasın
-                    ManufacturerKeys = vehicleManufacturerKeys // [VIN-FIX] Server-side filtering
-                };
-                
-                var result = await ProductSearchService.GetByFilterPagingAsync(filter);
-                
-                if (!result.Ok || result.Result == null || result.Result.Data == null)
-                {
-                    Logger.LogWarning("[VIN-COUNT] Elasticsearch sorgusu başarısız!");
-                    return;
-                }
-                
-                var allProducts = result.Result.Data;
-                Logger.LogInformation("[VIN-COUNT] Toplam {Count} ürün bulundu", allProducts.Count);
-                
-                // Her araç için ürün sayısını hesapla
-                // [VIN-COUNT-FIX] Use EXACT same filtering as the main search results 
-                // to avoid discrepancies between modal and final list.
-                int processedVehicles = 0;
-
-                foreach (var vehicle in vehicles)
-                {
-                    processedVehicles++;
-                    Logger.LogInformation("[VIN-COUNT] Araç {Current}/{Total} işleniyor: {Manufacturer} {Model}", 
-                        processedVehicles, vehicles.Count, vehicle.ManufacturerName, vehicle.BaseModelName);
-
-                    var vehicleKey = $"{vehicle.ManufacturerKey}_{vehicle.BaseModelKey}_{vehicle.Wmi}_{vehicle.VdsCode}_{vehicle.ModelYear}";
-                    
-                    // Bu aracın kodları
-                    var vehicleDpns = (vehicle.DatProcessNumbers ?? new List<string>())
-                        .Where(dpn => !string.IsNullOrWhiteSpace(dpn))
-                        .Select(dpn => dpn.Trim())
-                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
-                    
-                    var vehicleOems = (vehicle.OemParts ?? new List<ecommerce.Admin.Services.Dtos.VinDto.VinOemPartDto>())
-                        .Where(p => !string.IsNullOrWhiteSpace(p.Oem))
-                        .Select(p => p.Oem.Trim().ToUpperInvariant().Replace(" ", "").Replace("-", ""))
-                        .Where(oem => !string.IsNullOrEmpty(oem))
-                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
-                    
-                    // Bu araca ait ürünleri filtrele - EXACT MATCH with Service logic
-                    var matchingProducts = allProducts.Where(product =>
-                    {
-                        // 1. Manufacturer/Model Check (Strict)
-                        if (!string.IsNullOrEmpty(product.ManufacturerKey) && 
-                            !product.ManufacturerKey.Equals(vehicle.ManufacturerKey, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return false;
-                        }
-
-                        // 2. DPN Match
-                        bool hasDpnMatch = false;
-                        if (vehicleDpns.Any() && product.DatProcessNumber != null && product.DatProcessNumber.Any())
-                        {
-                            if (product.DatProcessNumber.Any(pdpn => !string.IsNullOrWhiteSpace(pdpn) && vehicleDpns.Contains(pdpn.Trim())))
-                            {
-                                hasDpnMatch = true;
-                            }
-                        }
-                        
-                        // 3. OEM Match
-                        bool hasOemMatch = false;
-                        if (vehicleOems.Any())
-                        {
-                            // PartNumber check
-                            if (!string.IsNullOrWhiteSpace(product.PartNumber))
-                            {
-                                var normalizedP = product.PartNumber.Trim().ToUpperInvariant().Replace(" ", "").Replace("-", "");
-                                if (vehicleOems.Contains(normalizedP)) hasOemMatch = true;
-                            }
-
-                            // OemCode array check
-                            if (!hasOemMatch && product.OemCode != null && product.OemCode.Any())
-                            {
-                                foreach (var oem in product.OemCode)
-                                {
-                                    var normalizedO = oem.Trim().ToUpperInvariant().Replace(" ", "").Replace("-", "");
-                                    if (vehicleOems.Contains(normalizedO)) { hasOemMatch = true; break; }
-                                }
-                            }
-                        }
-
-                        // Hybrid Logic: Matches Service Should clause (DPN OR OEM)
-                        return hasDpnMatch || hasOemMatch;
-                    }).Count();
-                    
-                    vinVehicleProductCounts[vehicleKey] = matchingProducts;
-                    
-                    Logger.LogInformation("[VIN-COUNT] {Manufacturer} {Model} - {Count} ürün eşleşti", 
-                        vehicle.ManufacturerName, vehicle.BaseModelName, matchingProducts);
-                }
-                
-                Logger.LogInformation("[VIN-COUNT] Hesaplama tamamlandı - {Count} araç için ürün sayısı belirlendi", 
-                    vinVehicleProductCounts.Count);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "[VIN-COUNT] CalculateProductCountsForVehicles hatası");
-            }
-            finally
-            {
-                isCalculatingVinCounts = false;
-            }
-        }
-
-        /// <summary>
-        /// VIN araç seçim modalını kapatır
-        /// </summary>
-        protected void CloseVinVehicleSelectionModal()
-        {
-            isVinVehicleSelectionModalOpen = false;
-            vinMatchedVehicles.Clear();
-            vinVehicleProductCounts.Clear(); // Ürün sayılarını da temizle
-            currentVinNumber = "";
-            vinVehicleSearchText = ""; // Arama metnini temizle
-            isLoading = false;
-            StateHasChanged();
         }
 
         protected async Task ClearSearch()
@@ -1391,8 +886,6 @@ namespace ecommerce.Admin.Components.Pages
             selectedManufacturerNames.Clear();
             selectedBaseModelNames.Clear();
             selectedSubModelNames.Clear();
-            selectedDatProcessNumbers.Clear();
-            selectedOemCodes.Clear();
             StateHasChanged();
         }
 
@@ -1445,51 +938,12 @@ namespace ecommerce.Admin.Components.Pages
                     CategoryIds = selectedCategoryIds.Any() ? selectedCategoryIds : null,
                     BrandIds = selectedBrandIds.Any() ? selectedBrandIds : null,
                     ProductIds = selectedProductIds.Any() ? selectedProductIds : null,
-                    DotPartNames = selectedDotPartNames.Any() ? selectedDotPartNames.ToList() : null,
-                    DatProcessNumbers = selectedDatProcessNumbers.Any() ? selectedDatProcessNumbers : null,
-                    OemCodes = selectedOemCodes.Any() ? selectedOemCodes : null,
-                    
-                    // [VIN-FIX] Applied vehicle filters consistently to maintain context during pagination and filter toggles.
-                    ManufacturerNames = selectedManufacturerNames.Any() 
-                        ? selectedManufacturerNames.ToList() 
-                        : (!string.IsNullOrEmpty(selectedManufacturerName) ? new List<string> { selectedManufacturerName } : null),
-                        
-                    BaseModelNames = selectedBaseModelNames.Any() 
-                        ? selectedBaseModelNames.ToList() 
-                        : (!string.IsNullOrEmpty(selectedBaseModelName) ? new List<string> { selectedBaseModelName } : null),
-                        
-                    SubModelNames = selectedSubModelNames.Any() 
-                        ? selectedSubModelNames.ToList() 
-                        : (!string.IsNullOrEmpty(selectedSubModelName) ? new List<string> { selectedSubModelName } : null),
-
                     MinPrice = minPrice.HasValue && minPrice.Value > 0 ? minPrice : (minPrice == null ? 0.01 : minPrice), 
                     MaxPrice = maxPrice,
-                    
-                    SingleManufacturerName = selectedManufacturerName,
-                    SingleModelName = selectedBaseModelName,
-                    SingleSubModelName = selectedSubModelName,
-                    
-                    SubModelKeys = string.IsNullOrEmpty(selectedSubModelKey) ? null : new List<string> { selectedSubModelKey },
                     Page = page,
                     PageSize = pageSize,
-                    // [VIN-FIX] Apply ManufacturerKey restriction if available to keep search within the selected brand context
-                    ManufacturerKeys = vinManufacturerKeys.Any() ? vinManufacturerKeys : null,
                     ShouldGroupOems = !isIncludeEquivalents
                 };
-                
-                // [VIN-FIX] Safety Net: If functionality is "Originals Only" (!isIncludeEquivalents) 
-                // but keys are missing (e.g. lost state), try to restore them from currentVinVehicle
-                if (!isIncludeEquivalents && (vinManufacturerKeys == null || !vinManufacturerKeys.Any()) && currentVinVehicle != null && !string.IsNullOrEmpty(currentVinVehicle.ManufacturerKey))
-                {
-                     Logger.LogWarning("[VIN-DEBUG] ManufacturerKeys missing during strict search! Restoring from CurrentVinVehicle: {Key}", currentVinVehicle.ManufacturerKey);
-                     vinManufacturerKeys = new List<string> { currentVinVehicle.ManufacturerKey };
-                }
-
-                Logger.LogInformation("[VIN-DEBUG] SearchProducts - IncludeEq: {Eq}, VinKeys: {Vk}, Filter.MKeys: {Fmk}, Filter.MNames: {Fmn}", 
-                    isIncludeEquivalents,
-                    vinManufacturerKeys != null ? string.Join(",", vinManufacturerKeys) : "null",
-                    filter.ManufacturerKeys != null ? string.Join(",", filter.ManufacturerKeys) : "null",
-                    filter.ManufacturerNames != null ? string.Join(",", filter.ManufacturerNames) : "null");
 
                 // Fetch Products
                 var result = await ProductSearchService.GetByFilterPagingAsync(filter);
@@ -1874,7 +1328,6 @@ namespace ecommerce.Admin.Components.Pages
             selectedCategoryIds.Clear();
             selectedBrandIds.Clear();
             selectedDotPartNames.Clear();
-            selectedDatProcessNumbers.Clear();
             selectedManufacturerNames.Clear();
             selectedBaseModelNames.Clear();
             selectedSubModelNames.Clear();
@@ -2222,7 +1675,6 @@ namespace ecommerce.Admin.Components.Pages
             selectedCategoryIds.Clear();
             selectedBrandIds.Clear();
             selectedDotPartNames.Clear();
-            selectedDatProcessNumbers.Clear(); // Clear the new list
             selectedManufacturerNames.Clear(); // Clear multi-select filters
             selectedBaseModelNames.Clear();
             selectedSubModelNames.Clear();
@@ -2247,16 +1699,7 @@ namespace ecommerce.Admin.Components.Pages
             // Apply Part Group Filter if selected
             if (!string.IsNullOrEmpty(modalSelectedDotPart))
             {
-                // Prioritize DatProcessNumber if available
-                if (modalSelectedDotPartProcessNumber?.Any() == true)
-                {
-                    selectedDatProcessNumbers.AddRange(modalSelectedDotPartProcessNumber);
-                    selectedDotPartNames.Add(modalSelectedDotPart); 
-                }
-                else
-                {
-                    selectedDotPartNames.Add(modalSelectedDotPart);
-                }
+                selectedDotPartNames.Add(modalSelectedDotPart);
             }
             
             // Close modal
@@ -2288,19 +1731,19 @@ namespace ecommerce.Admin.Components.Pages
 
         protected async Task OpenSimilarProductsModal(SellerProductViewModel product)
         {
-            // Gather all possible codes: existing OemCode list + the primary PartNumber
-            var oemCodes = (product.OemCode ?? new List<string>()).ToList();
-            var partNumber = product.PartNumber?.Trim().ToUpperInvariant();
-            if (!string.IsNullOrEmpty(partNumber) && !oemCodes.Contains(partNumber))
+            // Ürün adı ile benzer ürün araması (OEM/DPN kaldırıldı)
+            var searchTerms = new List<string>();
+            if (!string.IsNullOrWhiteSpace(product.ProductName))
             {
-                oemCodes.Add(partNumber);
+                var words = product.ProductName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Where(w => w.Length >= 2).Take(3).ToList();
+                searchTerms.AddRange(words);
             }
+            if (!searchTerms.Any()) return;
 
-            if (!oemCodes.Any()) return;
-
-            await DialogService.OpenAsync<SimilarProductsModal>($"Muadil Ürünler: {product.PartNumber}",
+            await DialogService.OpenAsync<SimilarProductsModal>($"Benzer Ürünler: {product.ProductName}",
                 new Dictionary<string, object> { 
-                    { "OemCodes", oemCodes },
+                    { "OemCodes", searchTerms },
                     { "SellerId", product.SellerId },
                     { "ExcludedProductSellerItemIds", searchResult.Data.Select(p => p.SellerItemId).ToList() }
                 },
@@ -2824,19 +2267,17 @@ namespace ecommerce.Admin.Components.Pages
                         await searchGrid.Reload();
                     }
                     
-                    // Force UI update
-                    StateHasChanged();
+                    // Force UI update on UI thread
+                    await InvokeAsync(StateHasChanged);
                     
-                    // Show appropriate notification (like CartPage)
+                    // Görsel geri bildirim: Sepete eklendi bildirimi
                     var productName = product?.ProductName ?? "Ürün";
                     var message = result.Metadata?.Message;
-                    
                     if (string.IsNullOrEmpty(message))
                     {
-                        message = "Sepet başarıyla güncellendi";
+                        message = $"{productName} sepete eklendi.";
                     }
-                    
-                    NotificationService.Notify(NotificationSeverity.Success, "Sepet", message, duration: 2000);
+                    NotificationService.Notify(NotificationSeverity.Success, "Sepete Eklendi", message, duration: 3000);
                 }
                 else if (result.Ok)
                 {
@@ -2969,8 +2410,23 @@ namespace ecommerce.Admin.Components.Pages
         {
             try
             {
-                await LoadCartItems();
-                
+                // Use CurrentCart when available (e.g. from SetCart after AddToCart) for immediate UI update
+                var cart = CartStateService?.CurrentCart;
+                if (cart?.Sellers != null)
+                {
+                    existingCartItems = cart.Sellers
+                        .SelectMany(s => s.Items)
+                        .ToDictionary(i => i.ProductSellerItemId, i => i.Quantity);
+                    foreach (var item in existingCartItems)
+                    {
+                        productQuantities[item.Key] = item.Value;
+                    }
+                }
+                else
+                {
+                    await LoadCartItems();
+                }
+
                 var userId = Security?.User?.Id ?? 0;
                 if (userId > 0)
                 {
@@ -2978,7 +2434,7 @@ namespace ecommerce.Admin.Components.Pages
                     DashboardCacheService.InvalidateCache(userId);
                     await LoadDashboardData();
                 }
-                
+
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)
@@ -3063,7 +2519,6 @@ namespace ecommerce.Admin.Components.Pages
                 selectedBaseModelNames.Clear();
                 selectedSubModelNames.Clear();
                 selectedDotPartNames.Clear();
-                selectedDatProcessNumbers.Clear();
                 minPrice = null;
                 maxPrice = null;
                 
@@ -3118,34 +2573,9 @@ namespace ecommerce.Admin.Components.Pages
         }
 
         /// <summary>
-        /// Girilen metnin VIN numarası olup olmadığını kontrol eder
+        /// Arama input'u için CSS class'ı döndürür
         /// </summary>
-        protected bool IsVinNumber(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return false;
-
-            var trimmed = text.Trim().ToUpperInvariant();
-            
-            // VIN 17 karakter olmalı ve sadece belirli karakterler içermeli (I, O, Q hariç)
-            return trimmed.Length == 17 && 
-                   System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"^[A-HJ-NPR-Z0-9]{17}$");
-        }
-
-        /// <summary>
-        /// Arama input'u için CSS class'ı döndürür (VIN tespiti için)
-        /// </summary>
-        protected string GetSearchInputClass()
-        {
-            if (string.IsNullOrWhiteSpace(searchText))
-                return "b2b-search-input flex-grow-1";
-
-            // VIN tespiti - şimdilik devre dışı
-            // if (IsVinNumber(searchText))
-            //     return "b2b-search-input flex-grow-1 vin-detected";
-
-            return "b2b-search-input flex-grow-1";
-        }
+        protected string GetSearchInputClass() => "b2b-search-input flex-grow-1";
 
         public void Dispose()
         {
@@ -3319,357 +2749,5 @@ namespace ecommerce.Admin.Components.Pages
         
         #endregion
 
-        #region VIN OEM Search
-
-        /// <summary>
-        /// OEM kodları listesi ile direkt seller_index'te arama yapar
-        /// VIN decode sonrası kullanılır - tüm OEM kodlarını kullanır
-        /// PERFORMANS: PageSize=50, Similar count skip, Aggregation skip
-        /// </summary>
-        protected async Task SearchProductsByOemCodes(List<string> oemCodes)
-        {
-            var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Logger.LogInformation("[PERF-VIN] VIN araması başladı - OEM kod sayısı: {Count}", oemCodes.Count);
-            
-            if (!oemCodes.Any())
-            {
-                Logger.LogError("[PERF-VIN] HATA: OEM kodları boş!");
-                NotificationService.Notify(new NotificationMessage 
-                { 
-                    Severity = NotificationSeverity.Error, 
-                    Summary = "Hata", 
-                    Detail = "OEM kodları boş. Lütfen tekrar deneyin." 
-                });
-                isLoading = false;
-                await InvokeAsync(StateHasChanged);
-                return;
-            }
-            
-            isLoading = true;
-            _searchStartTime = DateTime.UtcNow;
-            await InvokeAsync(StateHasChanged);
-            
-            hasSearched = true;
-            try
-            {
-                // Update state for subsequent filter toggles
-                selectedOemCodes = oemCodes;
-                selectedDatProcessNumbers.Clear(); // OEM is fallback or specific choice, clear DPN
-                
-                var filterStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                // Tek sorguda tüm OEM kodları ile ara - PageSize=50 (hızlı yükleme)
-                var filter = new SearchFilterReguestDto
-                {
-                    OemCodes = selectedOemCodes, // Direkt OEM kodları - Elasticsearch terms query kullanacak
-                    OnlyInStock = showOnlyInStock,
-                    OnlyWithImage = showOnlyWithImage,
-                    CategoryIds = selectedCategoryIds.Any() ? selectedCategoryIds : null,
-                    BrandIds = selectedBrandIds.Any() ? selectedBrandIds : null,
-                    ProductIds = selectedProductIds.Any() ? selectedProductIds : null,
-                    DotPartNames = selectedDotPartNames.Any() ? selectedDotPartNames.ToList() : null,
-                    DatProcessNumbers = selectedDatProcessNumbers.Any() ? selectedDatProcessNumbers : null,
-                    ManufacturerNames = !string.IsNullOrEmpty(selectedManufacturerName) ? new List<string> { selectedManufacturerName } : null,
-                    BaseModelNames = !string.IsNullOrEmpty(selectedBaseModelName) ? new List<string> { selectedBaseModelName } : null,
-                    ManufacturerKey = selectedManufacturerKey,
-                    BaseModelKey = selectedBaseModelKey,
-                    SingleManufacturerName = selectedManufacturerName,
-                    SingleModelName = selectedBaseModelName,
-                    SingleSubModelName = selectedSubModelName,
-                    SubModelKeys = string.IsNullOrEmpty(selectedSubModelKey) ? null : new List<string> { selectedSubModelKey },
-                    Page = 1,
-                    PageSize = 50, // PERFORMANS: İlk 50 ürün - hızlı yükleme
-                    ShouldGroupOems = !isIncludeEquivalents
-                };
-                filterStopwatch.Stop();
-                Logger.LogInformation("[PERF-VIN] Filter oluşturma: {Duration}ms", filterStopwatch.ElapsedMilliseconds);
-
-                var searchStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                var result = await ProductSearchService.GetByFilterPagingAsync(filter);
-                
-                // KADEMELİ FALLBACK MANTIĞI:
-                // 1. Kademe: Model filtresini kaldır, Markayı koru (AYAR BAĞIMSIZ - Aynı markada parça eşleşmesi güvenlidir)
-                if ((!result.Ok || result.Result?.DataCount == 0) && !string.IsNullOrEmpty(filter.BaseModelKey))
-                {
-                    Logger.LogInformation("[PERF-VIN] Orijinal modelde bulunamadı, marka bazlı eşdeğerlere bakılıyor...");
-                    filter.BaseModelNames = null;
-                    filter.BaseModelKey = null;
-                    filter.SingleModelName = null;
-                    filter.SubModelKeys = null;
-                    filter.SingleSubModelName = null;
-                    
-                    result = await ProductSearchService.GetByFilterPagingAsync(filter);
-                }
-
-                // 2. Kademe: Markayı da kaldır (AYARA BAĞLI - Cross-brand muadillere bak)
-                var allowCrossBrand = Configuration.GetValue<bool>("AppSettings:OriginalUrunBulunamayincaEsdegerBaksinMi");
-                if ((!result.Ok || result.Result?.DataCount == 0) && allowCrossBrand)
-                {
-                    Logger.LogInformation("[PERF-VIN] Marka bazlı aramada da bulunamadı, genel eşdeğerlere bakılıyor...");
-                    filter.ManufacturerNames = null;
-                    filter.BaseModelNames = null;
-                    filter.ManufacturerKey = null;
-                    filter.BaseModelKey = null;
-                    filter.SingleManufacturerName = null;
-                    filter.SingleModelName = null;
-                    filter.PageSize = 50;
-                    
-                    result = await ProductSearchService.GetByFilterPagingAsync(filter);
-                    Logger.LogInformation("[PERF-VIN] Eşdeğer araması sonucu: {Ok}, DataCount: {DataCount}", result.Ok, result.Result?.DataCount ?? 0);
-                }
-
-                searchStopwatch.Stop();
-                Logger.LogInformation("[PERF-VIN] Elasticsearch + JoinRelatedData: {Duration}ms, Ok: {Ok}, DataCount: {DataCount}", 
-                    searchStopwatch.ElapsedMilliseconds, result.Ok, result.Result?.DataCount ?? 0);
-                
-                if (result.Ok && result.Result != null && result.Result.Data != null)
-                {
-                    var processingStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                    searchResult = result.Result;
-                    
-                    // Sıralama: Stokta olanlar önce, sonra fiyata göre
-                    if (searchResult.Data != null && searchResult.Data.Any())
-                    {
-                        searchResult.Data = searchResult.Data
-                            .OrderByDescending(x => x.Stock > 0)
-                            .ThenBy(x => x.SalePrice)
-                            .ToList();
-                    }
-                    processingStopwatch.Stop();
-                    Logger.LogInformation("[PERF-VIN] Sonuç işleme: {Duration}ms, Ürün: {Count}", 
-                        processingStopwatch.ElapsedMilliseconds, searchResult.Data?.Count ?? 0);
-                }
-                else
-                {
-                    Logger.LogWarning("[PERF-VIN] Sonuç bulunamadı - Ok: {Ok}, Result: {Result}, Data: {Data}", 
-                        result.Ok, result.Result != null, result.Result?.Data != null);
-                    
-                    searchResult = new Paging<List<SellerProductViewModel>> 
-                    { 
-                        Data = new List<SellerProductViewModel>(), 
-                        DataCount = 0 
-                    };
-                }
-
-                // PERFORMANS: VIN aramasında aggregation skip - 500ms kazanç
-                manufacturerNames.Clear();
-                baseModelNames.Clear();
-                subModelNames.Clear();
-
-                ExtractFilters();
-
-                isLoading = false;
-                await InvokeAsync(StateHasChanged);
-                
-                // Force grouping update after grid render
-                if (isGroupedBySeller && searchGrid != null)
-                {
-                    await Task.Delay(50);
-                    await UpdateGridGroups();
-                }
-                
-                totalStopwatch.Stop();
-                Logger.LogInformation("[PERF-VIN] *** TOPLAM: {Duration}ms *** (Hedef: 3000ms)", 
-                    totalStopwatch.ElapsedMilliseconds);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "[PERF-VIN] HATA");
-                hasSearched = true; 
-                searchResult = new Paging<List<SellerProductViewModel>> { Data = new List<SellerProductViewModel>(), DataCount = 0 };
-                
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message });
-            }
-            finally
-            {
-                if (isLoading)
-                {
-                    isLoading = false;
-                }
-                
-                await InvokeAsync(StateHasChanged);
-                await Task.Delay(50);
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-
-        /// <summary>
-        /// VIN decode sonrası DatProcessNumber listesi ile ürün araması yapar
-        /// PRIMARY arama yöntemi - OEM kodlarından daha güvenilir
-        /// PERFORMANS: PageSize=50, Similar count skip, Aggregation skip
-        /// </summary>
-        protected async Task SearchProductsByDatProcessNumbers(List<string> datProcessNumbers)
-        {
-            var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Logger.LogInformation("[PERF-DPN] DatProcessNumber araması başladı - Kod sayısı: {Count}", datProcessNumbers.Count);
-            
-            if (!datProcessNumbers.Any())
-            {
-                Logger.LogError("[PERF-DPN] HATA: DatProcessNumbers boş!");
-                NotificationService.Notify(new NotificationMessage 
-                { 
-                    Severity = NotificationSeverity.Error, 
-                    Summary = "Hata", 
-                    Detail = "Parça kodları boş. Lütfen tekrar deneyin." 
-                });
-                isLoading = false;
-                await InvokeAsync(StateHasChanged);
-                return;
-            }
-            
-            isLoading = true;
-            _searchStartTime = DateTime.UtcNow;
-            await InvokeAsync(StateHasChanged);
-            
-            hasSearched = true;
-            try
-            {
-                // Update state for subsequent filter toggles
-                selectedDatProcessNumbers = datProcessNumbers;
-                selectedOemCodes.Clear(); // DPN is primary, clear OEM fallback
-                
-                var filterStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                // Tek sorguda tüm DatProcessNumbers ile ara - PageSize=50 (hızlı yükleme)
-                var filter = new SearchFilterReguestDto
-                {
-                    DatProcessNumbers = selectedDatProcessNumbers, // PRIMARY: DatProcessNumber ile arama
-                    OemCodes = null, // OEM kodları kullanma - DatProcessNumber öncelikli
-                    OnlyInStock = showOnlyInStock,
-                    OnlyWithImage = showOnlyWithImage,
-                    CategoryIds = selectedCategoryIds.Any() ? selectedCategoryIds : null,
-                    BrandIds = selectedBrandIds.Any() ? selectedBrandIds : null,
-                    ProductIds = selectedProductIds.Any() ? selectedProductIds : null,
-                    DotPartNames = selectedDotPartNames.Any() ? selectedDotPartNames.ToList() : null,
-                    
-                    // Şasi aramasında marka ve model kısıtlamalarını geri alalım (Alakasız sonuçları önlemek için)
-                    ManufacturerNames = !string.IsNullOrEmpty(selectedManufacturerName) ? new List<string> { selectedManufacturerName } : null,
-                    BaseModelNames = !string.IsNullOrEmpty(selectedBaseModelName) ? new List<string> { selectedBaseModelName } : null,
-                    ManufacturerKey = selectedManufacturerKey,
-                    BaseModelKey = selectedBaseModelKey,
-                    SingleManufacturerName = selectedManufacturerName,
-                    SingleModelName = selectedBaseModelName,
-                    
-                    SubModelNames = null,
-                    SingleSubModelName = null,
-                    SubModelKeys = null,
-
-                    MinPrice = minPrice.HasValue && minPrice.Value > 0 ? minPrice : (minPrice == null ? 0.01 : minPrice), 
-                    MaxPrice = maxPrice,
-                    Page = 1,
-                    PageSize = 50, // PERFORMANS: İlk 50 ürün - hızlı yükleme
-                    ShouldGroupOems = !isIncludeEquivalents
-                };
-                filterStopwatch.Stop();
-                Logger.LogInformation("[PERF-DPN] Filter oluşturma: {Duration}ms", filterStopwatch.ElapsedMilliseconds);
-
-                var searchStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                var result = await ProductSearchService.GetByFilterPagingAsync(filter);
-                
-                // KADEMELİ FALLBACK MANTIĞI:
-                // 1. Kademe: Model filtresini kaldır, Markayı koru (AYAR BAĞIMSIZ - Aynı markada parça eşleşmesi güvenlidir)
-                if ((!result.Ok || result.Result?.DataCount == 0) && !string.IsNullOrEmpty(filter.BaseModelKey))
-                {
-                    Logger.LogInformation("[PERF-DPN] Orijinal modelde bulunamadı, marka bazlı eşdeğerlere bakılıyor...");
-                    filter.BaseModelNames = null;
-                    filter.BaseModelKey = null;
-                    filter.SingleModelName = null;
-                    filter.SubModelNames = null;
-                    filter.SingleSubModelName = null;
-                    
-                    result = await ProductSearchService.GetByFilterPagingAsync(filter);
-                }
-
-                // 2. Kademe: Markayı da kaldır (AYARA BAĞLI - Cross-brand muadillere bak)
-                var allowCrossBrand = Configuration.GetValue<bool>("AppSettings:OriginalUrunBulunamayincaEsdegerBaksinMi");
-                if ((!result.Ok || result.Result?.DataCount == 0) && allowCrossBrand)
-                {
-                    Logger.LogInformation("[PERF-DPN] Marka bazlı aramada da bulunamadı, genel eşdeğerlere bakılıyor...");
-                    filter.ManufacturerNames = null;
-                    filter.BaseModelNames = null;
-                    filter.ManufacturerKey = null;
-                    filter.BaseModelKey = null;
-                    filter.SingleManufacturerName = null;
-                    filter.SingleModelName = null;
-                    filter.PageSize = 50;
-                    
-                    result = await ProductSearchService.GetByFilterPagingAsync(filter);
-                    Logger.LogInformation("[PERF-DPN] Eşdeğer araması sonucu: {Ok}, DataCount: {DataCount}", result.Ok, result.Result?.DataCount ?? 0);
-                }
-
-                searchStopwatch.Stop();
-                Logger.LogInformation("[PERF-DPN] Elasticsearch + JoinRelatedData: {Duration}ms, Ok: {Ok}, DataCount: {DataCount}", 
-                    searchStopwatch.ElapsedMilliseconds, result.Ok, result.Result?.DataCount ?? 0);
-                
-                if (result.Ok && result.Result != null && result.Result.Data != null)
-                {
-                    var processingStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                    searchResult = result.Result;
-                    
-                    // Sıralama: Stokta olanlar önce, sonra fiyata göre
-                    if (searchResult.Data != null && searchResult.Data.Any())
-                    {
-                        searchResult.Data = searchResult.Data
-                            .OrderByDescending(x => x.Stock > 0)
-                            .ThenBy(x => x.SalePrice)
-                            .ToList();
-                    }
-                    processingStopwatch.Stop();
-                    Logger.LogInformation("[PERF-DPN] Sonuç işleme: {Duration}ms, Ürün: {Count}", 
-                        processingStopwatch.ElapsedMilliseconds, searchResult.Data?.Count ?? 0);
-                }
-                else
-                {
-                    Logger.LogWarning("[PERF-DPN] Sonuç bulunamadı - Ok: {Ok}, Result: {Result}, Data: {Data}", 
-                        result.Ok, result.Result != null, result.Result?.Data != null);
-                    
-                    searchResult = new Paging<List<SellerProductViewModel>> 
-                    { 
-                        Data = new List<SellerProductViewModel>(), 
-                        DataCount = 0 
-                    };
-                }
-
-                // PERFORMANS: VIN aramasında aggregation skip - 500ms kazanç
-                manufacturerNames.Clear();
-                baseModelNames.Clear();
-                subModelNames.Clear();
-
-                ExtractFilters();
-
-                isLoading = false;
-                await InvokeAsync(StateHasChanged);
-                
-                // Force grouping update after grid render
-                if (isGroupedBySeller && searchGrid != null)
-                {
-                    await Task.Delay(50);
-                    await UpdateGridGroups();
-                }
-                
-                totalStopwatch.Stop();
-                Logger.LogInformation("[PERF-DPN] *** TOPLAM: {Duration}ms *** (Hedef: 3000ms)", 
-                    totalStopwatch.ElapsedMilliseconds);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "[PERF-DPN] HATA");
-                hasSearched = true; 
-                searchResult = new Paging<List<SellerProductViewModel>> { Data = new List<SellerProductViewModel>(), DataCount = 0 };
-                
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message });
-            }
-            finally
-            {
-                if (isLoading)
-                {
-                    isLoading = false;
-                }
-                
-                await InvokeAsync(StateHasChanged);
-                await Task.Delay(50);
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-
-        #endregion
     }
 }

@@ -17,7 +17,7 @@ namespace ecommerce.Admin.Domain.Interfaces
         Task<IActionResult<Empty>> DeleteSalesPerson(AuditWrapDto<SalesPersonDeleteDto> model);
         Task<IActionResult<SalesPersonUpsertDto>> GetSalesPersonById(int id);
         Task<IActionResult<List<CustomerListDto>>> GetCustomersByRegion(int regionId);
-        Task<IActionResult<List<CustomerListDto>>> GetCustomersOfSalesPerson(int salesPersonId);
+        Task<IActionResult<List<CustomerListDto>>> GetCustomersOfSalesPerson(int salesPersonId, string? search = null);
         Task<IActionResult<List<CustomerWithCoordsDto>>> GetCustomersWithCoordsOfSalesPerson(int salesPersonId);
         Task<IActionResult<Empty>> AssignCustomersToSalesPerson(int salesPersonId, int regionId);
         Task<IActionResult<List<MonthListDto>>> GetMonths();

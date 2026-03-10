@@ -36,7 +36,7 @@ public class YurticiOrderCancelJob : IAsyncBackgroundJob<YurticiOrderCancelJobAr
                 o => o.Id == args.OrderId
                      && o.CargoExternalId != null
                      && o.CargoTrackNumber == null
-                     && o.OrderStatusType == OrderStatusType.OrderPrepare
+                     && (o.OrderStatusType == OrderStatusType.OrderPrepare || o.OrderStatusType == OrderStatusType.OrderNew)
                      && o.Cargo != null
                      && o.Cargo.Name.ToLower().Contains("yurtiçi")
             )

@@ -43,6 +43,10 @@ namespace ecommerce.Admin.Domain.Dtos.ProductDto
         public int ? AdvertCount{get;set;} 
         public bool IsGift{get;set;}
         public bool IsStockFollow { get; set; } = true;
+        /// <summary>Web/Plasiyer sipariş ekranında satılsın mı?</summary>
+        public bool IsSoldOnWeb { get; set; } = true;
+        /// <summary>PcPos'ta satılsın mı?</summary>
+        public bool IsSoldOnPcPos { get; set; } = true;
 
         [Ignore]
         public bool StatusBool{ get; set; }

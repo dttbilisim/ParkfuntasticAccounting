@@ -138,28 +138,33 @@ public class RedisOrderManagerDecorator : IOrderManager
 			    .ThenInclude(p => p.ProductImage)
 			.Include(x => x.Product)
 			    .ThenInclude(p => p.Categories)
+			.Include(x => x.Product)
+			    .ThenInclude(p => p.ProductSaleItemsAsRef)
+			    .ThenInclude(ps => ps.Product)
 			.Include(x => x.Seller)
 			.Where(x => ids.Contains(x.Id))
 			.ToListAsync();
 		var sellerItemById = sellerItems.ToDictionary(x => x.Id, x => x);
 
-		// 4) Redis'ten Status bilgilerini BATCH olarak al (N+1 problemi çözümü)
+		// 4) Redis'ten Status, Voucher, GuideName, VisitDate, PackageItemQuantities bilgilerini BATCH olarak al
 		var statusByPsId = new Dictionary<int, int>(productSellerItemIds.Count);
+		var voucherByPsId = new Dictionary<int, string?>(productSellerItemIds.Count);
+		var guideNameByPsId = new Dictionary<int, string?>(productSellerItemIds.Count);
+		var visitDateByPsId = new Dictionary<int, DateTime?>(productSellerItemIds.Count);
+		var packageItemQuantitiesByPsId = new Dictionary<int, Dictionary<int, int>>(productSellerItemIds.Count);
 		
-		// Use Redis BATCH/PIPELINE to get all statuses in a single round-trip
 		var batch = _database.CreateBatch();
-		var statusTasks = new Dictionary<int, Task<HashEntry[]>>(productSellerItemIds.Count);
+		var metaTasks = new Dictionary<int, Task<HashEntry[]>>(productSellerItemIds.Count);
 		
 		foreach (var psId in productSellerItemIds)
 		{
 			var metaKey = CartItemMetaKey(userId, psId);
-			statusTasks[psId] = batch.HashGetAllAsync(metaKey);
+			metaTasks[psId] = batch.HashGetAllAsync(metaKey);
 		}
 		
 		batch.Execute();
 		
-		// Wait for all tasks and process results
-		foreach (var (psId, task) in statusTasks)
+		foreach (var (psId, task) in metaTasks)
 		{
 			try
 			{
@@ -168,38 +173,63 @@ public class RedisOrderManagerDecorator : IOrderManager
 				statusByPsId[psId] = statusEntry.Value.HasValue 
 					? (int)statusEntry.Value 
 					: (int)EntityStatus.Active;
+				var v = metaData.FirstOrDefault(x => x.Name == "Voucher");
+				voucherByPsId[psId] = v.Value.HasValue && !string.IsNullOrWhiteSpace(v.Value.ToString()) ? v.Value.ToString() : null;
+				var g = metaData.FirstOrDefault(x => x.Name == "GuideName");
+				guideNameByPsId[psId] = g.Value.HasValue && !string.IsNullOrWhiteSpace(g.Value.ToString()) ? g.Value.ToString() : null;
+				var vd = metaData.FirstOrDefault(x => x.Name == "VisitDate");
+				visitDateByPsId[psId] = vd.Value.HasValue && !string.IsNullOrWhiteSpace(vd.Value.ToString()) && DateTime.TryParse(vd.Value.ToString(), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out var parsed) ? parsed : null;
+				var pq = metaData.FirstOrDefault(x => x.Name == "PackageItemQuantities");
+				if (pq.Value.HasValue && !string.IsNullOrWhiteSpace(pq.Value.ToString()))
+				{
+					try
+					{
+						var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(pq.Value.ToString());
+						if (dict != null)
+							packageItemQuantitiesByPsId[psId] = dict.ToDictionary(x => int.Parse(x.Key), x => x.Value);
+					}
+					catch { }
+				}
 			}
 			catch
 			{
-				// Status yoksa Active kabul et
 				statusByPsId[psId] = (int)EntityStatus.Active;
+				voucherByPsId[psId] = null;
+				guideNameByPsId[psId] = null;
+				visitDateByPsId[psId] = null;
 			}
 		}
 
-		// 5) Project to CartItem objects (tüm item'lar, Status bilgisiyle)
+		// 5) Project to CartItem objects
 		var result = new List<CartItem>(sellerItemById.Count);
 		
 		foreach (var (psId, quantity) in quantitiesByPsId)
 		{
 			if (!sellerItemById.TryGetValue(psId, out var sellerItem)) continue;
 			
-			// Status al (yoksa Active kabul et)
-			if(!statusByPsId.TryGetValue(psId, out var itemStatus)){
+			if(!statusByPsId.TryGetValue(psId, out var itemStatus))
 				itemStatus = (int)EntityStatus.Active;
-			}
 			
-			result.Add(new CartItem
+			var cartItem = new CartItem
 			{
 				Id = sellerItem.Id,
 				UserId = userId,
 				ProductId = sellerItem.ProductId,
 				ProductSellerItemId = sellerItem.Id,
 				Quantity = quantity,
-				Status = itemStatus, // Status bilgisini koru (Active veya Passive)
+				Status = itemStatus,
 				Product = sellerItem.Product!,
 				ProductSellerItem = sellerItem,
 				User = new ecommerce.Core.Entities.Authentication.User { Id = userId }
-			});
+			};
+			if (sellerItem.Product?.IsPackageProduct == true)
+			{
+				cartItem.Voucher = voucherByPsId.GetValueOrDefault(psId);
+				cartItem.GuideName = guideNameByPsId.GetValueOrDefault(psId);
+				cartItem.VisitDate = visitDateByPsId.GetValueOrDefault(psId);
+				cartItem.PackageItemQuantities = packageItemQuantitiesByPsId.GetValueOrDefault(psId);
+			}
+			result.Add(cartItem);
 		}
 
 		return result;

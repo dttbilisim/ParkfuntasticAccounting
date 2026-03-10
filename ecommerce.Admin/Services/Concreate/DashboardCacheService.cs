@@ -15,6 +15,8 @@ namespace ecommerce.Admin.Services.Concreate;
 
 public class DashboardCacheService : IDashboardCacheService
 {
+    private static readonly SemaphoreSlim _refreshLock = new(1, 1);
+
     private readonly IMemoryCache _cache;
     private readonly IOrderService _orderService;
     private readonly IInvoiceService _invoiceService;
@@ -58,8 +60,18 @@ public class DashboardCacheService : IDashboardCacheService
             return cachedData;
         }
 
-        // Cache miss - load and cache
-        return await RefreshDashboardDataAsync(userId, customerId);
+        // Cache miss - serialize refresh to avoid duplicate DB calls (Footer + ProductSearch aynı anda çağırınca)
+        await _refreshLock.WaitAsync();
+        try
+        {
+            if (_cache.TryGetValue(cacheKey, out cachedData) && cachedData != null)
+                return cachedData;
+            return await RefreshDashboardDataAsync(userId, customerId);
+        }
+        finally
+        {
+            _refreshLock.Release();
+        }
     }
 
     public async Task<DashboardDataDto?> RefreshDashboardDataAsync(int userId, int? customerId = null)

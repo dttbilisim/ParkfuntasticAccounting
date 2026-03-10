@@ -256,6 +256,9 @@ public class PriceListService : IPriceListService
 
                 await _priceListRepository.InsertAsync(entity);
                 await _context.SaveChangesAsync();
+
+                // Tüm fiyat listeleri (genel + cariye özel): SellerId=1 ile SellerItem sync — product-search'te görünsün
+                await SyncSellerItemsFromPriceListAsync(model.Dto.Items, model.UserId, null, model.Dto.CurrencyId);
             }
             else
             {
@@ -315,6 +318,8 @@ public class PriceListService : IPriceListService
                 var existingItems = _context.DbContext.PriceListItems
                     .Where(x => x.PriceListId == model.Dto.Id);
 
+                var oldProductIds = await existingItems.Where(x => x.Status != (int)EntityStatus.Deleted && x.ProductId.HasValue).Select(x => x.ProductId!.Value).Distinct().ToListAsync();
+
                 await existingItems.ExecuteUpdateAsync(x => x
                     .SetProperty(c => c.Status, (int)EntityStatus.Deleted)
                     .SetProperty(c => c.DeletedId, model.UserId)
@@ -339,6 +344,12 @@ public class PriceListService : IPriceListService
                 }
 
                 await _context.SaveChangesAsync();
+
+                // Tüm fiyat listeleri: SellerId=1 ile SellerItem sync
+                var newProductIds = model.Dto.Items.Where(x => x.ProductId.HasValue).Select(x => x.ProductId!.Value).Distinct().ToList();
+                // Sadece genel fiyat listesinde (CustomerId==null) çıkarılan ürünleri SellerItem'dan pasife al
+                var removedProductIds = model.Dto.CustomerId == null ? oldProductIds.Except(newProductIds).ToList() : null;
+                await SyncSellerItemsFromPriceListAsync(model.Dto.Items, model.UserId, removedProductIds, model.Dto.CurrencyId);
             }
 
             var lastResult = _context.LastSaveChangesResult;
@@ -376,6 +387,99 @@ public class PriceListService : IPriceListService
             }
             return rs;
         }
+    }
+
+    /// <summary>Genel fiyat listesinden SellerId=1 ile SellerItem sync — product-search'te ürünler görünsün.</summary>
+    private async Task SyncSellerItemsFromPriceListAsync(List<PriceListItemUpsertDto> items, int userId, List<int>? removedProductIds, int? currencyId = null)
+    {
+        const int DefaultSellerId = 1;
+        var sellerItemRepo = _context.GetRepository<SellerItem>();
+        var productRepo = _context.GetRepository<Product>();
+
+        var currencyCode = "TRY";
+        if (currencyId.HasValue && currencyId.Value > 0)
+        {
+            var currency = await _context.DbContext.Currencies.AsNoTracking()
+                .Where(c => c.Id == currencyId.Value)
+                .Select(c => c.CurrencyCode)
+                .FirstOrDefaultAsync();
+            if (!string.IsNullOrWhiteSpace(currency))
+                currencyCode = currency;
+        }
+
+        var productIds = items.Where(i => i.ProductId.HasValue && i.ProductId.Value > 0).Select(i => i.ProductId!.Value).Distinct().ToList();
+        if (productIds.Count == 0 && (removedProductIds == null || !removedProductIds.Any()))
+            return;
+
+        // Paket ürünler için ProductSaleItems toplam fiyat
+        var packagePrices = await _context.DbContext.ProductSaleItems
+            .AsNoTracking()
+            .Where(ps => productIds.Contains(ps.RefProductId))
+            .GroupBy(ps => ps.RefProductId)
+            .Select(g => new { RefProductId = g.Key, TotalPrice = g.Sum(ps => ps.Price) })
+            .ToDictionaryAsync(x => x.RefProductId, x => x.TotalPrice);
+
+        var existingSellerItems = await sellerItemRepo.GetAll(ignoreQueryFilters: true)
+            .Where(si => si.SellerId == DefaultSellerId && productIds.Contains(si.ProductId))
+            .ToDictionaryAsync(si => si.ProductId, si => si);
+
+        foreach (var item in items)
+        {
+            if (!item.ProductId.HasValue || item.ProductId.Value <= 0) continue;
+
+            var productId = item.ProductId.Value;
+            var salePrice = packagePrices.TryGetValue(productId, out var pkgTotal) && pkgTotal > 0
+                ? pkgTotal
+                : item.SalePrice;
+
+            if (salePrice <= 0) continue;
+
+            if (existingSellerItems.TryGetValue(productId, out var existing))
+            {
+                existing.SalePrice = salePrice;
+                existing.CostPrice = item.CostPrice;
+                existing.Currency = currencyCode;
+                existing.Stock = existing.Stock <= 0 ? 999 : existing.Stock;
+                existing.Status = (int)EntityStatus.Active;
+                existing.ModifiedDate = DateTime.Now;
+                existing.ModifiedId = userId;
+                sellerItemRepo.Update(existing);
+            }
+            else
+            {
+                var newSi = new SellerItem
+                {
+                    SellerId = DefaultSellerId,
+                    ProductId = productId,
+                    SalePrice = salePrice,
+                    CostPrice = item.CostPrice,
+                    Stock = 999,
+                    Status = (int)EntityStatus.Active,
+                    Currency = currencyCode,
+                    Unit = "adet",
+                    CreatedDate = DateTime.Now,
+                    CreatedId = userId
+                };
+                await sellerItemRepo.InsertAsync(newSi);
+            }
+        }
+
+        // Listeden çıkarılan ürünler: SellerItem pasife al
+        if (removedProductIds != null && removedProductIds.Any())
+        {
+            var toDeactivate = await sellerItemRepo.GetAll(ignoreQueryFilters: true)
+                .Where(si => si.SellerId == DefaultSellerId && removedProductIds.Contains(si.ProductId))
+                .ToListAsync();
+            foreach (var si in toDeactivate)
+            {
+                si.Status = (int)EntityStatus.Passive;
+                si.ModifiedDate = DateTime.Now;
+                si.ModifiedId = userId;
+                sellerItemRepo.Update(si);
+            }
+        }
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IActionResult<Empty>> DeletePriceList(AuditWrapDto<PriceListDeleteDto> model)

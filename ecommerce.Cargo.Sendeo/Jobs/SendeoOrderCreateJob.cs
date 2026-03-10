@@ -40,7 +40,7 @@ public class SendeoOrderCreateJob : IAsyncBackgroundJob<SendeoOrderCreateJobArgs
             .Where(
                 o => o.Id == args.OrderId
                      && o.CargoExternalId == null
-                     && o.OrderStatusType == OrderStatusType.OrderPrepare
+                     && (o.OrderStatusType == OrderStatusType.OrderPrepare || o.OrderStatusType == OrderStatusType.OrderNew)
                      && o.Cargo != null
                      && o.Cargo.Name.ToLower().Contains("sendeo")
             )

@@ -1,6 +1,7 @@
 @using ecommerce.Admin.Services.Interfaces
 @using ecommerce.Web.Domain.Dtos.Cart
 @using Microsoft.AspNetCore.Components.Authorization
+@using ecommerce.Core.Helpers
 
 @inject ICartStateService CartStateService
 @inject NavigationManager Navigation
@@ -77,7 +78,7 @@
                         
                         <!-- Center: Total Price -->
                         <div class="seller-total-center" style="font-weight: 800; color: #0e947a; background-color: #e6fffa; padding: 4px 12px; border-radius: 6px; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                             @seller.OrderTotal.ToString("C2")
+                             @CurrencyHelper.FormatPrice(seller.OrderTotal, seller.Currency)
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
@@ -120,31 +121,37 @@
                                         @onmouseleave="@(() => HideTooltip())"
                                         style="cursor: pointer;">@item.ProductName</h6>
                                     <div class="meta">
-                                        <!-- Web-Style Quantity Controls in Drawer -->
-                                        <div class="quantity-controls" style="position: relative; z-index: 10;">
-                                            <button type="button" class="qty-btn minus" 
-                                                    disabled="@isItemUpdating"
-                                                    @onclick="@(async () => await UpdateQtyDifference(item, -1))"
-                                                    @onclick:stopPropagation="true"
-                                                    style="pointer-events: auto; cursor: pointer;">
-                                                <i class="fa-solid fa-minus" style="pointer-events: none;"></i>
-                                            </button>
-                                            
-                                            <input type="number" 
-                                                   value="@item.Quantity" 
-                                                   disabled="@isItemUpdating"
-                                                   @onchange="@((ChangeEventArgs e) => UpdateQuantity(item, e))"
-                                                   min="1" 
-                                                   style="pointer-events: auto;" />
-                                                
-                                            <button type="button" class="qty-btn plus" 
-                                                    disabled="@isItemUpdating"
-                                                    @onclick="@(async () => await UpdateQtyDifference(item, 1))"
-                                                    @onclick:stopPropagation="true"
-                                                    style="pointer-events: auto; cursor: pointer;">
-                                                <i class="fa-solid fa-plus" style="pointer-events: none;"></i>
-                                            </button>
-                                        </div>
+                                        @if (!item.IsPackageProduct)
+                                        {
+                                            <!-- Normal ürün: miktar düzenlenebilir -->
+                                            <div class="quantity-controls" style="position: relative; z-index: 10;">
+                                                <button type="button" class="qty-btn minus" 
+                                                        disabled="@isItemUpdating"
+                                                        @onclick="@(async () => await UpdateQtyDifference(item, -1))"
+                                                        @onclick:stopPropagation="true"
+                                                        style="pointer-events: auto; cursor: pointer;">
+                                                    <i class="fa-solid fa-minus" style="pointer-events: none;"></i>
+                                                </button>
+                                                <input type="number" 
+                                                       value="@item.Quantity" 
+                                                       disabled="@isItemUpdating"
+                                                       @onchange="@((ChangeEventArgs e) => UpdateQuantity(item, e))"
+                                                       min="1" 
+                                                       style="pointer-events: auto;" />
+                                                <button type="button" class="qty-btn plus" 
+                                                        disabled="@isItemUpdating"
+                                                        @onclick="@(async () => await UpdateQtyDifference(item, 1))"
+                                                        @onclick:stopPropagation="true"
+                                                        style="pointer-events: auto; cursor: pointer;">
+                                                    <i class="fa-solid fa-plus" style="pointer-events: none;"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <!-- Paket ürün: miktar değiştirilemez -->
+                                            <span class="text-muted small">Adet: @item.Quantity</span>
+                                        }
                                     </div>
                                     @if (item.IsPerfectCompatibility)
                                     {
@@ -152,8 +159,56 @@
                                             <i class="fa-solid fa-check-circle"></i> Tam Uyum
                                         </div>
                                     }
+                                    @if (item.IsPackageProduct && (item.VisitDate.HasValue || !string.IsNullOrEmpty(item.Voucher) || !string.IsNullOrEmpty(item.GuideName)))
+                                    {
+                                        <div class="cart-package-info small text-muted mt-1">
+                                            @if (item.VisitDate.HasValue)
+                                            {
+                                                <span class="d-block"><i class="fa-solid fa-calendar-day me-1"></i>Tarih: @item.VisitDate.Value.ToString("dd.MM.yyyy")</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Voucher))
+                                            {
+                                                <span class="d-block"><i class="fa-solid fa-ticket me-1"></i>Voucher: @item.Voucher</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.GuideName))
+                                            {
+                                                <span class="d-block"><i class="fa-solid fa-user-tie me-1"></i>Rehber: @item.GuideName</span>
+                                            }
+                                        </div>
+                                    }
+                                    @if (item.IsPackageProduct && item.PackageProductItems != null && item.PackageProductItems.Any())
+                                    {
+                                        <div class="cart-package-details small mt-1">
+                                            <div class="text-muted mb-1"><i class="fa-solid fa-boxes-stacked me-1"></i>Paket içeriği (miktarlar düzenlenebilir):</div>
+                                            <ul class="list-unstyled mb-0 ps-2" style="font-size: 0.8rem;">
+                                                @foreach (var pkg in item.PackageProductItems)
+                                                {
+                                                    var pkgUpdating = updatingPackageItems.Contains($"{item.ProductSellerItemId}-{pkg.ProductId}");
+                                                    <li class="d-flex align-items-center gap-1 mb-1">
+                                                        <span class="flex-grow-1">@pkg.ProductName — @CurrencyHelper.FormatPrice(pkg.Price, item.Currency)</span>
+                                                        <div class="d-flex align-items-center" style="gap: 2px;">
+                                                            <button type="button" class="btn btn-sm p-0" style="width: 24px; height: 24px; font-size: 0.7rem;"
+                                                                    disabled="@(pkgUpdating || pkg.Quantity <= 0)"
+                                                                    @onclick="@(() => UpdatePackageItemQty(item, pkg, -1))"
+                                                                    @onclick:stopPropagation="true">−</button>
+                                                            <input type="number" class="form-control form-control-sm text-center" style="width: 40px; font-size: 0.75rem; padding: 0 2px;"
+                                                                   value="@pkg.Quantity" min="0"
+                                                                   disabled="@pkgUpdating"
+                                                                   @onchange="@((ChangeEventArgs ev) => UpdatePackageItemQtyFromInput(item, pkg, ev))"
+                                                                   @onclick:stopPropagation="true"
+                                                                   @onkeydown:stopPropagation="true" />
+                                                            <button type="button" class="btn btn-sm p-0" style="width: 24px; height: 24px; font-size: 0.7rem;"
+                                                                    disabled="@pkgUpdating"
+                                                                    @onclick="@(() => UpdatePackageItemQty(item, pkg, 1))"
+                                                                    @onclick:stopPropagation="true">+</button>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
                                 </div>
-                                <div class="drop-price">@item.Total.ToString("C2")</div>
+                                <div class="drop-price">@CurrencyHelper.FormatPrice(item.Total, item.Currency)</div>
                                 
                                 <button type="button" class="item-remove-btn" 
                                         disabled="@isItemUpdating"
@@ -168,7 +223,7 @@
                         <li class="cart-seller-footer">
                             <div class="seller-footer-content">
                                 <span class="seller-footer-label">Toplam</span>
-                                <span class="seller-footer-total">@seller.OrderTotal.ToString("C2")</span>
+                                <span class="seller-footer-total">@CurrencyHelper.FormatPrice(seller.OrderTotal, seller.Currency)</span>
                             </div>
                         </li>
                     }
@@ -199,28 +254,20 @@
                 
                 <div class="cart-total-row">
                     <span class="label">Ara Toplam</span>
-                    <span class="value @(isUpdating ? "text-muted" : "")">@CartStateService.CurrentCart.SubTotal.ToString("C2")</span>
+                    <span class="value @(isUpdating ? "text-muted" : "")">@CurrencyHelper.FormatPrice(CartStateService.CurrentCart.SubTotal, CartStateService.CurrentCart.Currency)</span>
                 </div>
-                
-                @if(CartStateService.CurrentCart.CargoPrice > 0)
-                {
-                     <div class="cart-total-row">
-                        <span class="label">Kargo Ücreti</span>
-                        <span class="value @(isUpdating ? "text-muted" : "")">@CartStateService.CurrentCart.CargoPrice.ToString("C2")</span>
-                    </div>
-                }
 
                 @if(CartStateService.CurrentCart.OrderTotalDiscount > 0)
                 {
                     <div class="cart-total-row">
                         <span class="label">İndirim</span>
-                        <span class="value text-danger @(isUpdating ? "opacity-50" : "")">-@CartStateService.CurrentCart.OrderTotalDiscount.ToString("C2")</span>
+                        <span class="value text-danger @(isUpdating ? "opacity-50" : "")">-@CurrencyHelper.FormatPrice(CartStateService.CurrentCart.OrderTotalDiscount, CartStateService.CurrentCart.Currency)</span>
                     </div>
                 }
                 
                 <div class="cart-total-row grand-total">
                     <span class="label">Genel Toplam</span>
-                    <span class="value @(isUpdating ? "text-muted" : "")">@CartStateService.CurrentCart.OrderTotal.ToString("C2")</span>
+                    <span class="value @(isUpdating ? "text-muted" : "")">@CurrencyHelper.FormatPrice(CartStateService.CurrentCart.OrderTotal, CartStateService.CurrentCart.Currency)</span>
                 </div>
 
                 <div class="cart-actions">
@@ -240,6 +287,7 @@
     private bool isRefreshing = false;
     private bool isUpdating = false;
     private HashSet<int> updatingItems = new();
+    private HashSet<string> updatingPackageItems = new();
     
     // Dictionary to store Expanded state for each seller
     private Dictionary<int, bool> _sellerExpandedState = new();
@@ -257,6 +305,7 @@
         isRefreshing = false;
         isUpdating = false;
         updatingItems.Clear();
+        updatingPackageItems.Clear();
         // Optionally keep state or clear it. If clear, all accordions close on update.
         // _sellerExpandedState.Clear(); // Uncomment to close on update
         InvokeAsync(StateHasChanged);
@@ -282,6 +331,65 @@
     {
         IsOpen = false;
         await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task UpdatePackageItemQty(ecommerce.Web.Domain.Dtos.Cart.CartItemDto item, ecommerce.Web.Domain.Dtos.Cart.CartPackageItemDto pkg, int delta)
+    {
+        var newQty = Math.Max(0, pkg.Quantity + delta);
+        await UpdatePackageItemQuantities(item, pkg.ProductId, newQty);
+    }
+
+    private async Task UpdatePackageItemQtyFromInput(ecommerce.Web.Domain.Dtos.Cart.CartItemDto item, ecommerce.Web.Domain.Dtos.Cart.CartPackageItemDto pkg, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var val) && val >= 0)
+            await UpdatePackageItemQuantities(item, pkg.ProductId, val);
+    }
+
+    private async Task UpdatePackageItemQuantities(ecommerce.Web.Domain.Dtos.Cart.CartItemDto item, int productId, int newQuantity)
+    {
+        var key = $"{item.ProductSellerItemId}-{productId}";
+        updatingPackageItems.Add(key);
+        isUpdating = true;
+        StateHasChanged();
+
+        try
+        {
+            var quantities = item.PackageProductItems?.ToDictionary(x => x.ProductId, x => x.Quantity) ?? new Dictionary<int, int>();
+            quantities[productId] = newQuantity;
+
+            var req = new ecommerce.Web.Domain.Dtos.Cart.CartItemUpsertDto
+            {
+                ProductSellerItemId = item.ProductSellerItemId,
+                Quantity = 0,
+                CustomerId = Security?.SelectedCustomerId,
+                Voucher = item.Voucher,
+                GuideName = item.GuideName,
+                VisitDate = item.VisitDate,
+                PackageItemQuantities = quantities
+            };
+
+            var result = await CartService.CreateCartItem(req);
+            if (result.Ok && result.Result != null)
+            {
+                CartStateService.SetCart(result.Result);
+                StateHasChanged();
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Güncellendi", Detail = "Paket içeriği güncellendi.", Duration = 2000 });
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Metadata?.Message ?? "Güncellenemedi.", Duration = 4000 });
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 4000 });
+        }
+        finally
+        {
+            updatingPackageItems.Remove(key);
+            isUpdating = false;
+            StateHasChanged();
+        }
     }
 
     private async Task UpdateQtyDifference(ecommerce.Web.Domain.Dtos.Cart.CartItemDto item, int diff)

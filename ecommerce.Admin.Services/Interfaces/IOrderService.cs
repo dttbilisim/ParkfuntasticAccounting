@@ -2,6 +2,7 @@ using ecommerce.Admin.Domain.Dtos.OrderDto;
 using ecommerce.Admin.Domain.Dtos.DashboardDto;
 using ecommerce.Core.Helpers;
 using ecommerce.Core.Models;
+using ecommerce.Core.Utils;
 using ecommerce.Core.Utils.ResultSet;
 using ecommerce.Core.Entities;
 namespace ecommerce.Admin.Domain.Interfaces
@@ -9,6 +10,12 @@ namespace ecommerce.Admin.Domain.Interfaces
     public interface IOrderService
     {
         public Task<IActionResult<Paging<IQueryable<OrderListDto>>>> GetOrders(PageSetting pager);
+        Task<IActionResult<Paging<IQueryable<OrderListDto>>>> GetOrdersByStatus(OrderStatusType? statusFilter, PageSetting pager);
+        Task<IActionResult<Paging<IQueryable<OrderListDto>>>> GetPendingOrders(PageSetting pager);
+        Task<IActionResult<Paging<IQueryable<OrderListDto>>>> GetApprovedOrders(PageSetting pager);
+        Task<IActionResult<OrderDetailModalDto>> GetOrderDetailModal(int orderId);
+        Task<IActionResult<Empty>> ApproveOrder(int orderId);
+        Task<IActionResult<Empty>> UpdateOrderDetails(int orderId, DateTime? orderDate, string? voucher, string? guideName, List<OrderItemUpdateDto> items);
         Task<IActionResult<Empty>> DeleteOrder(AuditWrapDto<OrderDeleteDto> model);
         Task<IActionResult<OrderUpsertDto>> GetOrderById(int Id);
         Task<List<KeyValuePair<string, int>>> OrderStatus();

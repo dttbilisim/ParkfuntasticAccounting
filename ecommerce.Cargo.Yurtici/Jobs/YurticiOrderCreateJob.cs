@@ -23,7 +23,7 @@ public class YurticiOrderCreateJob : IAsyncBackgroundJob<YurticiOrderCreateJobAr
             .Include(o => o.ApplicationUser)
             .Include(o => o.OrderItems).ThenInclude(i => i.Product)
             .Include(o => o.Cargo)
-            .Where(o => o.Id == args.OrderId && o.CargoExternalId == null && o.OrderStatusType == OrderStatusType.OrderPrepare && o.Cargo != null && o.Cargo.Name.ToLower().Contains("yurtiçi"))
+            .Where(o => o.Id == args.OrderId && o.CargoExternalId == null && (o.OrderStatusType == OrderStatusType.OrderPrepare || o.OrderStatusType == OrderStatusType.OrderNew) && o.Cargo != null && o.Cargo.Name.ToLower().Contains("yurtiçi"))
             .FirstOrDefaultAsync();
         if(order == null){
             return;

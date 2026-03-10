@@ -37,6 +37,13 @@ namespace ecommerce.Admin.Services.Concreate
                 return true;
             }
 
+            // Sipariş onayı sayfası sepetteki "Siparişi Tamamla" ile erişilir, menü yetkisi gerektirmez
+            var normalizedPathForBypass = NormalizePath(path);
+            if (normalizedPathForBypass == "admin-checkout" || normalizedPathForBypass.StartsWith("admin-checkout/"))
+            {
+                return true;
+            }
+
             var userIdStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId)) return false;
 

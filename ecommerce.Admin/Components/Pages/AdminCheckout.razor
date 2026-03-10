@@ -1,8 +1,8 @@
 @page "/admin-checkout"
 @using ecommerce.Admin.Services.Interfaces
-@using ecommerce.Admin.Domain.Dtos.UserAddressDto
 @using ecommerce.Web.Domain.Dtos.Cart
 @using ecommerce.Core.Entities.Authentication
+@using ecommerce.Core.Helpers
 @using ecommerce.Admin.Components.Layout
 @using ecommerce.Web.Domain.Dtos.Bank
 @using ecommerce.Web.Domain.Dtos.Order
@@ -78,7 +78,7 @@ else
                                         <i class="fas fa-store me-2"></i>
                                         <span class="seller-name">@seller.SellerName</span>
                                     </div>
-                                    <div class="seller-total">@seller.OrderTotal.ToString("C")</div>
+                                    <div class="seller-total">@CurrencyHelper.FormatPrice(seller.OrderTotal, seller.Currency)</div>
                                 </div>
 
                                 <!-- Products List -->
@@ -139,6 +139,54 @@ else
                                                        class="product-name"
                                                        @onmouseenter="@(() => ShowTooltip(checkoutProductNameId, item.ProductName))"
                                                        @onmouseleave="@(() => HideTooltip())">@item.ProductName</a>
+                                                    @if (item.IsPackageProduct && (item.VisitDate.HasValue || !string.IsNullOrEmpty(item.Voucher) || !string.IsNullOrEmpty(item.GuideName)))
+                                                    {
+                                                        <div class="package-info small text-muted mt-1">
+                                                            @if (item.VisitDate.HasValue)
+                                                            {
+                                                                <span class="d-block"><i class="fa-solid fa-calendar-day me-1"></i>Sipariş Tarihi: @item.VisitDate.Value.ToString("dd.MM.yyyy")</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(item.Voucher))
+                                                            {
+                                                                <span class="d-block"><i class="fa-solid fa-ticket me-1"></i>Voucher: @item.Voucher</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(item.GuideName))
+                                                            {
+                                                                <span class="d-block"><i class="fa-solid fa-user-tie me-1"></i>Rehber: @item.GuideName</span>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    @if (item.IsPackageProduct && item.PackageProductItems != null && item.PackageProductItems.Any())
+                                                    {
+                                                        <div class="package-details small mt-1">
+                                                            <div class="text-muted mb-1"><i class="fa-solid fa-boxes-stacked me-1"></i>Paket içeriği (her biri ayrı düzenlenebilir):</div>
+                                                            <ul class="list-unstyled mb-0 ps-2" style="font-size: 0.8rem;">
+                                                                @foreach (var pkg in item.PackageProductItems)
+                                                                {
+                                                                    var pkgUpdating = IsPackageItemUpdating(item, pkg);
+                                                                    <li class="d-flex align-items-center gap-1 mb-1 flex-wrap">
+                                                                        <span class="flex-grow-1">@pkg.ProductName — @CurrencyHelper.FormatPrice(pkg.Price, item.Currency)</span>
+                                                                        <div class="d-flex align-items-center" style="gap: 2px;">
+                                                                            <button type="button" class="btn btn-sm p-0" style="width: 24px; height: 24px; font-size: 0.7rem;"
+                                                                                    disabled="@(pkgUpdating || pkg.Quantity <= 0 || isUpdatingCart)"
+                                                                                    @onclick="@(() => UpdatePackageItemQty(item, pkg, -1))"
+                                                                                    @onclick:stopPropagation="true">−</button>
+                                                                            <input type="number" class="form-control form-control-sm text-center" style="width: 40px; font-size: 0.75rem; padding: 0 2px;"
+                                                                                   value="@pkg.Quantity" min="0"
+                                                                                   disabled="@(pkgUpdating || isUpdatingCart)"
+                                                                                   @onchange="@((ChangeEventArgs ev) => UpdatePackageItemQtyFromInput(item, pkg, ev))"
+                                                                                   @onclick:stopPropagation="true"
+                                                                                   @onkeydown:stopPropagation="true" />
+                                                                            <button type="button" class="btn btn-sm p-0" style="width: 24px; height: 24px; font-size: 0.7rem;"
+                                                                                    disabled="@(pkgUpdating || isUpdatingCart)"
+                                                                                    @onclick="@(() => UpdatePackageItemQty(item, pkg, 1))"
+                                                                                    @onclick:stopPropagation="true">+</button>
+                                                                        </div>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    }
                                                 </div>
 
                                                 <!-- Product Discounts & Savings -->
@@ -156,7 +204,7 @@ else
                                                                 }
                                                                 else if (discount.DiscountAmount.HasValue)
                                                                 {
-                                                                    <text>(@discount.DiscountAmount.Value.ToString("C"))</text>
+                                                                    <text>(@CurrencyHelper.FormatPrice(discount.DiscountAmount.Value, item.Currency))</text>
                                                                 }
                                                             </span>
                                                         }
@@ -164,7 +212,7 @@ else
                                                         {
                                                             <span class="savings-badge">
                                                                 <i class="fa-solid fa-gift me-1"></i>
-                                                                Kazancınız: @((item.DisplaySavings * item.Quantity).ToString("C"))
+                                                                Kazancınız: @CurrencyHelper.FormatPrice(item.DisplaySavings * item.Quantity, item.Currency)
                                                             </span>
                                                         }
                                                     </div>
@@ -173,49 +221,53 @@ else
                                                 <!-- Price & Quantity -->
                                                 <div class="product-actions">
                                                     <div class="price-section">
-                                                        <div class="total-price">@item.Total.ToString("C")</div>
+                                                        <div class="total-price">@CurrencyHelper.FormatPrice(item.Total, item.Currency)</div>
                                                     </div>
                                                     
                                                     <div class="quantity-section">
-                                                        @{
-                                                            var isItemUpdating = IsItemUpdating(item);
+                                                        @if (item.IsPackageProduct)
+                                                        {
+                                                            <span class="text-muted small">Adet: @item.Quantity</span>
                                                         }
-                                                        <div class="quantity-controls @(isItemUpdating ? "updating" : "")">
-                                                            @if (isItemUpdating)
-                                                            {
-                                                                <div class="quantity-loading">
-                                                                    <div class="spinner-border spinner-border-sm text-success" role="status">
-                                                                        <span class="visually-hidden">Yükleniyor...</span>
+                                                        else
+                                                        {
+                                                            <div class="quantity-controls @(IsItemUpdating(item) ? "updating" : "")">
+                                                                @if (IsItemUpdating(item))
+                                                                {
+                                                                    <div class="quantity-loading">
+                                                                        <div class="spinner-border spinner-border-sm text-success" role="status">
+                                                                            <span class="visually-hidden">Yükleniyor...</span>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            }
-                                                            else
-                                                            {
-                                                                <button type="button" 
-                                                                        class="qty-btn minus" 
-                                                                        @onclick="() => UpdateQuantity(item, -1)"
-                                                                        @onclick:stopPropagation="true"
-                                                                        disabled="@(isUpdatingCart || item.Quantity <= (item.MinSellCount > 0 ? item.MinSellCount : 1))">
-                                                                    <i class="fa-solid fa-minus"></i>
-                                                                </button>
-                                                                <input type="number" 
-                                                                       class="qty-input" 
-                                                                       value="@item.Quantity" 
-                                                                       min="@(item.MinSellCount > 0 ? item.MinSellCount : 1)"
-                                                                       max="@(item.MaxSellCount > 0 ? item.MaxSellCount : 9999)"
-                                                                       step="@(item.Step > 0 ? item.Step : 1)"
-                                                                       @onchange="@((ChangeEventArgs e) => OnQuantityChanged(item, e))"
-                                                                       @onclick:stopPropagation="true"
-                                                                       disabled="@isUpdatingCart" />
-                                                                <button type="button" 
-                                                                        class="qty-btn plus" 
-                                                                        @onclick="() => UpdateQuantity(item, 1)"
-                                                                        @onclick:stopPropagation="true"
-                                                                        disabled="@(isUpdatingCart || (item.MaxSellCount > 0 && item.Quantity >= item.MaxSellCount))">
-                                                                    <i class="fa-solid fa-plus"></i>
-                                                                </button>
-                                                            }
-                                                        </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <button type="button" 
+                                                                            class="qty-btn minus" 
+                                                                            @onclick="() => UpdateQuantity(item, -1)"
+                                                                            @onclick:stopPropagation="true"
+                                                                            disabled="@(isUpdatingCart || item.Quantity <= (item.MinSellCount > 0 ? item.MinSellCount : 1))">
+                                                                        <i class="fa-solid fa-minus"></i>
+                                                                    </button>
+                                                                    <input type="number" 
+                                                                           class="qty-input" 
+                                                                           value="@item.Quantity" 
+                                                                           min="@(item.MinSellCount > 0 ? item.MinSellCount : 1)"
+                                                                           max="@(item.MaxSellCount > 0 ? item.MaxSellCount : 9999)"
+                                                                           step="@(item.Step > 0 ? item.Step : 1)"
+                                                                           @onchange="@((ChangeEventArgs e) => OnQuantityChanged(item, e))"
+                                                                           @onclick:stopPropagation="true"
+                                                                           disabled="@isUpdatingCart" />
+                                                                    <button type="button" 
+                                                                            class="qty-btn plus" 
+                                                                            @onclick="() => UpdateQuantity(item, 1)"
+                                                                            @onclick:stopPropagation="true"
+                                                                            disabled="@(isUpdatingCart || (item.MaxSellCount > 0 && item.Quantity >= item.MaxSellCount))">
+                                                                        <i class="fa-solid fa-plus"></i>
+                                                                    </button>
+                                                                }
+                                                            </div>
+                                                        }
                                                     </div>
                                                     <div class="product-remove-section product-remove-inline">
                                                         <button type="button" 
@@ -252,41 +304,8 @@ else
                                                     }
                                                     else if (discount.DiscountAmount.HasValue)
                                                     {
-                                                        <span class="discount-value">-@discount.DiscountAmount.Value.ToString("C")</span>
+                                                        <span class="discount-value">-@CurrencyHelper.FormatPrice(discount.DiscountAmount.Value, seller.Currency)</span>
                                                     }
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                }
-
-                                <!-- Cargo Selection -->
-                                @if (seller.Cargoes != null && seller.Cargoes.Any())
-                                {
-                                    <div class="seller-cargo-container">
-                                        <div class="cargo-header">
-                                            <i class="fa-solid fa-truck me-2"></i>
-                                            <span class="fw-bold">Kargo Seçimi</span>
-                                        </div>
-                                        <div class="cargo-list">
-                                            @foreach (var cargo in seller.Cargoes)
-                                            {
-                                                var isSelected = seller.SelectedCargo?.CargoId == cargo.CargoId;
-                                                <div class="cargo-radio-item @(isSelected ? "selected" : "")" 
-                                                     @onclick="() => OnSellerCargoChanged(seller, cargo)">
-                                                    <div class="radio-circle">
-                                                        @if (isSelected)
-                                                        {
-                                                            <div class="radio-dot"></div>
-                                                        }
-                                                    </div>
-                                                    <div class="cargo-info">
-                                                        <div class="cargo-name">@cargo.Name</div>
-                                                        <div class="cargo-delivery">Tahmini Teslimat: @GetEstimatedDelivery()</div>
-                                                    </div>
-                                                    <div class="cargo-price">
-                                                        @(cargo.CargoPrice > 0 ? cargo.CargoPrice.ToString("C") : "Ücretsiz")
-                                                    </div>
                                                 </div>
                                             }
                                         </div>
@@ -297,7 +316,7 @@ else
                                 <div class="seller-footer">
                                     <div class="seller-footer-row">
                                         <span class="summary-label">Toplam</span>
-                                        <span class="summary-price">@seller.OrderTotal.ToString("C")</span>
+                                        <span class="summary-price">@CurrencyHelper.FormatPrice(seller.OrderTotal, seller.Currency)</span>
                                     </div>
                                 </div>
                             </div>
@@ -315,63 +334,55 @@ else
                         <h3>Sipariş Özeti</h3>
                     </div>
 
-                    <!-- Customer Address Selection -->
-                    @if (CustomerInfo != null)
+                    <!-- Cari Seçimi (Plasiyer için - CustomerInfo null ise) -->
+                    @if (CustomerInfo == null && Security.User?.SalesPersonId.HasValue == true)
                     {
-                        <div class="summary-content">
-                            <div class="mb-3 pb-3 border-bottom">
-                                <h6 class="fw-bold mb-2 delivery-info-header">
-                                    <i class="fa-solid fa-truck me-2"></i>Teslimat Bilgileri
-                                </h6>
-                                
-                                @if (CustomerAddresses != null && CustomerAddresses.Any())
-                                {
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-semibold mb-2">
-                                            <i class="fa-solid fa-map-marker-alt text-muted me-1"></i>
-                                            Teslimat Adresi
-                                        </label>
-                                        <RadzenDropDown @bind-Value="@SelectedUserAddressId"
-                                                        Data="@CustomerAddresses"
-                                                        TextProperty="AddressDisplayName"
-                                                        ValueProperty="Id"
-                                                        Placeholder="Adres seçiniz..."
-                                                        class="w-100 form-control-modern"
-                                                        AllowClear="false" 
-                                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
-                                    </div>
-                                    
-                                    @if (SelectedUserAddressId.HasValue)
-                                    {
-                                        var selectedAddress = CustomerAddresses.FirstOrDefault(a => a.Id == SelectedUserAddressId.Value);
-                                        @if (selectedAddress != null)
-                                        {
-                                            <div class="delivery-info-content">
-                                                <div class="mb-1 fw-semibold delivery-info-name">@selectedAddress.FullName</div>
-                                                <div class="mb-1">@selectedAddress.Address</div>
-                                                <div class="mb-1 small text-muted">@selectedAddress.CityName / @selectedAddress.TownName</div>
-                                                <div><i class="fa-solid fa-phone me-1"></i>@selectedAddress.PhoneNumber</div>
-                                                @if (!string.IsNullOrWhiteSpace(selectedAddress.Email))
-                                                {
-                                                    <div><i class="fa-solid fa-envelope me-1"></i>@selectedAddress.Email</div>
-                                                }
-                                            </div>
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    <!-- Fallback to Customer entity address if no UserAddresses -->
-                                    <div class="delivery-info-content">
-                                        <div class="mb-1 fw-semibold delivery-info-name">@CustomerInfo.Name</div>
-                                        <div class="mb-1">@CustomerInfo.Address</div>
-                                        <div><i class="fa-solid fa-phone me-1"></i>@(CustomerInfo.Phone ?? CustomerInfo.Mobile)</div>
-                                    </div>
-                                }
+                        <div class="summary-content mb-3 p-3 border border-warning rounded bg-light">
+                            <h6 class="fw-bold mb-2 text-warning">
+                                <i class="fa-solid fa-user-check me-2"></i>Cari Seçiniz
+                            </h6>
+                            <p class="small text-muted mb-2">Siparişi tamamlamak için önce bir cari seçmelisiniz.</p>
+                            <div class="d-flex gap-2">
+                                <a href="/plasiyer/customers?returnUrl=/admin-checkout" class="btn btn-warning btn-sm">
+                                    <i class="fa-solid fa-users me-1"></i>Cari Seç
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="ReloadCustomerInfo">
+                                    <i class="fa-solid fa-rotate me-1"></i>Yeniden Dene
+                                </button>
                             </div>
                         </div>
                     }
 
+                    <!-- Voucher, Rehber, Sipariş Tarihi (Paket ürünler için - sadece okunabilir) -->
+                    @if (HasPackageProducts)
+                    {
+                        <div class="summary-content">
+                            @if (DisplayVisitDate.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold mb-2">
+                                        <i class="fa-solid fa-calendar-day text-muted me-1"></i>
+                                        Sipariş Tarihi (Paket ürünler için)
+                                    </label>
+                                    <div class="form-control form-control-sm bg-light">@DisplayVisitDate.Value.ToString("dd.MM.yyyy")</div>
+                                </div>
+                            }
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold mb-2">
+                                    <i class="fa-solid fa-ticket text-muted me-1"></i>
+                                    Voucher (Paket ürünler için)
+                                </label>
+                                <div class="form-control form-control-sm bg-light">@(DisplayVoucher ?? "—")</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold mb-2">
+                                    <i class="fa-solid fa-user-tie text-muted me-1"></i>
+                                    Rehber / Acenta İsmi (Paket ürünler için)
+                                </label>
+                                <div class="form-control form-control-sm bg-light">@(DisplayGuideName ?? "—")</div>
+                            </div>
+                        </div>
+                    }
 
                     <!-- Order Note -->
                     <div class="summary-content">
@@ -405,7 +416,7 @@ else
                                             }
                                         </div>
                                         <div class="discount-amount">
-                                            @discount.Amount.ToString("C")
+                                            @CurrencyHelper.FormatPrice(discount.Amount, CurrentCart?.Currency)
                                         </div>
                                     </div>
                                 }
@@ -417,29 +428,18 @@ else
                     <div class="summary-totals">
                         <div class="total-row">
                             <span>Ara Toplam</span>
-                            <span>@CurrentCart?.SubTotal.ToString("C")</span>
-                        </div>
-                        <div class="total-row cargo-row">
-                            <span>Kargo Ücreti</span>
-                            <span>@CurrentCart?.CargoPrice.ToString("C")</span>
+                            <span>@CurrencyHelper.FormatPrice(CurrentCart?.SubTotal ?? 0, CurrentCart?.Currency)</span>
                         </div>
                         @if (CurrentCart?.OrderTotalDiscount > 0)
                         {
                             <div class="total-row discount-row">
                                 <span>İndirim</span>
-                                <span class="text-success">-@CurrentCart.OrderTotalDiscount.ToString("C")</span>
-                            </div>
-                        }
-                        @if (ShouldShowPaymentModal && InterestDifference > 0)
-                        {
-                            <div class="total-row installment-total">
-                                <span>Vade Farkı</span>
-                                <span class="text-danger">+@InterestDifference.ToString("C")</span>
+                                <span class="text-success">-@CurrencyHelper.FormatPrice(CurrentCart.OrderTotalDiscount, CurrentCart.Currency)</span>
                             </div>
                         }
                         <div class="total-row final-total">
                             <span>Toplam</span>
-                            <span class="final-price">@(ShouldShowPaymentModal && CalculatedGrandTotal > 0 ? CalculatedGrandTotal.ToString("C") : CurrentCart?.OrderTotal.ToString("C"))</span>
+                            <span class="final-price">@CurrencyHelper.FormatPrice(CurrentCart?.OrderTotal ?? 0, CurrentCart?.Currency)</span>
                         </div>
                     </div>
 

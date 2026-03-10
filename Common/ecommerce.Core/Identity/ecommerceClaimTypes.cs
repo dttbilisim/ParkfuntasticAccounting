@@ -1,4 +1,4 @@
-﻿namespace ecommerce.Core.Identity;
+namespace ecommerce.Core.Identity;
 
 public class ecommerceClaimTypes
 {
@@ -14,6 +14,5 @@ public class ecommerceClaimTypes
     public const string TownId = "TownId";
     public const string CustomerId = "CustomerId";
     public const string CustomerName = "CustomerName";
-
-
+    public const string SalesPersonId = "SalesPersonId";
 }

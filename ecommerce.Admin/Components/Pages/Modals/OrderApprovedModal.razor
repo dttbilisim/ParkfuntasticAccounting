@@ -1,0 +1,54 @@
+@using ecommerce.Admin.Domain.Dtos.OrderDto
+@using ecommerce.Core.Helpers
+@using Radzen.Blazor
+
+@if (orderDetail != null)
+{
+    <div class="p-3">
+            <div class="mb-3">
+                <RadzenFieldset Text="Sipariş Bilgileri" Expanded="true">
+                    <div class="row">
+                        <div class="col-md-6"><strong>Sipariş No:</strong> @orderDetail.OrderNumber</div>
+                        <div class="col-md-6"><strong>Müşteri:</strong> @orderDetail.CustomerName</div>
+                        <div class="col-md-6"><strong>Tarih:</strong> @orderDetail.CreatedDate.ToString("dd.MM.yyyy")</div>
+                        <div class="col-md-6"><strong>Durum:</strong> @orderDetail.OrderStatusType</div>
+                        @if (!string.IsNullOrEmpty(orderDetail.Voucher))
+                        {
+                            <div class="col-md-6"><strong>Voucher:</strong> @orderDetail.Voucher</div>
+                        }
+                        @if (!string.IsNullOrEmpty(orderDetail.GuideName))
+                        {
+                            <div class="col-md-6"><strong>Rehber:</strong> @orderDetail.GuideName</div>
+                        }
+                        <div class="col-md-6"><strong>Toplam:</strong> @CurrencyHelper.FormatPrice(orderDetail.GrandTotal)</div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead><tr><th>Ürün</th><th>Miktar</th><th>Fiyat</th><th>Toplam</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in orderDetail.Items)
+                        {
+                            <tr>
+                                <td>@item.ProductName</td>
+                                <td>@item.Quantity</td>
+                                <td>@CurrencyHelper.FormatPrice(item.Price)</td>
+                                <td>@CurrencyHelper.FormatPrice(item.TotalPrice)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        <div class="mt-3 text-end">
+            <RadzenButton Text="Kapat" Click="@Close" Variant="Variant.Flat" />
+        </div>
+    </div>
+}
+else if (isLoading)
+{
+    <div class="text-center py-4">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <p class="mt-2">Sipariş detayı yükleniyor...</p>
+    </div>
+}

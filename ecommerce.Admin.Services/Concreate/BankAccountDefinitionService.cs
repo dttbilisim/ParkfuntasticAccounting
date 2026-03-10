@@ -70,6 +70,8 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 from c in currencyJoin.DefaultIfEmpty()
                 join pt in _dbContext.PaymentTypes on ba.PaymentTypeId equals pt.Id into ptJoin
                 from pt in ptJoin.DefaultIfEmpty()
+                join cr in _dbContext.CashRegisters on ba.CashRegisterId equals cr.Id into crJoin
+                from cr in crJoin.DefaultIfEmpty()
                 where ba.Status != (int)EntityStatus.Deleted
                 select new
                 {
@@ -81,6 +83,8 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                     PaymentTypeName = pt != null ? pt.Name : null,
                     CurrencyId = ba.CurrencyId,
                     CurrencyName = c != null ? c.CurrencyName : null,
+                    CashRegisterId = ba.CashRegisterId,
+                    CashRegisterName = cr != null ? cr.Name : null,
                     AccountCode = ba.AccountCode,
                     AccountName = ba.AccountName,
                     City = ba.City,
@@ -100,6 +104,8 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 PaymentType = x.PaymentTypeName ?? "",
                 CurrencyId = x.CurrencyId,
                 CurrencyName = x.CurrencyName,
+                CashRegisterId = x.CashRegisterId,
+                CashRegisterName = x.CashRegisterName,
                 AccountCode = x.AccountCode,
                 AccountName = x.AccountName,
                 City = x.City,
@@ -240,14 +246,15 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 SystemCode = entity.SystemCode,
                 PaymentTypeId = entity.PaymentTypeId,
                 CurrencyId = entity.CurrencyId,
-                AccountCode = entity.AccountCode,
-                AccountName = entity.AccountName,
-                City = entity.City,
-                BankName = entity.BankName,
-                BranchName = entity.BranchName,
+                CashRegisterId = entity.CashRegisterId,
+                AccountCode = entity.AccountCode ?? string.Empty,
+                AccountName = entity.AccountName ?? string.Empty,
+                City = entity.City ?? string.Empty,
+                BankName = entity.BankName ?? string.Empty,
+                BranchName = entity.BranchName ?? string.Empty,
                 CardNumber = entity.CardNumber,
-                Iban = entity.Iban,
-                Description = entity.Description,
+                Iban = entity.Iban ?? string.Empty,
+                Description = entity.Description ?? string.Empty,
                 Active = entity.Active
             };
 
@@ -290,6 +297,7 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                     SystemCode = dto.SystemCode,
                     PaymentTypeId = dto.PaymentTypeId,
                     CurrencyId = dto.CurrencyId,
+                    CashRegisterId = dto.CashRegisterId,
                     AccountCode = dto.AccountCode,
                     AccountName = dto.AccountName,
                     City = dto.City,
@@ -345,6 +353,7 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 entity.SystemCode = dto.SystemCode;
                 entity.PaymentTypeId = dto.PaymentTypeId;
                 entity.CurrencyId = dto.CurrencyId;
+                entity.CashRegisterId = dto.CashRegisterId;
                 entity.AccountCode = dto.AccountCode;
                 entity.AccountName = dto.AccountName;
                 entity.City = dto.City;
@@ -354,6 +363,11 @@ public class BankAccountDefinitionService : IBankAccountDefinitionService
                 entity.Iban = dto.Iban;
                 entity.Description = dto.Description;
                 entity.Active = dto.Active;
+                entity.ModifiedDate = DateTime.UtcNow;
+                entity.ModifiedId = model.UserId;
+
+                // EF bazen değişiklikleri algılamıyor; açıkça Modified işaretle
+                _dbContext.Entry(entity).State = EntityState.Modified;
             }
 
             await _unitOfWork.SaveChangesAsync();

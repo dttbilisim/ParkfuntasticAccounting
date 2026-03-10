@@ -122,7 +122,7 @@ else
                                 </div>
                                 <div class="col-md-6 d-flex align-items-center mt-2">
                                      <RadzenCheckBox @bind-Value=@Customer.IsCredit Name="IsCredit" TValue="bool" />
-                                     <RadzenLabel Text="Kredi Verilebilir" Component="IsCredit" class="ms-2 mb-0" style="cursor: pointer" />
+                                     <RadzenLabel Text="Bedelsiz Satış Yapabilir (IsCredit)" Component="IsCredit" class="ms-2 mb-0" style="cursor: pointer" Title="PcPos'ta bu cari seçildiğinde bedelsiz satış yapılabilir" />
                                 </div>
                                 <div class="col-md-6 d-flex align-items-center mt-2">
                                      <RadzenCheckBox @bind-Value=@Customer.IsVatExcluded Name="IsVatExcluded" TValue="bool" />

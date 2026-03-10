@@ -1,3 +1,4 @@
+using ecommerce.Admin.Domain.Dtos.CashRegisterDto;
 using ecommerce.Admin.Domain.Dtos.PaymentTypeDto;
 using ecommerce.Admin.Services;
 using ecommerce.Admin.Services.Interfaces;
@@ -15,12 +16,19 @@ using Radzen;
 
 namespace ecommerce.Admin.Components.Pages.Modals;
 
+public record CashRegisterDisplayItem
+{
+    public int Id { get; init; }
+    public string DisplayName { get; init; } = string.Empty;
+}
+
 public class UpsertBankAccountModalBase : ComponentBase
 {
     [Inject] protected IBankAccountDefinitionService BankAccountService { get; set; } = null!;
     [Inject] protected IExpenseDefinitionService ExpenseService { get; set; } = null!;
     [Inject] protected ICurrencyAdminService CurrencyService { get; set; } = null!;
     [Inject] protected IPaymentTypeService PaymentTypeService { get; set; } = null!;
+    [Inject] protected ICashRegisterService CashRegisterService { get; set; } = null!;
     [Inject] protected DialogService DialogService { get; set; } = null!;
     [Inject] protected NotificationService NotificationService { get; set; } = null!;
     [Inject] protected AuthenticationService AuthenticationService { get; set; } = null!;
@@ -48,12 +56,16 @@ public class UpsertBankAccountModalBase : ComponentBase
     // Payment Type Options (from PaymentType definitions)
     protected List<PaymentTypeListDto> PaymentTypeOptions { get; set; } = new();
 
+    // Kasa listesi (PcPos transferde kullanılacak)
+    protected List<CashRegisterDisplayItem> CashRegisters { get; set; } = new();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadModelAsync();
         await LoadMainExpensesAsync();
         await LoadCurrenciesAsync();
         await LoadPaymentTypesAsync();
+        await LoadCashRegistersAsync();
 
         if (model.Id > 0)
         {
@@ -105,6 +117,17 @@ public class UpsertBankAccountModalBase : ComponentBase
         if (result != null && result.Ok && result.Result != null)
         {
             PaymentTypeOptions = result.Result.Where(p => p.IsActive).ToList();
+        }
+    }
+
+    private async Task LoadCashRegistersAsync()
+    {
+        var result = await CashRegisterService.GetCashRegisters();
+        if (result != null && result.Ok && result.Result != null)
+        {
+            CashRegisters = result.Result
+                .Select(c => new CashRegisterDisplayItem { Id = c.Id, DisplayName = $"{c.Name} ({c.CurrencyCode ?? ""})" })
+                .ToList();
         }
     }
 
@@ -251,10 +274,11 @@ public class UpsertBankAccountModalBase : ComponentBase
         }
     }
 
-    protected async Task Save()
+    protected async Task Save(BankAccountUpsertDto args)
     {
         try
         {
+            // Radzen Submit args bazen güncel değerleri taşımıyor; @bind-Value ile güncellenen model kullan
             var audit = new AuditWrapDto<BankAccountUpsertDto>
             {
                 UserId = AuthenticationService.User.Id,
@@ -285,6 +309,11 @@ public class UpsertBankAccountModalBase : ComponentBase
     protected void Close()
     {
         DialogService.Close(null);
+    }
+
+    protected void ShowValidationErrors()
+    {
+        NotificationService.Notify(NotificationSeverity.Warning, "Uyarı", "Lütfen tüm zorunlu alanları doldurunuz.");
     }
 }
 

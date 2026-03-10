@@ -45,6 +45,9 @@ public class OrderManager : IOrderManager{
                 .ThenInclude(p => p.ProductImage)
             .Include(i => i.Product)
                 .ThenInclude(p => p.ProductTiers)
+            .Include(i => i.Product)
+                .ThenInclude(p => p.ProductSaleItemsAsRef)
+                    .ThenInclude(ps => ps.Product)
             .Include(i => i.ProductSellerItem)
                 .ThenInclude(psi => psi.Seller)
                     .ThenInclude(s => s.CompanyCargos.Where(c => c.Status == (int)EntityStatus.Active))
@@ -298,7 +301,12 @@ public class OrderManager : IOrderManager{
                 // if(cartItem.ProductSellerItem.Stock > 0 && cartItem.ProductSellerItem.Stock > cartItem.Quantity){
                 //     cartItem.Warnings.Add($"Minimum {cartItem.ProductSellerItem.Stock} adet satın alabilirsiniz.");
                 // }
-                var productPriceWithoutDiscount = cartItem.ProductSellerItem.SalePrice;
+                // Paket ürünlerde fiyat = içeriklerdeki (ProductSaleItems) fiyat * miktar toplamı
+                var productPriceWithoutDiscount = cartItem.Product?.IsPackageProduct == true
+                    && cartItem.Product?.ProductSaleItemsAsRef != null
+                    && cartItem.Product.ProductSaleItemsAsRef.Any()
+                    ? cartItem.Product.ProductSaleItemsAsRef.Sum(ps => ps.Price * (cartItem.PackageItemQuantities?.GetValueOrDefault(ps.ProductId) ?? 1))
+                    : cartItem.ProductSellerItem.SalePrice;
                 var productAppliedDiscounts = discounts.Where(c => !c.HasGiftProducts && (c.AssignedSellerItemIds?.Contains(cartItem.ProductSellerItemId) ?? false)).ToList();
                 productAppliedDiscounts = GetPreferredDiscount(productAppliedDiscounts, productPriceWithoutDiscount, out var appliedDiscountAmount);
                 cartItem.AppliedDiscounts = productAppliedDiscounts;
@@ -374,10 +382,10 @@ public class OrderManager : IOrderManager{
             seller.Desi = seller.Desi > 0 ? seller.Desi : 1;
             ApplyCargoPricing(seller, sellerCargoes);
             
-            var selectedCompanyCargo = cartPreferences?.SelectedCargoes.GetValueOrDefault(sellerEntity.Id);
-            seller.SelectedCargo = seller.Cargoes.FirstOrDefault(c => c.CargoId == selectedCompanyCargo) ?? seller.Cargoes.FirstOrDefault(c => c.IsDefault) ?? seller.Cargoes.MinBy(c => c.CargoPrice);
-            seller.CargoPrice = seller.SelectedCargo?.CargoPrice ?? decimal.Zero;
-            var sellerCargoAppliedDiscounts = GetPreferredDiscount(cargoAppliedDiscounts.Where(d => d.AssignedEntityIds?.Any() != true || d.AssignedEntityIds.Contains(selectedCompanyCargo ?? 0) && (d.AssignedSellerIds?.Any() != true || d.AssignedSellerIds.Contains(seller.SellerId))).ToList(), seller.CargoPrice, out var cargoAppliedDiscountAmount);
+            // Kargo seçimi kaldırıldı - normal ürüne geçildi, kargo ücreti 0
+            seller.SelectedCargo = null;
+            seller.CargoPrice = decimal.Zero;
+            var sellerCargoAppliedDiscounts = GetPreferredDiscount(new List<Discount>(), seller.CargoPrice, out var cargoAppliedDiscountAmount);
             if(seller.CargoPrice > decimal.Zero && sellerCargoAppliedDiscounts.Any()){
                 if(seller.CargoPrice < cargoAppliedDiscountAmount){
                     cargoAppliedDiscountAmount = seller.CargoPrice;
@@ -536,11 +544,8 @@ public class OrderManager : IOrderManager{
                         giftSellerResult.Items.Add(giftCartItem);
                     }
                     ApplyCargoPricing(giftSellerResult, giftSellerCargoes);
-                    var giftSelectedCargoId = cartPreferences?.SelectedCargoes.GetValueOrDefault(giftSellerResult.SellerId);
-                    giftSellerResult.SelectedCargo = giftSellerResult.Cargoes.FirstOrDefault(c => c.CargoId == giftSelectedCargoId)
-                        ?? giftSellerResult.Cargoes.FirstOrDefault(c => c.IsDefault)
-                        ?? giftSellerResult.Cargoes.MinBy(c => c.CargoPrice);
-                    giftSellerResult.CargoPrice = giftSellerResult.SelectedCargo?.CargoPrice ?? decimal.Zero;
+                    giftSellerResult.SelectedCargo = null;
+                    giftSellerResult.CargoPrice = decimal.Zero;
                     if(isNewGiftSeller && giftSellerResult.Items.Any()){
                         result.Sellers.Add(giftSellerResult);
                     }

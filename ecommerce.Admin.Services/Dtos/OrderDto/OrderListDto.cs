@@ -27,7 +27,9 @@
             public decimal OrderTotal { get; set; }
             public decimal GrandTotal { get; set; }
             public string CustomerName { get; set; } // Real Customer (Cari)
-        public string BuyerName { get; set; }    // UserAddress (Alıcı)
+            public string BuyerName { get; set; }    // UserAddress (Alıcı)
+            /// <summary>Para birimi kodu (USD, TRY, EUR vb.) - ilk ürünün SellerItem.Currency değeri.</summary>
+            public string? Currency { get; set; }
             public int? CustomerId { get; set; } // ApplicationUser.CustomerId for invoice creation
             public int CompanyId { get; set; } // FK: Works for both User.Id and ApplicationUser.Id
             public User? Company { get; set; } // Nullable: Admin context'te null, Web context'te User
@@ -50,6 +52,11 @@
             
             public string? CreatorName { get; set; }
             public bool IsCreatedByPlasiyer { get; set; }
+
+            /// <summary>Paket ürünler için voucher kodu.</summary>
+            public string? Voucher { get; set; }
+            /// <summary>Paket ürünler için rehber/acenta ismi.</summary>
+            public string? GuideName { get; set; }
             
             public string PaymentStatusResult
             {

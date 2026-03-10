@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using ecommerce.Core.Entities.Base;
 
@@ -32,6 +32,9 @@ namespace ecommerce.Core.Entities{
         public string? CargoTrackUrl { get; set; }
         public bool? CargoRequestHandled { get; set; }
         public DateTime? ShipmentDate { get; set; }
+
+        /// <summary>Paket ürünler için alt ürün miktarları (ProductId -> Quantity) JSON.</summary>
+        public string? PackageItemQuantitiesJson { get; set; }
         
         public virtual List<ProductImage> ProductImages{get;set;}
         [JsonIgnore]

@@ -117,40 +117,47 @@ namespace ecommerce.Admin.Domain.Concreate{
                     var isGlobalAdmin = _tenantProvider.IsGlobalAdmin;
                     var currentBranchId = _tenantProvider.GetCurrentBranchId();
 
-                    var product = await context.DbContext.Product
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(f => f.Id == productId 
-                            && (isGlobalAdmin ? (currentBranchId == 0 || f.BranchId == currentBranchId) : true));
+                    var productQuery = context.DbContext.Product.AsNoTracking().Where(f => f.Id == productId);
+                    if (_tenantProvider.IsPlasiyer || _tenantProvider.IsCustomerB2B)
+                        productQuery = productQuery.IgnoreQueryFilters();
+                    else if (isGlobalAdmin)
+                        productQuery = productQuery.Where(f => currentBranchId == 0 || f.BranchId == currentBranchId);
+                    var product = await productQuery.FirstOrDefaultAsync();
                     
-                    if (product != null && !isGlobalAdmin)
+                    if (product != null && !isGlobalAdmin && !_tenantProvider.IsPlasiyer && !_tenantProvider.IsCustomerB2B)
                     {
-                        var user = _httpContextAccessor.HttpContext?.User;
-                        var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                        if (int.TryParse(userIdClaim, out int userId))
+                        var productBranchId = product.BranchId ?? 0;
+                        // BranchId null/0 = şube atanmamış ürün, tüm yetkili kullanıcılar görebilir
+                        if (productBranchId > 0)
                         {
-                             var allowedBranchIds = await context.DbContext.UserBranches
-                                .AsNoTracking()
-                                .Where(ub => ub.UserId == userId && ub.Status == (int)EntityStatus.Active)
-                                .Select(ub => ub.BranchId)
-                                .ToListAsync();
-                             
-                             if (!allowedBranchIds.Contains(product.BranchId ?? 0))
-                             {
-                                 response.AddError("Bu ürünü görme yetkiniz yok.");
-                                 return response;
-                             }
-                             
-                             if (currentBranchId > 0 && product.BranchId != currentBranchId)
-                             {
-                                 response.AddError("Ürün seçili şubeye ait değil.");
-                                 return response;
-                             }
+                            var user = _httpContextAccessor.HttpContext?.User;
+                            var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                            if (int.TryParse(userIdClaim, out int userId))
+                            {
+                                var allowedBranchIds = await context.DbContext.UserBranches
+                                    .AsNoTracking()
+                                    .Where(ub => ub.UserId == userId && ub.Status == (int)EntityStatus.Active)
+                                    .Select(ub => ub.BranchId)
+                                    .ToListAsync();
+
+                                if (!allowedBranchIds.Contains(productBranchId))
+                                {
+                                    response.AddError("Bu ürünü görme yetkiniz yok.");
+                                    return response;
+                                }
+
+                                if (currentBranchId > 0 && product.BranchId != currentBranchId)
+                                {
+                                    response.AddError("Ürün seçili şubeye ait değil.");
+                                    return response;
+                                }
+                            }
                         }
                     }
                     var mappedCat = _mapper.Map<ProductUpsertDto>(product);
                     if (mappedCat != null)
                     {
-                        // Paket ürün ise ProductSaleItems yükle
+                        // Paket ürün ise ProductSaleItems veya PackageProductIds'den yükle
                         if (product.IsPackageProduct)
                         {
                             var saleItems = await context.DbContext.ProductSaleItems
@@ -158,14 +165,45 @@ namespace ecommerce.Admin.Domain.Concreate{
                                 .Where(x => x.RefProductId == productId)
                                 .Include(x => x.Product)
                                 .Include(x => x.Product!.Tax)
+                                .Include(x => x.Currency)
                                 .ToListAsync();
-                            mappedCat.PackageProductItems = saleItems.Select(s => new PackageProductItemDto
+                            if (saleItems.Any())
                             {
-                                ProductId = s.ProductId,
-                                ProductName = s.Product?.Name ?? "",
-                                Price = s.Price,
-                                TaxRate = s.Product?.Tax?.TaxRate ?? 0
-                            }).ToList();
+                                mappedCat.PackageProductItems = saleItems.Select(s => new PackageProductItemDto
+                                {
+                                    ProductId = s.ProductId,
+                                    ProductName = s.Product?.Name ?? "",
+                                    Price = s.Price,
+                                    CurrencyId = s.CurrencyId,
+                                    CurrencyCode = s.Currency?.CurrencyCode,
+                                    TaxRate = s.Product?.Tax?.TaxRate ?? 0
+                                }).ToList();
+                            }
+                            else if (!string.IsNullOrWhiteSpace(product.PackageProductIds))
+                            {
+                                // Fallback: ProductSaleItems boşsa PackageProductIds'den yükle
+                                var ids = product.PackageProductIds
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                    .Where(x => int.TryParse(x, out _))
+                                    .Select(int.Parse)
+                                    .Distinct()
+                                    .ToList();
+                                if (ids.Any())
+                                {
+                                    var products = await context.DbContext.Product
+                                        .AsNoTracking()
+                                        .Where(p => ids.Contains(p.Id))
+                                        .Include(p => p.Tax)
+                                        .ToListAsync();
+                                    mappedCat.PackageProductItems = products.Select(p => new PackageProductItemDto
+                                    {
+                                        ProductId = p.Id,
+                                        ProductName = p.Name ?? "",
+                                        Price = p.Price,
+                                        TaxRate = p.Tax?.TaxRate ?? 0
+                                    }).ToList();
+                                }
+                            }
                             mappedCat.PackageProductIdList = mappedCat.PackageProductItems.Select(x => x.ProductId).ToList();
                         }
                         response.Result = mappedCat;
@@ -757,6 +795,7 @@ namespace ecommerce.Admin.Domain.Concreate{
                 int productIdLocal = 0;
                 int productStatusLocal = dto.StatusBool == true ? (int)EntityStatus.Active : (int)EntityStatus.Passive;
                 int? brandIdLocal = null;
+                Product? insertedEntity = null;
                 var branchId = _tenantProvider.GetCurrentBranchId();
                 if(!dto.Id.HasValue){
                     // Check for duplicate name in current branch
@@ -780,7 +819,7 @@ namespace ecommerce.Admin.Domain.Concreate{
                         entity.BranchId = branchId;
                     }
                     await _repository.InsertAsync(entity);
-                    productIdLocal = entity.Id;
+                    insertedEntity = entity;
                     productStatusLocal = entity.Status;
                     brandIdLocal = entity.BrandId;
                 } else{
@@ -829,6 +868,8 @@ namespace ecommerce.Admin.Domain.Concreate{
                 var lastResult = _context.LastSaveChangesResult;
                 if (lastResult.IsOk)
                 {
+                    if (insertedEntity != null)
+                        productIdLocal = insertedEntity.Id;
                     var targetProductId = dto.Id ?? productIdLocal;
 
                     // Handle Category Saving
@@ -891,16 +932,16 @@ namespace ecommerce.Admin.Domain.Concreate{
                     // Paket ürün: ProductSaleItems kaydet
                     if (dto.IsPackageProduct && dto.PackageProductItems != null && dto.PackageProductItems.Count > 0)
                     {
-                        var existingSaleItems = await _context.DbContext.ProductSaleItems
+                        await _context.DbContext.ProductSaleItems
                             .Where(x => x.RefProductId == targetProductId)
-                            .ToListAsync();
-                        _context.DbContext.ProductSaleItems.RemoveRange(existingSaleItems);
+                            .ExecuteDeleteAsync();
                         foreach (var item in dto.PackageProductItems)
                         {
                             await _context.DbContext.ProductSaleItems.AddAsync(new ProductSaleItems
                             {
                                 RefProductId = targetProductId,
                                 ProductId = item.ProductId,
+                                CurrencyId = item.CurrencyId,
                                 Price = item.Price
                             });
                         }
@@ -909,26 +950,16 @@ namespace ecommerce.Admin.Domain.Concreate{
                     else if (dto.IsPackageProduct)
                     {
                         // Paket ürün ama liste boş - mevcut kayıtları sil
-                        var existingSaleItems = await _context.DbContext.ProductSaleItems
+                        await _context.DbContext.ProductSaleItems
                             .Where(x => x.RefProductId == targetProductId)
-                            .ToListAsync();
-                        if (existingSaleItems.Count > 0)
-                        {
-                            _context.DbContext.ProductSaleItems.RemoveRange(existingSaleItems);
-                            await _context.SaveChangesAsync();
-                        }
+                            .ExecuteDeleteAsync();
                     }
                     else
                     {
                         // Paket ürün işareti kaldırıldı - mevcut ProductSaleItems temizle
-                        var existingSaleItems = await _context.DbContext.ProductSaleItems
+                        await _context.DbContext.ProductSaleItems
                             .Where(x => x.RefProductId == targetProductId)
-                            .ToListAsync();
-                        if (existingSaleItems.Count > 0)
-                        {
-                            _context.DbContext.ProductSaleItems.RemoveRange(existingSaleItems);
-                            await _context.SaveChangesAsync();
-                        }
+                            .ExecuteDeleteAsync();
                     }
 
                     var productSellerList = await _context.DbContext.ProductSellerItems

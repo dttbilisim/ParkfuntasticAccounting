@@ -18,7 +18,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-body">
-             <AdminDataGrid @ref="grid" Data="@CustomersList" Count="@Count" LoadData="@LoadData" TItem="CustomerListDto" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="10" 
+             <AdminDataGrid @ref="grid" Data="@CustomersList" Count="@Count" LoadData="@LoadData" TItem="CustomerListDto" DataKey="Id" AllowFiltering="true" AllowPaging="true" AllowSorting="true" PageSize="10" 
                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" RowSelect="@(args => OpenUpsertModal(args.Id))"
                             Density="Density.Compact" GridLines="DataGridGridLines.Horizontal">
                 <Columns>

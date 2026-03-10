@@ -50,7 +50,7 @@ public class MngReadyCheckJob : IAsyncBackgroundJob
             .Include(o => o.ApplicationUser)
             .Where(
                 o =>  o.CargoTrackNumber == null
-                     && o.OrderStatusType == OrderStatusType.OrderPrepare
+                     && (o.OrderStatusType == OrderStatusType.OrderPrepare || o.OrderStatusType == OrderStatusType.OrderNew)
                      && o.Cargo != null
                      && o.Cargo.Name.ToLower().Contains("mng")
                      && o.CreatedDate > DateTime.UtcNow.AddDays(-20)

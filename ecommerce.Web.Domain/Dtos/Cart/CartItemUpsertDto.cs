@@ -16,4 +16,16 @@ public class CartItemUpsertDto
     /// Öne çıkan ürünler gibi sipariş geçmişinden gelen ürünler için kullanılır.
     /// </summary>
     public int? ProductId { get; set; }
+
+    /// <summary>Paket ürünler için voucher kodu (modalda girilir).</summary>
+    public string? Voucher { get; set; }
+
+    /// <summary>Paket ürünler için rehber/acenta ismi (modalda girilir).</summary>
+    public string? GuideName { get; set; }
+
+    /// <summary>Paket ürünler için ziyaret/etkinlik tarihi (zorunlu).</summary>
+    public DateTime? VisitDate { get; set; }
+
+    /// <summary>Paket ürünler için alt ürün miktarları (ProductId -> Quantity).</summary>
+    public Dictionary<int, int>? PackageItemQuantities { get; set; }
 }

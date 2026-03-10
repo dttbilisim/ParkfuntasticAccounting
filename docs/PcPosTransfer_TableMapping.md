@@ -33,6 +33,7 @@
 | StatusPcPos | **YOK** | ❌ Ekle |
 | StatusSales | **YOK** | ❌ Ekle |
 | IsActive | Status (farklı mantık) | - |
+| **Filtre** | **Product.IsSoldOnPcPos = true** | ✅ DataTransferService ürün transferinde sadece IsSoldOnPcPos=true olanları aktarmalı |
 
 ### tProductImage → ProductImages
 | PcPos Kolon | Bizdeki Karşılık | Eksik? |

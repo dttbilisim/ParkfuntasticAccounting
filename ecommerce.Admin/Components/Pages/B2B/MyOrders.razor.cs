@@ -4,11 +4,14 @@ using Microsoft.JSInterop;
 using ecommerce.Admin.Domain.Dtos.OrderDto;
 using ecommerce.Admin.Domain.Interfaces;
 using ecommerce.Admin.Services;
+using ecommerce.Admin.Components.Pages.Modals;
 using ecommerce.Core.Utils;
 using ecommerce.Core.Extensions;
 using ecommerce.Core.Entities;
+using ecommerce.Core.Utils.ResultSet;
 using Radzen;
 using ecommerce.Web.Domain.Services.Abstract;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace ecommerce.Admin.Components.Pages.B2B
 {
@@ -22,6 +25,8 @@ namespace ecommerce.Admin.Components.Pages.B2B
         [Inject] protected TooltipService TooltipService { get; set; } = null!;
         [Inject] protected Microsoft.Extensions.Configuration.IConfiguration Configuration { get; set; } = null!;
         [Inject] protected ecommerce.Odaksodt.Abstract.IOdaksoftInvoiceService OdaksoftInvoiceService { get; set; } = null!;
+        [Inject] protected ecommerce.Core.Interfaces.ITenantProvider TenantProvider { get; set; } = null!;
+        [Inject] protected ecommerce.Admin.Services.Interfaces.IDashboardCacheService DashboardCacheService { get; set; } = null!;
 
         private List<OrderListDto>? orders = new();
         private List<OrderListDto>? filteredOrders = new();
@@ -29,6 +34,8 @@ namespace ecommerce.Admin.Components.Pages.B2B
         private HashSet<int> expandedOrderIds = new(); // Track which orders are expanded
         private bool isCancelling = false;
         private int? cancellingOrderId = null;
+        private bool isApproving = false;
+        private int? approvingOrderId = null;
         
         // Pagination
         private int currentPage = 1;
@@ -37,10 +44,30 @@ namespace ecommerce.Admin.Components.Pages.B2B
         
         // Filter
         private OrderStatusType? selectedStatusFilter = null; // null = "Hepsi"
-        private bool isCargoFilterActive = false; // "Kargodaki" tabı için özel flag
         private string searchOrderNumber = string.Empty;
 
+        protected override void OnInitialized()
+        {
+            NavigationManager.LocationChanged += OnLocationChanged;
+        }
+
         protected override async Task OnInitializedAsync()
+        {
+            await LoadOrdersFromUri();
+        }
+
+        private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+        {
+            if (!e.Location.Contains("/b2b/my-orders", StringComparison.OrdinalIgnoreCase))
+                return;
+            await InvokeAsync(async () =>
+            {
+                await LoadOrdersFromUri();
+                StateHasChanged();
+            });
+        }
+
+        private async Task LoadOrdersFromUri()
         {
             try
             {
@@ -51,12 +78,20 @@ namespace ecommerce.Admin.Components.Pages.B2B
                     return;
                 }
 
-                // Check for search query parameter
+                // Check for query parameters
                 var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
                 var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
                 if (queryParams.TryGetValue("search", out var searchValue))
                 {
                     searchOrderNumber = searchValue.ToString().Trim();
+                }
+                if (queryParams.TryGetValue("tab", out var tabValue) && string.Equals(tabValue.ToString(), "onay-bekleyen", StringComparison.OrdinalIgnoreCase))
+                {
+                    selectedStatusFilter = OrderStatusType.OrderWaitingApproval;
+                }
+                else
+                {
+                    selectedStatusFilter = null;
                 }
 
                 await LoadOrders();
@@ -94,6 +129,12 @@ namespace ecommerce.Admin.Components.Pages.B2B
                 {
                    // Plasiyer with no customer selected -> Show ALL linked customers' orders
                    response = await OrderService.GetPlasiyerCustomersOrders(Security.User.Id);
+                }
+                else if (Security.User?.CustomerId.HasValue == true)
+                {
+                    // B2B müşteri (cari kullanıcısı) - kendi carisine ait tüm siparişleri göster
+                    // (Plasiyer tarafından oluşturulanlar dahil)
+                    response = await OrderService.GetCustomerOrders(Security.User.CustomerId.Value);
                 }
                 else
                 {
@@ -154,13 +195,13 @@ namespace ecommerce.Admin.Components.Pages.B2B
         private async Task CancelOrder(OrderListDto order)
         {
             // Sadece "Yeni" durumundaki siparişler iptal edilebilir
-            if (order.OrderStatusType != OrderStatusType.OrderNew)
+            if (order.OrderStatusType != OrderStatusType.OrderNew && order.OrderStatusType != OrderStatusType.OrderWaitingApproval)
             {
                 NotificationService.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Warning,
                     Summary = "Uyarı",
-                    Detail = "Bu sipariş artık iptal edilemez. Sadece yeni siparişler iptal edilebilir.",
+                    Detail = "Bu sipariş artık iptal edilemez. Sadece onay bekleyen veya yeni siparişler iptal edilebilir.",
                     Duration = 4000
                 });
                 return;
@@ -207,9 +248,13 @@ namespace ecommerce.Admin.Components.Pages.B2B
                             Detail = message,
                             Duration = 4000
                         });
-
-                        // Refresh orders
+                        if (Security.User != null)
+                        {
+                            DashboardCacheService.InvalidateCache(Security.User.Id, Security.SelectedCustomerId);
+                            DashboardCacheService.InvalidateCache(Security.User.Id, null);
+                        }
                         await LoadOrders();
+                        await InvokeAsync(StateHasChanged);
                     }
                     else
                     {
@@ -241,10 +286,114 @@ namespace ecommerce.Admin.Components.Pages.B2B
             }
         }
 
+        private bool CanApproveOrder(OrderListDto order)
+        {
+            if (order.OrderStatusType != OrderStatusType.OrderWaitingApproval)
+                return false;
+            return Security.User?.SalesPersonId.HasValue == true || TenantProvider.IsGlobalAdmin;
+        }
+
+        private async Task OpenOrderDetailModal(OrderListDto order)
+        {
+            if (order.OrderStatusType == OrderStatusType.OrderWaitingApproval)
+            {
+                var result = await DialogService.OpenAsync<OrderPendingModal>("Sipariş Detayı", new Dictionary<string, object> { { "OrderId", order.Id } }, new DialogOptions { Width = "900px" });
+                if (result == true)
+                {
+                    if (Security.User != null)
+                    {
+                        DashboardCacheService.InvalidateCache(Security.User.Id, Security.SelectedCustomerId);
+                        DashboardCacheService.InvalidateCache(Security.User.Id, null);
+                    }
+                    await LoadOrders();
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            else
+            {
+                await DialogService.OpenAsync<OrderApprovedModal>("Sipariş Detayı", new Dictionary<string, object> { { "OrderId", order.Id } }, new DialogOptions { Width = "800px" });
+            }
+        }
+
+        private async Task ApproveOrder(OrderListDto order)
+        {
+            if (order.OrderStatusType != OrderStatusType.OrderWaitingApproval)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Uyarı",
+                    Detail = "Sadece onay bekleyen siparişler onaylanabilir.",
+                    Duration = 4000
+                });
+                return;
+            }
+
+            var confirm = await DialogService.Confirm(
+                $"Sipariş No: {order.OrderNumber}\n\nBu siparişi onaylamak istediğinize emin misiniz?",
+                "Sipariş Onayı",
+                new ConfirmOptions { OkButtonText = "Evet, Onayla", CancelButtonText = "Hayır" });
+
+            if (confirm != true) return;
+
+            try
+            {
+                isApproving = true;
+                approvingOrderId = order.Id;
+                StateHasChanged();
+
+                var result = await OrderService.ApproveOrder(order.Id);
+
+                if (result.Ok)
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Başarılı",
+                        Detail = "Sipariş onaylandı.",
+                        Duration = 4000
+                    });
+                    if (Security.User != null)
+                    {
+                        DashboardCacheService.InvalidateCache(Security.User.Id, Security.SelectedCustomerId);
+                        DashboardCacheService.InvalidateCache(Security.User.Id, null);
+                    }
+                    await LoadOrders();
+                    await InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Hata",
+                        Detail = result.GetMetadataMessages() ?? "Sipariş onaylanırken bir hata oluştu.",
+                        Duration = 4000
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Hata",
+                    Detail = $"Sipariş onaylanırken hata: {ex.Message}",
+                    Duration = 4000
+                });
+            }
+            finally
+            {
+                isApproving = false;
+                approvingOrderId = null;
+                StateHasChanged();
+            }
+        }
+
         private bool CanCancelOrder(OrderListDto order)
         {
-            // Sadece "Yeni" durumundaki siparişler iptal edilebilir
-            if (order.OrderStatusType != OrderStatusType.OrderNew)
+            // Onay bekleyen ve yeni siparişler iptal edilebilir
+            if (order.OrderStatusType != OrderStatusType.OrderNew && order.OrderStatusType != OrderStatusType.OrderWaitingApproval)
             {
                 return false;
             }
@@ -262,14 +411,14 @@ namespace ecommerce.Admin.Components.Pages.B2B
         {
             return status switch
             {
+                OrderStatusType.OrderWaitingApproval => "badge bg-warning text-dark",
                 OrderStatusType.OrderNew => "badge bg-success",
                 OrderStatusType.OrderWaitingPayment => "badge bg-warning text-dark",
-                OrderStatusType.OrderPrepare => "badge bg-info",
+                OrderStatusType.OrderPrepare => "badge bg-info", // Eski siparişler için
                 OrderStatusType.OrderinCargo => "badge bg-primary",
                 OrderStatusType.OrderSuccess => "badge bg-success",
                 OrderStatusType.OrderCanceled => "badge bg-danger", // Kırmızı - İptal
                 OrderStatusType.OrderProblem => "badge bg-danger", // Kırmızı - Sorunlu
-                OrderStatusType.OrderWaitingApproval => "badge bg-warning text-dark",
                 OrderStatusType.PaymentSuccess => "badge bg-success",
                 _ => "badge bg-secondary"
             };
@@ -277,7 +426,12 @@ namespace ecommerce.Admin.Components.Pages.B2B
 
         private string GetStatusText(OrderStatusType status)
         {
-            return status.GetDisplayName();
+            return status switch
+            {
+                OrderStatusType.OrderNew => "Onaylandı",
+                OrderStatusType.OrderPrepare => "Onaylandı", // Eski siparişler
+                _ => status.GetDisplayName()
+            };
         }
 
         private string GetPaymentStatusText(OrderListDto order)
@@ -320,7 +474,6 @@ namespace ecommerce.Admin.Components.Pages.B2B
             public string Label { get; set; } = "";
             public int Count { get; set; }
             public string IconClass { get; set; } = "";
-            public bool IsCargoTrackFilter { get; set; } = false; // "Kargodaki" tabı için özel flag
         }
         
         private List<StatusFilterOption> GetStatusFilterOptions()
@@ -328,10 +481,8 @@ namespace ecommerce.Admin.Components.Pages.B2B
             return new List<StatusFilterOption>
             {
                 new StatusFilterOption { Text = "Hepsi", Value = null },
-                new StatusFilterOption { Text = "Yeni Sipariş", Value = OrderStatusType.OrderNew },
+                new StatusFilterOption { Text = "Onaylandı", Value = OrderStatusType.OrderNew },
                 new StatusFilterOption { Text = "Ödeme Bekliyor", Value = OrderStatusType.OrderWaitingPayment },
-                new StatusFilterOption { Text = "Hazırlanıyor", Value = OrderStatusType.OrderPrepare },
-                new StatusFilterOption { Text = "Kargoda", Value = OrderStatusType.OrderinCargo },
                 new StatusFilterOption { Text = "Tamamlananlar", Value = OrderStatusType.OrderSuccess },
                 new StatusFilterOption { Text = "İptaller", Value = OrderStatusType.OrderCanceled },
                 new StatusFilterOption { Text = "Sorunlu", Value = OrderStatusType.OrderProblem }
@@ -348,19 +499,21 @@ namespace ecommerce.Admin.Components.Pages.B2B
                 .Select(g => new { Status = g.Key, Count = g.Count() })
                 .ToDictionary(x => x.Status, x => x.Count);
 
-            // "Kargodaki" tabı için: OrderItems içinde CargoTrackUrl dolu olan siparişleri say
-            var cargoTrackCount = orders.Count(o => 
-                o.OrderItems != null && 
-                o.OrderItems.Any(item => !string.IsNullOrEmpty(item.CargoTrackUrl)));
-
             var badges = new List<StatusCountBadge>
             {
                 new StatusCountBadge 
                 { 
+                    Status = OrderStatusType.OrderWaitingApproval, 
+                    Label = "Onay Bekleyen", 
+                    Count = counts.GetValueOrDefault(OrderStatusType.OrderWaitingApproval, 0),
+                    IconClass = "fas fa-hourglass-half"
+                },
+                new StatusCountBadge 
+                { 
                     Status = OrderStatusType.OrderNew, 
-                    Label = "Yeni", 
-                    Count = counts.GetValueOrDefault(OrderStatusType.OrderNew, 0),
-                    IconClass = "fas fa-clock"
+                    Label = "Onaylandı", 
+                    Count = counts.GetValueOrDefault(OrderStatusType.OrderNew, 0) + counts.GetValueOrDefault(OrderStatusType.OrderPrepare, 0),
+                    IconClass = "fas fa-check"
                 },
                 new StatusCountBadge 
                 { 
@@ -368,20 +521,6 @@ namespace ecommerce.Admin.Components.Pages.B2B
                     Label = "Ödeme Bekliyor", 
                     Count = counts.GetValueOrDefault(OrderStatusType.OrderWaitingPayment, 0),
                     IconClass = "fas fa-credit-card"
-                },
-                new StatusCountBadge 
-                { 
-                    Status = OrderStatusType.OrderPrepare, 
-                    Label = "Hazırlanıyor", 
-                    Count = counts.GetValueOrDefault(OrderStatusType.OrderPrepare, 0),
-                    IconClass = "fas fa-box"
-                },
-                new StatusCountBadge 
-                { 
-                    Status = OrderStatusType.OrderinCargo, 
-                    Label = "Kargoda", 
-                    Count = counts.GetValueOrDefault(OrderStatusType.OrderinCargo, 0),
-                    IconClass = "fas fa-truck"
                 },
                 new StatusCountBadge 
                 { 
@@ -399,19 +538,6 @@ namespace ecommerce.Admin.Components.Pages.B2B
                 }
             };
 
-            // "Kargodaki" tabını ekle (OrderItems içinde CargoTrackUrl dolu olan siparişler)
-            if (cargoTrackCount > 0)
-            {
-                badges.Add(new StatusCountBadge 
-                { 
-                    Status = OrderStatusType.OrderinCargo, // Geçici olarak aynı status kullanıyoruz, ama IsCargoTrackFilter ile ayırt edeceğiz
-                    Label = "Kargodaki", 
-                    Count = cargoTrackCount,
-                    IconClass = "fas fa-shipping-fast",
-                    IsCargoTrackFilter = true
-                });
-            }
-
             // Only show badges with count > 0
             return badges.Where(b => b.Count > 0).ToList();
         }
@@ -423,18 +549,12 @@ namespace ecommerce.Admin.Components.Pages.B2B
 
         private void ApplyFilterAndPagination()
         {
-            // Apply "Kargodaki" filter (OrderItems içinde CargoTrackUrl dolu olan siparişler)
-            if (isCargoFilterActive)
+            // Apply status filter (Onaylandı = OrderNew + OrderPrepare)
+            if (selectedStatusFilter.HasValue)
             {
-                filteredOrders = orders?.Where(o => 
-                    o.OrderItems != null && 
-                    o.OrderItems.Any(item => !string.IsNullOrEmpty(item.CargoTrackUrl))
-                ).ToList();
-            }
-            // Apply status filter
-            else if (selectedStatusFilter.HasValue)
-            {
-                filteredOrders = orders?.Where(o => o.OrderStatusType == selectedStatusFilter.Value).ToList();
+                filteredOrders = selectedStatusFilter.Value == OrderStatusType.OrderNew
+                    ? orders?.Where(o => o.OrderStatusType == OrderStatusType.OrderNew || o.OrderStatusType == OrderStatusType.OrderPrepare).ToList()
+                    : orders?.Where(o => o.OrderStatusType == selectedStatusFilter.Value).ToList();
             }
             else
             {
@@ -492,15 +612,6 @@ namespace ecommerce.Admin.Components.Pages.B2B
         private void OnStatusFilterChanged(OrderStatusType? value)
         {
             selectedStatusFilter = value;
-            isCargoFilterActive = false; // "Kargodaki" filtresini kapat
-            currentPage = 1; // Reset to first page when filter changes
-            ApplyFilterAndPagination();
-        }
-
-        private void OnCargoTrackFilterChanged()
-        {
-            isCargoFilterActive = true;
-            selectedStatusFilter = null; // Status filtresini kapat
             currentPage = 1; // Reset to first page when filter changes
             ApplyFilterAndPagination();
         }
@@ -620,7 +731,7 @@ namespace ecommerce.Admin.Components.Pages.B2B
 
         public void Dispose()
         {
-            // Cleanup if needed
+            NavigationManager.LocationChanged -= OnLocationChanged;
         }
 
         [Inject] protected Microsoft.JSInterop.IJSRuntime JSRuntime { get; set; } = null!;
@@ -643,6 +754,35 @@ namespace ecommerce.Admin.Components.Pages.B2B
         protected void HideTooltip()
         {
             TooltipService.Close();
+        }
+
+        private bool GetIsPackageProduct(OrderItems item)
+        {
+            return item.Product?.IsPackageProduct == true || !string.IsNullOrWhiteSpace(item.PackageItemQuantitiesJson);
+        }
+
+        private List<(string Name, int Quantity)> GetPackageProductItems(OrderItems item)
+        {
+            var result = new List<(string Name, int Quantity)>();
+            if (item.Product?.ProductSaleItemsAsRef == null || !item.Product.ProductSaleItemsAsRef.Any())
+                return result;
+            Dictionary<int, int>? qtys = null;
+            if (!string.IsNullOrWhiteSpace(item.PackageItemQuantitiesJson))
+            {
+                try
+                {
+                    var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(item.PackageItemQuantitiesJson);
+                    if (dict != null)
+                        qtys = dict.ToDictionary(x => int.Parse(x.Key), x => x.Value);
+                }
+                catch { }
+            }
+            foreach (var ps in item.Product.ProductSaleItemsAsRef)
+            {
+                var qty = qtys != null && qtys.TryGetValue(ps.ProductId, out var v) ? v : 1;
+                result.Add((ps.Product?.Name ?? $"Ürün #{ps.ProductId}", qty));
+            }
+            return result;
         }
     }
 }

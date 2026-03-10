@@ -20,6 +20,6 @@ public class PaymentGatewayRequest
     public BankNames BankName { get; set; }
 
     public Dictionary<string, string> BankParameters { get; set; } = new Dictionary<string, string>();
-    public ecommerce.Core.Entities.Authentication.UserAddress InvoiceAddress { get; set; }
-    public ecommerce.Core.Entities.Authentication.UserAddress ShippingAddress { get; set; }
+    public ecommerce.Core.Entities.Authentication.UserAddress? InvoiceAddress { get; set; }
+    public ecommerce.Core.Entities.Authentication.UserAddress? ShippingAddress { get; set; }
 }

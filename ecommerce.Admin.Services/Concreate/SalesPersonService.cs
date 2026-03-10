@@ -451,29 +451,44 @@ namespace ecommerce.Admin.Domain.Concreate
             }
         }
 
-        public async Task<IActionResult<List<CustomerListDto>>> GetCustomersOfSalesPerson(int salesPersonId)
+        public async Task<IActionResult<List<CustomerListDto>>> GetCustomersOfSalesPerson(int salesPersonId, string? search = null)
         {
             var response = new IActionResult<List<CustomerListDto>> { Result = new List<CustomerListDto>() };
             try
             {
-                // using var scope = _serviceScopeFactory.CreateScope();
-                // var ctx = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var ctx = _context.DbContext;
-
-                // CRITICAL: Filter by Current Branch ID
                 var currentBranchId = _tenantProvider.IsMultiTenantEnabled ? _tenantProvider.GetCurrentBranchId() : 0;
 
-                var customers = await ctx.CustomerPlasiyers
-                    .Include(cp => cp.Customer).ThenInclude(c => c.Region)
-                    .Include(cp => cp.Customer).ThenInclude(c => c.City)
-                    .Include(cp => cp.Customer).ThenInclude(c => c.Town)
-                    .Where(cp => cp.SalesPersonId == salesPersonId && 
-                                 (currentBranchId == 0 || cp.Customer.CustomerBranches.Any(cb => cb.BranchId == currentBranchId)))
-                    .Select(cp => cp.Customer)
+                var allowedCustomerIds = await ctx.CustomerPlasiyers
+                    .Where(cp => cp.SalesPersonId == salesPersonId &&
+                                 (currentBranchId == 0 || cp.Customer.CustomerBranches.Any(cb => cb.BranchId == currentBranchId) || cp.Customer.BranchId == null || cp.Customer.BranchId == 0 || cp.Customer.BranchId == currentBranchId))
+                    .GroupBy(cp => cp.CustomerId)
+                    .Select(g => g.Key)
                     .ToListAsync();
 
+                if (allowedCustomerIds.Count == 0)
+                {
+                    return response;
+                }
+
+                var customersQuery = ctx.Customers
+                    .AsNoTracking()
+                    .Include(c => c.Region)
+                    .Include(c => c.City)
+                    .Include(c => c.Town)
+                    .Include(c => c.Corporation)
+                    .Where(c => allowedCustomerIds.Contains(c.Id));
+
+                if (!string.IsNullOrWhiteSpace(search) && search.Trim().Length >= 2)
+                {
+                    var term = search.Trim();
+                    var pattern = $"%{term}%";
+                    customersQuery = customersQuery.Where(c => EF.Functions.ILike(c.Name, pattern) || EF.Functions.ILike(c.Code, pattern));
+                }
+
+                var customers = await customersQuery.ToListAsync();
                 var mapped = _mapper.Map<List<CustomerListDto>>(customers);
-                response.Result = mapped ?? new List<CustomerListDto>();
+                response.Result = (mapped ?? new List<CustomerListDto>()).DistinctBy(c => c.Id).ToList();
                 return response;
             }
             catch (Exception ex)
@@ -494,8 +509,6 @@ namespace ecommerce.Admin.Domain.Concreate
             try
             {
                 var ctx = _context.DbContext;
-
-                // Şube filtreleme
                 var currentBranchId = _tenantProvider.IsMultiTenantEnabled ? _tenantProvider.GetCurrentBranchId() : 0;
 
                 var customers = await ctx.CustomerPlasiyers
@@ -503,7 +516,7 @@ namespace ecommerce.Admin.Domain.Concreate
                     .Include(cp => cp.Customer).ThenInclude(c => c.City)
                     .Include(cp => cp.Customer).ThenInclude(c => c.Town)
                     .Where(cp => cp.SalesPersonId == salesPersonId &&
-                                 (currentBranchId == 0 || cp.Customer.CustomerBranches.Any(cb => cb.BranchId == currentBranchId)))
+                                 (currentBranchId == 0 || cp.Customer.CustomerBranches.Any(cb => cb.BranchId == currentBranchId) || cp.Customer.BranchId == null || cp.Customer.BranchId == 0 || cp.Customer.BranchId == currentBranchId))
                     .Select(cp => new CustomerWithCoordsDto
                     {
                         Id = cp.Customer.Id,

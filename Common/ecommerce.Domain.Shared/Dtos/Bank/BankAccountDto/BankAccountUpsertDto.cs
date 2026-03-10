@@ -7,6 +7,7 @@ public class BankAccountUpsertDto
     public string? SystemCode { get; set; }
     public int? PaymentTypeId { get; set; }
     public int? CurrencyId { get; set; }
+    public int? CashRegisterId { get; set; }
     public string AccountCode { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;

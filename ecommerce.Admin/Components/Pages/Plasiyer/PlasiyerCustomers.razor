@@ -20,9 +20,17 @@
         </RadzenStack>
     </RadzenCard>
 
-    <RadzenDataGrid @ref="grid" Data="@customers" TItem="CustomerListDto" IsLoading="@isLoading"
+    <RadzenCard Variant="Variant.Flat">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+            <RadzenTextBox @bind-Value="@searchTerm" @bind-Value:event="oninput" Placeholder="Cari adı veya kodu ile ara..." 
+                           Style="min-width: 280px;" @onkeydown="@OnSearchKeyDown" />
+            <RadzenButton Icon="search" Text="Ara" Click="@SearchCustomers" ButtonStyle="ButtonStyle.Primary" Disabled="@isLoading" />
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenDataGrid @ref="grid" Data="@customers" TItem="CustomerListDto" DataKey="Id" IsLoading="@isLoading"
                     AllowFiltering="false" AllowPaging="true" PageSize="10"
-                    AllowSorting="true" ColumnWidth="150px" EmptyText="Müşteri bulunamadı." 
+                    AllowSorting="true" ColumnWidth="150px" EmptyText="@(string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Trim().Length < 2 ? "Carileri görmek için arama yapın (en az 2 karakter)" : "Müşteri bulunamadı.")" 
                     RowRender="@OnRowRender">
         <Columns>
             <RadzenDataGridColumn TItem="CustomerListDto" Property="Code" Title="Cari Kodu" Width="120px" />

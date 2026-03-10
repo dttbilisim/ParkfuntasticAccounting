@@ -112,7 +112,7 @@ namespace ecommerce.Admin.Services.Concreate
                     if (pager.Skip.HasValue) query = query.Skip(pager.Skip.Value);
                     if (pager.Take.HasValue) query = query.Take(pager.Take.Value);
 
-                    var customers = await query.ToListAsync();
+                    var customers = (await query.ToListAsync()).DistinctBy(c => c.Id).ToList();
                     response.Result.Data = _mapper.Map<List<CustomerListDto>>(customers);
                 // }
 
@@ -151,16 +151,14 @@ namespace ecommerce.Admin.Services.Concreate
                                     .Include(x => x.CustomerBranches)
                                     .AsQueryable();
 
-                    // Doğrudan BranchId filtreleme (ApplyFilter yerine)
+                    // Doğrudan BranchId filtreleme
                     var currentBranchId = _tenantProvider.GetCurrentBranchId();
                     if (currentBranchId > 0)
                     {
-                        // Belirli bir şube seçiliyse: sadece o şubeye ait + BranchId null + BranchId=0 olanları getir
                         query = query.Where(x => !x.BranchId.HasValue || x.BranchId == currentBranchId || x.BranchId == 0);
                     }
                     else if (!_tenantProvider.IsGlobalAdmin)
                     {
-                        // BranchId=0 (Merkez Ofis) ve Global Admin değil → UserBranches'a göre filtrele
                         var allowedBranchIds = await _roleFilter.GetAllowedBranchIdsAsync(uow.DbContext);
                         if (allowedBranchIds.Any())
                         {
@@ -168,11 +166,9 @@ namespace ecommerce.Admin.Services.Concreate
                         }
                         else
                         {
-                            // Hiç branch erişimi yok → sadece BranchId null veya global kayıtlar
                             query = query.Where(x => !x.BranchId.HasValue || x.BranchId == 0);
                         }
                     }
-                    // Global Admin + BranchId=0 → tüm kayıtlar (mevcut davranış korunuyor)
 
                     if (!string.IsNullOrEmpty(pager.Filter))
                     {
@@ -200,7 +196,7 @@ namespace ecommerce.Admin.Services.Concreate
                     if (pager.Skip.HasValue) query = query.Skip(pager.Skip.Value);
                     if (pager.Take.HasValue) query = query.Take(pager.Take.Value);
 
-                    var customers = await query.ToListAsync();
+                    var customers = (await query.ToListAsync()).DistinctBy(c => c.Id).ToList();
                     response.Result.Data = _mapper.Map<List<CustomerListDto>>(customers);
                 }
 
@@ -413,6 +409,11 @@ namespace ecommerce.Admin.Services.Concreate
                         // Insert
                         entity = _mapper.Map<Customer>(dto);
                         entity.BranchId = mainBranchId;
+                        // AuditableEntity alanları: CreatedDate ve CreatedId zorunlu
+                        entity.CreatedDate = DateTime.UtcNow;
+                        entity.Status = (int)EntityStatus.Active;
+                        var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        entity.CreatedId = int.TryParse(userIdClaim, out var uid) && uid > 0 ? uid : 1;
                         // Sadece CityId/TownId kullan; navigation set etme (City.Name NOT NULL hatasını önler)
                         entity.City = null;
                         entity.Town = null;

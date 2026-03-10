@@ -163,6 +163,24 @@
         </div>
         <div class="row">
             <div class="col-md-3">
+                <RadzenLabel Text="Webte Satılsın mı?" Component="IsSoldOnWeb" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenCheckBox TValue="bool" @bind-Value="@product.IsSoldOnWeb" Name="IsSoldOnWeb"/>
+                <span style="color: #666;font-size: 10px;">İşaretli ise plasiyer sipariş ekranında ve web satışında görünür.</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <RadzenLabel Text="PcPos'ta Satılsın mı?" Component="IsSoldOnPcPos" style="width: 100%"/>
+            </div>
+            <div class="col-md-9">
+                <RadzenCheckBox TValue="bool" @bind-Value="@product.IsSoldOnPcPos" Name="IsSoldOnPcPos"/>
+                <span style="color: #666;font-size: 10px;">İşaretli ise PcPos'ta satışa sunulur.</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
                 <RadzenLabel Text="Paket Ürün mü?" Component="IsPackageProduct" style="width: 100%"/>
             </div>
             <div class="col-md-9">
@@ -299,7 +317,7 @@
 {
 <RadzenTabsItem Text="Paket Ürünler">
     <RadzenFieldset Text="Paket İçeriği - Ürünler ve Fiyatları">
-        <p class="text-muted small mb-2">Ürün adı veya barkod ile arayın, listeden seçtiğinizde pakete eklenir. KDV oranı ürünün vergi bilgisinden otomatik gelir.</p>
+        <p class="text-muted small mb-2">Ürün adı veya barkod ile arayın, listeden seçtiğinizde pakete eklenir. Fiyat ve döviz seçimi yapabilirsiniz. KDV oranı ürünün vergi bilgisinden otomatik gelir.</p>
         <div class="row mb-3">
             <div class="col-md-8">
                 <RadzenLabel Text="Ürün Ara ve Ekle" />
@@ -338,9 +356,15 @@
                 <RadzenDataGridColumn TItem="PackageProductItemDto" Title="Ürün" Width="300px" Property="ProductName"/>
                 <RadzenDataGridColumn TItem="PackageProductItemDto" Title="Fiyat" Width="150px">
                     <Template Context="item">
-                        <RadzenNumeric Format="c" style="display: block; width: 100%" 
-                            Value="@item.Price" ValueChanged="@((decimal? val) => item.Price = val ?? 0)" 
-                            Min="0" ShowUpDown="false"/>
+                        <RadzenNumeric TValue="decimal" @bind-Value="@item.Price" Format="N2" style="display: block; width: 100%" 
+                            Min="0" ShowUpDown="false" Change="@(() => OnPackageItemChanged())"/>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="PackageProductItemDto" Title="Döviz" Width="140px">
+                    <Template Context="item">
+                        <RadzenDropDown TValue="int?" @bind-Value="@item.CurrencyId" Data="@PackageCurrencyOptions"
+                            TextProperty="Text" ValueProperty="Value" AllowClear="true"
+                            Style="width: 100%" Placeholder="Döviz seçin" Change="@(() => OnPackageItemChanged())"/>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="PackageProductItemDto" Title="KDV %" Width="80px" Property="TaxRate"/>

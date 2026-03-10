@@ -129,7 +129,14 @@ public class CheckoutService:ICheckoutService
                     var firstCustomerUserId = customerUserIds.FirstOrDefault();
                     if (firstCustomerUserId != 0) effectiveUserId = firstCustomerUserId;
                     
-                    if (userAddressId.HasValue)
+                    // B2B: Adres zorunlu değil - UserAddressId null ise adres aramıyoruz
+                    if (request.PlatformType == OrderPlatformType.B2B && !userAddressId.HasValue)
+                    {
+                        // B2B siparişlerde adres olmadan devam et
+                        currentCompany = null;
+                        userAddressId = null;
+                    }
+                    else if (userAddressId.HasValue)
                     {
                         // Validate that the selected address belongs to Customer's ApplicationUsers
                         currentCompany = _context.GetRepository<UserAddress>()
@@ -215,7 +222,8 @@ public class CheckoutService:ICheckoutService
                 _logger.LogInformation("Checkout Context Finalized - EffectiveUserId (Owner): {EffectiveUserId}, OriginalUserId (Creator): {OriginalUserId}, TargetCustomerId: {TargetCustomerId}", 
                     effectiveUserId, userId, targetCustomerId);
                 
-                if(currentCompany == null && targetCustomerId.HasValue){
+                // B2B dışında: Adres yoksa Customer'dan oluştur (Web/EP için)
+                if(currentCompany == null && targetCustomerId.HasValue && request.PlatformType != OrderPlatformType.B2B){
                     var customerRepo = _context.GetRepository<ecommerce.Core.Entities.Accounting.Customer>();
                     var customerForAddress = customerRepo.GetAll(predicate: c => c.Id == targetCustomerId.Value, disableTracking: false)
                         .Include(c => c.City)
@@ -250,14 +258,14 @@ public class CheckoutService:ICheckoutService
                     }
                 }
                 
-                if(currentCompany == null){
+                // B2B dışında adres zorunlu
+                if(currentCompany == null && request.PlatformType != OrderPlatformType.B2B){
                     result.AddError("Kullanici bilgileri bulunamadı.");
                     return result;
                 }
                 
-                // CRITICAL FIX: Always ensure userAddressId is set to currentCompany.Id
-                // This handles cases where address was found in lines 135-162 but userAddressId wasn't updated
-                if (currentCompany.Id > 0)
+                // CRITICAL FIX: Always ensure userAddressId is set to currentCompany.Id (B2B'de currentCompany null olabilir)
+                if (currentCompany != null && currentCompany.Id > 0)
                 {
                     userAddressId = currentCompany.Id;
                 }
@@ -272,22 +280,15 @@ public class CheckoutService:ICheckoutService
                     }
                     catch { }
                 }
-                var cartItemsTask = _orderManager.GetShoppingCart();
-                
-                try{
-                // CLEANUP: If there are existing unpaid orders for this user, clean them up first
-                // This prevents "Duplicate" or "Already Tracked" errors on retry/sequential checkout attempts
+                // CLEANUP: Önce ödenmemiş siparişleri temizle (aynı connection üzerinde paralel sorgu NpgsqlOperationInProgressException'a yol açar)
                 try {
                     await OrderDelete(effectiveUserId); 
                     _context.DbContext.ChangeTracker.Clear();
                 } catch(Exception ex) {
-                    _logger.LogError(ex, "Startup Cleanup error");
-                }
-                } catch{
-                    // ignored
+                    _logger.LogError(ex, "OrderDelete cleanup error");
                 }
                 
-                var cartItems = await cartItemsTask;
+                var cartItems = await _orderManager.GetShoppingCart();
                 var cartResult = await _orderManager.CalculateShoppingCart(cartItems, cartPreferences, true);
               
                 if(cartResult.Sellers.All(s => s.IsAllItemsPassive)){
@@ -298,10 +299,36 @@ public class CheckoutService:ICheckoutService
                     result.AddError("Sepetinizdeki bazı satıcıların minimum sipariş tutarı karşılanmamaktadır.");
                     return result;
                 }
-                if(cartResult.Sellers.Any(s => !s.IsAllItemsPassive && s.SelectedCargo == null)){
-                    result.AddError("Lütfen sepetinizdeki kargo firması seçimlerini yapınız!");
-                    return result;
+
+                // Voucher/Rehber zorunluluğu: Sadece paket ürünler için (ParkFuntastic)
+                var hasPackageProducts = cartResult.Sellers?
+                    .Where(s => !s.IsAllItemsPassive)
+                    .SelectMany(s => s.Items ?? new List<ecommerce.Core.Entities.CartItem>())
+                    .Any(i => i.Status == (int)EntityStatus.Active && (i.Product?.IsPackageProduct ?? false)) ?? false;
+                if (hasPackageProducts)
+                {
+                    var packageItemsWithoutDate = cartResult.Sellers?
+                        .Where(s => !s.IsAllItemsPassive)
+                        .SelectMany(s => s.Items ?? new List<ecommerce.Core.Entities.CartItem>())
+                        .Where(i => i.Status == (int)EntityStatus.Active && (i.Product?.IsPackageProduct ?? false) && !i.VisitDate.HasValue)
+                        .ToList() ?? new List<ecommerce.Core.Entities.CartItem>();
+                    if (packageItemsWithoutDate.Any())
+                    {
+                        result.AddError("Sepetinizde ziyaret tarihi girilmemiş paket ürün bulunmaktadır. Lütfen paket ürünleri sepetten çıkarıp tekrar ekleyerek tarih seçiniz.");
+                        return result;
+                    }
+                    if (string.IsNullOrWhiteSpace(request.Voucher))
+                    {
+                        result.AddError("Sepetinizde paket ürün bulunmaktadır. Siparişi tamamlamak için Voucher kodu girmeniz gerekmektedir.");
+                        return result;
+                    }
+                    if (string.IsNullOrWhiteSpace(request.GuideName))
+                    {
+                        result.AddError("Sepetinizde paket ürün bulunmaktadır. Siparişi tamamlamak için Rehber veya Acenta ismi girmeniz gerekmektedir.");
+                        return result;
+                    }
                 }
+
                 // Uyarı kontrolü — tam liste oluşturmadan Any() ile short-circuit (büyük sepet performansı)
                 var hasWarnings = cartResult.Warnings.Any()
                     || cartResult.Sellers.Any(s => !s.IsAllItemsPassive
@@ -342,17 +369,20 @@ public class CheckoutService:ICheckoutService
                 // Validation - Check CustomerWorkingType to determine if payment is required
                 bool requirePaymentPage = true; // Default: Require payment
                 
-                // If ApplicationUser has Customer, check CustomerWorkingType
-                if (customer != null)
+                // B2B platform: Tüm siparişler cari hesap (veresiye) — banka/kart seçimi kaldırıldı
+                if (request.PlatformType == OrderPlatformType.B2B && targetCustomerId.HasValue)
+                {
+                    requirePaymentPage = false;
+                    _logger.LogInformation("B2B platform - All orders as Cari Hesap (Veresiye), RequirePayment: false");
+                }
+                // If ApplicationUser has Customer, check CustomerWorkingType (Marketplace/Web için)
+                else if (customer != null)
                 {
                     // Vadeli (2) müşteriler ödeme gerektirmez
                     // Pesin (1) müşteriler her zaman ödeme gerektirir
                     // PesinAndVadeli (3) müşteriler: cardPayment gönderilmişse ödeme gerektirir
-                    // ÖNEMLİ: Frontend cardPayment göndermişse, müşteri tipi ne olursa olsun ödeme sayfası gösterilir
-                    // Bu sayede PesinAndVadeli müşteri online ödeme seçtiğinde 3D Secure sayfası açılır
                     if (request.CardPayment != null && request.CardPayment.BankId.HasValue)
                     {
-                        // Frontend açıkça ödeme bilgisi göndermiş — ödeme sayfası göster
                         requirePaymentPage = true;
                     }
                     else if (customer.CustomerWorkingType == CustomerWorkingTypeEnum.Pesin)
@@ -361,7 +391,6 @@ public class CheckoutService:ICheckoutService
                     }
                     else
                     {
-                        // Vadeli (2) veya PesinAndVadeli (3) cardPayment olmadan — cari hesaptan sipariş
                         requirePaymentPage = false;
                     }
                     
@@ -444,23 +473,26 @@ public class CheckoutService:ICheckoutService
                 
                 // Determine PaymentTypeId based on CustomerWorkingType and payment method
                 ecommerce.Core.Utils.PaymentType paymentTypeId = ecommerce.Core.Utils.PaymentType.CreditCart; // Default
-                if (customer != null)
+                if (request.PlatformType == OrderPlatformType.B2B && targetCustomerId.HasValue)
+                {
+                    // B2B: Tüm siparişler cari hesap (veresiye)
+                    paymentTypeId = ecommerce.Core.Utils.PaymentType.CustomerBalance;
+                    _logger.LogInformation("PaymentTypeId set to CustomerBalance for B2B platform (CustomerId: {CustomerId})", targetCustomerId.Value);
+                }
+                else if (customer != null)
                 {
                     if (customer.CustomerWorkingType == CustomerWorkingTypeEnum.Pesin)
                     {
-                        // Pesin customers always use CreditCart
                         paymentTypeId = ecommerce.Core.Utils.PaymentType.CreditCart;
                         _logger.LogInformation("PaymentTypeId set to CreditCart for Pesin customer (CustomerId: {CustomerId})", customer.Id);
                     }
                     else if (customer.CustomerWorkingType == CustomerWorkingTypeEnum.Vadeli)
                     {
-                        // Vadeli customers always use CustomerBalance
                         paymentTypeId = ecommerce.Core.Utils.PaymentType.CustomerBalance;
                         _logger.LogInformation("PaymentTypeId set to CustomerBalance for Vadeli customer (CustomerId: {CustomerId})", customer.Id);
                     }
                     else if (customer.CustomerWorkingType == CustomerWorkingTypeEnum.PesinAndVadeli)
                     {
-                        // PesinAndVadeli: If CardPayment is provided, use CreditCart, otherwise CustomerBalance
                         paymentTypeId = (request.CardPayment != null) ? ecommerce.Core.Utils.PaymentType.CreditCart : ecommerce.Core.Utils.PaymentType.CustomerBalance;
                         _logger.LogInformation("PaymentTypeId set to {PaymentType} for PesinAndVadeli customer (CustomerId: {CustomerId}, HasCardPayment: {HasCardPayment})", 
                             paymentTypeId, customer.Id, request.CardPayment != null);
@@ -468,7 +500,6 @@ public class CheckoutService:ICheckoutService
                 }
                 else
                 {
-                    // For non-B2B customers (Marketplace), use CreditCart if payment provided, otherwise CustomerBalance
                     paymentTypeId = (request.CardPayment != null) ? ecommerce.Core.Utils.PaymentType.CreditCart : ecommerce.Core.Utils.PaymentType.CustomerBalance;
                     _logger.LogInformation("PaymentTypeId set to {PaymentType} for non-B2B customer (HasCardPayment: {HasCardPayment})", 
                         paymentTypeId, request.CardPayment != null);
@@ -496,6 +527,16 @@ public class CheckoutService:ICheckoutService
                     if(seller.IsAllItemsPassive || seller.OrderTotal < seller.MinCartTotal){
                         continue;
                     }
+                    // OrderManager kargo seçimini kaldırdığı için SelectedCargo null olabilir; varsayılan/ilk kargoyu kullan
+                    var effectiveCargo = seller.SelectedCargo
+                        ?? seller.Cargoes.FirstOrDefault(c => c.IsDefault)
+                        ?? seller.Cargoes.FirstOrDefault();
+                    if (effectiveCargo == null)
+                    {
+                        _logger.LogWarning("Satıcı {SellerId} için kargo bilgisi bulunamadı, sipariş atlanıyor.", seller.SellerId);
+                        result.AddError($"Satıcı {seller.SellerName} için kargo bilgisi bulunmamaktadır.");
+                        continue;
+                    }
                     var sellerItems = seller.Items
                         .Where(i => i.Status == (int) EntityStatus.Active)
                         .GroupBy(x => x.ProductSellerItemId) // Deduplicate by Stock Item ID
@@ -505,20 +546,25 @@ public class CheckoutService:ICheckoutService
                     var uniqueSubTotal = sellerItems.Sum(i => i.Total);
                     var uniqueOrderTotal = uniqueSubTotal + seller.CargoPrice - seller.OrderTotalDiscount;
                     
+                    // B2B siparişler plasiyer onayı bekler (parkfuntastic gibi)
+                    var initialOrderStatus = (platformType == OrderPlatformType.B2B || targetCustomerId.HasValue)
+                        ? OrderStatusType.OrderWaitingApproval
+                        : OrderStatusType.OrderNew;
                     var order = new Orders{
                         Status = (int) EntityStatus.Active,
                         CreatedDate = DateTime.Now,
-                        OrderStatusType = OrderStatusType.OrderNew,
+                        OrderStatusType = initialOrderStatus,
                         PlatformType = platformType,
                         OrderNumber = KeyGenerator.GetUniqueKey(7),
                         CompanyId = effectiveUserId, // Order Owner (Customer)
                         CreatedId = userId,         // Order Creator (Plasiyer)
+                        CustomerId = targetCustomerId, // B2B: Sipariş listesinde görünmesi için
                         BranchId = _tenantProvider.GetCurrentBranchId() > 0 ? _tenantProvider.GetCurrentBranchId() : 1, // Multi-branch support
                         SellerId = seller.SellerId,
                         UserAddressId = userAddressId,
                         PaymentTypeId = paymentTypeId,
                         DiscountTotal = seller.OrderTotalDiscount,
-                        CargoId = seller.SelectedCargo!.CargoId,
+                        CargoId = effectiveCargo.CargoId,
                         CargoPrice = seller.CargoPrice,
                         ProductTotal = uniqueSubTotal, // Use recalculated subtotal
                         OrderTotal = uniqueOrderTotal, // Use recalculated total
@@ -530,9 +576,11 @@ public class CheckoutService:ICheckoutService
                         SubmerhantCommisionTotal = (uniqueSubTotal - sellerItems.Sum(c => c.SubmerhantCommision)), // Use unique subtotal
                         MerhanCommission = sellerItems.Sum(c => c.SubmerhantCommision),
                         PaymentToken = null,
-                        ShipmentDate = DateTime.Now,
+                        ShipmentDate = null,
                         PaymentId = requirePaymentPage ? null : $"CustomerBalance-{Guid.NewGuid().ToString("N").Substring(0, 8)}",
                         PaymentStatus = !requirePaymentPage,
+                        Voucher = request.Voucher,
+                        GuideName = request.GuideName,
                         AppliedDiscounts = new List<OrderAppliedDiscount>(),
                         OrderItems = new List<OrderItems>()
                     };
@@ -593,6 +641,11 @@ public class CheckoutService:ICheckoutService
                             CommissionTotal = cartItem.CommissionTotal,
                             DiscountAmount =(cartItem.DiscountAmount*cartItem.Quantity),
                             ExprationDate = DateTime.Now,
+                            ShipmentDate = cartItem.Product?.IsPackageProduct == true && cartItem.VisitDate.HasValue
+                                ? DateTime.SpecifyKind(cartItem.VisitDate.Value.Date, DateTimeKind.Utc)
+                                : null,
+                            PackageItemQuantitiesJson = cartItem.Product?.IsPackageProduct == true && cartItem.PackageItemQuantities != null && cartItem.PackageItemQuantities.Count > 0
+                                ? System.Text.Json.JsonSerializer.Serialize(cartItem.PackageItemQuantities) : null,
                             MerhantCommision = cartItem.SubmerhantCommision,
                             SubmerhantCommision = ((cartItem.Quantity * cartItem.UnitPrice) - cartItem.SubmerhantCommision),
                             PaymentTransactionId = string.Empty,
@@ -1268,8 +1321,8 @@ public class CheckoutService:ICheckoutService
                 };
 
                 // Clear cart only for non-payment (bypass) orders
-                // Online payments will clear cart in the callback confirmation
-                await _orderManager.ClearShoppingCart(effectiveUserId);
+                // Sepet giriş yapan kullanıcıya (userId) aittir; Plasiyer müşteri adına sipariş oluştursa bile sepet Plasiyer'indir
+                await _orderManager.ClearShoppingCart(userId);
             }
             catch(Exception ex){
                  result.AddSystemError(ex.Message);

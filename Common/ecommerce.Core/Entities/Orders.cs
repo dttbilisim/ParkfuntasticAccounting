@@ -106,6 +106,11 @@ namespace ecommerce.Core.Entities{
         public string? IyzicoCanceledMessage { get; set; }
         public DateTime? IyzicoCancelDate { get; set; }
 
+        /// <summary>Paket ürünler için voucher kodu (ParkFuntastic uyarlaması).</summary>
+        public string? Voucher { get; set; }
+        /// <summary>Paket ürünler için rehber/acenta ismi (ParkFuntastic uyarlaması).</summary>
+        public string? GuideName { get; set; }
+
         public virtual List<OrderItems> OrderItems{get;set;}
 
         // Web context için User (CompanyId FK ile)
@@ -141,6 +146,13 @@ namespace ecommerce.Core.Entities{
         
         [ForeignKey("CargoId")] public Cargo ? Cargo{get;set;}
         
+        /// <summary>
+        /// B2B: Cari ID (plasiyer adına sipariş oluşturulduğunda — sipariş listesinde görünmesi için)
+        /// </summary>
+        public int? CustomerId { get; set; }
+        [ForeignKey(nameof(CustomerId))]
+        public virtual ecommerce.Core.Entities.Accounting.Customer? Customer { get; set; }
+
         /// <summary>
         /// Fatura ID (hangi faturaya dönüştüğünü tutmak için)
         /// </summary>

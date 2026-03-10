@@ -48,6 +48,9 @@ public class CartSellerDto
 
     public List<string> Warnings { get; set; } = new();
     public List<CartAppliedDiscountDto> AppliedDiscounts { get; set; } = new();
+
+    /// <summary>Para birimi kodu (USD, TRY, EUR vb.) - ilk üründen alınır.</summary>
+    public string? Currency { get; set; }
 }
 
 public class CartCargoDto

@@ -41,16 +41,53 @@ public class CartService : ICartService{
                 rs.AddError("Kullanıcı girişi yapmanız gerekiyor.");
                 return rs;
             }
+            // Plasiyer kontrolü — cari seçmeden sepete ürün ekleyemez
+            var salesPersonIdClaim = principal?.Claims.FirstOrDefault(c => c.Type == "SalesPersonId")?.Value;
+            if (!string.IsNullOrWhiteSpace(salesPersonIdClaim) && int.TryParse(salesPersonIdClaim, out var salesPersonId) && salesPersonId > 0)
+            {
+                if (req.CustomerId == null || req.CustomerId <= 0)
+                {
+                    rs.AddError("Lütfen önce bir cari seçiniz.");
+                    return rs;
+                }
+            }
+            // ProductSellerItemId bilinmiyorsa ProductId'den otomatik çözümle
+            if (req.ProductSellerItemId <= 0 && req.ProductId.HasValue && req.ProductId.Value > 0)
+            {
+                var resolvedSellerItem = await _context.GetRepository<SellerItem>().GetAll(false).AsNoTracking()
+                    .Where(x => x.ProductId == req.ProductId.Value && x.Status == 1 && x.Stock > 0)
+                    .OrderByDescending(x => x.Stock)
+                    .FirstOrDefaultAsync();
+                if (resolvedSellerItem != null)
+                    req.ProductSellerItemId = resolvedSellerItem.Id;
+                else
+                {
+                    var anySellerItem = await _context.GetRepository<SellerItem>().GetAll(false).AsNoTracking()
+                        .Where(x => x.ProductId == req.ProductId.Value && x.Status == 1)
+                        .FirstOrDefaultAsync();
+                    if (anySellerItem != null)
+                        req.ProductSellerItemId = anySellerItem.Id;
+                    else
+                    {
+                        rs.AddError("Bu ürün için aktif ilan bulunamadı.");
+                        return rs;
+                    }
+                }
+            }
             var sem = _userLocks.GetOrAdd(userId, _ => new SemaphoreSlim(1, 1));
             await sem.WaitAsync();
             try{
                 var sellerItem = await _context.GetRepository<SellerItem>().GetAll(false).AsNoTracking().Include(x => x.Seller).Include(x => x.Product).AsSingleQuery().Where(x => x.Id == req.ProductSellerItemId && x.Status != (int) EntityStatus.Deleted).FirstOrDefaultAsync();
-                if(sellerItem != null && sellerItem.Status == 0){
+                if(sellerItem == null){
+                    rs.AddError("Ürün bulunamadı.");
+                    return rs;
+                }
+                if(sellerItem.Status == 0){
                     rs.AddError("Ürünün ilan durumu pasif durumdadır.");
                     return rs;
                 }
                 var cartRepo = _context.GetRepository<CartItem>();
-                var cartItem = await cartRepo.GetAll(false).AsNoTracking().AsSingleQuery().FirstOrDefaultAsync(x => x.ProductId == sellerItem.ProductId && x.UserId == userId);
+                var cartItem = await cartRepo.GetAll(false).AsNoTracking().AsSingleQuery().FirstOrDefaultAsync(x => x.ProductSellerItemId == req.ProductSellerItemId && x.UserId == userId);
                 var requestedQuantity = req.Quantity; // positive for add, negative for remove
                 if(cartItem == null){
                     if(requestedQuantity <= 0){
@@ -64,7 +101,12 @@ public class CartService : ICartService{
                         ProductId = sellerItem.ProductId,
                         ProductSellerItemId = sellerItem.Id,
                         Quantity = Convert.ToInt32(initialQty),
-                        Status = (int) EntityStatus.Active
+                        Status = (int) EntityStatus.Active,
+                        Voucher = sellerItem.Product?.IsPackageProduct == true ? req.Voucher : null,
+                        GuideName = sellerItem.Product?.IsPackageProduct == true ? req.GuideName : null,
+                        VisitDate = sellerItem.Product?.IsPackageProduct == true ? req.VisitDate : null,
+                        PackageItemQuantitiesJson = sellerItem.Product?.IsPackageProduct == true && req.PackageItemQuantities != null && req.PackageItemQuantities.Count > 0
+                            ? System.Text.Json.JsonSerializer.Serialize(req.PackageItemQuantities) : null
                     };
                     await cartRepo.InsertAsync(cartItem);
                     await _context.SaveChangesAsync();
@@ -73,7 +115,7 @@ public class CartService : ICartService{
                     newCartResult.Metadata = rs.Metadata; // Preserve the success message
                     return newCartResult;
                 }
-                var newQuantityCandidate = cartItem.Quantity + requestedQuantity;
+                var newQuantityCandidate = requestedQuantity != 0 ? cartItem.Quantity + requestedQuantity : cartItem.Quantity;
                 if(newQuantityCandidate > sellerItem.Stock){
                     rs.AddError($"Bu üründe yeterli stok bulunmamaktadır. Stok: {sellerItem.Stock}");
                     return rs;
@@ -88,6 +130,14 @@ public class CartService : ICartService{
                 var entityToUpdate = cartItem.Id > 0 ? await cartRepo.FindAsync(cartItem.Id) : cartItem;
                 entityToUpdate.Status = (int) EntityStatus.Active;
                 entityToUpdate.Quantity = newQuantityCandidate;
+                if (sellerItem.Product?.IsPackageProduct == true)
+                {
+                    if (!string.IsNullOrWhiteSpace(req.Voucher)) entityToUpdate.Voucher = req.Voucher;
+                    if (!string.IsNullOrWhiteSpace(req.GuideName)) entityToUpdate.GuideName = req.GuideName;
+                    if (req.VisitDate.HasValue) entityToUpdate.VisitDate = req.VisitDate;
+                    if (req.PackageItemQuantities != null && req.PackageItemQuantities.Count > 0)
+                        entityToUpdate.PackageItemQuantitiesJson = System.Text.Json.JsonSerializer.Serialize(req.PackageItemQuantities);
+                }
                 if(entityToUpdate.Quantity < 1 && entityToUpdate.Id > 0){
                     if(_context.DbContext.Entry(entityToUpdate).State == EntityState.Detached){
                         _context.DbContext.Attach(entityToUpdate);

@@ -17,4 +17,8 @@ public class CheckoutRequestDto
     public int? EstimatedCourierDeliveryMinutes { get; set; }
     /// <summary>Mobil/API checkout: Sepet tercihleri (seçili kargo + mesafe). Gönderilirse cookie yerine bu kullanılır; BicoJET kargo ücreti doğru hesaplanır.</summary>
     public CartCustomerSavedPreferences? CartPreferences { get; set; }
+    /// <summary>Paket ürünler için voucher kodu (ParkFuntastic uyarlaması).</summary>
+    public string? Voucher { get; set; }
+    /// <summary>Paket ürünler için rehber/acenta ismi (ParkFuntastic uyarlaması).</summary>
+    public string? GuideName { get; set; }
 }

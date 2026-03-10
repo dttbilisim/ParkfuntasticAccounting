@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using ecommerce.Core.Entities.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -30,6 +30,11 @@ public class UserClaimsPrincipalFactory : UserClaimsPrincipalFactory<Application
             {
                 identity.AddIfNotContains(new Claim(ecommerceClaimTypes.CustomerName, user.Customer.Name));
             }
+        }
+
+        if (user.SalesPersonId.HasValue)
+        {
+            identity.AddIfNotContains(new Claim(ecommerceClaimTypes.SalesPersonId, user.SalesPersonId.Value.ToString()));
         }
 
         identity.AddIfNotContains(new Claim(ecommerceClaimTypes.FullName, user.FullName));

@@ -307,7 +307,7 @@ builder.Services.AddUnitOfWork<ApplicationDbContext>();
 // Admin Services - Ortak Katman (Tüm servisler Admin.Services'den)
 builder.Services.AddScoped<ecommerce.Admin.Domain.Services.IRoleBasedFilterService, ecommerce.Admin.Domain.Services.RoleBasedFilterService>();
 builder.Services.AddScoped<ecommerce.Admin.Domain.Services.IPermissionService, ecommerce.Admin.Domain.Services.PermissionService>();
-builder.Services.AddScoped<IAdminProductSearchService, AdminProductSearchService>();
+builder.Services.AddScoped<IAdminProductSearchService, AdminProductSearchDbService>();
 builder.Services.AddScoped<ISearchSynonymService, SearchSynonymService>();
 
 // Location Services - Kayıt formu için il/ilçe servisleri

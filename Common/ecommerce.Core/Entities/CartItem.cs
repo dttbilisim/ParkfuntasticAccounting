@@ -95,5 +95,34 @@ namespace ecommerce.Core.Entities
 
         [NotMapped]
         public List<string> PerfectCompatibilitySummaries { get; set; } = new();
+
+        public string? Voucher { get; set; }
+
+        public string? GuideName { get; set; }
+
+        /// <summary>Paket ürünler için ziyaret/etkinlik tarihi.</summary>
+        public DateTime? VisitDate { get; set; }
+
+        /// <summary>Paket ürünler için alt ürün miktarları (ProductId -> Quantity) JSON.</summary>
+        public string? PackageItemQuantitiesJson { get; set; }
+
+        /// <summary>Paket ürünler için alt ürün miktarları (deserialize edilmiş, DB'de değil).</summary>
+        [NotMapped]
+        public Dictionary<int, int>? PackageItemQuantities
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(PackageItemQuantitiesJson)) return null;
+                try
+                {
+                    var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(PackageItemQuantitiesJson);
+                    return dict?.ToDictionary(x => int.Parse(x.Key), x => x.Value);
+                }
+                catch { return null; }
+            }
+            set => PackageItemQuantitiesJson = value != null && value.Count > 0
+                ? System.Text.Json.JsonSerializer.Serialize(value)
+                : null;
+        }
     }
 }

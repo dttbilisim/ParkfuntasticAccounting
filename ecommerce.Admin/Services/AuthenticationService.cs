@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using ecommerce.Admin.EFCore.UnitOfWork;
 using ecommerce.Core.Entities.Authentication;
 using ecommerce.Core.Entities.Hierarchical;
@@ -67,6 +67,12 @@ public class AuthenticationService
                 // Impersonate the customer's user for cart and order operations
                 identity.AddOrReplace(new Claim(ClaimTypes.NameIdentifier, targetUserId.Value.ToString()));
                 identity.AddOrReplace(new Claim("CustomerId", customerId.Value.ToString()));
+                
+                // Plasiyer yetkisi korunsun — sipariş onay/iptal için SalesPersonId gerekli
+                if (User.SalesPersonId.HasValue)
+                {
+                    identity.AddOrReplace(new Claim("SalesPersonId", User.SalesPersonId.Value.ToString()));
+                }
                 
                 var newPrincipal = new ClaimsPrincipal(identity);
                 _currentUser.SetUser(newPrincipal);

@@ -15,6 +15,7 @@ using ecommerce.Admin.Domain.Dtos.ProductUnitDto;
 using ecommerce.Admin.Domain.Dtos.UnitDto;
 using ecommerce.Admin.Domain.Interfaces;
 using ecommerce.Admin.Services.Interfaces;
+using ecommerce.Admin.Services.Dtos;
 using ecommerce.Admin.Helpers.Concretes;
 using ecommerce.Admin.Resources;
 using ecommerce.Admin.Services;
@@ -52,6 +53,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
         [Inject] public IProductStockService ProductStockService { get; set; } = null!;
         [Inject] public IProductUnitService ProductUnitService { get; set; } = null!;
         [Inject] public IUnitService UnitService { get; set; } = null!;
+        [Inject] public ICurrencyAdminService CurrencyService { get; set; } = null!;
         [Inject] public IConfiguration Configuration { get; set; } = null!;
         [Inject] protected AuthenticationService Security { get; set; } = null!;
         [Inject] protected IStringLocalizer<Culture_TR> Loc { get; set; } = null!;
@@ -97,6 +99,7 @@ namespace ecommerce.Admin.Components.Pages.Modals
         protected List<ProductListDto> packageProductSearchResults = new();
         protected List<ProductListDto> lastPackageSearchResults = new(); // Seçim anında Data temizlenebilir, yedek kullan
         protected string packageProductSearchText = "";
+        protected List<SelectItemDto<int?>> PackageCurrencyOptions { get; set; } = new();
         protected RadzenDataGrid<ProductActiveArticleListDto>? radzenDataGridActiveArticle;
         protected RadzenDataGrid<ProductImageListDto>? radzenDataGridProductImage;
         protected RadzenDataGrid<ProductAdvertListDto>? radzenDataGridProductAdvert;
@@ -121,8 +124,9 @@ namespace ecommerce.Admin.Components.Pages.Modals
             var tierTask = TierService.GetTiers();
             var unitTask = UnitService.GetUnits();
             var productsTask = Service.GetProducts();
+            var currencyTask = CurrencyService.GetCurrencies();
             
-            await Task.WhenAll(categoriesTask, brandsTask, taxesTask, productTypeTask, tierTask, unitTask, productsTask);
+            await Task.WhenAll(categoriesTask, brandsTask, taxesTask, productTypeTask, tierTask, unitTask, productsTask, currencyTask);
             
             var categoriesResponse = await categoriesTask;
             var brandsResponse = await brandsTask;
@@ -157,6 +161,20 @@ namespace ecommerce.Admin.Components.Pages.Modals
                 availableProductsForPackage = Id.HasValue
                     ? productsResponse.Result.Where(p => p.Id != Id.Value).ToList()
                     : productsResponse.Result;
+            }
+
+            var currencyResponse = await currencyTask;
+            if (currencyResponse.Ok && currencyResponse.Result != null)
+            {
+                var currencies = currencyResponse.Result
+                    .GroupBy(c => c.CurrencyCode)
+                    .Select(g => g.OrderByDescending(c => c.CreatedDate).First())
+                    .ToList();
+                PackageCurrencyOptions = currencies
+                    .Select(c => new SelectItemDto<int?> { Text = $"{c.CurrencyCode} - {c.CurrencyName}", Value = c.Id })
+                    .OrderBy(x => currencies.FirstOrDefault(c => c.Id == x.Value)?.CurrencyCode != "TRY")
+                    .ThenBy(x => x.Text)
+                    .ToList();
             }
             
             if (Id.HasValue)
@@ -892,12 +910,15 @@ namespace ecommerce.Admin.Components.Pages.Modals
                 return;
             }
 
+            var defaultCurrencyId = PackageCurrencyOptions.FirstOrDefault(c => c.Text?.Contains("TRY") == true || c.Text?.Contains("TL") == true)?.Value
+                ?? PackageCurrencyOptions.FirstOrDefault()?.Value;
             var newList = product.PackageProductItems.ToList();
             newList.Add(new PackageProductItemDto
             {
                 ProductId = p.Id,
                 ProductName = p.Name ?? "",
                 Price = p.Price,
+                CurrencyId = defaultCurrencyId,
                 TaxRate = p.Kdv ?? 0
             });
             product.PackageProductItems = newList;
@@ -909,6 +930,11 @@ namespace ecommerce.Admin.Components.Pages.Modals
         protected void RemovePackageProductItem(PackageProductItemDto item)
         {
             product.PackageProductItems?.Remove(item);
+            StateHasChanged();
+        }
+
+        protected void OnPackageItemChanged()
+        {
             StateHasChanged();
         }
 

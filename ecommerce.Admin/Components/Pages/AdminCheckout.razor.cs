@@ -38,13 +38,12 @@ namespace ecommerce.Admin.Components.Pages
 
         private CartDto? CurrentCart;
         private CustomerUpsertDto? CustomerInfo;
-        private List<ecommerce.Admin.Domain.Dtos.UserAddressDto.UserAddressListDto> CustomerAddresses { get; set; } = new();
-        private int? SelectedUserAddressId { get; set; }
         private string OrderNote = string.Empty;
         private bool isLoading = true;
         private bool isProcessing = false;
         private bool isUpdatingCart = false;
         private HashSet<int> updatingItems = new();
+        private HashSet<string> updatingPackageItems = new();
         private ecommerce.Core.Entities.CartCustomerSavedPreferences CartPreferences = new();
         
         // Payment Modal Control
@@ -64,6 +63,26 @@ namespace ecommerce.Admin.Components.Pages
             public string Text { get; set; } = string.Empty;
         }
         private ecommerce.Web.Domain.Dtos.Order.CardPaymentRequest PaymentModel = new ecommerce.Web.Domain.Dtos.Order.CardPaymentRequest{CardNumber = "4912055023019402",ExpMonth = "09",ExpYear = "2026",Cvv = "642",CardHolderName = "Sezgin OZTEMIR"};
+
+        /// <summary>Sepetteki paket ürünlerden ilkinin voucher değeri (modalda girilen, sadece gösterim).</summary>
+        private string? DisplayVoucher => CurrentCart?.Sellers?
+            .SelectMany(s => s.Items ?? new List<ecommerce.Web.Domain.Dtos.Cart.CartItemDto>())
+            .FirstOrDefault(i => i.IsPackageProduct)?.Voucher;
+
+        /// <summary>Sepetteki paket ürünlerden ilkinin rehber ismi (modalda girilen, sadece gösterim).</summary>
+        private string? DisplayGuideName => CurrentCart?.Sellers?
+            .SelectMany(s => s.Items ?? new List<ecommerce.Web.Domain.Dtos.Cart.CartItemDto>())
+            .FirstOrDefault(i => i.IsPackageProduct)?.GuideName;
+
+        /// <summary>Sepetteki paket ürünlerden ilkinin ziyaret/sipariş tarihi.</summary>
+        private DateTime? DisplayVisitDate => CurrentCart?.Sellers?
+            .SelectMany(s => s.Items ?? new List<ecommerce.Web.Domain.Dtos.Cart.CartItemDto>())
+            .FirstOrDefault(i => i.IsPackageProduct)?.VisitDate;
+
+        /// <summary>Sepette paket ürün var mı?</summary>
+        private bool HasPackageProducts => CurrentCart?.Sellers?
+            .SelectMany(s => s.Items ?? new List<ecommerce.Web.Domain.Dtos.Cart.CartItemDto>())
+            .Any(i => i.IsPackageProduct) ?? false;
         private decimal CalculatedGrandTotal = 0;
         private decimal InterestDifference = 0;
 
@@ -114,13 +133,6 @@ namespace ecommerce.Admin.Components.Pages
 
                 // Load customer info (B2B uses Customer entity, not UserAddress)
                 await LoadCustomerInfo();
-                
-                // Load customer addresses if available
-                var hasActiveCustomer = Security.User?.CustomerId.HasValue == true || Security.SelectedCustomerId.HasValue;
-                if (hasActiveCustomer)
-                {
-                    await LoadCustomerAddresses();
-                }
 
                 // Subscribe to cart state changes
                 CartStateService.OnChange += OnCartStateChanged;
@@ -203,13 +215,15 @@ namespace ecommerce.Admin.Components.Pages
             }
         }
 
+        private async Task ReloadCustomerInfo() => await LoadCustomerInfo();
+
         private async Task LoadCustomerInfo()
         {
+            var activeCustomerId = Security.SelectedCustomerId ?? Security.User?.CustomerId;
             try
             {
                 // B2B users (ApplicationUser) have CustomerId linking to Customer entity
                 // If acting as Plasiyer, use SelectedCustomerId
-                var activeCustomerId = Security.SelectedCustomerId ?? Security.User?.CustomerId;
                 
                 if (activeCustomerId == null)
                 {
@@ -230,78 +244,35 @@ namespace ecommerce.Admin.Components.Pages
                 {
                     CustomerInfo = result.Result;
                     
-                    // Check CustomerWorkingType: If Pesin (1) or PesinAndVadeli (3), initialize payment model but don't load banks on page
-                    ShouldShowPaymentModal = CustomerInfo.CustomerWorkingType == CustomerWorkingTypeEnum.Pesin 
-                                           || CustomerInfo.CustomerWorkingType == CustomerWorkingTypeEnum.PesinAndVadeli;
-                                           
-                    if (ShouldShowPaymentModal)
-                    {
-                        CalculatedGrandTotal = CurrentCart?.OrderTotal ?? 0;
-                        
-                        PaymentModel = new ecommerce.Web.Domain.Dtos.Order.CardPaymentRequest
-                        {
-                            CardNumber = "4912055023019402",
-                            ExpMonth = "09",
-                            ExpYear = "2040",
-                            Cvv = "642",
-                            CardHolderName = "Sezgin OZTEMIR"
-                        };
-                    }
+                    // Tüm siparişler cari hesap (veresiye) olarak oluşturulur - banka/taksit seçimi kaldırıldı
+                    ShouldShowPaymentModal = false;
                     
-                    Logger.LogInformation("Customer loaded: {CustomerId}, WorkingType: {WorkingType}, ShouldShowPaymentModal: {ShouldShowPaymentModal}", 
-                        CustomerInfo.Id, CustomerInfo.CustomerWorkingType, ShouldShowPaymentModal);
+                    Logger.LogInformation("Customer loaded: {CustomerId}, WorkingType: {WorkingType}, Checkout: Cari Hesap (Veresiye)",
+                        CustomerInfo.Id, CustomerInfo.CustomerWorkingType);
                 }
                 else
                 {
+                    var errMsg = result?.Metadata?.Message ?? "Müşteri bilgileri yüklenemedi.";
+                    Logger.LogWarning("LoadCustomerInfo failed for CustomerId {CustomerId}: {Error}", activeCustomerId, errMsg);
                     NotificationService.Notify(new NotificationMessage
                     {
                         Severity = NotificationSeverity.Error,
-                        Summary = "Hata",
-                        Detail = "Müşteri bilgileri yüklenirken bir hata oluştu.",
-                        Duration = 4000
+                        Summary = "Müşteri Bilgisi Hatası",
+                        Detail = errMsg,
+                        Duration = 5000
                     });
                 }
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "LoadCustomerInfo exception for CustomerId {CustomerId}", activeCustomerId);
                 NotificationService.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Error,
-                    Summary = "Hata",
-                    Detail = "Müşteri bilgisi yüklenirken bir hata oluştu.",
-                    Duration = 4000
+                    Summary = "Müşteri Bilgisi Hatası",
+                    Detail = "Müşteri bilgisi yüklenirken bir hata oluştu: " + ex.Message,
+                    Duration = 5000
                 });
-            }
-        }
-
-        private async Task LoadCustomerAddresses()
-        {
-            try
-            {
-                var activeCustomerId = Security.SelectedCustomerId ?? Security.User?.CustomerId;
-                if (activeCustomerId.HasValue != true) return;
-                
-                var result = await CustomerService.GetCustomerAddresses(activeCustomerId.Value);
-                if (result.Ok && result.Result != null)
-                {
-                    CustomerAddresses = result.Result;
-                    
-                    // Auto-select default address
-                    var defaultAddress = CustomerAddresses.FirstOrDefault(a => a.IsDefault);
-                    if (defaultAddress != null)
-                    {
-                        SelectedUserAddressId = defaultAddress.Id;
-                    }
-                    else if (CustomerAddresses.Any())
-                    {
-                        // If no default, select first one
-                        SelectedUserAddressId = CustomerAddresses.First().Id;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Silently fail - addresses are optional
             }
         }
 
@@ -342,75 +313,36 @@ namespace ecommerce.Admin.Components.Pages
                     return;
                 }
 
+                // Voucher/Rehber zorunluluğu: Sadece paket ürünler için (modalda girilen değerler)
+                if (HasPackageProducts)
+                {
+                    if (string.IsNullOrWhiteSpace(DisplayVoucher))
+                    {
+                        NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Warning,
+                            Summary = "Voucher Gerekli",
+                            Detail = "Sepetinizde paket ürün bulunmaktadır. Paket ürün eklerken Voucher kodu girmeniz gerekmektedir.",
+                            Duration = 4000
+                        });
+                        return;
+                    }
+                    if (string.IsNullOrWhiteSpace(DisplayGuideName))
+                    {
+                        NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Warning,
+                            Summary = "Rehber Gerekli",
+                            Detail = "Sepetinizde paket ürün bulunmaktadır. Paket ürün eklerken Rehber veya Acenta ismi girmeniz gerekmektedir.",
+                            Duration = 4000
+                        });
+                        return;
+                    }
+                }
+
                 Logger.LogInformation("CompleteOrder triggered: WorkingType={WorkingType}", CustomerInfo.CustomerWorkingType);
 
-                // Handle payment based on CustomerWorkingType
-                if (CustomerInfo.CustomerWorkingType == CustomerWorkingTypeEnum.Pesin)
-                {
-                    Logger.LogInformation("Branched to Type 1 (Pesin) - Opening Modal");
-                    
-                    // Reset processing so user can interact with modal
-                    isProcessing = false;
-                    await InvokeAsync(StateHasChanged);
-                    await Task.Delay(150); // Ensure overlay is removed from DOM before showing modal
-                    
-                    // Type 1: Always Online Payment - Show Modal
-                    var result = await OpenBankSelectionDialog();
-                    if (result == true)
-                    {
-                        Logger.LogInformation("Modal returned success - Processing Payment");
-                        isProcessing = true;
-                        await InvokeAsync(StateHasChanged);
-                        await ProcessPayment();
-                    }
-                    return;
-                }
-                else if (CustomerInfo.CustomerWorkingType == CustomerWorkingTypeEnum.PesinAndVadeli)
-                {
-                    // Reset processing for interaction
-                    isProcessing = false;
-                    await InvokeAsync(StateHasChanged);
-                    await Task.Delay(150); // Give time for overlay to disappear
-
-                    // Type 3: Ask for preference
-                    var paymentChoice = await DialogService.Confirm(
-                        "Ödeme yöntemini seçiniz",
-                        "Ödeme Seçimi",
-                        new ConfirmOptions 
-                        { 
-                            OkButtonText = "Online Sanal Ödeme", 
-                            CancelButtonText = "Cari Hesap" 
-                        });
-                    
-                    if (paymentChoice == true)
-                    {
-                        // User chose Online Payment - Show Modal
-                        var result = await OpenBankSelectionDialog();
-                        if (result == true)
-                        {
-                            Logger.LogInformation("Modal returned success - Processing Payment");
-                            isProcessing = true;
-                            await InvokeAsync(StateHasChanged);
-                            await ProcessPayment();
-                        }
-                        return;
-                    }
-                    else if (paymentChoice == false)
-                    {
-                        // User chose Cari Hesap
-                        isProcessing = true;
-                        await InvokeAsync(StateHasChanged);
-                        await PerformCheckoutDirectly();
-                        return;
-                    }
-                    else
-                    {
-                        // User cancelled choice - do nothing
-                        return;
-                    }
-                }
-
-                // Default logic (Vadeli or other types)
+                // Tüm siparişler cari hesap (veresiye) olarak oluşturulur - banka/taksit seçimi kaldırıldı
                 await PerformCheckoutDirectly();
             }
             catch (Exception ex)
@@ -447,8 +379,8 @@ namespace ecommerce.Admin.Components.Pages
         private async Task PerformCheckoutDirectly()
         {
             var activeCustomerId = Security.SelectedCustomerId ?? Security.User?.CustomerId;
-            Logger.LogInformation("=== AdminCheckout.PerformCheckoutDirectly STARTED === CustomerId: {CustomerId}, CartItems: {CartItems}, SelectedAddressId: {AddressId}",
-                activeCustomerId, CurrentCart?.TotalItems, SelectedUserAddressId);
+            Logger.LogInformation("=== AdminCheckout.PerformCheckoutDirectly STARTED === CustomerId: {CustomerId}, CartItems: {CartItems}",
+                activeCustomerId, CurrentCart?.TotalItems);
             
             isProcessing = true;
             StateHasChanged();
@@ -460,10 +392,12 @@ namespace ecommerce.Admin.Components.Pages
                 // Create checkout request - use selected UserAddress if available
                 var checkoutRequest = new CheckoutRequestDto
                 {
-                    UserAddressId = SelectedUserAddressId,
+                    UserAddressId = null,
                     CardPayment = null,
                     PlatformType = OrderPlatformType.B2B,
-                    OnBehalfOfCustomerId = activeCustomerId
+                    OnBehalfOfCustomerId = activeCustomerId,
+                    Voucher = string.IsNullOrWhiteSpace(DisplayVoucher) ? null : DisplayVoucher,
+                    GuideName = string.IsNullOrWhiteSpace(DisplayGuideName) ? null : DisplayGuideName
                 };
 
                 var result = await CheckoutService.Checkout(checkoutRequest);
@@ -483,10 +417,17 @@ namespace ecommerce.Admin.Components.Pages
                     });
 
                     // Invalidate dashboard cache for the plasiyer (total view) and the specific customer
-                    DashboardCache.InvalidateCache(Security.User.Id, activeCustomerId);
-                    DashboardCache.InvalidateCache(Security.User.Id, null); // Aggregated view
+                    if (Security?.User != null)
+                    {
+                        DashboardCache.InvalidateCache(Security.User.Id, activeCustomerId);
+                        DashboardCache.InvalidateCache(Security.User.Id, null); // Aggregated view
+                    }
 
-                    NavigationManager.NavigateTo("/product-search", forceLoad: true);
+                    // Siparişin DB'ye commit edilmesi için kısa bekleme (ilk yüklemede boş liste sorununu önler)
+                    await Task.Delay(300);
+                    // parkfuntastic gibi: Sipariş onay bekleyene düştü, siparişler sayfasına yönlendir (Onay Bekleyen tabı)
+                    // forceLoad kullanmıyoruz - tam sayfa yenileme ilk yüklemede boş liste gösterebiliyor
+                    NavigationManager.NavigateTo("/b2b/my-orders?tab=onay-bekleyen");
                 }
                 else
                 {
@@ -511,6 +452,9 @@ namespace ecommerce.Admin.Components.Pages
         {
             try
             {
+                isUpdatingCart = false;
+                updatingItems.Clear();
+                updatingPackageItems.Clear();
                 CurrentCart = CartStateService.CurrentCart;
                 
                 // Refresh CalculatedGrandTotal whenever cart state changes
@@ -549,46 +493,6 @@ namespace ecommerce.Admin.Components.Pages
             {
                 // Log error silently
             }
-        }
-
-        private async Task OnSellerCargoChanged(CartSellerDto seller, CartCargoDto cargo)
-        {
-            try
-            {
-                seller.SelectedCargo = cargo;
-                
-                // Update local cart preferences
-                if (CartPreferences.SelectedCargoes == null)
-                {
-                    CartPreferences.SelectedCargoes = new Dictionary<int, int>();
-                }
-                
-                CartPreferences.SelectedCargoes[seller.SellerId] = cargo.CargoId;
-                
-                // Refresh cart with preferences to get updated totals and persist selection
-                await CartStateService.RefreshCart(CartPreferences);
-                CurrentCart = CartStateService.CurrentCart;
-                
-                await InvokeAsync(StateHasChanged);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error changing cargo selection");
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "Hata",
-                    Detail = "Kargo seçimi güncellenirken bir hata oluştu: " + ex.Message,
-                    Duration = 4000
-                });
-            }
-        }
-
-        private string GetEstimatedDelivery()
-        {
-            // Simple estimation: 1-3 business days
-            var deliveryDate = DateTime.Now.AddDays(2);
-            return deliveryDate.ToString("dddd", new System.Globalization.CultureInfo("tr-TR"));
         }
 
         private async Task RemoveItem(int itemId, int? productSellerItemId = null)
@@ -756,6 +660,71 @@ namespace ecommerce.Admin.Components.Pages
         private bool IsItemUpdating(CartItemDto item)
         {
             return updatingItems.Contains(item.ProductSellerItemId);
+        }
+
+        private bool IsPackageItemUpdating(CartItemDto item, CartPackageItemDto pkg)
+        {
+            return updatingPackageItems.Contains($"{item.ProductSellerItemId}-{pkg.ProductId}");
+        }
+
+        private async Task UpdatePackageItemQty(CartItemDto item, CartPackageItemDto pkg, int delta)
+        {
+            var newQty = Math.Max(0, pkg.Quantity + delta);
+            await UpdatePackageItemQuantities(item, pkg.ProductId, newQty);
+        }
+
+        private async Task UpdatePackageItemQtyFromInput(CartItemDto item, CartPackageItemDto pkg, ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out var val) && val >= 0)
+                await UpdatePackageItemQuantities(item, pkg.ProductId, val);
+        }
+
+        private async Task UpdatePackageItemQuantities(CartItemDto item, int productId, int newQuantity)
+        {
+            var key = $"{item.ProductSellerItemId}-{productId}";
+            updatingPackageItems.Add(key);
+            isUpdatingCart = true;
+            await InvokeAsync(StateHasChanged);
+
+            try
+            {
+                var quantities = item.PackageProductItems?.ToDictionary(x => x.ProductId, x => x.Quantity) ?? new Dictionary<int, int>();
+                quantities[productId] = newQuantity;
+
+                var req = new CartItemUpsertDto
+                {
+                    ProductSellerItemId = item.ProductSellerItemId,
+                    Quantity = 0,
+                    CustomerId = Security?.SelectedCustomerId,
+                    Voucher = item.Voucher,
+                    GuideName = item.GuideName,
+                    VisitDate = item.VisitDate,
+                    PackageItemQuantities = quantities
+                };
+
+                var result = await CartService.CreateCartItem(req);
+                if (result.Ok && result.Result != null)
+                {
+                    CartStateService.SetCart(result.Result);
+                    CurrentCart = CartStateService.CurrentCart;
+                    await InvokeAsync(StateHasChanged);
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Güncellendi", Detail = "Paket içeriği güncellendi.", Duration = 2000 });
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Metadata?.Message ?? "Güncellenemedi.", Duration = 4000 });
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 4000 });
+            }
+            finally
+            {
+                updatingPackageItems.Remove(key);
+                isUpdatingCart = false;
+                await InvokeAsync(StateHasChanged);
+            }
         }
 
         private async Task OnSellerCheckboxChanged(int sellerId, ChangeEventArgs e)
@@ -931,14 +900,16 @@ namespace ecommerce.Admin.Components.Pages
                 
                 var checkoutRequest = new CheckoutRequestDto
                 {
-                    UserAddressId = SelectedUserAddressId,
+                    UserAddressId = null,
                     CardPayment = PaymentModel,
                     PlatformType = OrderPlatformType.B2B,
-                    OnBehalfOfCustomerId = activeCustomerId
+                    OnBehalfOfCustomerId = activeCustomerId,
+                    Voucher = string.IsNullOrWhiteSpace(DisplayVoucher) ? null : DisplayVoucher,
+                    GuideName = string.IsNullOrWhiteSpace(DisplayGuideName) ? null : DisplayGuideName
                 };
 
                 var result = await CheckoutService.Checkout(checkoutRequest);
-                
+
                 if (result != null && result.Ok && result.Result != null)
                 {
                     if (!string.IsNullOrEmpty(result.Result.CheckoutFormContent))
@@ -1033,8 +1004,11 @@ namespace ecommerce.Admin.Components.Pages
                 
                 // Invalidate dashboard cache
                 var activeCustomerId = Security.SelectedCustomerId ?? Security.User?.CustomerId;
-                DashboardCache.InvalidateCache(Security.User.Id, activeCustomerId);
-                DashboardCache.InvalidateCache(Security.User.Id, null); 
+                if (Security?.User != null)
+                {
+                    DashboardCache.InvalidateCache(Security.User.Id, activeCustomerId);
+                    DashboardCache.InvalidateCache(Security.User.Id, null);
+                } 
 
                 // Clear cart state
                 await CartStateService.RefreshCart(CartPreferences);

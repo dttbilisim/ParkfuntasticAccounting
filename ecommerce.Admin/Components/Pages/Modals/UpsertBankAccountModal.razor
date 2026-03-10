@@ -15,7 +15,7 @@
 }
 else
 {
-    <RadzenTemplateForm TItem="BankAccountUpsertDto" Data="@model" Submit="@(async (BankAccountUpsertDto args) => { await Save(); })">
+    <RadzenTemplateForm TItem="BankAccountUpsertDto" Data="@model" Submit="@(async (BankAccountUpsertDto args) => { await Save(args); })" OnInvalidSubmit="@ShowValidationErrors">
         <div class="modal-content-body" style="max-height: calc(90vh - 120px); overflow-y: auto;">
             <RadzenTabs RenderMode="TabRenderMode.Client">
                 <Tabs>
@@ -95,6 +95,19 @@ else
                                                     class="w-100 form-control-modern"
                                                     AllowClear="true"
                                                     Placeholder="Seçiniz..." 
+                                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                                </div>
+                                <div class="col-md-4">
+                                    <RadzenLabel Text="Kasa (PcPos)" Component="CashRegisterId" />
+                                    <RadzenDropDown Name="CashRegisterId"
+                                                    Data="@CashRegisters"
+                                                    TextProperty="DisplayName"
+                                                    ValueProperty="Id"
+                                                    TValue="int?"
+                                                    @bind-Value="@model.CashRegisterId"
+                                                    class="w-100 form-control-modern"
+                                                    AllowClear="true"
+                                                    Placeholder="Seçiniz..."
                                                     AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
                                 </div>
                             </div>

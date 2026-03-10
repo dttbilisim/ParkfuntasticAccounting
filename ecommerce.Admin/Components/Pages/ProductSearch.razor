@@ -1,6 +1,7 @@
 @page "/product-search"
 @using ecommerce.Domain.Shared.Dtos.Product
 @using ecommerce.Admin.Components.Layout
+@using ecommerce.Core.Helpers
 @using Radzen
 @using Radzen.Blazor
 @layout MainLayout
@@ -27,34 +28,6 @@
         background: #adb5bd; 
     }
 
-    /* Şasi Detection Styles */
-    .b2b-search-input.vin-detected {
-        border: 2px solid #198754 !important;
-        background: linear-gradient(to right, #f0fff4, #ffffff) !important;
-        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15) !important;
-        padding-right: 140px !important; /* Şasi badge için yer aç */
-    }
-
-    .vin-badge {
-        background: linear-gradient(135deg, #f0fff4 0%, #d1e7dd 100%);
-        padding: 4px 12px;
-        border-radius: 20px;
-        border: 1px solid #198754;
-        animation: vinPulse 2s ease-in-out infinite;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    @@keyframes vinPulse {
-        0%, 100% {
-            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4);
-        }
-        50% {
-            box-shadow: 0 0 0 6px rgba(25, 135, 84, 0);
-        }
-    }
-
 </style>
 
 <div class="product-search-root b2b-animate @(isLoading ? "is-loading" : "")" @onclick="CloseRecentSearchesOnOutsideClick">
@@ -69,15 +42,7 @@
                    @onfocus="OnSearchInputFocus"
                    @onblur="OnSearchInputBlur"
                    class="@GetSearchInputClass()" 
-                   placeholder="OEM kodu, ürün adı, marka veya 17 haneli şasi numarası ile arayın..." 
-                   title="17 haneli şasi numarası girerseniz otomatik araç eşleştirme yapılır" />
-            @if (IsVinNumber(searchText))
-            {
-                <span class="vin-badge position-absolute" style="right: 90px; top: 50%; transform: translateY(-50%); z-index: 10;" title="Şasi Numarası Tespit Edildi">
-                    <i class="fa-solid fa-car text-success me-1"></i>
-                    <span class="small fw-bold text-success">ŞASİ</span>
-                </span>
-            }
+                   placeholder="Ürün adı ile arayın..." />
             @if (!string.IsNullOrEmpty(searchText))
             {
             <button type="button" class="btn btn-link text-muted p-0 position-absolute" style="right: 50px; z-index: 10;" @onclick="ClearSearch" title="Arama metnini temizle">
@@ -203,9 +168,11 @@
                 <span class="fw-semibold">@(isLoading ? "Aranıyor..." : "ARA")</span>
             </button>
 
+            @* Araçtan Bul butonu şimdilik kaldırıldı
             <button class="btn-b2b-icon" @onclick="OpenVehicleMatchModal" title="Araç bilgilerine göre ürün ara (Marka, Model, Yıl)">
                 <i class="fa-solid fa-car text-success"></i> <span class="d-none d-lg-inline">Araçtan Bul</span>
             </button>
+            *@
         </div>
     </div>
 
@@ -245,35 +212,16 @@
                                                       Class="w-100 mb-3" />
                                         
                                         <div class="d-flex align-items-center justify-content-between text-muted small">
-                                            <span>@((minPrice ?? 0).ToString("N0")) ₺</span>
-                                            <span>@((maxPrice ?? priceMaxLimit).ToString("N0")) ₺</span>
+                                            <span>@CurrencyHelper.FormatPrice((decimal)(minPrice ?? 0))</span>
+                                            <span>@CurrencyHelper.FormatPrice((decimal)(maxPrice ?? priceMaxLimit))</span>
                                         </div>
                                     </div>
                                 }
                             </div>
 
-                            <!-- 2. DotParts / Parça Grubu (Accordion) -->
-                             <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
-                                <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isPartsExpanded = !isPartsExpanded" style="cursor: pointer;">
-                                    <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-gears me-2 text-success"></i>Parça Grubu</label>
-                                    <i class="fa-solid @(isPartsExpanded ? "fa-chevron-up" : "fa-chevron-down") small text-muted"></i>
-                                </div>
-                                @if(isPartsExpanded) {
-                                    <div class="mt-3 fade-in">
-                                         <RadzenDropDown Data="@dotPartNames" 
-                                                           @bind-Value="@selectedDotPartNamesList"
-                                                           Multiple="true"
-                                                           AllowFiltering="true"
-                                                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                           Placeholder="Seçiniz"
-                                                           SelectedItemsText="seçildi"
-                                                           Change="@OnDotPartNamesChanged"
-                                                           Class="w-100 search-dropdown shadow-sm border-0" />
-                                    </div>
-                                }
-                            </div>
+                            @* Parça Grubu filtresi şimdilik kaldırıldı *@
 
-                            <!-- 3. Categories (Accordion) -->
+                            <!-- 2. Categories (Accordion) -->
                             <div class="filter-section mb-3 card border-0 shadow-none bg-light rounded-3 p-3">
                                 <div class="d-flex align-items-center justify-content-between mb-0 pointer" @onclick="() => isCategoriesExpanded = !isCategoriesExpanded" style="cursor: pointer;">
                                     <label class="form-label small fw-bold text-dark text-uppercase mb-0 pointer"><i class="fa-solid fa-layer-group me-2 text-success"></i>Kategoriler</label>
@@ -420,7 +368,7 @@
                     }
                     else if (!isLoading && (searchResult == null || searchResult.DataCount == 0 || searchResult.Data == null || !searchResult.Data.Any()))
                     {
-                         @* Araç tespit edildi boş durumu - şimdilik devre dışı (currentVinVehicle) *@
+                         @* Sonuç bulunamadı *@
                              <div class="py-5 text-center bg-white rounded-5 shadow-sm">
                                  <img src="/images/empty-search.svg" class="mb-4" style="height: 150px; opacity: 0.5;" />
                                  <h4 class="fw-bold text-dark">Sonuç Bulunamadı</h4>
@@ -438,9 +386,6 @@
                                     <div class="sticky-top d-flex flex-column align-items-center justify-content-center" style="top: 300px; height: 100px;">
                                         <div class="spinner-border text-success mb-3 shadow-sm" role="status" style="width: 3.5rem; height: 3.5rem; border-width: 0.35em;">
                                             <span class="visually-hidden">Yükleniyor...</span>
-                                        </div>
-                                        <div class="fw-bold text-dark px-3 py-1 rounded-pill shadow-sm bg-white" style="letter-spacing: 0.5px; font-size: 1rem; border: 1px solid #e9ecef;">
-                                            @(isLoadingVin ? "İşleminizi yapıyorum lütfen bekleyin" : "İşleminizi yapıyorum lütfen bekleyin")
                                         </div>
                                     </div>
                                 </div>
@@ -950,7 +895,7 @@
                             <div class="card-content-wrapper">
                                 <div class="card-label">@(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? "Bağlı Cari" : "Bakiye")</div>
                                 <div class="card-main-value balance-value">
-                                    @(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? $"{linkedCustomerCount} Adet" : GetBalance().ToString("C"))
+                                    @(IsPlasiyer() && !Security.SelectedCustomerId.HasValue ? $"{linkedCustomerCount} Adet" : CurrencyHelper.FormatPrice(GetBalance()))
                                 </div>
                                 <div class="card-secondary-info d-flex flex-column align-items-start gap-1">
                                     @if(IsPlasiyer() && !Security.SelectedCustomerId.HasValue)
@@ -962,10 +907,10 @@
                                     else
                                     {
                                         <div class="small fw-semibold text-danger">
-                                            <i class="fa-solid fa-arrow-up me-1"></i> Borç: @GetTotalDebit().ToString("C")
+                                            <i class="fa-solid fa-arrow-up me-1"></i> Borç: @CurrencyHelper.FormatPrice(GetTotalDebit())
                                         </div>
                                         <div class="small fw-semibold text-success">
-                                            <i class="fa-solid fa-arrow-down me-1"></i> Alacak: @GetTotalCredit().ToString("C")
+                                            <i class="fa-solid fa-arrow-down me-1"></i> Alacak: @CurrencyHelper.FormatPrice(GetTotalCredit())
                                         </div>
                                     }
                                 </div>
@@ -1523,21 +1468,7 @@
         // emphasizing the current search context if it exists.
         var compatibilities = new List<ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto>();
 
-        // 1. If we are in a VIN search context, add the selected vehicle as the first item
-        // if it's not already in the product's own lists.
-        if (currentVinVehicle != null)
-        {
-            compatibilities.Add(new ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto
-            {
-                ManufacturerName = currentVinVehicle.ManufacturerName,
-                BaseModelName = currentVinVehicle.BaseModelName,
-                SubModelName = "ARAMA BAĞLAMI", // Special label for clarity
-                ManufacturerKey = currentVinVehicle.ManufacturerKey,
-                BaseModelKey = currentVinVehicle.BaseModelKey
-            });
-        }
-
-        // 2. Add vehicles from Parts (Rich data with Manufacturer/Model)
+        // Add vehicles from Parts (Rich data with Manufacturer/Model)
         if (product.Parts != null && product.Parts.Any())
         {
             foreach (var part in product.Parts)
@@ -1546,17 +1477,6 @@
                 {
                     foreach (var sm in part.SubModelsJson)
                     {
-                        // Avoid duplicates with the currentVinVehicle (simple check)
-                        if (currentVinVehicle != null && 
-                            part.ManufacturerKey?.ToString() == currentVinVehicle.ManufacturerKey && 
-                            part.BaseModelKey?.ToString() == currentVinVehicle.BaseModelKey)
-                        {
-                            // If this is the same car, maybe update the first item's name if it was just a placeholder
-                            var contextItem = compatibilities.FirstOrDefault(c => c.SubModelName == "ARAMA BAĞLAMI");
-                            if (contextItem != null) contextItem.SubModelName = sm.Name;
-                            continue; 
-                        }
-
                         compatibilities.Add(new ecommerce.Domain.Shared.Dtos.Product.SellerProductCompatibilityDto
                         {
                             ManufacturerName = part.ManufacturerName,
@@ -1687,214 +1607,42 @@
              }
          }
 
-         await DialogService.OpenAsync<Modals.ProductDetailModal>($"Ürün Detayı: {product.PartNumber}",
-             new Dictionary<string, object> 
-             { 
-                 { "Product", product },
-                 { "SimilarProducts", similarProducts }
-             },
-             new DialogOptions 
-             { 
-                 Width = "900px",
-                 ShowTitle = false,
-                 ShowClose = false,
-                 Style = "border-radius: 16px; overflow: hidden; padding: 0; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-height: 85vh;"
-             });
+         if (product.IsPackageProduct)
+         {
+             await DialogService.OpenAsync<Modals.PackageDetailModal>($"Paket Ürün: {product.ProductName}",
+                 new Dictionary<string, object>
+                 {
+                     { "PackageName", product.ProductName ?? "" },
+                     { "RefProductId", product.ProductId },
+                     { "SellerId", product.SellerId },
+                     { "SellerItemId", product.SellerItemId },
+                     { "Currency", product.Currency ?? "TL" }
+                 },
+                 new DialogOptions
+                 {
+                     Width = "480px",
+                     ShowTitle = false,
+                     ShowClose = false,
+                     Style = "border-radius: 16px; overflow: hidden; padding: 0; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-height: 85vh;"
+                 });
+         }
+         else
+         {
+             await DialogService.OpenAsync<Modals.ProductDetailModal>($"Ürün Detayı: {product.PartNumber}",
+                 new Dictionary<string, object>
+                 {
+                     { "Product", product },
+                     { "SimilarProducts", similarProducts }
+                 },
+                 new DialogOptions
+                 {
+                     Width = "900px",
+                     ShowTitle = false,
+                     ShowClose = false,
+                     Style = "border-radius: 16px; overflow: hidden; padding: 0; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-height: 85vh;"
+                 });
+         }
     }
-}
-
-@* Şasi Araç Seçim Modal - şimdilik devre dışı *@
-@if (false && isVinVehicleSelectionModalOpen)
-{
-    <div class="modal fade show d-block d-flex align-items-center justify-content-center" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 2000;" @onclick="CloseVinVehicleSelectionModal">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable my-0" @onclick:stopPropagation="true" style="max-height: 90vh;">
-            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
-                <!-- Modal Header -->
-                <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-                    <div class="w-100">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h5 class="modal-title fw-bold text-dark mb-1">
-                                    <i class="fa-solid fa-car text-success me-2"></i>
-                                    Araç Seçimi
-                                </h5>
-                                <p class="text-muted small mb-0">
-                                    <i class="fa-solid fa-barcode me-1"></i>
-                                    Şasi: <span class="fw-bold">@currentVinNumber</span>
-                                </p>
-                            </div>
-                            <button type="button" class="btn-close" @onclick="CloseVinVehicleSelectionModal" aria-label="Kapat"></button>
-                        </div>
-                        <div class="alert alert-soft-success d-flex align-items-center mt-3 mb-0 py-2 border-0" role="alert" style="border-radius: 12px; background: rgba(25, 135, 84, 0.08); color: #0f5132;">
-                            <i class="fa-solid fa-info-circle me-3 fs-5"></i>
-                            <div class="small">
-                                Bu şasi için <strong>@vinMatchedVehicles.Count araç</strong> varyantı bulundu. Parçaları listelemek için lütfen uygun olanı seçin.
-                            </div>
-                        </div>
-                        
-                        <!-- Arama Kutusu -->
-                        @if (vinMatchedVehicles.Count > 0)
-                        {
-                            <div class="mt-3">
-                                <div class="d-flex align-items-center gap-3 flex-wrap">
-                                    <div class="input-group flex-grow-1" style="max-width: 450px;">
-                                        <span class="input-group-text bg-white border-end-0" style="border-radius: 8px 0 0 8px;">
-                                            <i class="fa-solid fa-search text-muted"></i>
-                                        </span>
-                                        <input type="text" 
-                                               class="form-control border-start-0 ps-0" 
-                                               placeholder="Araç ara (marka, model, yıl, WMI)..." 
-                                               style="border-radius: 0 8px 8px 0;"
-                                               @bind="vinVehicleSearchText" 
-                                               @bind:event="oninput" />
-                                        @if (!string.IsNullOrWhiteSpace(vinVehicleSearchText))
-                                        {
-                                            <button class="btn btn-outline-secondary border-start-0" 
-                                                    type="button" 
-                                                    @onclick="@(() => vinVehicleSearchText = "")"
-                                                    style="border-radius: 0 8px 8px 0; border-left: none;">
-                                                <i class="fa-solid fa-times"></i>
-                                            </button>
-                                        }
-                                    </div>
-
-                                    <div class="form-check form-switch custom-switch mb-0" title="Sadece ürün bulunan araçları göster">
-                                        <input class="form-check-input" type="checkbox" id="modalStockFilter" checked="@showOnlyInStock" @onchange="@(args => OnModalStockToggle((bool)(args.Value ?? false)))" 
-                                               style="cursor:pointer; @(showOnlyInStock ? "background-color: #198754; border-color: #198754;" : "")">
-                                        <label class="form-check-label fw-bold small user-select-none mb-0 @(showOnlyInStock ? "text-success" : "text-dark")" for="modalStockFilter" style="cursor:pointer">
-                                            <i class="fa-solid fa-box-open me-1"></i>Sadece Stokta Olanlar
-                                        </label>
-                                    </div>
-
-                                    @if (FilteredVinVehicles.Count != vinMatchedVehicles.Count)
-                                    {
-                                        <small class="text-muted text-nowrap">
-                                            <i class="fa-solid fa-filter me-1"></i>
-                                            @FilteredVinVehicles.Count / @vinMatchedVehicles.Count araç
-                                        </small>
-                                    }
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                <!-- Modal Body -->
-                <div class="modal-body p-4" style="max-height: 500px; overflow-y: auto;">
-                    @if (!FilteredVinVehicles.Any())
-                    {
-                        <div class="text-center py-5">
-                            <i class="fa-solid fa-search fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Arama kriterlerinize uygun araç bulunamadı.</p>
-                            <button class="btn btn-outline-primary btn-sm rounded-pill" @onclick="@(() => vinVehicleSearchText = "")">
-                                <i class="fa-solid fa-redo me-1"></i>Aramayı Temizle
-                            </button>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="row g-2">
-                            @foreach (var vehicle in FilteredVinVehicles)
-                        {
-                            var oemCount = vehicle.OemParts?.Count ?? 0;
-                            var dpnCount = vehicle.DatProcessNumbers?.Count ?? 0;
-                            var yearRange = $"{vehicle.ModelYear}";
-                            
-                            <div class="col-12">
-                                <div class="vehicle-list-item d-flex align-items-center p-2 gap-3 shadow-none" 
-                                     @onclick="@(() => OnVinVehicleSelected(vehicle))">
-                                    
-                                    <!-- Icon Section -->
-                                    <div class="vehicle-icon-wrapper d-flex align-items-center justify-content-center">
-                                        <i class="fa-solid fa-car fs-5"></i>
-                                    </div>
-
-                                    <!-- Info Section -->
-                                    <div class="flex-grow-1 min-width-0">
-                                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                                            <h6 class="mb-0 fw-bold text-dark text-truncate">
-                                                @vehicle.ManufacturerName @vehicle.BaseModelName
-                                            </h6>
-                                            <span class="badge bg-success text-white border-0 px-2 py-1 rounded shadow-sm" style="font-size: 0.75rem;">
-                                                @vehicle.ModelYear
-                                            </span>
-                                        </div>
-                                        <div class="d-flex align-items-center gap-2 text-muted small mt-2">
-                                            <span class="text-nowrap"><i class="fa-solid fa-barcode me-1 opacity-75"></i>WMI: <strong>@vehicle.Wmi</strong></span>
-                                            
-                                            <div class="vr mx-1 opacity-25"></div>
-
-                                            @{
-                                                var vKey = $"{vehicle.ManufacturerKey}_{vehicle.BaseModelKey}_{vehicle.Wmi}_{vehicle.VdsCode}_{vehicle.ModelYear}";
-                                                var hasStockCount = vinVehicleProductCounts.TryGetValue(vKey, out var pCount);
-                                            }
-
-                                            @if (dpnCount > 0)
-                                            {
-                                                <span class="badge bg-white text-success border border-success fw-bold px-2 py-1 rounded" style="font-size: 0.7rem; letter-spacing: 0.2px;" title="Bu araç için tanımlı parça tipi sayısı ve eşleşen ürünler">
-                                                    <i class="fa-solid fa-list-check me-1"></i>
-                                                    @if (hasStockCount)
-                                                    {
-                                                        @($"{dpnCount} Ref ({pCount} Ürün)")
-                                                    }
-                                                    else
-                                                    {
-                                                        @($"{dpnCount} Ref")
-                                                    }
-                                                </span>
-                                            }
-                                            else if (oemCount > 0)
-                                            {
-                                                <span class="badge bg-info text-white border-0 px-2 py-1 rounded" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.3px;">
-                                                    <i class="fa-solid fa-gears me-1"></i>
-                                                    @if (hasStockCount)
-                                                    {
-                                                        @($"# {oemCount} OEM Referans ({pCount} Ürün)")
-                                                    }
-                                                    else
-                                                    {
-                                                        @($"# {oemCount} OEM Referans")
-                                                    }
-                                                </span>
-                                            }
-
-                                            @{
-                                                if (hasStockCount)
-                                                {
-                                                    // Blue badge merged into green/info above.
-                                                }
-                                                else if (isCalculatingVinCounts)
-                                                {
-                                                    <div class="vr mx-1 opacity-25"></div>
-                                                    <span class="text-primary small" style="font-size: 0.7rem;">
-                                                        <span class="spinner-border spinner-border-sm me-1" role="status" style="width: 10px; height: 10px; border-width: 2px;"></span>
-                                                        Ürünler bulunuyor...
-                                                    </span>
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-
-                                    <!-- Action Section -->
-                                    <div class="text-end d-none d-sm-block">
-                                        <i class="fa-solid fa-chevron-right text-muted opacity-25"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-            </div>
-
-                <!-- Modal Footer -->
-                <div class="modal-footer border-0 pt-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" @onclick="CloseVinVehicleSelectionModal">
-                        <i class="fa-solid fa-times me-2"></i>İptal
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 }
 
 <style>

@@ -216,6 +216,9 @@ public class SellerProductViewModel
     public int SimilarProductCount { get; set; }
     public bool IsEquivalent { get; set; }
     
+    /// <summary>Paket ürün mü? Paket ürünlerde PackageDetailModal açılır.</summary>
+    public bool IsPackageProduct { get; set; }
+    
     // Helper property for backward compatibility (first OemCode or empty)
     public string? OemCodeFirst => OemCode?.FirstOrDefault();
     public List<SubModelDto>? SubModelsJson { get; set; }

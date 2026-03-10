@@ -188,17 +188,8 @@ namespace ecommerce.Admin.AppStart{
             builder.Services.AddScoped<IEditorialContentService, EditorialContentService>();
             builder.Services.AddScoped<ISupportLineService, SupportLineService>();
             builder.Services.AddScoped<IPopupService, PopupService>();
-            // Order Manager with Redis Decorator (matching Web project structure)
-            builder.Services.AddScoped<OrderManager>();
-            builder.Services.AddScoped<IOrderManager>(sp => new ecommerce.Web.Domain.Services.Concreate.RedisOrderManagerDecorator(
-                sp.GetRequiredService<OrderManager>(),
-                sp.GetRequiredService<IConnectionMultiplexer>(),
-                sp.GetRequiredService<IUnitOfWork<ecommerce.EFCore.Context.ApplicationDbContext>>(),
-                sp.GetRequiredService<IHttpContextAccessor>(),
-                sp.GetRequiredService<IConfiguration>(),
-                sp.GetRequiredService<ecommerce.Core.Interfaces.ITenantProvider>(),
-                sp.GetRequiredService<ecommerce.Core.Identity.CurrentUser>()
-            ));
+            // Order Manager (DB tabanlı — Redis kullanılmıyor)
+            builder.Services.AddScoped<ecommerce.Domain.Shared.Services.IOrderManager, ecommerce.Domain.Shared.Services.OrderManager>();
             builder.Services.AddScoped<IBannerService, BannerService>();
             builder.Services.AddScoped<IBannerItemService, BannerItemService>();
             builder.Services.AddScoped<IBannerSubItemService, BannerSubItemService>();
@@ -223,7 +214,7 @@ namespace ecommerce.Admin.AppStart{
 
             builder.Services.AddScoped<JwtTokenGenerator>();
             
-            builder.Services.AddScoped<IAdminProductSearchService, AdminProductSearchService>();
+            builder.Services.AddScoped<IAdminProductSearchService, AdminProductSearchDbService>();
             builder.Services.AddScoped<ecommerce.Domain.Shared.Abstract.ISearchSynonymService, ecommerce.Domain.Shared.Services.SearchSynonymService>();
             builder.Services.AddScoped<ISearchSynonymAdminService, SearchSynonymAdminService>();
             builder.Services.AddScoped<IAppSettingService, AppSettingService>();
@@ -243,8 +234,8 @@ namespace ecommerce.Admin.AppStart{
             // Seller Product Service (required by RedisCartService)
             builder.Services.AddScoped<ecommerce.Web.Domain.Services.Abstract.ISellerProductService, ecommerce.Web.Domain.Services.Concreate.SellerProductService>();
             
-            // Cart Service for B2B customers (using RedisCartService like Web project)
-            builder.Services.AddTransient<ecommerce.Web.Domain.Services.Abstract.ICartService, ecommerce.Web.Domain.Services.Concreate.RedisCartService>();
+            // Cart Service for B2B customers (DB tabanlı — Redis kullanılmıyor)
+            builder.Services.AddTransient<ecommerce.Web.Domain.Services.Abstract.ICartService, ecommerce.Web.Domain.Services.Concreate.CartService>();
             
             // Bank Service for payment processing
             builder.Services.AddScoped<ecommerce.Web.Domain.Services.Abstract.IBankService, ecommerce.Web.Domain.Services.Concreate.BankService>();

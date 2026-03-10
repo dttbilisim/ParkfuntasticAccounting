@@ -2,10 +2,12 @@ using ecommerce.Admin.Domain.Dtos.Customer;
 using ecommerce.Admin.Domain.Interfaces;
 using ecommerce.Admin.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 using Radzen.Blazor;
 using ecommerce.Admin.Components.Pages.Plasiyer.Modals;
 using ecommerce.Core.Entities.Accounting;
+using ecommerce.Core.Utils.ResultSet;
 
 namespace ecommerce.Admin.Components.Pages.Plasiyer;
 
@@ -23,36 +25,66 @@ public partial class PlasiyerCustomers : ComponentBase
     protected List<CustomerListDto> customers = new();
     protected bool isLoading = false;
     protected RadzenDataGrid<CustomerListDto> grid = default!;
+    protected string searchTerm = string.Empty;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         if (Security.User?.SalesPersonId == null)
         {
             NavigationManager.NavigateTo("/");
-            return;
         }
-
-        await LoadCustomers();
     }
+
+    protected async Task OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SearchCustomers();
+    }
+
+    protected async Task SearchCustomers() => await LoadCustomers();
 
     protected async Task LoadCustomers()
     {
+        if (Security.User?.SalesPersonId == null) return;
+
+        var term = searchTerm?.Trim();
+        if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+        {
+            customers = new List<CustomerListDto>();
+            NotificationService.Notify(NotificationSeverity.Info, "Arama", "Carileri listelemek için en az 2 karakter girin.");
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
         isLoading = true;
+        StateHasChanged();
         try
         {
-            var response = await SalesPersonService.GetCustomersOfSalesPerson(Security.User.SalesPersonId.Value);
-            if (response.Ok)
+            var response = await SalesPersonService.GetCustomersOfSalesPerson(Security.User!.SalesPersonId!.Value, term);
+            await InvokeAsync(() =>
             {
-                customers = response.Result;
-            }
-            else
+                if (response.Ok)
+                {
+                    customers = response.Result ?? new List<CustomerListDto>();
+                }
+                else
+                {
+                    customers = new List<CustomerListDto>();
+                    NotificationService.Notify(NotificationSeverity.Error, "Hata", response.GetMetadataMessages() ?? "Müşteri listesi yüklenemedi.");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            await InvokeAsync(() =>
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Hata", "Müşteri listesi yüklenemedi.");
-            }
+                customers = new List<CustomerListDto>();
+                NotificationService.Notify(NotificationSeverity.Error, "Hata", $"Arama sırasında hata: {ex.Message}");
+            });
         }
         finally
         {
             isLoading = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -60,8 +92,10 @@ public partial class PlasiyerCustomers : ComponentBase
     {
         await Security.SetSelectedCustomer(customer.Id, customer.Name);
         NotificationService.Notify(NotificationSeverity.Success, "Cari Seçildi", $"{customer.Name} adına işlem yapılıyor.");
-        // Navigate to product search to start shopping
-        NavigationManager.NavigateTo("/product-search");
+        // returnUrl varsa oraya git (örn. checkout'tan geldiyse), yoksa product-search
+        var uri = new Uri(NavigationManager.Uri);
+        var returnUrl = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var val) ? val.ToString() : null;
+        NavigationManager.NavigateTo(!string.IsNullOrWhiteSpace(returnUrl) ? returnUrl : "/product-search", forceLoad: true);
     }
 
     protected async Task ViewOrders(CustomerListDto customer)

@@ -56,4 +56,22 @@ public class CartItemDto
     public bool IsPerfectCompatibility { get; set; }
 
     public List<string> PerfectCompatibilitySummaries { get; set; } = new();
+
+    /// <summary>Paket ürün mü? Voucher/Rehber zorunluluğu sadece paket ürünler için geçerlidir.</summary>
+    public bool IsPackageProduct { get; set; }
+
+    /// <summary>Paket ürünler için modalda girilen voucher kodu (bilgilendirme amaçlı gösterim).</summary>
+    public string? Voucher { get; set; }
+
+    /// <summary>Paket ürünler için modalda girilen rehber/acenta ismi (bilgilendirme amaçlı gösterim).</summary>
+    public string? GuideName { get; set; }
+
+    /// <summary>Paket ürünler için ziyaret/etkinlik tarihi.</summary>
+    public DateTime? VisitDate { get; set; }
+
+    /// <summary>Paket ürün bileşenleri (ProductSaleItems) - sepette detay gösterimi için.</summary>
+    public List<CartPackageItemDto> PackageProductItems { get; set; } = new();
+
+    /// <summary>Para birimi kodu (USD, TRY, EUR vb.) - fiyat formatlamada kullanılır.</summary>
+    public string? Currency { get; set; }
 }

@@ -9,6 +9,8 @@ public class BankAccountListDto
     public string PaymentType { get; set; } = string.Empty;
     public int? CurrencyId { get; set; }
     public string? CurrencyName { get; set; }
+    public int? CashRegisterId { get; set; }
+    public string? CashRegisterName { get; set; }
     public string AccountCode { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;

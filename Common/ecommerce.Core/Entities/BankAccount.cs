@@ -24,6 +24,9 @@ public class BankAccount : AuditableEntity<int>
 
     public int? CurrencyId { get; set; }
 
+    /// <summary>PcPos transferde bu hesaba ait ödemelerin yazılacağı kasa (CashRegisters.Id).</summary>
+    public int? CashRegisterId { get; set; }
+
     [ForeignKey(nameof(PaymentTypeId))]
     public ecommerce.Core.Entities.Accounting.PaymentType? PaymentType { get; set; }
 
@@ -67,6 +70,9 @@ public class BankAccount : AuditableEntity<int>
 
     [ForeignKey(nameof(CurrencyId))]
     public Currency? Currency { get; set; }
+
+    [ForeignKey(nameof(CashRegisterId))]
+    public ecommerce.Core.Entities.Accounting.CashRegister? CashRegister { get; set; }
 
     public ICollection<BankAccountExpense> Expenses { get; set; } = new List<BankAccountExpense>();
 

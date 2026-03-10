@@ -135,12 +135,12 @@ public class AutoMapperProfile : Profile
     {
         CreateMap<Orders, OrderListDto>()
             .ForMember(d => d.Company, opt => opt.MapFrom(s => (User?)null)) // Admin context'te User null, use CustomerName instead
-            .ForMember(d => d.CustomerName, opt => opt.MapFrom(s => 
-                // Priority 1: B2B Customer (Cari) Name from ApplicationUser.Customer
-                s.ApplicationUser != null && s.ApplicationUser.Customer != null 
-                    ? s.ApplicationUser.Customer.Name 
-                    // Priority 2: ApplicationUser FullName (for non-B2B users)
-                    : (s.ApplicationUser != null ? s.ApplicationUser.FullName : s.UserFullName ?? ""))) 
+            .ForMember(d => d.CustomerName, opt => opt.MapFrom(s =>
+                s.Customer != null && !string.IsNullOrWhiteSpace(s.Customer.Name)
+                    ? s.Customer.Name
+                    : (s.ApplicationUser != null && s.ApplicationUser.Customer != null
+                        ? s.ApplicationUser.Customer.Name
+                        : (s.ApplicationUser != null ? s.ApplicationUser.FullName : s.UserFullName ?? ""))))
             .ForMember(d => d.BuyerName, opt => opt.MapFrom(s => 
                 // Buyer Name: UserAddress FullName (delivery contact)
                 s.UserAddress != null && !string.IsNullOrWhiteSpace(s.UserAddress.FullName) 

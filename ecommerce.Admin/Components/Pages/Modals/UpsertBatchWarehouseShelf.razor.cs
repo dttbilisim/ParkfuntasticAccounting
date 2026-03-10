@@ -48,8 +48,6 @@ namespace ecommerce.Admin.Components.Pages.Modals
              UpdatePreview();
         }
 
-        public void OnChange(dynamic value) => UpdatePreview();
-
         protected void UpdatePreview()
         {
             if (dto.WarehouseId == 0)

@@ -22,7 +22,7 @@
                     <RadzenLabel Text="Ön Ek" Component="Prefix" />
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="8">
-                    <RadzenTextBox Name="Prefix" @bind-Value="@dto.Prefix" Style="width: 100%" Placeholder="Örn: A-" Change="@((string args) => OnChange(args))" />
+                    <RadzenTextBox Name="Prefix" @bind-Value="@dto.Prefix" @bind-Value:after="UpdatePreview" Style="width: 100%" Placeholder="Örn: A-" />
                 </RadzenColumn>
             </RadzenRow>
 
@@ -32,7 +32,7 @@
                     <RadzenLabel Text="Başlangıç No" Component="StartNumber" />
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="8">
-                    <RadzenNumeric Name="StartNumber" @bind-Value="@dto.StartNumber" Style="width: 100%" Min="1" Change="@((int args) => OnChange(args))" />
+                    <RadzenNumeric Name="StartNumber" @bind-Value="@dto.StartNumber" @bind-Value:after="UpdatePreview" Style="width: 100%" Min="1" />
                     <RadzenRequiredValidator Component="StartNumber" Text="Başlangıç gereklidir" Style="display: block; font-size: 0.8rem;" />
                 </RadzenColumn>
             </RadzenRow>
@@ -43,7 +43,7 @@
                     <RadzenLabel Text="Bitiş No" Component="EndNumber" />
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="8">
-                    <RadzenNumeric Name="EndNumber" @bind-Value="@dto.EndNumber" Style="width: 100%" Min="@dto.StartNumber" Change="@((int args) => OnChange(args))" />
+                    <RadzenNumeric Name="EndNumber" @bind-Value="@dto.EndNumber" @bind-Value:after="UpdatePreview" Style="width: 100%" Min="@dto.StartNumber" />
                     <RadzenRequiredValidator Component="EndNumber" Text="Bitiş gereklidir" Style="display: block; font-size: 0.8rem;" />
                     <RadzenCompareValidator Visible="@(dto.EndNumber > 0)" Value="@dto.StartNumber" Component="EndNumber" Operator="CompareOperator.GreaterThanEqual" Text="Bitiş >= Başlangıç olmalı" Style="display: block; font-size: 0.8rem;" />
                 </RadzenColumn>
@@ -55,7 +55,7 @@
                     <RadzenLabel Text="Son Ek" Component="Suffix" />
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="8">
-                    <RadzenTextBox Name="Suffix" @bind-Value="@dto.Suffix" Style="width: 100%" Placeholder="Örn: -Zemin" Change="@((string args) => OnChange(args))" />
+                    <RadzenTextBox Name="Suffix" @bind-Value="@dto.Suffix" @bind-Value:after="UpdatePreview" Style="width: 100%" Placeholder="Örn: -Zemin" />
                 </RadzenColumn>
             </RadzenRow>
 

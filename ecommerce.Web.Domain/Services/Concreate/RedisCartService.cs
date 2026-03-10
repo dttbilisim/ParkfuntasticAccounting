@@ -116,36 +116,37 @@ public class RedisCartService : ICartService{
             using var resolveScope = _scopeFactory.CreateScope();
             var resolveUow = resolveScope.ServiceProvider.GetRequiredService<IUnitOfWork<ApplicationDbContext>>();
             
+            // ProductId ile eklemede SellerId=1 (genel fiyat listesi) tercih et — ilanlardan satış kaldırıldı
+            const int DefaultSellerId = 1;
             if (req.ProductSellerItemId <= 0 && req.ProductId.HasValue && req.ProductId.Value > 0)
             {
                 var resolvedSellerItem = await resolveUow.GetRepository<SellerItem>()
                     .GetAll(false).AsNoTracking()
-                    .Where(x => x.ProductId == req.ProductId.Value && x.Status == 1 && x.Stock > 0)
+                    .Where(x => x.ProductId == req.ProductId.Value && x.SellerId == DefaultSellerId && x.Status == 1 && x.SalePrice > 0)
                     .OrderByDescending(x => x.Stock)
                     .FirstOrDefaultAsync();
                 
                 if (resolvedSellerItem != null)
                 {
                     req.ProductSellerItemId = resolvedSellerItem.Id;
-                    _logger.LogInformation($"🔄 ProductId ({req.ProductId.Value}) → ProductSellerItemId ({resolvedSellerItem.Id}) otomatik çözümlendi");
+                    _logger.LogInformation($"🔄 ProductId ({req.ProductId.Value}) → ProductSellerItemId ({resolvedSellerItem.Id}) otomatik çözümlendi (SellerId={DefaultSellerId})");
                 }
                 else
                 {
-                    // Stokta yoksa pasif olanı da dene
                     var anySellerItem = await resolveUow.GetRepository<SellerItem>()
                         .GetAll(false).AsNoTracking()
-                        .Where(x => x.ProductId == req.ProductId.Value && x.Status == 1)
+                        .Where(x => x.ProductId == req.ProductId.Value && x.SellerId == DefaultSellerId && x.Status == 1)
                         .FirstOrDefaultAsync();
                     
                     if (anySellerItem != null)
                     {
                         req.ProductSellerItemId = anySellerItem.Id;
-                        _logger.LogInformation($"🔄 ProductId ({req.ProductId.Value}) → ProductSellerItemId ({anySellerItem.Id}) otomatik çözümlendi (stok yok)");
+                        _logger.LogInformation($"🔄 ProductId ({req.ProductId.Value}) → ProductSellerItemId ({anySellerItem.Id}) otomatik çözümlendi (stok yok, SellerId={DefaultSellerId})");
                     }
                     else
                     {
-                        _logger.LogError($"❌ ProductId ({req.ProductId.Value}) için aktif SellerItem bulunamadı");
-                        rs.AddError("Bu ürün için aktif ilan bulunamadı.");
+                        _logger.LogError($"❌ ProductId ({req.ProductId.Value}) için genel fiyat listesinde fiyat tanımlı değil");
+                        rs.AddError("Bu ürün için genel fiyat listesinde fiyat tanımlı değil.");
                         return rs;
                     }
                 }
@@ -170,7 +171,7 @@ public class RedisCartService : ICartService{
             
             _logger.LogInformation($"✅ SellerItem bulundu - ProductId: {sellerItem.ProductId}, ProductName: {sellerItem.Product?.Name}, SalePrice: {sellerItem.SalePrice}");
             if(sellerItem.Status == 0){
-                rs.AddError("Ürünün ilan durumu pasif durumdadır.");
+                rs.AddError("Ürün şu anda satışta değildir.");
                 return rs;
             }
             var existingQuantity = await _database.StringGetAsync(itemKey);
@@ -203,7 +204,39 @@ public class RedisCartService : ICartService{
             } else{
                 await _database.StringSetAsync(itemKey, newQuantity);
                 await _database.SetAddAsync(GetUserCartItemsSetKey(userId), req.ProductSellerItemId);
-                await _database.HashSetAsync(GetUserCartItemMetaKey(userId, req.ProductSellerItemId), new HashEntry[]{new HashEntry("UnitPrice", (double) sellerItem.SalePrice), new HashEntry("SellerId", sellerItem.SellerId), new HashEntry("ProductId", sellerItem.ProductId)});
+                var metaKey = GetUserCartItemMetaKey(userId, req.ProductSellerItemId);
+                var metaEntries = new List<HashEntry>
+                {
+                    new HashEntry("UnitPrice", (double)sellerItem.SalePrice),
+                    new HashEntry("SellerId", sellerItem.SellerId),
+                    new HashEntry("ProductId", sellerItem.ProductId)
+                };
+                if (sellerItem.Product?.IsPackageProduct == true)
+                {
+                    var voucher = !string.IsNullOrWhiteSpace(req.Voucher) ? req.Voucher : (await _database.HashGetAsync(metaKey, "Voucher")).ToString();
+                    var guideName = !string.IsNullOrWhiteSpace(req.GuideName) ? req.GuideName : (await _database.HashGetAsync(metaKey, "GuideName")).ToString();
+                    if (!string.IsNullOrWhiteSpace(voucher))
+                        metaEntries.Add(new HashEntry("Voucher", voucher));
+                    if (!string.IsNullOrWhiteSpace(guideName))
+                        metaEntries.Add(new HashEntry("GuideName", guideName));
+                    if (req.VisitDate.HasValue)
+                        metaEntries.Add(new HashEntry("VisitDate", req.VisitDate.Value.ToString("o")));
+                    else
+                    {
+                        var existingVisit = (await _database.HashGetAsync(metaKey, "VisitDate")).ToString();
+                        if (!string.IsNullOrWhiteSpace(existingVisit))
+                            metaEntries.Add(new HashEntry("VisitDate", existingVisit));
+                    }
+                    if (req.PackageItemQuantities != null && req.PackageItemQuantities.Count > 0)
+                        metaEntries.Add(new HashEntry("PackageItemQuantities", System.Text.Json.JsonSerializer.Serialize(req.PackageItemQuantities)));
+                    else
+                    {
+                        var existingPkg = (await _database.HashGetAsync(metaKey, "PackageItemQuantities")).ToString();
+                        if (!string.IsNullOrWhiteSpace(existingPkg))
+                            metaEntries.Add(new HashEntry("PackageItemQuantities", existingPkg));
+                    }
+                }
+                await _database.HashSetAsync(metaKey, metaEntries.ToArray());
                 rs.AddSuccess("Sepetteki ürün güncellendi.");
             }
 
@@ -437,7 +470,9 @@ public class RedisCartService : ICartService{
             Status = 1,
             Step = sellerItem.Step,
             MinSellCount = (int)sellerItem.MinSaleAmount,
-            MaxSellCount = (int)sellerItem.MaxSaleAmount
+            MaxSellCount = (int)sellerItem.MaxSaleAmount,
+            IsPackageProduct = sellerItem.Product?.IsPackageProduct ?? false,
+            Currency = sellerItem.Currency
         };
     }
 
@@ -507,8 +542,15 @@ public class RedisCartService : ICartService{
                    .Append(':')
                    .Append(item.Quantity)
                    .Append(':')
-                   .Append(item.Status)
-                   .Append(';');
+                   .Append(item.Status);
+            if (item.Product?.IsPackageProduct == true)
+            {
+                if (item.VisitDate.HasValue)
+                    builder.Append(':').Append(item.VisitDate.Value.ToString("o"));
+                if (item.PackageItemQuantities != null && item.PackageItemQuantities.Count > 0)
+                    builder.Append(':').Append(System.Text.Json.JsonSerializer.Serialize(item.PackageItemQuantities.OrderBy(x => x.Key)));
+            }
+            builder.Append(';');
         }
         builder.Append("coupon=").Append(preferences?.UsedCouponCode ?? string.Empty).Append('|');
         if(preferences?.SelectedCargoes?.Any() == true){

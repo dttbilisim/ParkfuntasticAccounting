@@ -114,7 +114,6 @@ namespace ecommerce.Admin.Domain.Services
                 }
 
                 // SPECIAL CASE: B2B Customers must be able to see their own Customer record
-                // even if it belongs to a different branch (e.g. branch 0 or main branch)
                 if (_tenantProvider.IsCustomerB2B && typeof(T).Name == "Customer")
                 {
                     return query; // No branch filtering for Customer entity

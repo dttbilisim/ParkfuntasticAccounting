@@ -233,7 +233,7 @@ public partial class Footer : ComponentBase, IDisposable
 
     private void NavigateToPendingOrders()
     {
-        NavigationManager.NavigateTo("/b2b/my-orders");
+        NavigationManager.NavigateTo("/b2b/my-orders?tab=onay-bekleyen");
     }
 
     private async void OnSelectedCustomerChanged()

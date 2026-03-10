@@ -39,7 +39,7 @@ public class MngOrderCreateJob : IAsyncBackgroundJob<MngOrderCreateJobArgs>
                 .Include(o => o.Seller)
                 .Include(o => o.OrderItems).ThenInclude(i => i.Product)
                 .Include(o => o.Cargo)
-                .Where(o => o.Id == args.OrderId && o.CargoExternalId == null && o.OrderStatusType == OrderStatusType.OrderPrepare && o.Cargo != null && o.Cargo.Name.ToLower().Contains("mng"))
+                .Where(o => o.Id == args.OrderId && o.CargoExternalId == null && (o.OrderStatusType == OrderStatusType.OrderPrepare || o.OrderStatusType == OrderStatusType.OrderNew) && o.Cargo != null && o.Cargo.Name.ToLower().Contains("mng"))
                 .FirstOrDefaultAsync();
 
             if(order == null){

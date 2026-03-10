@@ -662,7 +662,9 @@ namespace ecommerce.Admin.Domain.Concreate{
                         IsCreatedByPlasiyer = isPlasiyer,
                         CreatorName = isPlasiyer 
                             ? (plasiyerNames.TryGetValue(order.CreatedId, out var pName) ? pName : "Plasiyer") 
-                            : customerName // or "Müşteri" / "Kendisi"
+                            : customerName, // or "Müşteri" / "Kendisi"
+                        Voucher = order.Voucher,
+                        GuideName = order.GuideName
                     };
                 }).ToList();
                 
@@ -718,6 +720,454 @@ namespace ecommerce.Admin.Domain.Concreate{
                 return response;
             }
         }
+
+        public async Task<IActionResult<Paging<IQueryable<OrderListDto>>>> GetPendingOrders(PageSetting pager)
+        {
+            return await GetOrdersByStatus(OrderStatusType.OrderWaitingApproval, pager);
+        }
+
+        public async Task<IActionResult<Paging<IQueryable<OrderListDto>>>> GetApprovedOrders(PageSetting pager)
+        {
+            var response = new IActionResult<Paging<IQueryable<OrderListDto>>> { Result = new() };
+            try
+            {
+                var approvedStatuses = new[] { OrderStatusType.OrderNew, OrderStatusType.OrderPrepare, OrderStatusType.OrderinCargo, OrderStatusType.OrderSuccess, OrderStatusType.PaymentSuccess };
+                var ordersQuery = _repository.GetAll(
+                    predicate: f => f.Id != 0 && f.Status == (int)EntityStatus.Active && approvedStatuses.Contains(f.OrderStatusType),
+                    include: x => x.Include(f => f.OrderItems).ThenInclude(p => p.Product)
+                                   .Include(x => x.Seller)
+                                   .Include(x => x.ApplicationUser)
+                                       .ThenInclude(au => au!.Customer)
+                                   .Include(f => f.UserAddress).ThenInclude(ua => ua!.City)
+                                   .Include(f => f.UserAddress).ThenInclude(ua => ua!.Town)
+                                   .Include(x => x.Bank)
+                                   .Include(x => x.Invoice!),
+                    ignoreQueryFilters: true
+                );
+                ordersQuery = ApplyOrderRoleFilter(ordersQuery, _context.DbContext);
+                var ordersList = ordersQuery.ToList();
+                var plasiyerIds = ordersList.Where(o => o.CreatedId != o.CompanyId).Select(o => o.CreatedId).Distinct().ToList();
+                Dictionary<int, string> plasiyerNames = new();
+                if (plasiyerIds.Any())
+                {
+                    plasiyerNames = _context.DbContext.AspNetUsers.AsNoTracking()
+                        .Where(u => plasiyerIds.Contains(u.Id))
+                        .Select(u => new { u.Id, Name = (u.FirstName + " " + u.LastName).Trim() })
+                        .ToDictionary(k => k.Id, v => v.Name);
+                }
+                var mappedCats = ordersList.Select(order =>
+                {
+                    var isPlasiyer = order.CreatedId != order.CompanyId;
+                    var customerName = !string.IsNullOrWhiteSpace(order.ApplicationUser?.Customer?.Name)
+                        ? order.ApplicationUser.Customer.Name
+                        : (!string.IsNullOrWhiteSpace(order.UserAddress?.FullName) ? order.UserAddress!.FullName : (order.UserFullName ?? ""));
+                    return new OrderListDto
+                    {
+                        Id = order.Id, OrderNumber = order.OrderNumber, OrderStatusType = order.OrderStatusType,
+                        PlatformType = order.PlatformType, PaymentTypeId = order.PaymentTypeId, CreatedDate = order.CreatedDate,
+                        ShipmentDate = order.OrderItems?.FirstOrDefault()?.ShipmentDate ?? order.CreatedDate,
+                        CargoPrice = order.CargoPrice, DiscountTotal = order.DiscountTotal, ProductTotal = order.ProductTotal,
+                        OrderTotal = order.OrderTotal, GrandTotal = order.GrandTotal, PaymentStatus = order.PaymentStatus,
+                        IyzicoCancelDate = order.IyzicoCancelDate, IyzicoCanceledMessage = order.IyzicoCanceledMessage,
+                        IyzicoPaidTotal = order.IyzicoPaidTotal, CompanyId = order.CompanyId, Company = null,
+                        CustomerName = customerName, Seller = order.Seller, UserAddress = order.UserAddress,
+                        Cargo = order.Cargo, Bank = order.Bank, OrderItems = order.OrderItems?.ToList() ?? new List<OrderItems>(),
+                        IsCreatedByPlasiyer = isPlasiyer,
+                        CreatorName = isPlasiyer ? (plasiyerNames.TryGetValue(order.CreatedId, out var pName) ? pName : "Plasiyer") : customerName,
+                        Voucher = order.Voucher, GuideName = order.GuideName
+                    };
+                }).ToList();
+                var allOrderIds = mappedCats.Select(o => o.Id).ToList();
+                var allInvoiceIds = mappedCats.Where(o => o.InvoiceId.HasValue).Select(o => o.InvoiceId!.Value).Distinct().ToList();
+                if (allOrderIds.Any() || allInvoiceIds.Any())
+                {
+                    var linkedInvoices = await _context.DbContext.Set<ecommerce.Core.Entities.Accounting.Invoice>()
+                        .AsNoTracking()
+                        .Where(inv => inv.Status != (int)EntityStatus.Deleted &&
+                            ((inv.OrderId.HasValue && allOrderIds.Contains(inv.OrderId.Value)) || allInvoiceIds.Contains(inv.Id)))
+                        .ToListAsync();
+                    foreach (var mappedOrder in mappedCats)
+                    {
+                        var faturaListesi = linkedInvoices.Where(inv => inv.OrderId == mappedOrder.Id || inv.Id == mappedOrder.InvoiceId)
+                            .GroupBy(inv => inv.Id).Select(g => g.First())
+                            .Select(inv => new OrderLinkedInvoiceDto { InvoiceId = inv.Id, InvoiceNo = inv.InvoiceNo ?? "", Ettn = inv.Ettn,
+                                IsEInvoice = inv.IsEInvoice, IsEArchive = inv.IsEArchive, EInvoiceStatus = inv.EInvoiceStatus,
+                                InvoiceDate = inv.InvoiceDate, TotalAmount = inv.TotalAmount, DiscountTotal = inv.DiscountTotal,
+                                VatTotal = inv.VatTotal, GeneralTotal = inv.GeneralTotal }).ToList();
+                        if (faturaListesi.Any()) mappedOrder.LinkedInvoices = faturaListesi;
+                    }
+                }
+                var data = mappedCats.AsQueryable().OrderByDescending(x => x.Id);
+                response.Result = _radzenPagerService.MakeDataQueryable(data, pager);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetApprovedOrders Exception " + ex.ToString());
+                response.AddSystemError(ex.ToString());
+                return response;
+            }
+        }
+
+        public async Task<IActionResult<Paging<IQueryable<OrderListDto>>>> GetOrdersByStatus(OrderStatusType? statusFilter, PageSetting pager)
+        {
+            if (!statusFilter.HasValue)
+                return await GetOrders(pager);
+
+            var response = new IActionResult<Paging<IQueryable<OrderListDto>>> { Result = new() };
+            try
+            {
+                var ordersQuery = _repository.GetAll(
+                    predicate: f => f.Id != 0 && f.Status == (int)EntityStatus.Active && f.OrderStatusType == statusFilter.Value,
+                    include: x => x.Include(f => f.OrderItems)
+                                   .ThenInclude(p => p.Product)
+                                   .Include(x => x.Seller)
+                                   .Include(x => x.ApplicationUser)
+                                       .ThenInclude(au => au!.Customer)
+                                   .Include(f => f.UserAddress).ThenInclude(ua => ua!.City)
+                                   .Include(f => f.UserAddress).ThenInclude(ua => ua!.Town)
+                                   .Include(x => x.Bank)
+                                   .Include(x => x.Invoice!),
+                    ignoreQueryFilters: true
+                );
+                ordersQuery = ApplyOrderRoleFilter(ordersQuery, _context.DbContext);
+                var ordersList = ordersQuery.ToList();
+
+                var plasiyerIds = ordersList.Where(o => o.CreatedId != o.CompanyId).Select(o => o.CreatedId).Distinct().ToList();
+                Dictionary<int, string> plasiyerNames = new();
+                if (plasiyerIds.Any())
+                {
+                    plasiyerNames = _context.DbContext.AspNetUsers
+                        .AsNoTracking()
+                        .Where(u => plasiyerIds.Contains(u.Id))
+                        .Select(u => new { u.Id, Name = (u.FirstName + " " + u.LastName).Trim() })
+                        .ToDictionary(k => k.Id, v => v.Name);
+                }
+
+                var mappedCats = ordersList.Select(order =>
+                {
+                    var isPlasiyer = order.CreatedId != order.CompanyId;
+                    // B2B/Plasiyer: Cari adı ApplicationUser.Customer.Name — yoksa UserAddress veya UserFullName
+                    var customerName = !string.IsNullOrWhiteSpace(order.ApplicationUser?.Customer?.Name)
+                        ? order.ApplicationUser.Customer.Name
+                        : (!string.IsNullOrWhiteSpace(order.UserAddress?.FullName)
+                            ? order.UserAddress!.FullName
+                            : (order.UserFullName ?? ""));
+                    return new OrderListDto
+                    {
+                        Id = order.Id,
+                        OrderNumber = order.OrderNumber,
+                        OrderStatusType = order.OrderStatusType,
+                        PlatformType = order.PlatformType,
+                        PaymentTypeId = order.PaymentTypeId,
+                        CreatedDate = order.CreatedDate,
+                        ShipmentDate = order.OrderItems?.FirstOrDefault()?.ShipmentDate ?? order.CreatedDate,
+                        CargoPrice = order.CargoPrice,
+                        DiscountTotal = order.DiscountTotal,
+                        ProductTotal = order.ProductTotal,
+                        OrderTotal = order.OrderTotal,
+                        GrandTotal = order.GrandTotal,
+                        PaymentStatus = order.PaymentStatus,
+                        IyzicoCancelDate = order.IyzicoCancelDate,
+                        IyzicoCanceledMessage = order.IyzicoCanceledMessage,
+                        IyzicoPaidTotal = order.IyzicoPaidTotal,
+                        CompanyId = order.CompanyId,
+                        Company = null,
+                        CustomerName = customerName,
+                        Seller = order.Seller,
+                        UserAddress = order.UserAddress,
+                        Cargo = order.Cargo,
+                        Bank = order.Bank,
+                        OrderItems = order.OrderItems?.ToList() ?? new List<OrderItems>(),
+                        IsCreatedByPlasiyer = isPlasiyer,
+                        CreatorName = isPlasiyer ? (plasiyerNames.TryGetValue(order.CreatedId, out var pName) ? pName : "Plasiyer") : customerName,
+                        Voucher = order.Voucher,
+                        GuideName = order.GuideName
+                    };
+                }).ToList();
+
+                var allOrderIds = mappedCats.Select(o => o.Id).ToList();
+                var allInvoiceIds = mappedCats.Where(o => o.InvoiceId.HasValue).Select(o => o.InvoiceId!.Value).Distinct().ToList();
+                if (allOrderIds.Any() || allInvoiceIds.Any())
+                {
+                    var linkedInvoices = await _context.DbContext.Set<ecommerce.Core.Entities.Accounting.Invoice>()
+                        .AsNoTracking()
+                        .Where(inv => inv.Status != (int)EntityStatus.Deleted &&
+                            ((inv.OrderId.HasValue && allOrderIds.Contains(inv.OrderId.Value)) || allInvoiceIds.Contains(inv.Id)))
+                        .ToListAsync();
+                    foreach (var mappedOrder in mappedCats)
+                    {
+                        var faturaListesi = linkedInvoices
+                            .Where(inv => inv.OrderId == mappedOrder.Id || inv.Id == mappedOrder.InvoiceId)
+                            .GroupBy(inv => inv.Id).Select(g => g.First())
+                            .Select(inv => new OrderLinkedInvoiceDto
+                            {
+                                InvoiceId = inv.Id,
+                                InvoiceNo = inv.InvoiceNo ?? "",
+                                Ettn = inv.Ettn,
+                                IsEInvoice = inv.IsEInvoice,
+                                IsEArchive = inv.IsEArchive,
+                                EInvoiceStatus = inv.EInvoiceStatus,
+                                InvoiceDate = inv.InvoiceDate,
+                                TotalAmount = inv.TotalAmount,
+                                DiscountTotal = inv.DiscountTotal,
+                                VatTotal = inv.VatTotal,
+                                GeneralTotal = inv.GeneralTotal
+                            }).ToList();
+                        if (faturaListesi.Any()) mappedOrder.LinkedInvoices = faturaListesi;
+                    }
+                }
+
+                var data = mappedCats.AsQueryable().OrderByDescending(x => x.Id);
+                var result = _radzenPagerService.MakeDataQueryable(data, pager);
+                response.Result = result;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetOrdersByStatus Exception " + ex.ToString());
+                response.AddSystemError(ex.ToString());
+                return response;
+            }
+        }
+
+        public async Task<IActionResult<OrderDetailModalDto>> GetOrderDetailModal(int orderId)
+        {
+            var response = new IActionResult<OrderDetailModalDto> { Result = null! };
+            try
+            {
+                // Yeni scope: Modal açıldığında DbContext disposed hatası önlenir
+                using var scope = _scopeFactory.CreateScope();
+                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork<ApplicationDbContext>>();
+                var db = uow.DbContext;
+
+                // Manuel yükleme: Karmaşık Include Npgsql format/index hatası veriyor
+                var order = await db.Set<Orders>()
+                    .AsNoTracking()
+                    .IgnoreQueryFilters()
+                    .Include(f => f.OrderItems)
+                    .FirstOrDefaultAsync(f => f.Id == orderId && f.Status == (int)EntityStatus.Active);
+
+                if (order != null && order.UserAddressId.HasValue)
+                {
+                    order.UserAddress = await db.Set<UserAddress>()
+                        .AsNoTracking()
+                        .IgnoreQueryFilters()
+                        .FirstOrDefaultAsync(ua => ua.Id == order.UserAddressId.Value);
+                }
+
+                if (order?.OrderItems != null && order.OrderItems.Any())
+                {
+                    var productIds = order.OrderItems.Select(oi => oi.ProductId).Distinct().ToList();
+                    var products = await db.Set<Product>()
+                        .AsNoTracking()
+                        .IgnoreQueryFilters()
+                        .Include(p => p!.Tax)
+                        .Include(p => p!.ProductSaleItemsAsRef!).ThenInclude(ps => ps!.Product)
+                        .Where(p => productIds.Contains(p.Id))
+                        .ToDictionaryAsync(p => p.Id, p => p);
+                    foreach (var oi in order.OrderItems)
+                    {
+                        if (products.TryGetValue(oi.ProductId, out var prod))
+                            oi.Product = prod;
+                    }
+                }
+                if (order == null)
+                {
+                    response.AddError("Sipariş bulunamadı.");
+                    return response;
+                }
+                var ordersQuery = db.Set<Orders>().AsNoTracking().IgnoreQueryFilters().Where(f => f.Id == orderId);
+                ordersQuery = ApplyOrderRoleFilter(ordersQuery, db);
+                if (!await ordersQuery.AnyAsync())
+                {
+                    response.AddError("Bu siparişe erişim yetkiniz yok.");
+                    return response;
+                }
+                var isPlasiyer = _tenantProvider.IsPlasiyer;
+                var customerName = !string.IsNullOrWhiteSpace(order.UserAddress?.FullName)
+                    ? order.UserAddress!.FullName
+                    : (order.UserFullName ?? "");
+                response.Result = new OrderDetailModalDto
+                {
+                    Id = order.Id,
+                    OrderNumber = order.OrderNumber,
+                    OrderStatusType = order.OrderStatusType,
+                    CreatedDate = order.CreatedDate,
+                    CustomerName = customerName,
+                    Voucher = order.Voucher,
+                    GuideName = order.GuideName,
+                    GrandTotal = order.GrandTotal,
+                    IsPlasiyer = isPlasiyer,
+                    Items = order.OrderItems?.Select(oi =>
+                    {
+                        var isPkg = oi.Product?.IsPackageProduct ?? (!string.IsNullOrWhiteSpace(oi.PackageItemQuantitiesJson));
+                        Dictionary<int, int>? pkgQtys = null;
+                        if (!string.IsNullOrWhiteSpace(oi.PackageItemQuantitiesJson))
+                        {
+                            try
+                            {
+                                var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(oi.PackageItemQuantitiesJson);
+                                if (dict != null)
+                                    pkgQtys = dict.ToDictionary(x => int.Parse(x.Key), x => x.Value);
+                            }
+                            catch { }
+                        }
+                        var pkgItems = new List<OrderPackageItemDto>();
+                        if (isPkg && oi.Product?.ProductSaleItemsAsRef != null && oi.Product.ProductSaleItemsAsRef.Any())
+                        {
+                            foreach (var ps in oi.Product.ProductSaleItemsAsRef)
+                            {
+                                pkgItems.Add(new OrderPackageItemDto
+                                {
+                                    ProductId = ps.ProductId,
+                                    ProductName = ps.Product?.Name ?? "",
+                                    Price = ps.Price,
+                                    Quantity = pkgQtys != null && pkgQtys.ContainsKey(ps.ProductId) ? pkgQtys[ps.ProductId] : 1
+                                });
+                            }
+                        }
+                        return new OrderItemUpdateDto
+                        {
+                            OrderItemId = oi.Id,
+                            ProductId = oi.ProductId,
+                            ProductName = oi.ProductName,
+                            Quantity = oi.Quantity,
+                            Price = oi.Price,
+                            TotalPrice = oi.TotalPrice,
+                            DiscountAmount = oi.DiscountAmount,
+                            IsPackageProduct = isPkg,
+                            ShipmentDate = oi.ShipmentDate,
+                            PackageProductItems = pkgItems
+                        };
+                    }).ToList() ?? new List<OrderItemUpdateDto>()
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetOrderDetailModal Exception " + ex.ToString());
+                response.AddSystemError(ex.ToString());
+                return response;
+            }
+        }
+
+        public async Task<IActionResult<Empty>> ApproveOrder(int orderId)
+        {
+            var response = new IActionResult<Empty> { Result = new Empty() };
+            try
+            {
+                var order = await _repository.GetAll(predicate: f => f.Id == orderId, ignoreQueryFilters: true).FirstOrDefaultAsync();
+                if (order == null)
+                {
+                    response.AddError("Sipariş bulunamadı.");
+                    return response;
+                }
+                var ordersQuery = _repository.GetAll(predicate: f => f.Id == orderId, ignoreQueryFilters: true);
+                ordersQuery = ApplyOrderRoleFilter(ordersQuery, _context.DbContext);
+                if (!await ordersQuery.AnyAsync())
+                {
+                    response.AddError("Bu siparişi onaylama yetkiniz yok.");
+                    return response;
+                }
+                if (order.OrderStatusType != OrderStatusType.OrderWaitingApproval)
+                {
+                    response.AddError("Sadece onay bekleyen siparişler onaylanabilir.");
+                    return response;
+                }
+                order.OrderStatusType = OrderStatusType.OrderNew;
+                order.ModifiedDate = DateTime.UtcNow;
+                order.ModifiedId = int.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                _repository.Update(order);
+                await _context.SaveChangesAsync();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ApproveOrder Exception " + ex.ToString());
+                response.AddSystemError(ex.ToString());
+                return response;
+            }
+        }
+
+        public async Task<IActionResult<Empty>> UpdateOrderDetails(int orderId, DateTime? orderDate, string? voucher, string? guideName, List<OrderItemUpdateDto> items)
+        {
+            var response = new IActionResult<Empty> { Result = new Empty() };
+            try
+            {
+                var order = await _repository.GetAll(
+                    predicate: f => f.Id == orderId,
+                    include: x => x.Include(f => f.OrderItems),
+                    disableTracking: false,
+                    ignoreQueryFilters: true
+                ).FirstOrDefaultAsync();
+                if (order == null)
+                {
+                    response.AddError("Sipariş bulunamadı.");
+                    return response;
+                }
+                var ordersQuery = _repository.GetAll(predicate: f => f.Id == orderId, ignoreQueryFilters: true);
+                ordersQuery = ApplyOrderRoleFilter(ordersQuery, _context.DbContext);
+                if (!await ordersQuery.AnyAsync())
+                {
+                    response.AddError("Bu siparişi güncelleme yetkiniz yok.");
+                    return response;
+                }
+                if (!_tenantProvider.IsPlasiyer && !_tenantProvider.IsGlobalAdmin)
+                {
+                    response.AddError("Sadece plasiyer veya admin sipariş detaylarını güncelleyebilir.");
+                    return response;
+                }
+                if (orderDate.HasValue) order.CreatedDate = orderDate.Value;
+                if (voucher != null) order.Voucher = voucher;
+                if (guideName != null) order.GuideName = guideName;
+                if (items != null && items.Any())
+                {
+                    foreach (var item in items)
+                    {
+                        var oi = order.OrderItems?.FirstOrDefault(x => x.Id == item.OrderItemId);
+                        if (oi != null)
+                        {
+                            oi.Quantity = item.Quantity;
+                            oi.Price = item.Price;
+                            oi.TotalPrice = item.TotalPrice;
+                            if (item.ShipmentDate.HasValue)
+                                oi.ShipmentDate = item.ShipmentDate;
+                            if (item.IsPackageProduct && item.PackageProductItems != null && item.PackageProductItems.Any())
+                            {
+                                var dict = item.PackageProductItems.ToDictionary(x => x.ProductId, x => x.Quantity);
+                                oi.PackageItemQuantitiesJson = System.Text.Json.JsonSerializer.Serialize(dict);
+                                // Paket toplamı = (alt ürünler toplamı) * paket adedi
+                                var packageSubTotal = item.PackageProductItems.Sum(p => p.Price * p.Quantity);
+                                oi.TotalPrice = packageSubTotal * item.Quantity - (item.DiscountAmount ?? 0);
+                            }
+                            else
+                            {
+                                oi.TotalPrice = item.Price * item.Quantity - (item.DiscountAmount ?? 0);
+                            }
+                            oi.ModifiedDate = DateTime.UtcNow;
+                            oi.ModifiedId = int.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                        }
+                    }
+                    var productTotal = order.OrderItems?.Sum(x => x.TotalPrice) ?? 0;
+                    order.ProductTotal = productTotal;
+                    order.OrderTotal = productTotal + order.CargoPrice - (order.DiscountTotal ?? 0);
+                    order.GrandTotal = order.OrderTotal;
+                    order.ModifiedDate = DateTime.UtcNow;
+                    order.ModifiedId = int.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                }
+                _repository.Update(order);
+                await _context.SaveChangesAsync();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("UpdateOrderDetails Exception " + ex.ToString());
+                response.AddSystemError(ex.ToString());
+                return response;
+            }
+        }
+
         public async Task<IActionResult<DashboardOrderSummaryDto>> GetDashboardOrderSummary()
         {
             var rs = new IActionResult<DashboardOrderSummaryDto> { Result = new() };
@@ -1474,7 +1924,11 @@ namespace ecommerce.Admin.Domain.Concreate{
                         predicate: f => f.CompanyId == userId.Value && f.Status == (int)EntityStatus.Active,
                         include: x => x.Include(f => f.OrderItems)
                                        .ThenInclude(p => p.Product)
-                                       .ThenInclude(p => p.ProductImage)
+                                       .ThenInclude(p => p!.ProductImage)
+                                       .Include(f => f.OrderItems)
+                                       .ThenInclude(p => p.Product)
+                                       .ThenInclude(p => p!.ProductSaleItemsAsRef!)
+                                       .ThenInclude(ps => ps!.Product)
                                        .Include(x => x.Seller)
                                        .Include(x => x.ApplicationUser)
                                        .Include(x => x.UserAddress)
@@ -1523,6 +1977,31 @@ namespace ecommerce.Admin.Domain.Concreate{
                         InvoiceId = order.InvoiceId,
                         InvoiceNo = order.Invoice?.InvoiceNo
                     }).ToList();
+
+                    // Döviz bilgisi: Her sipariş için ilk OrderItem'ın SellerItem.Currency değeri
+                    var myOrdersPairs = ordersList
+                        .Where(o => o.OrderItems != null && o.OrderItems.Any())
+                        .Select(o => new { OrderId = o.Id, ProductId = o.OrderItems!.First().ProductId, SellerId = o.SellerId })
+                        .ToList();
+                    if (myOrdersPairs.Any())
+                    {
+                        var productIds = myOrdersPairs.Select(p => p.ProductId).Distinct().ToList();
+                        var sellerIds = myOrdersPairs.Select(p => p.SellerId).Distinct().ToList();
+                        var sellerItems = await _context.DbContext.Set<ecommerce.Core.Entities.SellerItem>()
+                            .AsNoTracking()
+                            .Where(si => productIds.Contains(si.ProductId) && sellerIds.Contains(si.SellerId))
+                            .Select(si => new { si.ProductId, si.SellerId, si.Currency })
+                            .ToListAsync();
+                        var siDict = sellerItems.ToDictionary(x => (x.ProductId, x.SellerId), x => x.Currency);
+                        foreach (var p in myOrdersPairs)
+                        {
+                            if (siDict.TryGetValue((p.ProductId, p.SellerId), out var currency) && !string.IsNullOrWhiteSpace(currency))
+                            {
+                                var dto = mappedOrders.FirstOrDefault(x => x.Id == p.OrderId);
+                                if (dto != null) dto.Currency = currency;
+                            }
+                        }
+                    }
                     
                     response.Result = mappedOrders;
                     
@@ -1590,24 +2069,27 @@ namespace ecommerce.Admin.Domain.Concreate{
                     userId = currentUserId;
                 }
 
-                // Get order with all necessary includes
-                var order = await _repository.GetFirstOrDefaultAsync(
-                    predicate: o => o.Id == orderId && o.CompanyId == userId.Value && o.Status == (int)EntityStatus.Active,
-                    include: q => q.Include(o => o.Bank!)
-                                   .Include(o => o.ApplicationUser)
-                                   .Include(o => o.Seller)
-                                   .Include(o => o.OrderItems)
-                                   .Include(o => o.Cargo!),
-                    disableTracking: false
+                // Plasiyer müşteri adına sipariş oluşturduğunda CompanyId = müşteri, bu yüzden role filter kullan
+                var ordersQuery = _repository.GetAll(
+                    predicate: o => o.Id == orderId && o.Status == (int)EntityStatus.Active,
+                    ignoreQueryFilters: true
                 );
+                ordersQuery = ApplyOrderRoleFilter(ordersQuery, _context.DbContext);
+                var order = await ordersQuery
+                    .Include(o => o.Bank!)
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.Seller)
+                    .Include(o => o.OrderItems)
+                    .Include(o => o.Cargo!)
+                    .FirstOrDefaultAsync();
 
                 if (order == null)
                 {
-                    return (false, "Sipariş bulunamadı");
+                    return (false, "Sipariş bulunamadı veya bu siparişi iptal etme yetkiniz yok");
                 }
 
-                // Only allow cancellation for new/pending orders
-                if (order.OrderStatusType != OrderStatusType.OrderNew && order.OrderStatusType != OrderStatusType.OrderWaitingPayment)
+                // Only allow cancellation for new/pending/waiting-approval orders
+                if (order.OrderStatusType != OrderStatusType.OrderNew && order.OrderStatusType != OrderStatusType.OrderWaitingPayment && order.OrderStatusType != OrderStatusType.OrderWaitingApproval)
                 {
                     return (false, "Bu sipariş artık iptal edilemez");
                 }
@@ -1882,18 +2364,24 @@ namespace ecommerce.Admin.Domain.Concreate{
                     .AsNoTracking()
                     .IgnoreQueryFilters()
                     .Include(x => x.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                        .ThenInclude(p => p!.ProductSaleItemsAsRef!)
+                        .ThenInclude(ps => ps!.Product)
                     .Include(x => x.Seller)
+                    .Include(x => x.Customer)
                     .Include(x => x.ApplicationUser)
                         .ThenInclude(au => au!.Customer)
                     .Include(x => x.User)
                     .Include(x => x.UserAddress)
                         .ThenInclude(ua => ua!.ApplicationUser)
+                            .ThenInclude(u => u!.Customer)
                     .Include(x => x.UserAddress)
                         .ThenInclude(ua => ua!.City)
                     .Include(x => x.UserAddress)
                         .ThenInclude(ua => ua!.Town)
                     .Where(x => x.Status != (int)EntityStatus.Deleted && 
-                               ((x.ApplicationUser != null && x.ApplicationUser.CustomerId == customerId) ||
+                               ((x.CustomerId == customerId) ||
+                                (x.ApplicationUser != null && x.ApplicationUser.CustomerId == customerId) ||
                                 (allCustomerUserIds.Contains(x.CompanyId)) ||
                                 (x.UserAddress != null && x.UserAddress.ApplicationUserId.HasValue && allCustomerUserIds.Contains(x.UserAddress.ApplicationUserId!.Value)) ||
                                 context.CustomerAccountTransactions.Any(t => t.OrderId == x.Id && t.CustomerId == customerId)))
@@ -1916,6 +2404,29 @@ namespace ecommerce.Admin.Domain.Concreate{
 
                 var mappedData = _mapper.Map<List<OrderListDto>>(data);
 
+                // Döviz bilgisi: Her sipariş için ilk OrderItem'ın SellerItem.Currency değeri
+                var currencyByOrderId = new Dictionary<int, string>();
+                var pairs = data
+                    .Where(o => o.OrderItems != null && o.OrderItems.Any())
+                    .Select(o => new { OrderId = o.Id, ProductId = o.OrderItems!.First().ProductId, SellerId = o.SellerId })
+                    .ToList();
+                if (pairs.Any())
+                {
+                    var productIds = pairs.Select(p => p.ProductId).Distinct().ToList();
+                    var sellerIds = pairs.Select(p => p.SellerId).Distinct().ToList();
+                    var sellerItems = await context.Set<ecommerce.Core.Entities.SellerItem>()
+                        .AsNoTracking()
+                        .Where(si => productIds.Contains(si.ProductId) && sellerIds.Contains(si.SellerId))
+                        .Select(si => new { si.ProductId, si.SellerId, si.Currency })
+                        .ToListAsync();
+                    var siDict = sellerItems.ToDictionary(x => (x.ProductId, x.SellerId), x => x.Currency);
+                    foreach (var p in pairs)
+                    {
+                        if (siDict.TryGetValue((p.ProductId, p.SellerId), out var currency) && !string.IsNullOrWhiteSpace(currency))
+                            currencyByOrderId[p.OrderId] = currency;
+                    }
+                }
+
                 foreach (var dto in mappedData)
                 {
                     var originalOrder = data.FirstOrDefault(x => x.Id == dto.Id);
@@ -1924,6 +2435,16 @@ namespace ecommerce.Admin.Domain.Concreate{
                         var isPlasiyer = plasiyerNames.TryGetValue(originalOrder.CreatedId, out var pName);
                         dto.IsCreatedByPlasiyer = isPlasiyer;
                         dto.CreatorName = isPlasiyer ? pName : customerName;
+                        // Cari adı: Order.Customer (Plasiyer seçtiği cari), ApplicationUser.Customer, veya UserAddress
+                        if (string.IsNullOrWhiteSpace(dto.CustomerName) && originalOrder.Customer != null && !string.IsNullOrWhiteSpace(originalOrder.Customer.Name))
+                            dto.CustomerName = originalOrder.Customer.Name;
+                        else if (string.IsNullOrWhiteSpace(dto.CustomerName) && originalOrder.ApplicationUser?.Customer != null)
+                            dto.CustomerName = originalOrder.ApplicationUser.Customer.Name;
+                        else if (string.IsNullOrWhiteSpace(dto.CustomerName) && originalOrder.UserAddress?.ApplicationUser?.Customer != null)
+                            dto.CustomerName = originalOrder.UserAddress.ApplicationUser.Customer.Name;
+                        // Döviz: SellerItems'tan ilk ürünün Currency değeri
+                        if (currencyByOrderId.TryGetValue(dto.Id, out var currency) && !string.IsNullOrWhiteSpace(currency))
+                            dto.Currency = currency;
                     }
                 }
 
@@ -2112,6 +2633,10 @@ namespace ecommerce.Admin.Domain.Concreate{
                 var ordersList = await uow.DbContext.Orders
                     .AsNoTracking()
                     .Include(x => x.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                        .ThenInclude(p => p!.ProductSaleItemsAsRef!)
+                        .ThenInclude(ps => ps!.Product)
+                    .Include(x => x.Customer)
                     .Include(x => x.ApplicationUser)
                         .ThenInclude(au => au!.Customer)
                     .Include(x => x.User)
@@ -2125,7 +2650,8 @@ namespace ecommerce.Admin.Domain.Concreate{
                     .Include(x => x.Invoice)
                     .Include(x => x.Seller)
                     .Where(x => x.Status != (int)EntityStatus.Deleted &&
-                               ((x.ApplicationUser != null && x.ApplicationUser.CustomerId.HasValue && customerIds.Contains(x.ApplicationUser.CustomerId!.Value)) ||
+                               ((x.CustomerId.HasValue && customerIds.Contains(x.CustomerId.Value)) ||
+                                (x.ApplicationUser != null && x.ApplicationUser.CustomerId.HasValue && customerIds.Contains(x.ApplicationUser.CustomerId!.Value)) ||
                                 (allCustomerUserIds.Contains(x.CompanyId)) ||
                                 (x.UserAddress != null && x.UserAddress.ApplicationUserId.HasValue && allCustomerUserIds.Contains(x.UserAddress.ApplicationUserId!.Value)) ||
                                 uow.DbContext.CustomerAccountTransactions.Any(t => t.OrderId == x.Id && customerIds.Contains(t.CustomerId))))
@@ -2145,6 +2671,29 @@ namespace ecommerce.Admin.Domain.Concreate{
 
                 var mappedData = _mapper.Map<List<OrderListDto>>(ordersList);
 
+                // Döviz bilgisi: Her sipariş için ilk OrderItem'ın SellerItem.Currency değeri
+                var currencyByOrderId = new Dictionary<int, string>();
+                var plasiyerPairs = ordersList
+                    .Where(o => o.OrderItems != null && o.OrderItems.Any())
+                    .Select(o => new { OrderId = o.Id, ProductId = o.OrderItems!.First().ProductId, SellerId = o.SellerId })
+                    .ToList();
+                if (plasiyerPairs.Any())
+                {
+                    var productIds = plasiyerPairs.Select(p => p.ProductId).Distinct().ToList();
+                    var sellerIds = plasiyerPairs.Select(p => p.SellerId).Distinct().ToList();
+                    var sellerItems = await uow.DbContext.Set<ecommerce.Core.Entities.SellerItem>()
+                        .AsNoTracking()
+                        .Where(si => productIds.Contains(si.ProductId) && sellerIds.Contains(si.SellerId))
+                        .Select(si => new { si.ProductId, si.SellerId, si.Currency })
+                        .ToListAsync();
+                    var siDict = sellerItems.ToDictionary(x => (x.ProductId, x.SellerId), x => x.Currency);
+                    foreach (var p in plasiyerPairs)
+                    {
+                        if (siDict.TryGetValue((p.ProductId, p.SellerId), out var currency) && !string.IsNullOrWhiteSpace(currency))
+                            currencyByOrderId[p.OrderId] = currency;
+                    }
+                }
+
                 foreach (var dto in mappedData)
                 {
                     var originalOrder = ordersList.FirstOrDefault(x => x.Id == dto.Id);
@@ -2152,10 +2701,14 @@ namespace ecommerce.Admin.Domain.Concreate{
                     {
                         var isPlasiyer = plasiyerNames.TryGetValue(originalOrder.CreatedId, out var pName);
                         dto.IsCreatedByPlasiyer = isPlasiyer;
-                        dto.CreatorName = isPlasiyer ? pName : (originalOrder.ApplicationUser?.Customer?.Name ?? "Müşteri");
+                        dto.CreatorName = isPlasiyer ? pName : (originalOrder.Customer?.Name ?? originalOrder.ApplicationUser?.Customer?.Name ?? "Müşteri");
                         
-                        // CRITICAL: Manually set CustomerName from ApplicationUser.Customer
-                        if (originalOrder.ApplicationUser?.Customer != null && !string.IsNullOrWhiteSpace(originalOrder.ApplicationUser.Customer.Name))
+                        // CRITICAL: Manually set CustomerName from Order.Customer, ApplicationUser.Customer, or UserAddress
+                        if (originalOrder.Customer != null && !string.IsNullOrWhiteSpace(originalOrder.Customer.Name))
+                        {
+                            dto.CustomerName = originalOrder.Customer.Name;
+                        }
+                        else if (originalOrder.ApplicationUser?.Customer != null && !string.IsNullOrWhiteSpace(originalOrder.ApplicationUser.Customer.Name))
                         {
                             dto.CustomerName = originalOrder.ApplicationUser.Customer.Name;
                         }
@@ -2167,6 +2720,9 @@ namespace ecommerce.Admin.Domain.Concreate{
                         {
                             dto.CustomerName = originalOrder.ApplicationUser.FullName;
                         }
+                        // Döviz: SellerItems'tan ilk ürünün Currency değeri
+                        if (currencyByOrderId.TryGetValue(dto.Id, out var currency) && !string.IsNullOrWhiteSpace(currency))
+                            dto.Currency = currency;
                     }
                 }
 
@@ -2322,6 +2878,20 @@ namespace ecommerce.Admin.Domain.Concreate{
         {
             var salesPersonId = _tenantProvider.GetSalesPersonId();
 
+            // Fallback: Claim yoksa (eski oturum) mevcut kullanıcıdan DB'den al
+            if (!salesPersonId.HasValue)
+            {
+                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(userIdClaim, out var userId))
+                {
+                    var appUser = dbContext.AspNetUsers.AsNoTracking()
+                        .Where(u => u.Id == userId)
+                        .Select(u => new { u.SalesPersonId })
+                        .FirstOrDefault();
+                    salesPersonId = appUser?.SalesPersonId;
+                }
+            }
+
             if (!salesPersonId.HasValue)
             {
                 return query.Where(x => false);
@@ -2349,6 +2919,8 @@ namespace ecommerce.Admin.Domain.Concreate{
                 .ToList();
 
             return query.Where(x => 
+                // Case 0: Order.CustomerId doğrudan atanmış (Plasiyer adına oluşturulan siparişler)
+                (x.CustomerId.HasValue && assignedCustomerIds.Contains(x.CustomerId.Value)) ||
                 // Case 1: Order owner is directly one of the linked customers (via ApplicationUser.CustomerId)
                 (x.ApplicationUser != null && x.ApplicationUser.CustomerId.HasValue && assignedCustomerIds.Contains(x.ApplicationUser.CustomerId.Value)) ||
                 // Case 2: Order owner (CompanyId) is one of the users belonging to the linked customers

@@ -2,6 +2,7 @@
 @using ecommerce.Admin.Domain.Dtos.OrderDto;
 @using ecommerce.Core.Entities;
 @using ecommerce.Core.Utils;
+@using ecommerce.Core.Helpers;
 @using ecommerce.Admin.Domain.Dtos.SellerAddressDto;
 @attribute [Authorize]
 @inject IStringLocalizer<Culture_TR> Loc
@@ -109,92 +110,6 @@
 </RadzenTabsItem>
 
 
-<RadzenTabsItem Text="Kargo Bilgileri">
-    <RadzenFieldset Text="Kargo Bilgileri">
-        <RadzenTemplateForm TItem="OrderListDto" Data="@order" Visible="@(order != null)">
-            <div class="row rz-form-row">
-                <div class="col-md-3">
-                    <RadzenLabel Text="Satıcı Adı" class="w-100"/>
-                </div>
-                <div class="col-md-9">
-                    <RadzenTextBox class="rz-full-width" @bind-Value="@order!.Seller!.Name" Name="SellerName" Disabled="true" Visible="@(order?.Seller != null)"/>
-                </div>
-            </div>
-            @if (BuyerCompany != null)
-            {
-                <div class="row rz-form-row">
-                    <div class="col-md-3">
-                        <RadzenLabel Text="Alıcı Adı" class="w-100"/>
-                    </div>
-                    <div class="col-md-9">
-                        <RadzenTextBox class="rz-full-width" @bind-Value="@BuyerCompany.FirstName" Disabled="true"/>
-                    </div>
-                </div>
-            }
-            @if (BuyerCompany != null)
-            {
-                <div class="row rz-form-row">
-                    <div class="col-md-3">
-                        <RadzenLabel Text="Alıcı Kargo Adresi" class="w-100"/>
-                    </div>
-                    <div class="col-md-9">
-                        <RadzenTextBox class="rz-full-width" @bind-Value="@FullAddress" Name="Address" Disabled="true"/>
-                    </div>
-                </div>
-            }
-            <div class="row rz-form-row">
-                <div class="col-md-3">
-                    <RadzenLabel Text="Kargo Adı" class="w-100"/>
-                </div>
-                <div class="col-md-9">
-                    <RadzenTextBox class="rz-full-width" Value="@(order.Cargo != null ? order.Cargo.Name : "")" Name="CargoName" Disabled="true"/>
-                </div>
-            </div>
-            <div class="row rz-form-row">
-                <div class="col-md-3">
-                    <RadzenLabel Text="Kargo Takip Numarası" class="w-100"/>
-                </div>
-                <div class="col-md-9">
-                    <RadzenTextBox class="rz-full-width" Value="@order.CargoTrackNumber" Name="CargoTrackNumber" Disabled="true"/>
-                </div>
-            </div>
-            <div class="row rz-form-row">
-                <div class="col-md-3">
-                    <RadzenLabel Text="Kargo Takip Url" class="w-100"/>
-                </div>
-                <div class="col-md-9">
-                    <RadzenTextBox class="rz-full-width" Value="@order.CargoTrackUrl" Name="CargoTrackUrl" Disabled="true"/>
-                </div>
-            </div>
-            <div class="row rz-form-row">
-                <div class="col-md-3">
-                    <RadzenLabel Text="Kargo Ücreti" class="w-100"/>
-                </div>
-                <div class="col-md-9">
-                    <RadzenTextBox class="rz-full-width" Value="@(Math.Round(order.CargoPrice, 2).ToString())" Name="CargoPrice" Disabled="true"/>
-                </div>
-            </div>
-            <div class="row rz-form-row">
-                <div class="col-md-3">
-                    <RadzenLabel Text="Teslimat Tarihi" class="w-100"/>
-                </div>
-                <div class="col-md-9">
-                    <RadzenTextBox class="rz-full-width" Value="@order.DeliveryDate.ToString()" Name="DeliveryDate" Disabled="true"/>
-                </div>
-            </div>
-            <div class="row rz-form-row">
-                <div class="col-md-3">
-                    <RadzenLabel Text="Teslim Alan" class="w-100"/>
-                </div>
-                <div class="col-md-9">
-                    <RadzenTextBox class="rz-full-width" Value="@order.DeliveryTo" Name="DeliveryTo" Disabled="true"/>
-                </div>
-            </div>
-        </RadzenTemplateForm>
-    </RadzenFieldset>
-</RadzenTabsItem>
-
-
 <RadzenTabsItem Text="Ürün Bilgileri">
     <div class="tab-flex-container">
         <div class="fieldset-header-container p-3">
@@ -229,32 +144,16 @@
                 ClearFilterText="@Loc.GetString("ClearFilterText")">
                 <Columns>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Id" Property="Item.ProductId" Width="80px" Filterable="false"/>
-                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Kargo" Width="70px" Filterable="false" Sortable="false">
-                    <Template Context="vm">
-                        @if (vm.Item.CargoRequestHandled == true && !string.IsNullOrEmpty(vm.Item.CargoTrackNumber))
-                        {
-                            <div class="cargo-status-shipped" title="Kargoya Verildi - @vm.Item.CargoTrackNumber">
-                                <i class="fa fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="cargo-status-pending" title="Kargoya Verilmedi">
-                                <i class="fa fa-clock" style="color: #64748b; font-size: 18px;"></i>
-                            </div>
-                        }
-                    </Template>
-                </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Adı" Property="Item.ProductName" Filterable="false"/>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Adet" Property="Item.Quantity" Filterable="false" Width="50px"/>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Birim Fiyatı" Property="Item.Price" Filterable="false" Width="100px">
                     <Template Context="vm">
-                        <span class="price-val">₺@vm.Item.Price.ToString("N2")</span>
+                        <span class="price-val">@CurrencyHelper.FormatPrice(vm.Item.Price)</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Toplam Fiyatı" Property="Item.TotalPrice" Filterable="false" Width="120px">
                     <Template Context="vm">
-                        <span class="price-val">₺@vm.Item.TotalPrice.ToString("N2")</span>
+                        <span class="price-val">@CurrencyHelper.FormatPrice(vm.Item.TotalPrice)</span>
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
@@ -267,19 +166,15 @@
                         <div class="summary-content">
                             <div class="summary-line">
                                 <span class="sum-label">Alt Toplam</span>
-                                <span class="price-val">₺@order.ProductTotal.ToString("N2")</span>
+                                <span class="price-val">@CurrencyHelper.FormatPrice(order.ProductTotal)</span>
                             </div>
                             <div class="summary-line discount">
                                 <span class="sum-label">İndirim Toplamı</span>
-                                <span class="price-val">₺@((order.DiscountTotal ?? 0).ToString("N2"))</span>
-                            </div>
-                            <div class="summary-line">
-                                <span class="sum-label">Kargo Toplamı</span>
-                                <span class="price-val">₺@order.CargoPrice.ToString("N2")</span>
+                                <span class="price-val">@CurrencyHelper.FormatPrice(order.DiscountTotal ?? 0)</span>
                             </div>
                             <div class="summary-line grand-total">
                                 <span class="sum-label">Toplam</span>
-                                <span class="price-val">₺@order.GrandTotal.ToString("N2")</span>
+                                <span class="price-val">@CurrencyHelper.FormatPrice(order.GrandTotal)</span>
                             </div>
                         </div>
                     </div>
@@ -351,92 +246,26 @@
                 ApplyFilterText="@Loc.GetString("ApplyFilterText")"
                 ClearFilterText="@Loc.GetString("ClearFilterText")">
                 <GroupHeaderTemplate>
-                    <div class="cargo-group-header @(IsCreatingCargo ? "loading" : "")">
+                    <div class="cargo-group-header">
                         <div class="cargo-icon-wrapper">
                             <i class="fa-solid fa-box" style="color: #10b981; font-size: 18px;"></i>
                         </div>
                         <span class="cargo-group-title">@context.Data!.Key</span>
                         <span class="cargo-group-count">(@context.Data.Count ürün)</span>
-                        @{
-                            var groupItems = (context.Data.Items ?? Array.Empty<object>()).Cast<OrderItemViewModel>().ToList();
-                            var isGroupShipped = groupItems.All(vm => vm.Item.CargoRequestHandled == true);
-                        }
-
-                        @if (isGroupShipped)
-                        {
-                            <span class="cargo-status-badge">
-                                <i class="fa fa-check-circle"></i> Kargolandı
-                            </span>
-                            
-                            @* Cancel button - only for Sendeo cargo *@
-                            @if (!string.IsNullOrEmpty(order?.Cargo?.Name) && order.Cargo.Name.ToLower().Contains("sendeo"))
-                            {
-                                <button class="btn-cancel-cargo" 
-                                        @onclick="@(() => CancelCargoForGroup(context.Data.Key.ToString(), groupItems))"
-                                        disabled="@IsCancellingCargo">
-                                    @if (IsCancellingCargo)
-                                    {
-                                        <i class="fa fa-spinner fa-spin"></i> <span>İptal Ediliyor...</span>
-                                    }
-                                    else
-                                    {
-                                        <i class="fa fa-times-circle"></i> <span>Kargoyu İptal Et</span>
-                                    }
-                                </button>
-                            }
-                        }
-                        else
-                        {
-                            <button class="btn-create-cargo" 
-                                    @onclick="@(() => CreateCargoForGroup(context.Data.Key.ToString(), groupItems))"
-                                    disabled="@(IsCreatingCargo || !_isStocksChecked)">
-                                @if (IsCreatingCargo)
-                                {
-                                    <i class="fa fa-spinner fa-spin"></i> <span>Oluşturuluyor...</span>
-                                }
-                                else
-                                {
-                                    @if (!string.IsNullOrEmpty(order?.Cargo?.Name))
-                                    {
-                                        <i class="fa fa-truck"></i> <span>@order.Cargo.Name ile Gönder</span>
-                                    }
-                                    else
-                                    {
-                                        <i class="fa fa-truck"></i> <span>Kargo Oluştur</span>
-                                    }
-                                }
-                            </button>
-                        }
                     </div>
                 </GroupHeaderTemplate>
                 <Columns>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Id" Property="Item.ProductId" Width="80px" Filterable="false"/>
-                <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Kargo" Width="70px" Filterable="false" Sortable="false">
-                    <Template Context="vm">
-                        @if (vm.Item.CargoRequestHandled == true && !string.IsNullOrEmpty(vm.Item.CargoTrackNumber))
-                        {
-                            <div class="cargo-status-shipped" title="Kargoya Verildi - @vm.Item.CargoTrackNumber">
-                                <i class="fa fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="cargo-status-pending" title="Kargoya Verilmedi">
-                                <i class="fa fa-clock" style="color: #64748b; font-size: 18px;"></i>
-                            </div>
-                        }
-                    </Template>
-                </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Ürün Adı" Property="Item.ProductName" Filterable="false"/>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Adet" Property="Item.Quantity" Filterable="false" Width="50px"/>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Birim Fiyatı" Property="Item.Price" Filterable="false" Width="100px">
                     <Template Context="vm">
-                        <span class="price-val">₺@vm.Item.Price.ToString("N2")</span>
+                        <span class="price-val">@CurrencyHelper.FormatPrice(vm.Item.Price)</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Toplam Fiyatı" Property="Item.TotalPrice" Filterable="false" Width="120px">
                     <Template Context="vm">
-                        <span class="price-val">₺@vm.Item.TotalPrice.ToString("N2")</span>
+                        <span class="price-val">@CurrencyHelper.FormatPrice(vm.Item.TotalPrice)</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="OrderItemViewModel" Title="Depo Stoğu" Filterable="false" Width="220px">
@@ -551,19 +380,15 @@
                         <div class="summary-content">
                             <div class="summary-line">
                                 <span class="sum-label">Alt Toplam</span>
-                                <span class="price-val">₺@order.ProductTotal.ToString("N2")</span>
+                                <span class="price-val">@CurrencyHelper.FormatPrice(order.ProductTotal)</span>
                             </div>
                             <div class="summary-line discount">
                                 <span class="sum-label">İndirim Toplamı</span>
-                                <span class="price-val">₺@((order.DiscountTotal ?? 0).ToString("N2"))</span>
-                            </div>
-                            <div class="summary-line">
-                                <span class="sum-label">Kargo Toplamı</span>
-                                <span class="price-val">₺@order.CargoPrice.ToString("N2")</span>
+                                <span class="price-val">@CurrencyHelper.FormatPrice(order.DiscountTotal ?? 0)</span>
                             </div>
                             <div class="summary-line grand-total">
                                 <span class="sum-label">Toplam</span>
-                                <span class="price-val">₺@order.GrandTotal.ToString("N2")</span>
+                                <span class="price-val">@CurrencyHelper.FormatPrice(order.GrandTotal)</span>
                             </div>
                         </div>
                     </div>

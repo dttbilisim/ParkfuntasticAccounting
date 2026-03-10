@@ -5,6 +5,7 @@ namespace ecommerce.Admin.Services.Concreate
     public class CartStateService : ICartStateService
     {
         private readonly ecommerce.Web.Domain.Services.Abstract.ICartService _cartService;
+        private static readonly SemaphoreSlim _refreshLock = new(1, 1);
 
         public CartStateService(ecommerce.Web.Domain.Services.Abstract.ICartService cartService)
         {
@@ -17,11 +18,19 @@ namespace ecommerce.Admin.Services.Concreate
 
         public async Task RefreshCart(ecommerce.Core.Entities.CartCustomerSavedPreferences? preferences = null)
         {
-            var result = await _cartService.GetCart(preferences);
-            if (result.Ok && result.Result != null)
+            await _refreshLock.WaitAsync();
+            try
             {
-                CurrentCart = result.Result;
-                NotifyStateChanged();
+                var result = await _cartService.GetCart(preferences);
+                if (result.Ok && result.Result != null)
+                {
+                    CurrentCart = result.Result;
+                    NotifyStateChanged();
+                }
+            }
+            finally
+            {
+                _refreshLock.Release();
             }
         }
 
